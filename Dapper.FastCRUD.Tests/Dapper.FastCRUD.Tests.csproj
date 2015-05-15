@@ -53,14 +53,6 @@
       <HintPath>..\packages\Dapper.SimpleCRUD.1.8.7\lib\net45\Dapper.SimpleCRUD.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DeclarativeSql, Version=0.1.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DeclarativeSql.Core.0.1.9\lib\net45\DeclarativeSql.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="DeclarativeSql.Dapper, Version=0.1.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DeclarativeSql.Dapper.0.1.9\lib\net45\DeclarativeSql.Dapper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>..\packages\Shared.Management.Objects.for.SQL.Server.2012.SP1.11.0.3000.0\lib\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
       <Private>True</Private>
@@ -124,6 +116,7 @@
     <Compile Include="Features\DapperSteps.cs" />
     <Compile Include="Features\DatabaseSteps.cs" />
     <Compile Include="Features\DatabaseTestContext.cs" />
+    <None Include="Features\DeclarativeSqlSteps_Invalid.cs" />
     <Compile Include="Features\EntityGenerationSteps.cs" />
     <Compile Include="Features\FastCrudSteps.cs" />
     <Compile Include="Features\Queries.feature.cs">
@@ -137,6 +130,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelGenerator.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\SingleIntPrimaryKeyEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

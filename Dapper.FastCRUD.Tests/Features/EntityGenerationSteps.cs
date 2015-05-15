@@ -11,7 +11,7 @@
             {
                 FirstName = string.Format("First Name {0}", entityIndex),
                 LastName = string.Format("Last Name {0}", entityIndex),
-                DateOfBirth = DateTime.Now
+                DateOfBirth = DateTime.Now.Date
             };
         }
 

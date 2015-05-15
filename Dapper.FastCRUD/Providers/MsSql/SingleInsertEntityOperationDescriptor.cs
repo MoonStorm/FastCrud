@@ -23,7 +23,10 @@
                 this.EntityDescriptor.TableName,
                 this.EntityDescriptor.UpdatePropertiesColumnQuery,
                 this.EntityDescriptor.UpdatePropertyValuesColumnQuery,
-                this.EntityDescriptor.OutputInsertedKeyPropertiesQuery);
+                this.EntityDescriptor.OutputDatabaseGeneratedPropertiesQuery);
+
+            //var parameters = this.EntityDescriptor.CreateParameters(this.EntityDescriptor.UpdateablePropertyDescriptors, entity);
+            //var insertedEntity = connection.Query<TEntity>(sqlQuery, parameters, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).First();
 
             var insertedEntity = connection.Query<TEntity>(sqlQuery, entity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).First();
 

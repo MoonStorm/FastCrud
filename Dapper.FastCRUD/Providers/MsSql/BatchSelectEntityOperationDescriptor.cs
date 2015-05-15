@@ -22,10 +22,10 @@
             FormattableString orderClause,
             int? skipRowsCount,
             int? limitRowsCount,
-            object queryParameters = null,
-            bool streamResults = false,
-            IDbTransaction transaction = null,
-            TimeSpan? commandTimeout = null)
+            object queryParameters,
+            bool streamResults,
+            IDbTransaction transaction,
+            TimeSpan? commandTimeout)
         {
 
             var sqlQueryBuilder = new StringBuilder();

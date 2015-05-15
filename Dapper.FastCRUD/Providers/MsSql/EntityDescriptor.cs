@@ -10,14 +10,16 @@
         public EntityDescriptor()
         {
             this.SelectPropertiesColumnQuery = string.Join(",", this.SelectPropertyDescriptors.Select(propInfo => propInfo.Name));
-            this.OutputInsertedKeyPropertiesQuery = string.Join(",",
-                this.KeyPropertyDescriptors.Select(
+            this.OutputDatabaseGeneratedPropertiesQuery = string.Join(",",
+                this.DatabaseGeneratedPropertyDescriptors.Select(
                     propInfo => string.Format(CultureInfo.InvariantCulture, "inserted.{0}", propInfo.Name)));
             this.OutputDeletedKeyPropertiesQuery = string.Join(",",
                 this.KeyPropertyDescriptors.Select(
                     propInfo => string.Format(CultureInfo.InvariantCulture, "deleted.{0}", propInfo.Name)));
             this.UpdatePropertiesColumnQuery = string.Join(",",
                 this.UpdateablePropertyDescriptors.Select(propInfo => propInfo.Name));
+            UpdatePropertiesColumnSetterQuery = string.Join(",",
+                this.UpdateablePropertyDescriptors.Select(propInfo => string.Format(CultureInfo.InvariantCulture, "{0}=@{0}", propInfo.Name)));
             this.UpdatePropertyValuesColumnQuery = string.Join(",",
                 this.UpdateablePropertyDescriptors.Select(
                     propInfo => string.Format(CultureInfo.InvariantCulture, "@{0}", propInfo.Name)));
@@ -26,12 +28,13 @@
                 " and ",
                 this.KeyPropertyDescriptors.Select(
                     (propInfo, index) =>
-                        string.Format(CultureInfo.InvariantCulture, "{0} = @{1}", propInfo.Name, propInfo.Name)));
+                        string.Format(CultureInfo.InvariantCulture, "{0}=@{1}", propInfo.Name, propInfo.Name)));
 
-            this.RegisterOperation<ISingleDeleteEntityOperationDescriptor<TEntity>>(new SingleDeleteEntityOperationDescriptor<TEntity>(this));
-            this.RegisterOperation<ISingleInsertEntityOperationDescriptor<TEntity>>(new SingleInsertEntityOperationDescriptor<TEntity>(this));
-            this.RegisterOperation<ISingleUpdateEntityOperationDescriptor<TEntity>>(new SingleUpdateEntityOperationDescriptor<TEntity>(this));
-            this.RegisterOperation<IBatchSelectEntityOperationDescriptor<TEntity>>(new BatchSelectEntityOperationDescriptor<TEntity>(this));
+            this.SingleDeleteOperation = new SingleDeleteEntityOperationDescriptor<TEntity>(this);
+            this.SingleInsertOperation = new SingleInsertEntityOperationDescriptor<TEntity>(this);
+            this.SingleUpdateOperation = new SingleUpdateEntityOperationDescriptor<TEntity>(this);
+            this.BatchSelectOperation = new BatchSelectEntityOperationDescriptor<TEntity>(this);
+            this.SingleSelectOperation = new SingleSelectEntityOperationDescriptor<TEntity>(this);
 
             if (string.IsNullOrEmpty(this.TableDescriptor.Schema))
             {
@@ -49,8 +52,9 @@
         public string KeyPropertiesColumnQuery { get; private set; }
         public string UpdatePropertyValuesColumnQuery { get; private set; }
         public string UpdatePropertiesColumnQuery { get; private set; }
+        public string UpdatePropertiesColumnSetterQuery { get; private set; }
         public string OutputDeletedKeyPropertiesQuery { get; private set; }
-        public string OutputInsertedKeyPropertiesQuery { get; private set; }
+        public string OutputDatabaseGeneratedPropertiesQuery { get; private set; }
 
         public override string TableName
         {

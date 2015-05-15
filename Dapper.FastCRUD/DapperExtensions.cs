@@ -32,8 +32,29 @@
         /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
         public static T GetByPrimaryKeys<T>(this IDbConnection connection, T entityKeys, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
-            return GetEntityOperationDescriptor<T, ISingleSelectEntityOperationDescriptor<T>>()
-                .Execute(connection, entityKeys, transaction, commandTimeout);
+            return GetEntityDescriptor<T>().SingleSelectOperation.Execute(connection, entityKeys, transaction, commandTimeout);
+        }
+
+        /// <summary>
+        /// Returns all the records in the database.
+        /// </summary>
+        /// <typeparam name="T">Entity type</typeparam>
+        /// <param name="connection"></param>
+        /// <param name="streamResult">If set to true, the resulting list of entities is not entirely loaded in memory. This is useful for processing large result sets.</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <returns>Gets a list of all entities</returns>
+        public static IEnumerable<T> GetAll<T>(
+            this IDbConnection connection,
+            bool streamResult = false,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null)
+        {
+            return GetEntityDescriptor<T>().BatchSelectOperation.Execute(
+                connection,
+                streamResults: streamResult,
+                transaction: transaction,
+                commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -61,7 +82,7 @@
             IDbTransaction transaction = null, 
             TimeSpan? commandTimeout = null)
         {
-            return GetEntityOperationDescriptor<T, BatchSelectEntityOperationDescriptor<T>>().Execute(
+            return GetEntityDescriptor<T>().BatchSelectOperation.Execute(
                 connection, 
                 whereClause:whereClause,
                 orderClause:orderClause,
@@ -82,8 +103,7 @@
         /// <param name="commandTimeout"></param>
         public static void Insert<T>(this IDbConnection connection, T entityToInsert, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
-            GetEntityOperationDescriptor<T, ISingleInsertEntityOperationDescriptor<T>>()
-                .Execute(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+            GetEntityDescriptor<T>().SingleInsertOperation.Execute(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
         }
 
 
@@ -97,8 +117,7 @@
         /// <returns>True if the item was updated.</returns>
         public static bool UpdateByPrimaryKeys<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
-            return GetEntityOperationDescriptor<T, ISingleUpdateEntityOperationDescriptor<T>>()
-                .Execute(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+            return GetEntityDescriptor<T>().SingleUpdateOperation.Execute(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -112,8 +131,7 @@
         /// <returns>True if the entity was found and successfully deleted.</returns>
         public static bool DeleteByPrimaryKeys<T>(this IDbConnection connection, T entityToDelete, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
-            return GetEntityOperationDescriptor<T, ISingleDeleteEntityOperationDescriptor<T>>()
-                .Execute(connection, entityToDelete, transaction: transaction, commandTimeout: commandTimeout);
+            return GetEntityDescriptor<T>().SingleDeleteOperation.Execute(connection, entityToDelete, transaction: transaction, commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -154,11 +172,5 @@
                                                                                        }
                                                                                    });
         }
-
-        private static TOperation GetEntityOperationDescriptor<TEntity, TOperation>() where TOperation: IOperationDescriptor<TEntity>
-        {
-            return GetEntityDescriptor<TEntity>().Operation<TOperation>();
-        }
-
     }
 }

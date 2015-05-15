@@ -18,10 +18,9 @@
         {
             var sqlQuery = string.Format(
                 CultureInfo.InvariantCulture,
-                "UPDATE {0} ({1}) VALUES ({2}) WHERE {3}",
+                "UPDATE {0} SET {1} WHERE {2}",
                 this.EntityDescriptor.TableName,
-                this.EntityDescriptor.UpdatePropertiesColumnQuery,
-                this.EntityDescriptor.UpdatePropertyValuesColumnQuery,
+                this.EntityDescriptor.UpdatePropertiesColumnSetterQuery,
                 this.EntityDescriptor.KeyPropertiesWhereClause);
 
             return connection.Execute(sqlQuery, keyEntity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds) > 0;
