@@ -1,0 +1,371 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dapper.SimpleCRUD</name>
+    </assembly>
+    <members>
+        <member name="T:Dapper.SimpleCRUD">
+            <summary>
+            Main class for Dapper.SimpleCRUD extensions
+            </summary>
+            <summary>
+            Main class for Dapper.SimpleCRUD extensions
+            </summary>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetDialect">
+            <summary>
+            Returns the current dialect name
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.SetDialect(Dapper.SimpleCRUD.Dialect)">
+            <summary>
+            Sets the database dialect 
+            </summary>
+            <param name="dialect"></param>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Get``1(System.Data.IDbConnection,System.Object)">
+            <summary>
+            <para>By default queries the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>By default filters on the Id column</para>
+            <para>-Id column name can be overridden by adding an attribute on your primary key property [Key]</para>
+            <para>Returns a single entity by a single id from table T</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="id"></param>
+            <returns>Returns a single entity by a single id from table T.</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetList``1(System.Data.IDbConnection,System.Object)">
+            <summary>
+            <para>By default queries the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>whereConditions is an anonymous type to filter the results ex: new {Category = 1, SubCategory=2}</para>
+            <para>Returns a list of entities that match where conditions</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="whereConditions"></param>
+            <returns>Gets a list of entities with optional exact match where conditions</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetList``1(System.Data.IDbConnection,System.String)">
+            <summary>
+            <para>By default queries the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>conditions is an SQL where clause and/or order by clause ex: "where name='bob'"</para>
+            <para>Returns a list of entities that match where conditions</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="conditions"></param>
+            <returns>Gets a list of entities with optional SQL where conditions</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetList``1(System.Data.IDbConnection)">
+            <summary>
+            <para>By default queries the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Returns a list of all entities</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <returns>Gets a list of all entities</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Insert(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Inserts a row into the database</para>
+            <para>By default inserts into the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Insert filters out Id column and any columns with the [Key] attribute</para>
+            <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</para>
+            </summary>
+            <param name="connection"></param>
+            <param name="entityToInsert"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Insert``1(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Inserts a row into the database</para>
+            <para>By default inserts into the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Insert filters out Id column and any columns with the [Key] attribute</para>
+            <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</para>
+            </summary>
+            <param name="connection"></param>
+            <param name="entityToInsert"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Update(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Updates a record or records in the database</para>
+            <para>By default updates records in the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Updates records where the Id property and properties with the [Key] attribute match those in the database.</para>
+            <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns number of rows effected</para>
+            </summary>
+            <param name="connection"></param>
+            <param name="entityToUpdate"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of effected records</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Delete``1(System.Data.IDbConnection,``0,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Deletes a record or records in the database that match the object passed in</para>
+            <para>-By default deletes records in the table matching the class name</para>
+            <para>Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the number of records effected</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="entityToDelete"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of records effected</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.Delete``1(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Deletes a record or records in the database by ID</para>
+            <para>By default deletes records in the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Deletes records where the Id property and properties with the [Key] attribute match those in the database</para>
+            <para>The number of records effected</para>
+            <para>Supports transaction and command timeout</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="id"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of records effected</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.SequentialGuid">
+            <summary>
+            Generates a guid based on the current date/time
+            http://stackoverflow.com/questions/1752004/sequential-guid-generator-c-sharp
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetAsync``1(System.Data.IDbConnection,System.Object)">
+            <summary>
+            <para>By default queries the table matching the class name asynchronously </para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>By default filters on the Id column</para>
+            <para>-Id column name can be overridden by adding an attribute on your primary key property [Key]</para>
+            <para>Returns a single entity by a single id from table T</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="id"></param>
+            <returns>Returns a single entity by a single id from table T.</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetListAsync``1(System.Data.IDbConnection,System.Object)">
+            <summary>
+            <para>By default queries the table matching the class name asynchronously</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>whereConditions is an anonymous type to filter the results ex: new {Category = 1, SubCategory=2}</para>
+            <para>Returns a list of entities that match where conditions</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="whereConditions"></param>
+            <returns>Gets a list of entities with optional exact match where conditions</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetListAsync``1(System.Data.IDbConnection,System.String)">
+            <summary>
+            <para>By default queries the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>conditions is an SQL where clause and/or order by clause ex: "where name='bob'"</para>
+            <para>Returns a list of entities that match where conditions</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="conditions"></param>
+            <returns>Gets a list of entities with optional SQL where conditions</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.GetListAsync``1(System.Data.IDbConnection)">
+            <summary>
+            <para>By default queries the table matching the class name asynchronously</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Returns a list of all entities</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <returns>Gets a list of all entities</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.InsertAsync(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Inserts a row into the database asynchronously</para>
+            <para>By default inserts into the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Insert filters out Id column and any columns with the [Key] attribute</para>
+            <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</para>
+            </summary>
+            <param name="connection"></param>
+            <param name="entityToInsert"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.InsertAsync``1(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Inserts a row into the database asynchronously</para>
+            <para>By default inserts into the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Insert filters out Id column and any columns with the [Key] attribute</para>
+            <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</para>
+            </summary>
+            <param name="connection"></param>
+            <param name="entityToInsert"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.UpdateAsync(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Threading.CancellationToken})">
+            <summary>
+             <para>Updates a record or records in the database asynchronously</para>
+             <para>By default updates records in the table matching the class name</para>
+             <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+             <para>Updates records where the Id property and properties with the [Key] attribute match those in the database.</para>
+             <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
+             <para>Supports transaction and command timeout</para>
+             <para>Returns number of rows effected</para>
+             </summary>
+             <param name="connection"></param>
+             <param name="entityToUpdate"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of effected records</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.DeleteAsync``1(System.Data.IDbConnection,``0,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Deletes a record or records in the database that match the object passed in asynchronously</para>
+            <para>-By default deletes records in the table matching the class name</para>
+            <para>Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Supports transaction and command timeout</para>
+            <para>Returns the number of records effected</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="entityToDelete"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of records effected</returns>
+        </member>
+        <member name="M:Dapper.SimpleCRUD.DeleteAsync``1(System.Data.IDbConnection,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32})">
+            <summary>
+            <para>Deletes a record or records in the database by ID asynchronously</para>
+            <para>By default deletes records in the table matching the class name</para>
+            <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
+            <para>Deletes records where the Id property and properties with the [Key] attribute match those in the database</para>
+            <para>The number of records effected</para>
+            <para>Supports transaction and command timeout</para>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="connection"></param>
+            <param name="id"></param>
+            <param name="transaction"></param>
+            <param name="commandTimeout"></param>
+            <returns>The number of records effected</returns>
+        </member>
+        <member name="T:Dapper.SimpleCRUD.Dialect">
+            <summary>
+            Database server dialects
+            </summary>
+        </member>
+        <member name="T:Dapper.TableAttribute">
+            <summary>
+            Optional Table attribute.
+            You can use the System.ComponentModel.DataAnnotations version in its place to specify the table name of a poco
+            </summary>
+        </member>
+        <member name="M:Dapper.TableAttribute.#ctor(System.String)">
+            <summary>
+            Optional Table attribute.
+            </summary>
+            <param name="tableName"></param>
+        </member>
+        <member name="P:Dapper.TableAttribute.Name">
+            <summary>
+            Name of the table
+            </summary>
+        </member>
+        <member name="P:Dapper.TableAttribute.Schema">
+            <summary>
+            Name of the schema
+            </summary>
+        </member>
+        <member name="T:Dapper.ColumnAttribute">
+            <summary>
+            Optional Column attribute.
+            You can use the System.ComponentModel.DataAnnotations version in its place to specify the table name of a poco
+            </summary>
+        </member>
+        <member name="M:Dapper.ColumnAttribute.#ctor(System.String)">
+            <summary>
+            Optional Column attribute.
+            </summary>
+            <param name="columnName"></param>
+        </member>
+        <member name="P:Dapper.ColumnAttribute.Name">
+            <summary>
+            Name of the column
+            </summary>
+        </member>
+        <member name="T:Dapper.KeyAttribute">
+            <summary>
+            Optional Key attribute.
+            You can use the System.ComponentModel.DataAnnotations version in its place to specify the Primary Key of a poco
+            </summary>
+        </member>
+        <member name="T:Dapper.EditableAttribute">
+            <summary>
+            Optional Editable attribute.
+            You can use the System.ComponentModel.DataAnnotations version in its place to specify the properties that are editable
+            </summary>
+        </member>
+        <member name="M:Dapper.EditableAttribute.#ctor(System.Boolean)">
+            <summary>
+            Optional Editable attribute.
+            </summary>
+            <param name="iseditable"></param>
+        </member>
+        <member name="P:Dapper.EditableAttribute.AllowEdit">
+            <summary>
+            Does this property persist to the database?
+            </summary>
+        </member>
+        <member name="T:Dapper.ReadOnlyAttribute">
+            <summary>
+            Optional Readonly attribute.
+            You can use the System.ComponentModel version in its place to specify the properties that are editable
+            </summary>
+        </member>
+        <member name="M:Dapper.ReadOnlyAttribute.#ctor(System.Boolean)">
+            <summary>
+            Optional ReadOnly attribute.
+            </summary>
+            <param name="isReadOnly"></param>
+        </member>
+        <member name="P:Dapper.ReadOnlyAttribute.IsReadOnly">
+            <summary>
+            Does this property persist to the database?
+            </summary>
+        </member>
+    </members>
+</doc>

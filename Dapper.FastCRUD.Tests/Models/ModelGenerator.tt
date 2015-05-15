@@ -1,0 +1,35 @@
+<#@ template hostspecific="True" #>
+
+<#
+/*
+This code is part of the Dapper.SimpleCRUD project
+It is based on the T4 template from the PetaPoco project which in turn is based on the subsonic project.
+ -----------------------------------------------------------------------------------------
+ This template can read minimal schema information from the following databases:
+
+	* SQL Server
+ -----------------------------------------------------------------------------------------
+*/
+	// Settings
+    ConnectionStringName = ""; // Uses last connection string in config if not specified
+	ConfigPath = @""; //Looks in current project for web.config or app.config by default. This overrides to a relative path - useful for seperate class library projects.
+    Namespace = "Dapper.FastCrud.Tests.Models";
+	ClassPrefix = "";
+	ClassSuffix = "";
+    IncludeViews = true;
+    IncludeRelationships = false;
+	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire."};
+#>
+<#@ include file="GenericModelGenerator.tt" #>
+<#+
+	void ConfigureTableMappings(Tables tables){
+		/*
+			// Tweak Schema
+			tables["tablename"].Ignore = true;							// To ignore a table
+			tables["tablename"].ClassName = "newname";					// To change the class name of a table
+			tables["tablename"]["columnname"].Ignore = true;			// To ignore a column
+			tables["tablename"]["columnname"].PropertyName="newname";	// To change the property name of a column
+			tables["tablename"]["columnname"].PropertyType="bool";		// To change the property type of a column
+		*/
+	}
+#>
