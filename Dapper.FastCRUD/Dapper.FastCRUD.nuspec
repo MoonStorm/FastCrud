@@ -6,9 +6,9 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/LICENSE</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/LICENSE</licenseUrl>
     <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.jpg</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <!--<description>$description$</description>-->
     <description>
@@ -24,10 +24,10 @@
       - dbConnection.Update(updatedEntity);
       - dbConnection.Delete(entity)
       - dbConnection.Find&lt;Entity&gt;(
-              whereClause:$"{nameof(Entity.FirstName}=@FirstNameParam", 
-              orderClause:$"{nameof(Entity.LastName)} DESC", 
-              queryParameters: new {FirstNameParam: "John"});
-        This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
+      whereClause:$"{nameof(Entity.FirstName}=@FirstNameParam",
+      orderClause:$"{nameof(Entity.LastName)} DESC",
+      queryParameters: new {FirstNameParam: "John"});
+      This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
       - dbConnection.GetTableName&lt;Entity&gt;()
 
       Features:
@@ -47,7 +47,7 @@
   <files>
     <file src="bin\Release\v4.6\Dapper.FastCrud.Net46.dll" target="lib\net46" />
     <file src="bin\Release\v4.5\Dapper.FastCrud.dll" target="lib\net45" />
-    <file src="Package\GenericModelGenerator.tt" target="Content\Models" />  
+    <file src="Package\GenericModelGenerator.tt" target="Content\Models" />
     <file src="Package\SampleModelGeneratorConfig.tt" target="Content\Models" />
     <file src="Package\install.ps1" target="Tools" />
   </files>
