@@ -26,7 +26,7 @@
                 var generatedEntity = this.GenerateSingleIntPrimaryKeyEntity(entityIndex);
 
                 generatedEntity.Id = dbConnection.ExecuteScalar<int>(
-                    $"INSERT INTO {tableName} ({nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}) VALUES (@FirstName, @LastName, @BirthDate); select scope_identity();",
+                    $"INSERT INTO {tableName} ({nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SingleIntPrimaryKeyEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)",
                     new {
                             FirstName = generatedEntity.FirstName,
                             LastName = generatedEntity.LastName,
