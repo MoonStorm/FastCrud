@@ -19,7 +19,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 
 #### Features:
-- Support for LocalDb ans Ms Sql Server (support for more databases will come soon)
+- Support for LocalDb and Ms Sql Server (more coming soon)
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
 - Fast pre-computed entity queries
