@@ -19,14 +19,14 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 
 #### Features:
-- Support for LocalDb ans Ms Sql Server (support for more databases will come soon)
+- Support for LocalDb and Ms Sql Server (more coming soon)
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
-- Fast pre-computed entity mappings
-- A generic T4 template is also provided for convenience. Isolated entity generation via separate template configurations. Existing POCO entities are also supported which can be decorated with attributes such as Table, Key and DatabaseGenerated. Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
+- Fast pre-computed entity queries
+- A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations. Existing POCO entities are also supported which can be manually decorated with attributes such as Table, Key and DatabaseGenerated. Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
 
 #### Automatic Benchmark Report (Last Run: Saturday, May 16, 2015)
-| Micro ORM |  Operation | Entity Count |Time (ms) |
+|   |  Operation | Entity Count |Time (ms) |
 ------------|------------|--------------|-----------
 Dapper | update | 20000 | 6,948.49 
 Fast Crud | update | 20000 | 7,565.05 
