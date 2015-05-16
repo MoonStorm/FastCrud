@@ -27,6 +27,7 @@ Examples of usage:
 - dbConnection.Delete(entity)
 - dbConnection.Find&lt;Entity&gt;(
 - dbConnection.GetTableName&lt;Entity&gt;()
+- dbConnection.Find&lt;Entity&gt;(
         whereClause:$"{nameof(Entity.FirstName}=@FirstNameParam",
         orderClause:$"{nameof(Entity.LastName)} DESC",
         queryParameters: new {FirstNameParam: "John"});
@@ -35,11 +36,11 @@ This is where the power of the C# 6 compiler comes into play, and leaves no chan
 
 Features:
 ----------
-- Support for LocalDb ans Ms Sql Server (support for more databases will come soon)
+- Support for LocalDb and Ms Sql Server (more coming soon)
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
-- Fast pre-computed entity mappings
-- A generic T4 template is also provided for convenience. Isolated entity generation via separate template configurations.
+- Fast pre-computed entity queries
+- A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations.
 Existing POCO entities are also supported which can be decorated with attributes such as Table, Key and DatabaseGenerated.
 Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
 
