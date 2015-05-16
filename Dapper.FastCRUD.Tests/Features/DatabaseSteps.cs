@@ -5,8 +5,10 @@
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using Dapper.FastCrud.Tests.Models;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
@@ -68,10 +70,34 @@
             _testContext.Stopwatch.Stop();
         }
 
-        [When(@"I report the stopwatch value for (.*)")]
-        public void WhenIReportTheStopwatchValueFor(string ormType)
+        [When(@"I report the stopwatch value for (.*) finished processing (.*) entities for an operation of type (.*)")]
+        public void WhenIReportTheStopwatchValueFor(string ormType, int entityCount, string operation)
         {
             Trace.WriteLine($"Stopwatch reported: {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} milliseconds for {ormType}");
+
+            // automatically update the docs
+            var docsPath = Path.Combine(OriginalDatabaseFolder, "../../../../README.MD");
+            var docsContents = File.ReadAllText(docsPath);
+
+            var reportTitle = $"{ormType} | {operation} | {entityCount} |";
+            var report = $"{reportTitle} {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} {Environment.NewLine}";
+
+            var benchmarkHeaderRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report)[^{Environment.NewLine}]*", RegexOptions.Singleline);
+            var emptySpaceInsertRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report(.*?{Environment.NewLine}){{3,3}})\s*?", RegexOptions.Singleline);
+            var reportReplaceRegex = new Regex($@"{reportTitle.Replace("|",@"\|")}.*?{Environment.NewLine}", RegexOptions.Singleline);
+
+            if (reportReplaceRegex.Match(docsContents).Success)
+            {
+                docsContents = reportReplaceRegex.Replace(docsContents, report, 1);
+            }
+            else
+            {
+                docsContents = emptySpaceInsertRegex.Replace(docsContents, report, 1);
+            }
+
+            docsContents = benchmarkHeaderRegex.Replace(docsContents, $" (Last Run: {DateTime.Now:F})", 1);
+
+            File.WriteAllText(docsPath, docsContents);
         }
 
         [Then(@"I should have queried (.*) entities")]

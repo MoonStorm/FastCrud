@@ -86,7 +86,8 @@ this.ScenarioSetup(scenarioInfo);
 #line 7
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 8
- testRunner.And(string.Format("I report the stopwatch value for {0}", microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
+                        "ation of type insert", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 9
  testRunner.Then(string.Format("I should have {0} {1} in the database", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line 10
@@ -116,7 +117,8 @@ this.ScenarioSetup(scenarioInfo);
 #line 25
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 26
- testRunner.And(string.Format("I report the stopwatch value for {0}", microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
+                        "ation of type batch select - no filter", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 27
  testRunner.Then(string.Format("I should have queried {0} entities", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line 28
@@ -148,7 +150,8 @@ this.ScenarioSetup(scenarioInfo);
 #line 41
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 42
- testRunner.And(string.Format("I report the stopwatch value for {0}", microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
+                        "ation of type delete", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 43
  testRunner.Then(string.Format("I should have 0 {0} in the database", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line 44
@@ -178,7 +181,8 @@ this.ScenarioSetup(scenarioInfo);
 #line 56
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 57
- testRunner.And(string.Format("I report the stopwatch value for {0}", microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
+                        "ation of type select by id", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 58
  testRunner.Then(string.Format("I should have queried {0} entities", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line 59
@@ -210,7 +214,8 @@ this.ScenarioSetup(scenarioInfo);
 #line 72
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 73
- testRunner.And(string.Format("I report the stopwatch value for {0}", microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+ testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
+                        "ation of type update", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 74
  testRunner.And(string.Format("I select all the {0} using Dapper", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 75

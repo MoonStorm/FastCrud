@@ -5,7 +5,7 @@ Scenario Outline: Insert Benchmark
 	When I start the stopwatch
 	And I insert <entity count> <entity type> using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm>
+	And I report the stopwatch value for <micro orm> finished processing <entity count> entities for an operation of type insert
 	Then I should have <entity count> <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
@@ -23,7 +23,7 @@ Scenario Outline: Batch Select No Filter Benchmark
 	And I start the stopwatch
 	And I select all the <entity type> using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm>
+	And I report the stopwatch value for <micro orm> finished processing <entity count> entities for an operation of type batch select - no filter
 	Then I should have queried <entity count> entities
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
@@ -39,7 +39,7 @@ Scenario Outline: Single Delete Benchmark
 	And I start the stopwatch
 	And I delete all the inserted <entity type> using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm>
+	And I report the stopwatch value for <micro orm> finished processing <entity count> entities for an operation of type delete
 	Then I should have 0 <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
@@ -54,7 +54,7 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And I start the stopwatch
 	And I select all the <entity type> that I previously inserted using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm>
+	And I report the stopwatch value for <micro orm> finished processing <entity count> entities for an operation of type select by id
 	Then I should have queried <entity count> entities
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
@@ -70,7 +70,7 @@ Scenario Outline: Single Update Benchmark
 	And I start the stopwatch
 	And I update all the <entity type> that I previously inserted using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm>
+	And I report the stopwatch value for <micro orm> finished processing <entity count> entities for an operation of type update
 	And I select all the <entity type> using Dapper
 	Then the queried entities should be the same as the ones I updated
 	Then I cleanup the <database type> database
