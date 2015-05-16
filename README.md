@@ -45,7 +45,7 @@ Fast Crud | batch select - no filter | 20000 | 50.83
 Simple Crud | batch select - no filter | 20000 | 792.37 
 
 Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is dropped and restored at every run and the cache reset. 
-Database growth and other factors might influence the results, but they should be fairly consistent as the tests are following the same stepts and are running on the same number and size of records.
+Database growth and other factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records.
 
 ##### Install via NuGet and Enjoy !
 
