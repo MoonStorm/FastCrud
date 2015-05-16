@@ -22,7 +22,7 @@ This is where the power of the C# 6 compiler comes into play, and leaves no chan
 - Support for LocalDb ans Ms Sql Server (support for more databases will come soon)
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
-- Fast pre-computed entity mappings
+- Fast pre-computed entity queries
 - A generic T4 template is also provided for convenience. Isolated entity generation via separate template configurations. Existing POCO entities are also supported which can be decorated with attributes such as Table, Key and DatabaseGenerated. Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
 
 #### Automatic Benchmark Report (Last Run: Saturday, May 16, 2015)
