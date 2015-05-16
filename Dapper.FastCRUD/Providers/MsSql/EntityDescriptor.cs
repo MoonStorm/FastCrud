@@ -30,12 +30,6 @@
                     (propInfo, index) =>
                         string.Format(CultureInfo.InvariantCulture, "{0}=@{1}", propInfo.Name, propInfo.Name)));
 
-            this.SingleDeleteOperation = new SingleDeleteEntityOperationDescriptor<TEntity>(this);
-            this.SingleInsertOperation = new SingleInsertEntityOperationDescriptor<TEntity>(this);
-            this.SingleUpdateOperation = new SingleUpdateEntityOperationDescriptor<TEntity>(this);
-            this.BatchSelectOperation = new BatchSelectEntityOperationDescriptor<TEntity>(this);
-            this.SingleSelectOperation = new SingleSelectEntityOperationDescriptor<TEntity>(this);
-
             if (string.IsNullOrEmpty(this.TableDescriptor.Schema))
             {
                 this._tableName = string.Format(CultureInfo.InvariantCulture, "[{0}]", this.TableDescriptor.Name);
@@ -45,6 +39,11 @@
                 this._tableName = string.Format(CultureInfo.InvariantCulture, "[{0}].[{1}]", this.TableDescriptor.Schema, this.TableDescriptor.Name);
             }
 
+            this.SingleDeleteOperation = new SingleDeleteEntityOperationDescriptor<TEntity>(this);
+            this.SingleInsertOperation = new SingleInsertEntityOperationDescriptor<TEntity>(this);
+            this.SingleUpdateOperation = new SingleUpdateEntityOperationDescriptor<TEntity>(this);
+            this.BatchSelectOperation = new BatchSelectEntityOperationDescriptor<TEntity>(this);
+            this.SingleSelectOperation = new SingleSelectEntityOperationDescriptor<TEntity>(this);        
         }
 
         public string SelectPropertiesColumnQuery { get; private set; }

@@ -66,12 +66,9 @@ namespace Dapper.FastCrud.Tests.Features
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Insert Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "10", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "10", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "10", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
         public virtual void InsertBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert Benchmark", exampleTags);
@@ -98,32 +95,32 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Batch Select No Filter Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
         public virtual void BatchSelectNoFilterBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch Select No Filter Benchmark", exampleTags);
-#line 20
+#line 17
 this.ScenarioSetup(scenarioInfo);
-#line 21
+#line 18
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 22
+#line 19
  testRunner.When(string.Format("I insert {0} {1} using Fast Crud", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 23
+#line 20
  testRunner.And("I start the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 24
+#line 21
  testRunner.And(string.Format("I select all the {0} using {1}", entityType, microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 25
+#line 22
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 26
+#line 23
  testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
                         "ation of type batch select - no filter", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 27
+#line 24
  testRunner.Then(string.Format("I should have queried {0} entities", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 28
+#line 25
  testRunner.And("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 29
+#line 26
  testRunner.And(string.Format("I cleanup the {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             this.ScenarioCleanup();
@@ -131,30 +128,30 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Delete Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
         public virtual void SingleDeleteBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Delete Benchmark", exampleTags);
-#line 36
+#line 33
 this.ScenarioSetup(scenarioInfo);
-#line 37
+#line 34
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 38
+#line 35
  testRunner.When(string.Format("I insert {0} {1} using Fast Crud", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 39
+#line 36
  testRunner.And("I start the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 40
+#line 37
  testRunner.And(string.Format("I delete all the inserted {0} using {1}", entityType, microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 41
+#line 38
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 42
+#line 39
  testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
                         "ation of type delete", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 43
+#line 40
  testRunner.Then(string.Format("I should have 0 {0} in the database", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 44
+#line 41
  testRunner.And(string.Format("I cleanup the {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             this.ScenarioCleanup();
@@ -162,32 +159,32 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Select Id Filter Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
         public virtual void SingleSelectIdFilterBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Select Id Filter Benchmark", exampleTags);
-#line 51
+#line 48
 this.ScenarioSetup(scenarioInfo);
-#line 52
+#line 49
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 53
+#line 50
  testRunner.When(string.Format("I insert {0} {1} using Fast Crud", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 54
+#line 51
  testRunner.And("I start the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 55
+#line 52
  testRunner.And(string.Format("I select all the {0} that I previously inserted using {1}", entityType, microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 56
+#line 53
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 57
+#line 54
  testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
                         "ation of type select by id", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 58
+#line 55
  testRunner.Then(string.Format("I should have queried {0} entities", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 59
+#line 56
  testRunner.And("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 60
+#line 57
  testRunner.And(string.Format("I cleanup the {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             this.ScenarioCleanup();
@@ -195,32 +192,32 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Update Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "single int key entities", "20000", "Dapper", null)]
         public virtual void SingleUpdateBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Update Benchmark", exampleTags);
-#line 67
+#line 64
 this.ScenarioSetup(scenarioInfo);
-#line 68
+#line 65
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 69
+#line 66
  testRunner.When(string.Format("I insert {0} {1} using Fast Crud", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 70
+#line 67
  testRunner.And("I start the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 71
+#line 68
  testRunner.And(string.Format("I update all the {0} that I previously inserted using {1}", entityType, microOrm), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 72
+#line 69
  testRunner.And("I stop the stopwatch", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 73
+#line 70
  testRunner.And(string.Format("I report the stopwatch value for {0} finished processing {1} entities for an oper" +
                         "ation of type update", microOrm, entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 74
+#line 71
  testRunner.And(string.Format("I select all the {0} using Dapper", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 75
+#line 72
  testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 76
+#line 73
  testRunner.Then(string.Format("I cleanup the {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();

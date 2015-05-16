@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Tests.Features
 {
     using System;
+    using System.Data.SqlTypes;
     using Dapper.FastCrud.Tests.Models;
 
     public class EntityGenerationSteps
@@ -9,9 +10,9 @@
         {
             return new SingleIntPrimaryKeyEntity()
             {
-                FirstName = string.Format("First Name {0}", entityIndex),
-                LastName = string.Format("Last Name {0}", entityIndex),
-                DateOfBirth = DateTime.Now.Date
+                FirstName = $"First Name {entityIndex}",
+                LastName = $"Last Name {entityIndex}",
+                DateOfBirth = new SqlDateTime(DateTime.Now).Value
             };
         }
 

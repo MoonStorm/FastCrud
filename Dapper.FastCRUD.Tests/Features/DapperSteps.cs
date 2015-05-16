@@ -20,13 +20,13 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
             var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
+            string sql = $"INSERT INTO {tableName} ({nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SingleIntPrimaryKeyEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)";
 
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
                 var generatedEntity = this.GenerateSingleIntPrimaryKeyEntity(entityIndex);
 
-                generatedEntity.Id = dbConnection.ExecuteScalar<int>(
-                    $"INSERT INTO {tableName} ({nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SingleIntPrimaryKeyEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)",
+                generatedEntity.Id = dbConnection.ExecuteScalar<int>(sql,
                     new {
                             FirstName = generatedEntity.FirstName,
                             LastName = generatedEntity.LastName,
@@ -52,11 +52,13 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
             var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
+            string sql = $"SELECT {nameof(SingleIntPrimaryKeyEntity.Id)}, {nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)} FROM {tableName} where {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id";
+
             foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
             {
                 _testContext.QueriedEntities.AddRange(
                     dbConnection.Query<SingleIntPrimaryKeyEntity>(
-                        $"SELECT {nameof(SingleIntPrimaryKeyEntity.Id)}, {nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)} FROM {tableName} where {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id",
+                        sql,
                         new { Id = entity.Id }));
             }
         }
@@ -67,17 +69,14 @@
             var dbConnection = _testContext.DatabaseConnection;
             var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
             var entityIndex = _testContext.InsertedEntities.Count;
+            string sql = $"UPDATE {tableName} SET {nameof(SingleIntPrimaryKeyEntity.FirstName)}=@{nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}=@{nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}=@{nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}  WHERE {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id";
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
             {
                 var newEntity = this.GenerateSingleIntPrimaryKeyEntity(entityIndex++);
                 newEntity.Id = entity.Id;
 
-                Assert.AreEqual(
-                    dbConnection.Execute(
-                        $"UPDATE {tableName} SET {nameof(SingleIntPrimaryKeyEntity.FirstName)}=@{nameof(SingleIntPrimaryKeyEntity.FirstName)}, {nameof(SingleIntPrimaryKeyEntity.LastName)}=@{nameof(SingleIntPrimaryKeyEntity.LastName)}, {nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}=@{nameof(SingleIntPrimaryKeyEntity.DateOfBirth)}  WHERE {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id",
-                        newEntity),
-                    1);
+                Assert.AreEqual(dbConnection.Execute(sql,newEntity),1);
 
                 _testContext.UpdatedEntities.Add(newEntity);
             }
@@ -88,10 +87,11 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
             var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
+            string sql = $"DELETE FROM {tableName} WHERE {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id";
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
             {
-                Assert.AreEqual(dbConnection.Execute($"DELETE FROM {tableName} WHERE {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id", entity),1);
+                Assert.AreEqual(dbConnection.Execute(sql, entity),1);
             }
         }
     }

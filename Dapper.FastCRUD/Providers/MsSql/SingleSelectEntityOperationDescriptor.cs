@@ -10,9 +10,17 @@
     /// </summary>
     internal class SingleSelectEntityOperationDescriptor<TEntity> : EntityOperationDescriptor<EntityDescriptor<TEntity>, TEntity>, ISingleSelectEntityOperationDescriptor<TEntity>
     {
+        private readonly string _sqlQuery;
+
         public SingleSelectEntityOperationDescriptor(EntityDescriptor<TEntity> entityDescriptor)
             : base(entityDescriptor)
         {
+            _sqlQuery = string.Format(
+                CultureInfo.InvariantCulture,
+                "SELECT {0} FROM {1} WHERE {2}",
+                this.EntityDescriptor.SelectPropertiesColumnQuery,
+                this.EntityDescriptor.TableName,
+                this.EntityDescriptor.KeyPropertiesWhereClause);
         }
 
         public TEntity Execute(
@@ -21,15 +29,9 @@
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null)
         {
-            var sqlQuery = string.Format(
-                CultureInfo.InvariantCulture,
-                "SELECT {0} FROM {1} WHERE {2}",
-                this.EntityDescriptor.SelectPropertiesColumnQuery,
-                this.EntityDescriptor.TableName,
-                this.EntityDescriptor.KeyPropertiesWhereClause);
 
             return connection.Query<TEntity>(
-                sqlQuery,
+                _sqlQuery,
                 keyEntity,
                 transaction: transaction,
                 commandTimeout: (int?)commandTimeout?.TotalSeconds).SingleOrDefault();

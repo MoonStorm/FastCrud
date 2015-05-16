@@ -9,6 +9,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using Dapper.FastCrud.Tests.Models;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
@@ -95,7 +96,7 @@
                 docsContents = emptySpaceInsertRegex.Replace(docsContents, report, 1);
             }
 
-            docsContents = benchmarkHeaderRegex.Replace(docsContents, $" (Last Run: {DateTime.Now:F})", 1);
+            docsContents = benchmarkHeaderRegex.Replace(docsContents, $" (Last Run: {DateTime.Now:D})", 1);
 
             File.WriteAllText(docsPath, docsContents);
         }
@@ -149,6 +150,11 @@
 
                 dataFiles.AddRange(new[] { finalSqlDatabaseDataFilePath, finalSqlDatabaseLogFilePath });
                 serverManagement.AttachDatabase(MsSqlDatabaseName, dataFiles);
+
+                var database = serverManagement.Databases[MsSqlDatabaseName];
+                //database.ExecuteNonQuery(@"CHECKPOINT;");
+                database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
+                database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
             }
 
             _testContext.DatabaseConnection = new SqlConnection(connectionString);
@@ -175,7 +181,9 @@
                     database.Alter(TerminationClause.RollbackTransactionsImmediately);
                     database.Refresh();
 
-                    serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
+                    database.Drop();
+
+                    ////serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
                 }
             }
 

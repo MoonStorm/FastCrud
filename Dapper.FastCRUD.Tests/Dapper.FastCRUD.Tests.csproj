@@ -150,7 +150,6 @@
       <DependentUpon>TestDatabase.mdf</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Models\GenericModelGenerator.tt" />
     <Content Include="Models\ModelGeneratorConfig.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ModelGeneratorConfig.cs</LastGenOutput>

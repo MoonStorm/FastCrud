@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
+    using System.Threading;
     using Dapper.FastCrud;
 
     /// <summary>
@@ -11,7 +12,7 @@
     /// </summary>
     public static class DapperExtensions
     {
-        private static readonly ConcurrentDictionary<Type, EntityDescriptor> _entityDescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        private static Dictionary<Type, EntityDescriptor> _entityDescriptorCache = new Dictionary<Type, EntityDescriptor>();
         private static SqlDialect _currentDialect;
 
         static DapperExtensions()
@@ -156,19 +157,45 @@
             }
         }
 
-        private static FastCrud.Providers.MsSql.EntityDescriptor<TEntity> GetEntityDescriptor<TEntity>()
+        private static EntityDescriptor<TEntity> GetEntityDescriptor<TEntity>()
         {
-            return (FastCrud.Providers.MsSql.EntityDescriptor<TEntity>)_entityDescriptorCache.GetOrAdd(typeof(TEntity),
-                                                                               entityType =>
-                                                                                   {
-                                                                                       switch (_currentDialect)
-                                                                                       {
-                                                                                           case SqlDialect.MsSql:
-                                                                                               return new FastCrud.Providers.MsSql.EntityDescriptor<TEntity>();
-                                                                                           default:
-                                                                                               throw new InvalidOperationException("Dialect not supported");
-                                                                                       }
-                                                                                   });
+            var entityType = typeof(TEntity);
+            EntityDescriptor<TEntity> entityDescriptor = null;
+            EntityDescriptor genericEntityDescriptor;
+
+            if (_entityDescriptorCache.TryGetValue(entityType, out genericEntityDescriptor))
+            {
+                entityDescriptor = (EntityDescriptor<TEntity>)genericEntityDescriptor;
+            }
+            else
+            {
+                entityDescriptor = CreateEntityDescriptor<TEntity>();
+            }
+
+            return entityDescriptor;
+        }
+
+        private static EntityDescriptor<TEntity> CreateEntityDescriptor<TEntity>()
+        {
+            EntityDescriptor<TEntity> entityDescriptor;
+
+            switch (_currentDialect)
+            {
+                case SqlDialect.MsSql:
+                    entityDescriptor = new FastCrud.Providers.MsSql.EntityDescriptor<TEntity>();
+                    break;
+                default:
+                    throw new InvalidOperationException("Dialect not supported");
+            }
+
+            // reads greatly outperform the writes, so a locking mechanism is not required
+            var originalDictionary = _entityDescriptorCache;
+            Interlocked.Exchange(ref _entityDescriptorCache, new Dictionary<Type, EntityDescriptor>(originalDictionary)
+                                                                 {
+                                                                     [typeof(TEntity)] = entityDescriptor
+                                                                 });
+
+            return entityDescriptor;
         }
     }
 }

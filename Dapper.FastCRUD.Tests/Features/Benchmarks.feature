@@ -9,13 +9,10 @@ Scenario Outline: Insert Benchmark
 	Then I should have <entity count> <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type             | entity count | micro orm       |
-	| LocalDb       | single int key entities | 10           | Dapper          |
-	| LocalDb       | single int key entities | 10           | Fast Crud       |
-	| LocalDb       | single int key entities | 10           | Simple Crud     |
-	| LocalDb       | single int key entities | 20000        | Dapper          |
-	| LocalDb       | single int key entities | 20000        | Fast Crud       |
-	| LocalDb       | single int key entities | 20000        | Simple Crud     |
+	| database type | entity type             | entity count | micro orm   |
+	| LocalDb       | single int key entities | 20000        | Simple Crud |
+	| LocalDb       | single int key entities | 20000        | Fast Crud   |
+	| LocalDb       | single int key entities | 20000        | Dapper      |
 
 Scenario Outline: Batch Select No Filter Benchmark
 	Given I have initialized a <database type> database
@@ -28,10 +25,10 @@ Scenario Outline: Batch Select No Filter Benchmark
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type             | entity count | micro orm       |
-	| LocalDb       | single int key entities | 20000        | Dapper          |
-	| LocalDb       | single int key entities | 20000      | Fast Crud       |
-	| LocalDb       | single int key entities | 20000       | Simple Crud     |
+	| database type | entity type             | entity count | micro orm   |
+	| LocalDb   | single int key entities | 20000        | Simple Crud |
+	| LocalDb   | single int key entities | 20000        | Fast Crud   |
+	| LocalDb   | single int key entities | 20000        | Dapper      |
 
 Scenario Outline: Single Delete Benchmark
 	Given I have initialized a <database type> database
@@ -43,10 +40,10 @@ Scenario Outline: Single Delete Benchmark
 	Then I should have 0 <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type             | entity count | micro orm       |
-	| LocalDb       | single int key entities | 20000        | Dapper          |
-	| LocalDb       | single int key entities | 20000      | Fast Crud       |
-	| LocalDb       | single int key entities | 20000       | Simple Crud     |
+	| database type | entity type             | entity count | micro orm   |
+	| LocalDb   | single int key entities | 20000        | Simple Crud |
+	| LocalDb   | single int key entities | 20000        | Fast Crud   |
+	| LocalDb   | single int key entities | 20000        | Dapper      |
 
 Scenario Outline: Single Select Id Filter Benchmark
 	Given I have initialized a <database type> database
@@ -60,9 +57,9 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type             | entity count | micro orm   |
-	| LocalDb       | single int key entities | 20000        | Dapper      |
-	| LocalDb       | single int key entities | 20000        | Fast Crud   |
 	| LocalDb       | single int key entities | 20000        | Simple Crud |
+	| LocalDb       | single int key entities | 20000        | Fast Crud   |
+	| LocalDb       | single int key entities | 20000        | Dapper      |
 
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
@@ -76,6 +73,6 @@ Scenario Outline: Single Update Benchmark
 	Then I cleanup the <database type> database
 	Examples: 
 	| database type | entity type             | entity count | micro orm   |
-	| LocalDb       | single int key entities | 20000        | Dapper      |
-	| LocalDb       | single int key entities | 20000       | Fast Crud   |
-	| LocalDb       | single int key entities | 20000        | Simple Crud |
+	| LocalDb   | single int key entities | 20000        | Simple Crud |
+	| LocalDb   | single int key entities | 20000        | Fast Crud   |
+	| LocalDb   | single int key entities | 20000        | Dapper      |
