@@ -181,9 +181,7 @@
                     database.Alter(TerminationClause.RollbackTransactionsImmediately);
                     database.Refresh();
 
-                    database.Drop();
-
-                    ////serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
+                    serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
                 }
             }
 
