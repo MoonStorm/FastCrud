@@ -58,9 +58,21 @@
             {
                 var newEntity = this.GenerateSingleIntPrimaryKeyEntity(entityIndex++);
                 newEntity.Id = entity.Id;
-                Assert.AreEqual(dbConnection.Update(newEntity), 1);
+                Assert.AreEqual(SimpleCRUD.Update(dbConnection, newEntity), 1);
                 _testContext.UpdatedEntities.Add(newEntity);
             }
         }
+
+        [When(@"I delete all the inserted single int key entities using Simple Crud")]
+        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingSimpleCrud()
+        {
+            var dbConnection = _testContext.DatabaseConnection;
+
+            foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
+            {
+                Assert.Greater(SimpleCRUD.Delete(dbConnection, entity), 0);
+            }
+        }
+
     }
 }

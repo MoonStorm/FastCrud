@@ -22,8 +22,8 @@
 This code is based on the work of the guys and girls behind the Dapper.SimpleCRUD and PetaPoco projects.
  -----------------------------------------------------------------------------------------
  This template can read minimal schema information from the following databases:
-
-	* SQL Server
+	* SQL Server / LocalDb
+ If you wish to tweak the settings please use a configuration
  -----------------------------------------------------------------------------------------
 */
     // Read schema

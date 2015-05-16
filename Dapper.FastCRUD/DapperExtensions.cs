@@ -5,8 +5,6 @@
     using System.Collections.Generic;
     using System.Data;
     using Dapper.FastCrud;
-    using Dapper.FastCrud.Providers;
-    using Dapper.FastCrud.Providers.MsSql;
 
     /// <summary>
     /// Class for Dapper extensions
@@ -30,7 +28,7 @@
         /// <param name="transaction">Transaction to attach the query to.</param>
         /// <param name="commandTimeout">The command timeout.</param>
         /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
-        public static T GetByPrimaryKeys<T>(this IDbConnection connection, T entityKeys, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        public static T Get<T>(this IDbConnection connection, T entityKeys, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
             return GetEntityDescriptor<T>().SingleSelectOperation.Execute(connection, entityKeys, transaction, commandTimeout);
         }
@@ -44,7 +42,7 @@
         /// <param name="transaction">Transaction to attach the query to.</param>
         /// <param name="commandTimeout">The command timeout.</param>
         /// <returns>Gets a list of all entities</returns>
-        public static IEnumerable<T> GetAll<T>(
+        public static IEnumerable<T> Get<T>(
             this IDbConnection connection,
             bool streamResult = false,
             IDbTransaction transaction = null,
@@ -71,7 +69,7 @@
         /// <param name="skipRowsCount">Number of rows to skip.</param>
         /// <param name="limitRowsCount">Maximum number of rows to return.</param>
         /// <returns>Gets a list of all entities</returns>
-        public static IEnumerable<T> GetByFilter<T>(
+        public static IEnumerable<T> Find<T>(
             this IDbConnection connection,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
@@ -115,7 +113,7 @@
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>True if the item was updated.</returns>
-        public static bool UpdateByPrimaryKeys<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        public static bool Update<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
             return GetEntityDescriptor<T>().SingleUpdateOperation.Execute(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
         }
@@ -129,7 +127,7 @@
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>True if the entity was found and successfully deleted.</returns>
-        public static bool DeleteByPrimaryKeys<T>(this IDbConnection connection, T entityToDelete, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        public static bool Delete<T>(this IDbConnection connection, T entityToDelete, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
             return GetEntityDescriptor<T>().SingleDeleteOperation.Execute(connection, entityToDelete, transaction: transaction, commandTimeout: commandTimeout);
         }

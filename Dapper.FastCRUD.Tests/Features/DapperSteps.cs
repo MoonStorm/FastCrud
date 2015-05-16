@@ -82,5 +82,17 @@
                 _testContext.UpdatedEntities.Add(newEntity);
             }
         }
+
+        [When(@"I delete all the inserted single int key entities using Dapper")]
+        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingDapper()
+        {
+            var dbConnection = _testContext.DatabaseConnection;
+            var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
+
+            foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
+            {
+                Assert.AreEqual(dbConnection.Execute($"DELETE FROM {tableName} WHERE {nameof(SingleIntPrimaryKeyEntity.Id)}=@Id", entity),1);
+            }
+        }
     }
 }

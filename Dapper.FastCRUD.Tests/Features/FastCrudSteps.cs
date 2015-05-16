@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using Dapper.FastCrud;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -36,7 +37,7 @@
         [Then(@"I should have (.*) single int key entities in the database")]
         public void ThenIShouldHaveSingleIntKeyEntitiesInTheDatabase(int entitiesCount)
         {
-            var entities = _testContext.DatabaseConnection.GetAll<SingleIntPrimaryKeyEntity>();
+            var entities = _testContext.DatabaseConnection.Get<SingleIntPrimaryKeyEntity>();
             Assert.AreEqual(entities.Count(), entitiesCount);
         }
 
@@ -44,7 +45,7 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingFastCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            _testContext.QueriedEntities.AddRange(dbConnection.GetAll<SingleIntPrimaryKeyEntity>());
+            _testContext.QueriedEntities.AddRange(dbConnection.Get<SingleIntPrimaryKeyEntity>());
         }
 
         [When(@"I select all the single int key entities that I previously inserted using Fast Crud")]
@@ -54,7 +55,7 @@
             var tableName = _testContext.DatabaseConnection.GetTableName<SingleIntPrimaryKeyEntity>();
             foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
             {
-                _testContext.QueriedEntities.Add(dbConnection.GetByPrimaryKeys<SingleIntPrimaryKeyEntity>(new SingleIntPrimaryKeyEntity() {Id = entity.Id}));
+                _testContext.QueriedEntities.Add(dbConnection.Get<SingleIntPrimaryKeyEntity>(new SingleIntPrimaryKeyEntity() {Id = entity.Id}));
             }
         }
 
@@ -68,10 +69,20 @@
             {
                 var newEntity = this.GenerateSingleIntPrimaryKeyEntity(entityIndex++);
                 newEntity.Id = entity.Id;
-                Assert.IsTrue(dbConnection.UpdateByPrimaryKeys(newEntity));
+                Assert.IsTrue(dbConnection.Update(newEntity));
                 _testContext.UpdatedEntities.Add(newEntity);
             }
         }
 
+        [When(@"I delete all the inserted single int key entities using Fast Crud")]
+        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingFastCrud()
+        {
+            var dbConnection = _testContext.DatabaseConnection;
+
+            foreach (var entity in _testContext.InsertedEntities.OfType<SingleIntPrimaryKeyEntity>())
+            {
+                Assert.IsTrue(DapperExtensions.Delete(dbConnection, entity));
+            }
+        }
     }
 }
