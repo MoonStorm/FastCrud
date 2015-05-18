@@ -27,7 +27,6 @@
             IDbTransaction transaction,
             TimeSpan? commandTimeout)
         {
-
             var sqlQueryBuilder = new StringBuilder();
             sqlQueryBuilder.AppendFormat(
                 CultureInfo.InvariantCulture,

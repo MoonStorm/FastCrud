@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Tests", "Dapper.FastCRUD.Tests\Dapper.FastCRUD.Tests.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD", "Dapper.FastCRUD\Dapper.FastCRUD.csproj", "{0044043B-C8EC-497C-8B58-ABE028014D24}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C198D9B5-6ECC-4F86-8C08-B64FB025267B} = {C198D9B5-6ECC-4F86-8C08-B64FB025267B}
@@ -17,16 +15,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Benchmarks", "Dapper.FastCRUD.Benchmarks\Dapper.FastCRUD.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Tests", "Dapper.FastCRUD.Tests\Dapper.FastCRUD.Tests.csproj", "{C746BCF1-692B-4450-A864-D76681F3B37D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{859E62C6-1EBE-4F0F-8C4D-916E4A252905}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0044043B-C8EC-497C-8B58-ABE028014D24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0044043B-C8EC-497C-8B58-ABE028014D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0044043B-C8EC-497C-8B58-ABE028014D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -35,8 +35,20 @@ Global
 		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C746BCF1-692B-4450-A864-D76681F3B37D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C746BCF1-692B-4450-A864-D76681F3B37D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C746BCF1-692B-4450-A864-D76681F3B37D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C746BCF1-692B-4450-A864-D76681F3B37D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692} = {859E62C6-1EBE-4F0F-8C4D-916E4A252905}
+		{C746BCF1-692B-4450-A864-D76681F3B37D} = {859E62C6-1EBE-4F0F-8C4D-916E4A252905}
 	EndGlobalSection
 EndGlobal

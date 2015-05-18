@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A52E30BD-44B2-45EA-BE65-7D07D00A9692}</ProjectGuid>
+    <ProjectGuid>{C746BCF1-692B-4450-A864-D76681F3B37D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Dapper.FastCrud.Tests</RootNamespace>
     <AssemblyName>Dapper.FastCrud.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,6 +30,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -38,6 +40,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -45,15 +48,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.38.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Dapper.SimpleCRUD, Version=1.8.7.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dapper.SimpleCRUD.1.8.7\lib\net45\Dapper.SimpleCRUD.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>..\packages\Shared.Management.Objects.for.SQL.Server.2012.SP1.11.0.3000.0\lib\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
       <Private>True</Private>
@@ -100,7 +98,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -114,46 +111,57 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Features\DapperSteps.cs" />
-    <Compile Include="Features\DatabaseSteps.cs" />
-    <Compile Include="Features\DatabaseTestContext.cs" />
-    <None Include="Features\DeclarativeSqlSteps_Invalid.cs" />
-    <Compile Include="Features\EntityGenerationSteps.cs" />
-    <Compile Include="Features\FastCrudSteps.cs" />
-    <Compile Include="Features\Benchmarks.feature.cs">
+    <Compile Include="Crud.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Benchmarks.feature</DependentUpon>
+      <DependentUpon>Crud.feature</DependentUpon>
     </Compile>
-    <Compile Include="Features\SimpleCrudSteps.cs" />
-    <Compile Include="Models\ModelGeneratorConfig.cs">
+    <Compile Include="CrudSteps.cs" />
+    <Compile Include="DatabaseSteps.cs" />
+    <Compile Include="DatabaseTestContext.cs" />
+    <Compile Include="EntityGenerationSteps.cs" />
+    <Compile Include="Models\EmployeeEntity.cs" />
+    <Compile Include="Models\ModelGeneratorConfig1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelGeneratorConfig.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\SingleIntPrimaryKeyEntity.cs" />
+    <Compile Include="Models\SimpleBenchmarkEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Features\Benchmarks.feature">
+    <None Include="App.config" />
+    <None Include="Crud.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
-      <LastGenOutput>Benchmarks.feature.cs</LastGenOutput>
+      <LastGenOutput>Crud1.feature.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App_Data\TestDatabase.mdf">
+    <ProjectReference Include="..\Dapper.FastCRUD\Dapper.FastCRUD.csproj">
+      <Project>{0044043b-c8ec-497c-8b58-abe028014d24}</Project>
+      <Name>Dapper.FastCRUD</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\TestDatabase.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="App_Data\TestDatabase_log.ldf">
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\TestDatabase_log.ldf">
       <DependentUpon>TestDatabase.mdf</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Models\ModelGeneratorConfig.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModelGeneratorConfig.cs</LastGenOutput>
+      <LastGenOutput>ModelGeneratorConfig1.cs</LastGenOutput>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -166,15 +174,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Dapper.FastCRUD\Dapper.FastCRUD.csproj">
-      <Project>{0044043b-c8ec-497c-8b58-abe028014d24}</Project>
-      <Name>Dapper.FastCRUD</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

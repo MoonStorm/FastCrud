@@ -31,20 +31,27 @@
                             IsSimpleSqlType(p.PropertyType)
                             && p.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit))
                     .ToArray();
-            this.KeyPropertyDescriptors =
-                this.SelectPropertyDescriptors.Where(propInfo => propInfo.Attributes.OfType<KeyAttribute>().Any()).ToArray();
+            this.KeyPropertyDescriptors = this.SelectPropertyDescriptors.Where(propInfo => propInfo.Attributes.OfType<KeyAttribute>().Any()).ToArray();
+            this.TableDescriptor = TypeDescriptor.GetAttributes(entityType)
+                .OfType<TableAttribute>().SingleOrDefault() ?? new TableAttribute(entityType.Name);
+            this.DatabaseGeneratedPropertyDescriptors = this.SelectPropertyDescriptors
+                .Where(propInfo => propInfo.Attributes.OfType<DatabaseGeneratedAttribute>()
+                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Computed || dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Identity))
+                .ToArray();
 
-            this.TableDescriptor = TypeDescriptor.GetAttributes(entityType).OfType<TableAttribute>().SingleOrDefault() ??
-                            new TableAttribute(entityType.Name);
-            this.DatabaseGeneratedPropertyDescriptors = this.SelectPropertyDescriptors.Where(propInfo => propInfo.Attributes.OfType<KeyAttribute>().Any()).ToArray();
-            this.UpdateablePropertyDescriptors = this.SelectPropertyDescriptors.Except(this.DatabaseGeneratedPropertyDescriptors).ToArray();
+            // everything can be updateable, with the exception of the primary keys
+            this.UpdatePropertyDescriptors = this.SelectPropertyDescriptors.Except(this.KeyPropertyDescriptors).ToArray();
+
+            // we consider properties that go into an insert only the ones that are not auto-generated 
+            this.InsertPropertyDescriptors = this.SelectPropertyDescriptors.Except(this.DatabaseGeneratedPropertyDescriptors).ToArray();
         }
 
         public abstract string TableName { get; }
 
         public PropertyDescriptor[] DatabaseGeneratedPropertyDescriptors { get; private set; }
         public PropertyDescriptor[] SelectPropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] UpdateablePropertyDescriptors { get; private set; }
+        public PropertyDescriptor[] InsertPropertyDescriptors { get; private set; }
+        public PropertyDescriptor[] UpdatePropertyDescriptors { get; private set; }
         public PropertyDescriptor[] KeyPropertyDescriptors { get; private set; }
         public TableAttribute TableDescriptor { get; private set; }
 

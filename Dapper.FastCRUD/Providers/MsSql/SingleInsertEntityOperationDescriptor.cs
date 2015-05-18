@@ -19,8 +19,8 @@
                 CultureInfo.InvariantCulture,
                 "INSERT INTO {0} ({1}) OUTPUT {3} VALUES ({2}) ",
                 this.EntityDescriptor.TableName,
-                this.EntityDescriptor.UpdatePropertiesColumnQuery,
-                this.EntityDescriptor.UpdatePropertyValuesColumnQuery,
+                this.EntityDescriptor.InsertPropertiesColumnQuery,
+                this.EntityDescriptor.InsertParameteredPropertiesColumnQuery,
                 this.EntityDescriptor.OutputDatabaseGeneratedPropertiesQuery);
         }
 
@@ -33,7 +33,7 @@
             var insertedEntity = connection.Query<TEntity>(_sqlQuery, entity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).First();
 
             // copy all the key properties back onto our entity
-            foreach (var propDescriptor in this.EntityDescriptor.KeyPropertyDescriptors)
+            foreach (var propDescriptor in this.EntityDescriptor.DatabaseGeneratedPropertyDescriptors)
             {
                 var updatedKeyValue = propDescriptor.GetValue(insertedEntity);
                 propDescriptor.SetValue(entity, updatedKeyValue);

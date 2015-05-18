@@ -6,33 +6,18 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/LICENSE</licenseUrl>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <!--<description>$description$</description>-->
+    <summary>Fast CRUD extensions added to the IDbConnection for convenience and a less error prone experience with Dapper.</summary>
     <description>
-Simple extensions added to the IDbConnection for convenience and a less error prone experience. This library is 2x faster than Dapper.SimpleCRUD.
+Fast Dapper CRUD extensions added to the IDbConnection for convenience and a less error prone experience. This library is 2x faster than Dapper.SimpleCRUD.
 For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation but that's not a requirement.
 
 The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
 For .NET 4.5, the code contains the polyfills for the missing FormattableString class, which is required when targetting that framework version and using string interpolation with the C# 6 compiler in VS 2015.
-
-Examples of usage:
--------------------
-- dbConnection.Insert(newEntity);
-- dbConnection.Get()
-- dbConnection.Get(new Entity() {Id = 10});
-- dbConnection.Update(updatedEntity);
-- dbConnection.Delete(entity)
-- dbConnection.Find&lt;Entity&gt;(
-- dbConnection.GetTableName&lt;Entity&gt;()
-- dbConnection.Find&lt;Entity&gt;(
-        whereClause:$"{nameof(Entity.FirstName}=@FirstNameParam",
-        orderClause:$"{nameof(Entity.LastName)} DESC",
-        queryParameters: new {FirstNameParam: "John"});
-
-This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 
 Features:
 ----------
@@ -44,10 +29,29 @@ Features:
 Existing POCO entities are also supported which can be decorated with attributes such as Table, Key and DatabaseGenerated.
 Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
 
+Examples of usage:
+-------------------
+- dbConnection.Insert(newEntity);
+- dbConnection.Get()
+- dbConnection.Get(new Entity() {Id = 10});
+- dbConnection.Update(updatedEntity);
+- dbConnection.Delete(entity)
+- dbConnection.GetTableName&lt;Entity&gt;()
+- dbConnection.Find&lt;Entity&gt;(
+        whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam",
+        orderClause:$"{nameof(Entity.LastName)} DESC",
+        queryParameters: new {FirstNameParam: "John"});
+
+This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
+More examples are available on the project site.
+
     </description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>Dapper CRUD</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
+    </frameworkAssemblies>
   </metadata>
   <files>
     <file src="bin\Release\v4.6\Dapper.FastCrud.Net46.dll" target="lib\net46" />
