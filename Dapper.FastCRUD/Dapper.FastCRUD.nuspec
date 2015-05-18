@@ -38,12 +38,13 @@ Examples of usage:
 - dbConnection.Delete(entity)
 - dbConnection.GetTableName&lt;Entity&gt;()
 - dbConnection.Find&lt;Entity&gt;(
-        whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam",
-        orderClause:$"{nameof(Entity.LastName)} DESC",
-        queryParameters: new {FirstNameParam: "John"});
+      whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam",
+      orderClause:$"{nameof(Entity.LastName)} DESC",
+      skipRowsCount:10, limitRowsCount:20,
+      queryParameters: new {FirstNameParam: "John"});
 
-This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
-More examples are available on the project site.
+      This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
+      More details and benchmarks are available on the project site.
 
     </description>
     <releaseNotes></releaseNotes>

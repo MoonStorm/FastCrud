@@ -21,6 +21,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 - dbConnection.Find<Entity>(
         whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam", 
         orderClause:$"{nameof(Entity.LastName)} DESC", 
+		skipRowsCount:10, limitRowsCount:20,
         queryParameters: new {FirstNameParam: "John"});
 
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
