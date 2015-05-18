@@ -77,9 +77,6 @@
     <None Include="LICENSE" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="logo.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
     <None Include="Package\GenericModelGenerator.tt" />
   </ItemGroup>
@@ -93,6 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Package\Install.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="logo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

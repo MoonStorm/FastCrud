@@ -8,7 +8,7 @@
     <owners>$author$</owners>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.jpg</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <!--<description>$description$</description>-->
     <summary>Fast CRUD extensions added to the IDbConnection for convenience and a less error prone experience with Dapper.</summary>
