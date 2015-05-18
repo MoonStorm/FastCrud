@@ -66,7 +66,7 @@ To understand the logic behind the CRUD operations, let's have a look at an enti
 
 ```
 - The ``Table`` attribute specifies the table used to produce the entity.  
-- The ``Key`` attributes is used to mark the properties that represent the primary key, and in this particular case, we're dealing with a composite key.
+- The ``Key`` attribute is used to mark the properties that represent the primary key, and in this particular case, we're dealing with a composite key.
 ``Update``, ``Get``, ``Delete`` will always use the properties decorated with a ``Key`` attribute to identify the entity the operation is targeting.
 - The ``DatabaseGenerated`` attribute is generated for database fields that are either identity columns or have a default value. 
 An ``Insert`` operation will always exclude properties decorated with a ``DatabaseGenerated`` attribute, but will update the entity with the database generated values on return.
