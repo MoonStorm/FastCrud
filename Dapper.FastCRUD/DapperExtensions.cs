@@ -184,6 +184,12 @@
                 case SqlDialect.MsSql:
                     entityDescriptor = new FastCrud.Providers.MsSql.EntityDescriptor<TEntity>();
                     break;
+                case SqlDialect.MySql:
+                    entityDescriptor = new FastCrud.Providers.MySql.EntityDescriptor<TEntity>();
+                    break;
+                case SqlDialect.SqLite:
+                    entityDescriptor = new FastCrud.Providers.SqLite.EntityDescriptor<TEntity>();
+                    break;
                 default:
                     throw new InvalidOperationException("Dialect not supported");
             }

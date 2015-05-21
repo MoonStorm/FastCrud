@@ -15,29 +15,39 @@
         public SingleInsertEntityOperationDescriptor(EntityDescriptor<TEntity> entityDescriptor)
             : base(entityDescriptor)
         {
+
+            string outputQuery = this.EntityDescriptor.DatabaseGeneratedPropertyDescriptors.Length > 0
+                                     ? string.Format(
+                                         CultureInfo.InvariantCulture,
+                                         "OUTPUT {0}",
+                                         string.Join(
+                                             ",",
+                                             this.EntityDescriptor.DatabaseGeneratedPropertyDescriptors.Select(
+                                                 propInfo => string.Format(CultureInfo.InvariantCulture, "inserted.{0}", propInfo.Name))))
+                                     : string.Empty;
+
             _sqlQuery = string.Format(
                 CultureInfo.InvariantCulture,
-                "INSERT INTO {0} ({1}) OUTPUT {3} VALUES ({2}) ",
+                "INSERT INTO {0} ({1}) {3} VALUES ({2}) ",
                 this.EntityDescriptor.TableName,
-                this.EntityDescriptor.InsertPropertiesColumnQuery,
-                this.EntityDescriptor.InsertParameteredPropertiesColumnQuery,
-                this.EntityDescriptor.OutputDatabaseGeneratedPropertiesQuery);
+                string.Join(",", this.EntityDescriptor.InsertPropertyDescriptors.Select(propInfo => propInfo.Name)),
+                string.Join(",", this.EntityDescriptor.InsertPropertyDescriptors.Select(propInfo => string.Format(CultureInfo.InvariantCulture, "@{0}", propInfo.Name))),
+                outputQuery);
         }
 
         public void Execute(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
+            var insertedEntity = connection.Query<TEntity>(_sqlQuery, entity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).FirstOrDefault();
 
-            //var parameters = this.EntityDescriptor.CreateParameters(this.EntityDescriptor.UpdateablePropertyDescriptors, entity);
-            //var insertedEntity = connection.Query<TEntity>(sqlQuery, parameters, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).First();
-
-            var insertedEntity = connection.Query<TEntity>(_sqlQuery, entity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds).First();
-
-            // copy all the key properties back onto our entity
-            foreach (var propDescriptor in this.EntityDescriptor.DatabaseGeneratedPropertyDescriptors)
+            if (insertedEntity != null)
             {
-                var updatedKeyValue = propDescriptor.GetValue(insertedEntity);
-                propDescriptor.SetValue(entity, updatedKeyValue);
-            };
+                // copy all the key properties back onto our entity
+                foreach (var propDescriptor in this.EntityDescriptor.DatabaseGeneratedPropertyDescriptors)
+                {
+                    var updatedKeyValue = propDescriptor.GetValue(insertedEntity);
+                    propDescriptor.SetValue(entity, updatedKeyValue);
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Globalization;
+    using System.Linq;
     using System.Text;
 
     /// <summary>
@@ -11,9 +12,17 @@
     /// </summary>
     internal class BatchSelectEntityOperationDescriptor<TEntity> : EntityOperationDescriptor<EntityDescriptor<TEntity>,  TEntity>, IBatchSelectEntityOperationDescriptor<TEntity>
     {
+        private string _baseSql;
+
         public BatchSelectEntityOperationDescriptor(EntityDescriptor<TEntity> entityDescriptor)
             : base(entityDescriptor)
         {
+            _baseSql = string.Format(
+                CultureInfo.InvariantCulture,
+                "SELECT {0} FROM {1}",
+                string.Join(",", this.EntityDescriptor.SelectPropertyDescriptors.Select(propInfo => propInfo.Name)),
+                this.EntityDescriptor.TableName);
+
         }
 
         public IEnumerable<TEntity> Execute(
@@ -27,33 +36,26 @@
             IDbTransaction transaction,
             TimeSpan? commandTimeout)
         {
-            var sqlQueryBuilder = new StringBuilder();
-            sqlQueryBuilder.AppendFormat(
-                CultureInfo.InvariantCulture,
-                "SELECT {0} FROM {1} ",
-                this.EntityDescriptor.SelectPropertiesColumnQuery,
-                this.EntityDescriptor.TableName);
-            if (whereClause!=null)
+            var sql = _baseSql;
+            if (whereClause != null)
             {
-                sqlQueryBuilder.Append(" WHERE ");
-                sqlQueryBuilder.Append(whereClause.ToString(CultureInfo.InvariantCulture));
+                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
             }
             if (orderClause != null)
             {
-                sqlQueryBuilder.Append(" ORDER BY ");
-                sqlQueryBuilder.Append(orderClause.ToString(CultureInfo.InvariantCulture));
+                sql += string.Format(CultureInfo.InvariantCulture, " ORDER BY {0}", orderClause);
             }
             if (skipRowsCount.HasValue)
             {
-                sqlQueryBuilder.AppendFormat(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount);
+                sql+=string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount);
             }
             if (limitRowsCount.HasValue)
             {
-                sqlQueryBuilder.AppendFormat(CultureInfo.InvariantCulture, " FETCH NEXT {0} ROWS ONLY", limitRowsCount);
+                sql+=string.Format(CultureInfo.InvariantCulture, " FETCH NEXT {0} ROWS ONLY", limitRowsCount);
             }
 
             return connection.Query<TEntity>(
-                sqlQueryBuilder.ToString(),
+                sql,
                 queryParameters,
                 buffered: !streamResults,
                 transaction: transaction,

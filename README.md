@@ -5,7 +5,7 @@ The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based
 For .NET 4.5, the code contains the polyfills for the missing FormattableString class, which is required when targetting that framework version and using string interpolation with the C# 6 compiler in VS 2015.
 
 #### Features:
-- Support for LocalDb and Ms Sql Server (more coming soon)
+- Support for LocalDb, Ms Sql Server, MySql, SqLite
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
 - Fast pre-computed entity queries

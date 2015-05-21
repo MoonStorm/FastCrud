@@ -18,9 +18,12 @@
             _sqlQuery = string.Format(
                 CultureInfo.InvariantCulture,
                 "SELECT {0} FROM {1} WHERE {2}",
-                this.EntityDescriptor.SelectPropertiesColumnQuery,
+                string.Join(",", this.EntityDescriptor.SelectPropertyDescriptors.Select(propInfo => propInfo.Name)),
                 this.EntityDescriptor.TableName,
-                this.EntityDescriptor.KeyPropertiesWhereClause);
+                string.Join(
+                    " and ",
+                    this.EntityDescriptor.KeyPropertyDescriptors.Select(
+                        (propInfo, index) => string.Format(CultureInfo.InvariantCulture, "{0}=@{1}", propInfo.Name, propInfo.Name))));
         }
 
         public TEntity Execute(

@@ -3,6 +3,7 @@
     using System;
     using System.Data;
     using System.Globalization;
+    using System.Linq;
 
     /// <summary>
     /// Class for Dapper extensions
@@ -18,8 +19,14 @@
                 CultureInfo.InvariantCulture,
                 "UPDATE {0} SET {1} WHERE {2}",
                 this.EntityDescriptor.TableName,
-                this.EntityDescriptor.UpdatePropertiesColumnSetterQuery,
-                this.EntityDescriptor.KeyPropertiesWhereClause);
+                string.Join(
+                    ",",
+                    this.EntityDescriptor.UpdatePropertyDescriptors.Select(
+                        propInfo => string.Format(CultureInfo.InvariantCulture, "{0}=@{0}", propInfo.Name))),
+                string.Join(
+                    " and ",
+                    this.EntityDescriptor.KeyPropertyDescriptors.Select(
+                        (propInfo, index) => string.Format(CultureInfo.InvariantCulture, "{0}=@{1}", propInfo.Name, propInfo.Name))));
         }
 
         public bool Execute(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)

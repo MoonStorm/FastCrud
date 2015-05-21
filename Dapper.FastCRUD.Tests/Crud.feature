@@ -1,48 +1,75 @@
-﻿Feature: Crud 
+﻿Feature: CRUD tests
 
 Scenario Outline: Insert and select all
 	Given I have initialized a <database type> database
-	When I insert <entity count> employee entities
-	And I query for all the employee entities
+	When I insert <entity count> <entity type> entities
+	And I query for all the <entity type> entities
 	Then the queried entities should be the same as the ones I inserted
 	Examples: 
-	| database type | entity count | 
-	| LocalDb       | 1            |
+	| database type | entity type | entity count |
+	| LocalDb       | employee    | 1            |
+	| MySql         | employee    | 1            |
+	| SqLite        | workstation | 1            |
+	| LocalDb       | building    | 1            |
+	| MySql         | building    | 1            |
+	| SqLite        | building    | 1            |
 
 Scenario Outline: Find
 	Given I have initialized a <database type> database
-	When I insert <entity count> employee entities
-	And I query for a maximum of <max> employee entities ordered by workstation id skipping <skip> records
+	When I insert <entity count> <entity type> entities
+	And I query for a maximum of <max> <entity type> entities ordered by workstation id skipping <skip> records
 	Then the queried entities should be the same as the ones I inserted, in reverse order, starting from <skip> counting <max>
 	Examples: 
-	| database type | entity count | max | skip |
-	| LocalDb       | 100          | 10  | 20   |
+	| database type | entity type | entity count | max | skip |
+	| LocalDb       | employee    | 100          | 10  | 20   |
+	| MySql         | employee    | 100          | 10  | 20   |
+	| SqLite        | workstation | 100          | 10  | 20   |
 
-Scenario Outline: Insert and select by composite primary key
+Scenario Outline: Insert and select by primary key
 	Given I have initialized a <database type> database
-	When I insert <entity count> employee entities
-	And I query for the inserted employee entities
+	When I insert <entity count> <entity type> entities
+	And I query for the inserted <entity type> entities
 	Then the queried entities should be the same as the ones I inserted
 	Examples: 
-	| database type | entity count |
-	| LocalDb       | 1            |
+	| database type | entity type | entity count |
+	| LocalDb       | employee    | 1            |
+	| MySql         | employee    | 1            |
+	| LocalDb       | workstation | 1            |
+	| MySql         | workstation | 1            |
+	| LocalDb       | building    | 1            |
+	| MySql         | building    | 1            |
+	| SqLite        | building    | 1            |
 
-Scenario Outline: Update by composite keys
+Scenario Outline: Update by primary keys
 	Given I have initialized a <database type> database
-	When I insert <entity count> employee entities
-	And I update all the inserted employee entities
-	And I query for all the employee entities
+	When I insert <entity count> <entity type> entities
+	And I update all the inserted <entity type> entities
+	And I query for all the <entity type> entities
 	Then the queried entities should be the same as the ones I updated
 	Examples: 
-	| database type | entity count |
-	| LocalDb       | 1            |
+	| database type | entity type | entity count |
+	| LocalDb       | employee    | 1            |
+	| MySql         | employee    | 1            |
+	| LocalDb       | workstation | 1            |
+	| MySql         | workstation | 1            |
+	| LocalDb       | building    | 1            |
+	| MySql         | building    | 1            |
+	| SqLite        | building    | 1            |
 
-Scenario Outline: Delete by composite keys
+Scenario Outline: Delete by primary keys
 	Given I have initialized a <database type> database
-	When I insert <entity count> employee entities
-	And I delete all the inserted employee entities
-	And I query for all the employee entities
-	Then I should have 0 employee entities in the database
+	When I insert <entity count> <entity type> entities
+	And I clear all the inserted entities
+	And I insert <entity count> <entity type> entities
+	And I delete all the inserted <entity type> entities
+	And I query for all the <entity type> entities
+	Then I should have <entity count> <entity type> entities in the database
 	Examples: 
-	| database type | entity count |
-	| LocalDb       | 1            |
+	| database type | entity type | entity count |
+	| LocalDb       | employee    | 1            |
+	| MySql         | employee    | 1            |
+	| LocalDb       | workstation | 1            |
+	| MySql         | workstation | 1            |
+	| LocalDb       | building    | 1            |
+	| MySql         | building    | 1            |
+	| SqLite        | building    | 1            |

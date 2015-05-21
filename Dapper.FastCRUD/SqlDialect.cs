@@ -2,6 +2,8 @@
 {
     public enum SqlDialect
     {
-        MsSql
+        MsSql,
+        MySql,
+        SqLite
     }
 }

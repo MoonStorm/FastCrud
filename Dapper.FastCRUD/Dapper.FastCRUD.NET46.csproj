@@ -66,6 +66,18 @@
     <Compile Include="Providers\MsSql\SingleInsertEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MsSql\SingleSelectEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MsSql\SingleUpdateEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\MySql\BatchSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\MySql\EntityDescriptor.cs" />
+    <Compile Include="Providers\MySql\SingleDeleteEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\MySql\SingleInsertEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\MySql\SingleSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\MySql\SingleUpdateEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\SqLite\BatchSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\SqLite\EntityDescriptor.cs" />
+    <Compile Include="Providers\SqLite\SingleDeleteEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\SqLite\SingleInsertEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\SqLite\SingleSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\SqLite\SingleUpdateEntityOperationDescriptor.cs" />
     <Compile Include="SqlDialect.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\src\Dapper.FastCRUD.Tests\App_Data\\TestDatabase.mdf;Initial Catalog=TestDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\src\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models
@@ -15,6 +15,17 @@ namespace Dapper.FastCrud.Tests.Models
 	using System.ComponentModel.DataAnnotations;
 	using System.ComponentModel.DataAnnotations.Schema;
 	using System.Collections.Generic;
+
+    /// <summary>
+    /// A class which represents the Buildings table.
+    /// </summary>
+	[Table("Buildings")]
+	public partial class Building
+	{
+		[Key]
+		public virtual int BuildingId { get; set; }
+		public virtual string Name { get; set; }
+	}
 
     /// <summary>
     /// A class which represents the SimpleBenchmarkEntities table.
@@ -48,6 +59,20 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual string FirstName { get; set; }
 		public virtual DateTime BirthDate { get; set; }
 		public virtual int? WorkstationId { get; set; }
+	}
+
+    /// <summary>
+    /// A class which represents the Workstations table.
+    /// </summary>
+	[Table("Workstations")]
+	public partial class Workstation
+	{
+		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public virtual long WorkstationId { get; set; }
+		public virtual string Name { get; set; }
+		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+		public virtual int AccessLevel { get; set; }
 	}
 
 }

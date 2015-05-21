@@ -21,7 +21,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 
 Features:
 ----------
-- Support for LocalDb and Ms Sql Server (more coming soon)
+- Support for LocalDb, Ms Sql Server, MySql, SqLite
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
 - Fast pre-computed entity queries
@@ -47,9 +47,10 @@ Examples of usage:
       More details and benchmarks are available on the project site.
 
     </description>
-    <releaseNotes></releaseNotes>
+    <releaseNotes>
+    </releaseNotes>
     <copyright>Copyright 2015</copyright>
-    <tags>Dapper CRUD</tags>
+    <tags>dapper CRUD orm</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
     </frameworkAssemblies>

@@ -34,6 +34,10 @@
             this.KeyPropertyDescriptors = this.SelectPropertyDescriptors.Where(propInfo => propInfo.Attributes.OfType<KeyAttribute>().Any()).ToArray();
             this.TableDescriptor = TypeDescriptor.GetAttributes(entityType)
                 .OfType<TableAttribute>().SingleOrDefault() ?? new TableAttribute(entityType.Name);
+            this.DatabaseGeneratedIdentityPropertyDescriptors = this.SelectPropertyDescriptors
+                .Where(propInfo => propInfo.Attributes.OfType<DatabaseGeneratedAttribute>()
+                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
+                .ToArray();
             this.DatabaseGeneratedPropertyDescriptors = this.SelectPropertyDescriptors
                 .Where(propInfo => propInfo.Attributes.OfType<DatabaseGeneratedAttribute>()
                 .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Computed || dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Identity))
@@ -48,6 +52,7 @@
 
         public abstract string TableName { get; }
 
+        public PropertyDescriptor[] DatabaseGeneratedIdentityPropertyDescriptors { get; private set; }
         public PropertyDescriptor[] DatabaseGeneratedPropertyDescriptors { get; private set; }
         public PropertyDescriptor[] SelectPropertyDescriptors { get; private set; }
         public PropertyDescriptor[] InsertPropertyDescriptors { get; private set; }

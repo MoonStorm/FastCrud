@@ -64,5 +64,15 @@ namespace Dapper.FastCrud.Tests.Models
         {
             return !Equals(left, right);
         }
+
+        // MYSQL table generation
+        ////CREATE TABLE `SimpleBenchmarkEntities` (
+	       //// Id int NOT NULL,
+	       //// FirstName nvarchar(50) NULL,
+	       //// LastName nvarchar(50) NOT NULL,
+        ////    DateOfBirth date NULL,
+        ////    PRIMARY KEY(Id)
+        ////)
+
     }
 }

@@ -3,13 +3,16 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.Configuration;
     using System.Data.SqlClient;
+    using System.Data.SQLite;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
+    using MySql.Data.MySqlClient;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 
@@ -17,12 +20,9 @@
     public class DatabaseSteps
     {
         private DatabaseTestContext _testContext;
-        private const string MsSqlDatabaseName = "TestDatabase";
-        private static string OriginalDatabaseFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data");
-        private static string FinalDatabaseFolder = Path.Combine(OriginalDatabaseFolder, $"FastCrudDatabaseTests");
-
-        private static string LocalDbConnectionString = $@"Data Source = (LocalDb)\v11.0; Initial Catalog = {MsSqlDatabaseName}; Integrated Security = True"; //AttachDbFilename =|DataDirectory|\{MsSqlDatabaseName}.mdf; Data Source = (LocalDb)\MSSQLLocalDB
-        private static string MsSqlConnectionString = $@"Data Source=.; Initial Catalog = {MsSqlDatabaseName}; Integrated Security = True";
+        private const string DatabaseName = "TestDatabase";
+        //private static string OriginalDatabaseFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data");
+        //private static string FinalDatabaseFolder = Path.Combine(OriginalDatabaseFolder, $"FastCrudDatabaseTests");
 
         public DatabaseSteps(DatabaseTestContext testContext)
         {
@@ -32,27 +32,40 @@
         [Given(@"I have initialized a LocalDb database")]
         public void GivenIHaveInitializedLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(LocalDbConnectionString);
-            this.SetupMsSqlDatabase(LocalDbConnectionString);
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+        }
+
+        [Given(@"I have initialized a SqLite database")]
+        public void GivenIHaveInitializedSqlLiteDatabase()
+        {
+            this.SetupSqLiteDatabase(ConfigurationManager.ConnectionStrings["SqLite"].ConnectionString);
+        }
+
+        [Given(@"I have initialized a MySql database")]
+        public void GivenIHaveInitializedMySqlDatabase()
+        {
+            this.CleanupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
+            this.SetupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
         }
 
         [Then(@"I cleanup the LocalDb database")]
         public void ThenICleanupTheLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(LocalDbConnectionString);
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
         }
 
         [Given(@"I have initialized a MsSqlServer database")]
         public void GivenIHaveInitializedAnMsSqlServerDatabase()
         {
-            this.CleanupMsSqlDatabase(MsSqlConnectionString);
-            this.SetupMsSqlDatabase(MsSqlConnectionString);
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
+            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
         }
 
         [Then(@"I cleanup the MsSqlServer database")]
         public void ThenICleanupTheMsSqlServerDatabase()
         {
-            this.CleanupMsSqlDatabase(MsSqlConnectionString);
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
         }
 
         [Given(@"I started the stopwatch")]
@@ -74,7 +87,7 @@
             Trace.WriteLine($"Stopwatch reported: {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} milliseconds for {ormType}");
 
             // automatically update the docs
-            var docsPath = Path.Combine(OriginalDatabaseFolder, "../../../../README.MD");
+            var docsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../README.MD");
             var docsContents = File.ReadAllText(docsPath);
 
             var reportTitle = $"{ormType} | {operation} | {entityCount} |";
@@ -135,33 +148,182 @@
             _testContext.DatabaseConnection?.Dispose();
         }
 
-        private void SetupMsSqlDatabase(string connectionString)
+        private void SetupSqLiteDatabase(string connectionString)
         {
-            using (var dataConnection = new SqlConnection(connectionString.Replace(MsSqlDatabaseName, "master")))
+            DapperExtensions.Dialect = SqlDialect.SqLite;
+
+            _testContext.DatabaseConnection = new SQLiteConnection(connectionString);
+            _testContext.DatabaseConnection.Open();
+
+            using (var command = _testContext.DatabaseConnection.CreateCommand())
+            {
+                command.CommandText = $@"CREATE TABLE Workstations (
+	                        WorkstationId integer primary key AUTOINCREMENT,
+	                        Name nvarchar(50) NULL,
+                            AccessLevel int NOT NULL DEFAULT(1)
+                        )";
+
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = _testContext.DatabaseConnection.CreateCommand())
+            {
+                command.CommandText = $@"CREATE TABLE Buildings (
+	                        BuildingId integer primary key,
+	                        Name nvarchar(50) NULL
+                        )";
+
+                command.ExecuteNonQuery();
+            }
+
+        }
+
+        private void CleanupMySqlDatabase(string connectionString)
+        {
+            using (var dataConnection = new MySqlConnection(connectionString))
             {
                 dataConnection.Open();
-                var serverManagement = new Server(new ServerConnection(dataConnection));
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText = $@"DROP DATABASE IF EXISTS {DatabaseName}";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
 
-                // attach the test dbs
-                var dataFiles = new StringCollection();
+        private void SetupMySqlDatabase(string connectionString)
+        {
+            DapperExtensions.Dialect = SqlDialect.MySql;
 
-                var finalSqlDatabaseDataFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}.mdf");
-                var finalSqlDatabaseLogFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf");
+            using (var dataConnection = new MySqlConnection(connectionString))
+            {
+                dataConnection.Open();
 
-                Directory.CreateDirectory(FinalDatabaseFolder);
-                File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}.mdf"), finalSqlDatabaseDataFilePath, true);
-                File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf"), finalSqlDatabaseLogFilePath, true);
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText = $@"CREATE DATABASE {DatabaseName}";
+                    command.ExecuteNonQuery();
+                }
 
-                dataFiles.AddRange(new[] { finalSqlDatabaseDataFilePath, finalSqlDatabaseLogFilePath });
-                serverManagement.AttachDatabase(MsSqlDatabaseName, dataFiles);
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText = $@"USE {DatabaseName};
 
-                var database = serverManagement.Databases[MsSqlDatabaseName];
-                //database.ExecuteNonQuery(@"CHECKPOINT;");
+                        CREATE TABLE `Employee` (
+	                        UserId int NOT NULL AUTO_INCREMENT,
+                            EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+	                        LastName nvarchar(50) NOT NULL,
+	                        FirstName nvarchar(50) NOT NULL,
+	                        BirthDate datetime NOT NULL,
+                            WorkstationId int NULL,
+	                        PRIMARY KEY (UserId, EmployeeId)
+                        );
+
+                        ALTER TABLE Employee auto_increment=2;
+
+                        CREATE TRIGGER `Employee_Assign_UUID`
+                            BEFORE INSERT ON Employee
+                            FOR EACH ROW
+                            SET NEW.EmployeeId = UUID(),
+                            New.KeyPass = UUID();
+
+                        CREATE TABLE `Workstations` (
+	                        WorkstationId bigint NOT NULL AUTO_INCREMENT,
+	                        Name nvarchar(50) NOT NULL,
+                            AccessLevel int NOT NULL DEFAULT 1,
+	                        PRIMARY KEY (WorkstationId)
+                        );
+
+                        ALTER TABLE Workstations auto_increment=2;
+
+                        CREATE TABLE `Buildings` (
+	                        BuildingId int NOT NULL,
+	                        Name nvarchar(50) NULL,
+	                        PRIMARY KEY (BuildingId)
+                        );
+                    ";
+                    command.ExecuteNonQuery();
+                }
+            }
+
+
+            _testContext.DatabaseConnection = new MySqlConnection(connectionString+$";Database={DatabaseName}");
+            _testContext.DatabaseConnection.Open();
+        }
+
+        private void SetupMsSqlDatabase(string connectionString)
+        {
+            DapperExtensions.Dialect = SqlDialect.MsSql;
+
+            using (var dataConnection = new SqlConnection(connectionString))
+            {
+                dataConnection.Open();
+
+                var server = new Server(new ServerConnection(dataConnection));
+                var database = new Database(server, DatabaseName);
+                database.Create();
+                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
+	                    [Id] [int] IDENTITY(2,1) NOT NULL,
+	                    [FirstName] [nvarchar](50) NULL,
+	                    [LastName] [nvarchar](50) NOT NULL,
+	                    [DateOfBirth] [datetime] NULL,
+                        CONSTRAINT [PK_SimpleBenchmarkEntities] PRIMARY KEY CLUSTERED 
+                        (
+	                        [Id] ASC
+                        ))");
+
+                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Workstations](
+	                    [WorkstationId] [bigint] IDENTITY(2,1) NOT NULL,
+	                    [Name] [nvarchar](50) NULL,
+                        [AccessLevel] [int] NOT NULL DEFAULT(1),
+                        CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED 
+                        (
+	                        [WorkstationId] ASC
+                        ))");
+
+                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
+	                    [UserId] [int] IDENTITY(2,1) NOT NULL,
+	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
+	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
+	                    [LastName] [nvarchar](50) NOT NULL,
+	                    [FirstName] [nvarchar](50) NULL,
+	                    [BirthDate] [datetime] NOT NULL,
+	                    [WorkstationId] [int] NULL,
+                        CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
+                        (
+	                        [UserId] ASC,
+	                        [EmployeeId] ASC
+                        ))");
+
+                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
+	                    [BuildingId] [int]  NOT NULL,
+	                    [Name] [nvarchar](50) NULL,
+                        CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED 
+                        (
+	                        [BuildingId] ASC
+                        ))");
+
+                ////// attach the test dbs
+                ////var dataFiles = new StringCollection();
+
+                ////var finalSqlDatabaseDataFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}.mdf");
+                ////var finalSqlDatabaseLogFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf");
+
+                ////Directory.CreateDirectory(FinalDatabaseFolder);
+                ////File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}.mdf"), finalSqlDatabaseDataFilePath, true);
+                ////File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf"), finalSqlDatabaseLogFilePath, true);
+
+                ////dataFiles.AddRange(new[] { finalSqlDatabaseDataFilePath, finalSqlDatabaseLogFilePath });
+                ////serverManagement.AttachDatabase(MsSqlDatabaseName, dataFiles);
+
+                ////var database = serverManagement.Databases[MsSqlDatabaseName];
+                //////database.ExecuteNonQuery(@"CHECKPOINT;");
                 database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
                 database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
             }
 
-            _testContext.DatabaseConnection = new SqlConnection(connectionString);
+            _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName}");
             _testContext.DatabaseConnection.Open();
         }
 
@@ -169,11 +331,11 @@
         {
             _testContext.DatabaseConnection?.Close();
 
-            using (var dataConnection = new SqlConnection(connectionString.Replace(MsSqlDatabaseName, "master")))
+            using (var dataConnection = new SqlConnection(connectionString))
             {
                 dataConnection.Open();
                 var serverManagement = new Server(new ServerConnection(dataConnection));
-                var database = serverManagement.Databases[MsSqlDatabaseName];
+                var database = serverManagement.Databases[DatabaseName];
                 if (database != null)
                 {
                     // drop any active connections
@@ -185,14 +347,15 @@
                     database.Alter(TerminationClause.RollbackTransactionsImmediately);
                     database.Refresh();
 
-                    serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
+                    database.Drop();
+                    //serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
                 }
             }
 
-            if (Directory.Exists(FinalDatabaseFolder))
-            {
-                Directory.Delete(FinalDatabaseFolder, true);
-            }
+            ////if (Directory.Exists(FinalDatabaseFolder))
+            ////{
+            ////    Directory.Delete(FinalDatabaseFolder, true);
+            ////}
         }
     }
 }

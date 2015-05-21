@@ -10,7 +10,9 @@ namespace Dapper.FastCrud.Tests.Models
     {
         protected bool Equals(Employee other)
         {
-            return this.UserId == other.UserId && this.EmployeeId.Equals(other.EmployeeId) && this.KeyPass.Equals(other.KeyPass) && string.Equals(this.LastName, other.LastName) && string.Equals(this.FirstName, other.FirstName) && this.BirthDate.Equals(other.BirthDate) && this.WorkstationId == other.WorkstationId;
+            return this.UserId == other.UserId && this.EmployeeId.Equals(other.EmployeeId) && this.KeyPass.Equals(other.KeyPass)
+                   && string.Equals(this.LastName, other.LastName) && string.Equals(this.FirstName, other.FirstName)
+                   && this.BirthDate.Equals(other.BirthDate) && this.WorkstationId == other.WorkstationId;
         }
 
         /// <summary>
@@ -67,5 +69,26 @@ namespace Dapper.FastCrud.Tests.Models
         {
             return !Equals(left, right);
         }
+
+
+        // mysql 
+        ////CREATE TABLE `Employee` (
+	       //// UserId int NOT NULL,
+        ////    EmployeeId BINARY(16) NOT NULL DEFAULT '0',
+	       //// KeyPass BINARY(16) NOT NULL DEFAULT '0',
+	       //// LastName nvarchar(50) NOT NULL,
+        ////    FirstName nvarchar(50) NOT NULL,
+        ////    BirthDate datetime NOT NULL,
+        ////    WorkstationId int NULL,
+        ////    PRIMARY KEY(UserId, EmployeeId)
+        ////);
+
+        ////CREATE TRIGGER `Employee_Assign_UUID`
+        ////  BEFORE INSERT ON Employee
+        ////  FOR EACH ROW
+        ////  SET NEW.EmployeeId = UNHEX(REPLACE(UUID(), '-', '')),
+        ////  New.KeyPass = UNHEX(REPLACE(UUID(), '-', ''));
+
     }
 }
+
