@@ -5,14 +5,14 @@ The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based
 For .NET 4.5, the code contains the polyfills for the missing FormattableString class, which is required when targetting that framework version and using string interpolation with the C# 6 compiler in VS 2015.
 
 #### Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
 - Fast pre-computed entity queries
 - A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations. Existing POCO entities are also supported which can be manually decorated with attributes such as Table, Key and DatabaseGenerated. Column name overrides are not supported and not recommended. As you'll end up writing more complex SQL queries, outside of the domain of this library, you'll want to use the nameof operator as much as possible.
 
 #### Usage:
-- DapperExtensions.Dialect = SqlDialect.MsSql | MySql | SqLite
+- DapperExtensions.Dialect = SqlDialect.MsSql | MySql | SqLite | PostgreSql
 - dbConnection.Insert(newEntity);
 - dbConnection.Get()
 - dbConnection.Get(new Entity() {Id = 10});

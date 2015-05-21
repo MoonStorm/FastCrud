@@ -153,7 +153,7 @@
             set
             {
                 _currentDialect = value;
-                _entityDescriptorCache.Clear();
+                Interlocked.Exchange(ref _entityDescriptorCache, new Dictionary<Type, EntityDescriptor>());
             }
         }
 
@@ -189,6 +189,9 @@
                     break;
                 case SqlDialect.SqLite:
                     entityDescriptor = new FastCrud.Providers.SqLite.EntityDescriptor<TEntity>();
+                    break;
+                case SqlDialect.PostgreSql:
+                    entityDescriptor = new FastCrud.Providers.PostgreSql.EntityDescriptor<TEntity>();
                     break;
                 default:
                     throw new InvalidOperationException("Dialect not supported");

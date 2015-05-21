@@ -57,6 +57,12 @@
     <Compile Include="FormattableStringFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\IOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\BatchSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\EntityDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleDeleteEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleInsertEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleUpdateEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MsSql\BatchSelectEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MsSql\EntityDescriptor.cs" />
     <Compile Include="Providers\IBatchSelectEntityOperationDescriptor.cs" />

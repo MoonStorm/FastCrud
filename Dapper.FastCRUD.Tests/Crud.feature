@@ -8,10 +8,12 @@ Scenario Outline: Insert and select all
 	Examples: 
 	| database type | entity type | entity count |
 	| LocalDb       | employee    | 1            |
+	| PostgreSql    | employee    | 1            |
 	| MySql         | employee    | 1            |
 	| SqLite        | workstation | 1            |
 	| LocalDb       | building    | 1            |
 	| MySql         | building    | 1            |
+	| PostgreSql    | building    | 1            |
 	| SqLite        | building    | 1            |
 
 Scenario Outline: Find
@@ -23,6 +25,7 @@ Scenario Outline: Find
 	| database type | entity type | entity count | max | skip |
 	| LocalDb       | employee    | 100          | 10  | 20   |
 	| MySql         | employee    | 100          | 10  | 20   |
+	| PostgreSql    | employee    | 100          | 10  | 20   |
 	| SqLite        | workstation | 100          | 10  | 20   |
 
 Scenario Outline: Insert and select by primary key
@@ -34,11 +37,14 @@ Scenario Outline: Insert and select by primary key
 	| database type | entity type | entity count |
 	| LocalDb       | employee    | 1            |
 	| MySql         | employee    | 1            |
+	| PostgreSql    | employee    | 1            |
 	| LocalDb       | workstation | 1            |
 	| MySql         | workstation | 1            |
+	| PostgreSql    | workstation | 1            |
 	| LocalDb       | building    | 1            |
 	| MySql         | building    | 1            |
 	| SqLite        | building    | 1            |
+	| PostgreSql    | building    | 1            |
 
 Scenario Outline: Update by primary keys
 	Given I have initialized a <database type> database
@@ -50,11 +56,14 @@ Scenario Outline: Update by primary keys
 	| database type | entity type | entity count |
 	| LocalDb       | employee    | 1            |
 	| MySql         | employee    | 1            |
+	| PostgreSql    | employee    | 1            |
 	| LocalDb       | workstation | 1            |
 	| MySql         | workstation | 1            |
+	| PostgreSql    | workstation | 1            |
 	| LocalDb       | building    | 1            |
 	| MySql         | building    | 1            |
 	| SqLite        | building    | 1            |
+	| PostgreSql    | building    | 1            |
 
 Scenario Outline: Delete by primary keys
 	Given I have initialized a <database type> database
@@ -68,8 +77,11 @@ Scenario Outline: Delete by primary keys
 	| database type | entity type | entity count |
 	| LocalDb       | employee    | 1            |
 	| MySql         | employee    | 1            |
+	| PostgreSql    | employee    | 1            |
 	| LocalDb       | workstation | 1            |
 	| MySql         | workstation | 1            |
+	| PostgreSql    | workstation | 1            |
 	| LocalDb       | building    | 1            |
 	| MySql         | building    | 1            |
 	| SqLite        | building    | 1            |
+	| PostgreSql    | building    | 1            |

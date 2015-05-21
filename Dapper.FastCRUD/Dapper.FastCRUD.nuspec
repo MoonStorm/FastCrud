@@ -21,7 +21,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 
 Features:
 ----------
-- Support for LocalDb, Ms Sql Server, MySql, SqLite
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
 - Entities having composite primary keys are supported
 - All the CRUD methods accept a transaction and a command timeout
 - Fast pre-computed entity queries
@@ -31,6 +31,7 @@ Column name overrides are not supported and not recommended. As you'll end up wr
 
 Examples of usage:
 -------------------
+- DapperExtensions.Dialect = SqlDialect.MsSql | MySql | SqLite | PostgreSql
 - dbConnection.Insert(newEntity);
 - dbConnection.Get()
 - dbConnection.Get(new Entity() {Id = 10});
@@ -50,7 +51,7 @@ Examples of usage:
     <releaseNotes>
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
-    <tags>dapper CRUD orm</tags>
+    <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
     </frameworkAssemblies>

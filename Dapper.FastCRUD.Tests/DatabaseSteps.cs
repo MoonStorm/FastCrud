@@ -13,6 +13,7 @@
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
     using MySql.Data.MySqlClient;
+    using Npgsql;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 
@@ -27,6 +28,13 @@
         public DatabaseSteps(DatabaseTestContext testContext)
         {
             this._testContext = testContext;
+        }
+
+        [Given(@"I have initialized a PostgreSql database")]
+        public void GivenIHaveInitializedPostgreSqlDatabase()
+        {
+            this.CleanupPostgreSqlDatabase(ConfigurationManager.ConnectionStrings["PostgreSql"].ConnectionString);
+            this.SetupPostgreSqlDatabase(ConfigurationManager.ConnectionStrings["PostgreSql"].ConnectionString);
         }
 
         [Given(@"I have initialized a LocalDb database")]
@@ -145,6 +153,7 @@
         [AfterScenario]
         public void Cleanup()
         {
+            _testContext.DatabaseConnection?.Close();
             _testContext.DatabaseConnection?.Dispose();
         }
 
@@ -177,6 +186,86 @@
             }
 
         }
+
+        private void CleanupPostgreSqlDatabase(string connectionString)
+        {
+            using (var dataConnection = new NpgsqlConnection(connectionString))
+            {
+                dataConnection.Open();
+
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText =
+                        $@"
+                        select pg_terminate_backend(pid)
+                        from pg_stat_activity
+                        where datname = '{
+                            DatabaseName.ToLowerInvariant()}'";
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText = $@"DROP DATABASE IF EXISTS { DatabaseName.ToLowerInvariant()}";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void SetupPostgreSqlDatabase(string connectionString)
+        {
+            DapperExtensions.Dialect = SqlDialect.PostgreSql;
+
+            using (var dataConnection = new NpgsqlConnection(connectionString))
+            {
+                dataConnection.Open();
+
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText = $@"CREATE DATABASE {DatabaseName}";
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            using (var dataConnection = new NpgsqlConnection(connectionString + $";Database={DatabaseName.ToLowerInvariant()}"))
+            {
+                //  uuid_in((md5((random())::text))::cstring)
+                dataConnection.Open();
+                using (var command = dataConnection.CreateCommand())
+                {
+                    command.CommandText =$@"
+                        CREATE TABLE Employee (
+	                        UserId SERIAL,
+                            EmployeeId uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
+	                        KeyPass uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
+	                        LastName varchar(50) NOT NULL,
+	                        FirstName varchar(50) NOT NULL,
+	                        BirthDate timestamp NOT NULL,
+                            WorkstationId int NULL,
+	                        PRIMARY KEY (UserId, EmployeeId)
+                        );
+
+                        CREATE TABLE Workstations (
+	                        WorkstationId BIGSERIAL,
+	                        Name varchar(50) NOT NULL,
+                            AccessLevel int NOT NULL DEFAULT 1,
+	                        PRIMARY KEY (WorkstationId)
+                        );
+
+                        CREATE TABLE Buildings (
+	                        BuildingId int NOT NULL,
+	                        Name varchar(50) NULL,
+	                        PRIMARY KEY (BuildingId)
+                        );
+                    ";
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            _testContext.DatabaseConnection = new NpgsqlConnection(connectionString + $";Database={DatabaseName.ToLowerInvariant()}");
+            _testContext.DatabaseConnection.Open();
+        }
+
 
         private void CleanupMySqlDatabase(string connectionString)
         {

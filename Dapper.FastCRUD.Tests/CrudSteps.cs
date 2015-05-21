@@ -64,7 +64,7 @@
                 dbConnection.Insert(generatedEntity, commandTimeout: (TimeSpan?)null);
                 // the entity already has the associated id set
 
-                Assert.Greater(generatedEntity.UserId, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
+                Assert.Greater(generatedEntity.UserId, 0);
                 Assert.AreNotEqual(generatedEntity.KeyPass, Guid.Empty);
 
                 _testContext.InsertedEntities.Add(generatedEntity);

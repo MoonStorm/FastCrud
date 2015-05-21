@@ -72,6 +72,12 @@
     <Compile Include="Providers\MySql\SingleInsertEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MySql\SingleSelectEntityOperationDescriptor.cs" />
     <Compile Include="Providers\MySql\SingleUpdateEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\BatchSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\EntityDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleDeleteEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleInsertEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleSelectEntityOperationDescriptor.cs" />
+    <Compile Include="Providers\PostgreSql\SingleUpdateEntityOperationDescriptor.cs" />
     <Compile Include="Providers\SqLite\BatchSelectEntityOperationDescriptor.cs" />
     <Compile Include="Providers\SqLite\EntityDescriptor.cs" />
     <Compile Include="Providers\SqLite\SingleDeleteEntityOperationDescriptor.cs" />
