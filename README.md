@@ -1,5 +1,5 @@
 Simple extensions added to the IDbConnection for convenience and a less error prone experience. This library is roughly twice as fast than Dapper.SimpleCRUD.
-For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation but that's not a requirement.
+For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
 
 The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
 For .NET 4.5, the code contains the polyfills for the missing FormattableString class, which is required when targetting that framework version and using string interpolation with the C# 6 compiler in VS 2015.
