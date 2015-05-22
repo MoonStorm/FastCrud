@@ -1,6 +1,8 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
     using System;
+    using System.Data;
+    using System.Data.SqlClient;
     using System.Diagnostics;
     using System.Linq;
     using Dapper.FastCrud.Tests;
@@ -23,6 +25,26 @@
         public DapperSteps(DatabaseTestContext testContext)
         {
             _testContext = testContext;
+        }
+
+        [When(@"I insert (.*) benchmark entities using ADO \.NET")]
+        public void WhenIInsertBenchmarkEntitiesUsingADONET(int entitiesCount)
+        {
+            for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
+            {
+                var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
+
+                using (var sqlInsertCommand = new SqlCommand(_insertSql, (SqlConnection)_testContext.DatabaseConnection))
+                {
+                    sqlInsertCommand.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = generatedEntity.FirstName });
+                    sqlInsertCommand.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = generatedEntity.LastName });
+                    sqlInsertCommand.Parameters.Add(new SqlParameter("@BirthDate", SqlDbType.DateTime) { Value = generatedEntity.DateOfBirth });
+                    generatedEntity.Id = (int)sqlInsertCommand.ExecuteScalar();
+                }
+
+                Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
+                _testContext.InsertedEntities.Add(generatedEntity);
+            }
         }
 
         [When(@"I insert (.*) benchmark entities using Dapper")]

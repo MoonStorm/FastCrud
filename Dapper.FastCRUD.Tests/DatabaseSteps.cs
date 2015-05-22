@@ -96,7 +96,7 @@
             _testContext.Stopwatch.Stop();
         }
 
-        [When(@"I report the stopwatch value for (.*) finished processing (.*) entities for an operation of type (.*)")]
+        [When(@"I report the stopwatch value for (.*) finished processing (.*) operations of type (.*)")]
         public void WhenIReportTheStopwatchValueFor(string ormType, int entityCount, string operation)
         {
             Trace.WriteLine($"Stopwatch reported: {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} milliseconds for {ormType}");

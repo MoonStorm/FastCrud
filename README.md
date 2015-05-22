@@ -77,34 +77,39 @@ In case you have primary keys and other fields that are not database generated, 
 #### Speed
 Most of us love Dapper for its speed. 
 Without taking this away from you, Dapper.FastCRUD helps by giving you the foundation of the database repositories in your DAL. 
-Let's have a look at how it performs against other well known Dapper extensions out there.
+Let's have a look at how it performs against other similar libraries out there (``Dapper.SimpleCRUD v1.8.7``, ``DapperExtensions v1.4.4 ``).
 
 ##### Automatic Benchmark Report (Last Run: Friday, May 22, 2015)
-|   |  Operation | Entity Count |Time (ms) |
+|   |  Operation | Count |Time (ms) |
 ------------|------------|--------------|-----------
-Dapper | update | 20000 | 4,880.78 
-Fast Crud | update | 20000 | 6,657.23 
-Dapper Extensions | update | 20000 | 7,610.25 
-Simple Crud | update | 20000 | 8,373.13 
-Dapper | select by id | 20000 | 2,305.45 
-Fast Crud | select by id | 20000 | 2,358.92 
-Dapper Extensions | select by id | 20000 | 3,259.04 
-Simple Crud | select by id | 20000 | 4,770.90 
-Dapper | delete | 20000 | 6,169.71 
-Fast Crud | delete | 20000 | 6,395.53 
-Dapper Extensions | delete | 20000 | 5,883.66 
-Simple Crud | delete | 20000 | 7,716.42 
-Dapper | insert | 20000 | 5,381.78 
-Fast Crud | insert | 20000 | 6,392.07 
-Dapper Extensions | insert | 20000 | 9,114.92 
-Simple Crud | insert | 20000 | 12,744.80 
-Dapper | batch select - no filter | 20000 | 45.17 
-Fast Crud | batch select - no filter | 20000 | 83.22 
-Dapper Extensions | batch select - no filter | 20000 | 68.09 
-Simple Crud | batch select - no filter | 20000 | 106.60 
+Dapper | update | 20000 | 7,406.61 
+Fast Crud | update | 20000 | 7,388.05 
+Dapper Extensions | update | 20000 | 10,110.19 
+Simple Crud | update | 20000 | 14,007.36 
+Dapper | select by id | 20000 | 3,022.25 
+Fast Crud | select by id | 20000 | 3,608.53 
+Dapper Extensions | select by id | 20000 | 6,129.52 
+Simple Crud | select by id | 20000 | 9,572.73 
+Dapper | delete | 20000 | 6,069.14 
+Fast Crud | delete | 20000 | 6,750.90 
+Dapper Extensions | delete | 20000 | 7,986.23 
+Simple Crud | delete | 20000 | 10,993.32 
+Dapper | insert | 20000 | 7,533.32 
+Fast Crud | insert | 20000 | 8,160.50 
+Dapper Extensions | insert | 20000 | 8,605.20 
+Simple Crud | insert | 20000 | 12,064.94 
+Dapper | select all - no warmup | 1 | 57.20 
+Fast Crud | select all - no warmup | 1 | 108.42 
+Dapper Extensions | select all - no warmup | 1 | 105.92 
+Simple Crud | select all - no warmup | 1 | 821.56 
+Dapper | select all - with warmup | 1 | 52.84 
+Fast Crud | select all - with warmup | 1 | 47.33 
+Dapper Extensions | select all - with warmup | 1 | 68.30 
+Simple Crud | select all - with warmup | 1 | 94.88 
 
-Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run and auto-create statistics is disabled. 
-Database growth and other factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records.
+Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run and the ``auto-create statistics`` feature of the db is turned off.
+Database growth and other factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records. 
+Environment details: Windows 7, SQL Server 2012 SP2 Developer Edition, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD
 
 ##### Install via NuGet and Enjoy !
 
