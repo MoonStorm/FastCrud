@@ -76,6 +76,13 @@
             this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
         }
 
+        [When(@"I refresh the database connection")]
+        public void WhenIRefreshTheDatabaseConnection()
+        {
+            _testContext.DatabaseConnection.Close();
+            _testContext.DatabaseConnection.Open();
+        }
+
         [Given(@"I started the stopwatch")]
         [When(@"I start the stopwatch")]
         public void GivenIStartedTheStopwatch()
@@ -352,6 +359,9 @@
                 var server = new Server(new ServerConnection(dataConnection));
                 var database = new Database(server, DatabaseName);
                 database.Create();
+
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_CREATE_STATISTICS OFF"); // for benchmarking purposes
+
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [FirstName] [nvarchar](50) NULL,

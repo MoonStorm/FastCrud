@@ -1,7 +1,9 @@
-﻿namespace Dapper.FastCrud.Tests.Features.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks
 {
+    using System;
+    using System.Diagnostics;
     using System.Linq;
-    using Dapper.FastCrud.Benchmarks;
+    using Dapper.FastCrud.Tests;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -10,6 +12,13 @@
     public sealed class DapperSteps:EntityGenerationSteps
     {
         private DatabaseTestContext _testContext;
+
+        private const string _tableName = "SimpleBenchmarkEntities";
+        private string _insertSql = $"INSERT INTO {_tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SimpleBenchmarkEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)";
+        private string _selectAllSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName}";
+        private string _selectByIdSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName} where {nameof(SimpleBenchmarkEntity.Id)}=@Id";
+        private string _updateSql = $"UPDATE {_tableName} SET {nameof(SimpleBenchmarkEntity.FirstName)}=@{nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}=@{nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}=@{nameof(SimpleBenchmarkEntity.DateOfBirth)}  WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
+        private string _deleteByIdSql = $"DELETE FROM {_tableName} WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
 
         public DapperSteps(DatabaseTestContext testContext)
         {
@@ -20,14 +29,12 @@
         public void WhenIInsertSingleIntKeyEntitiesUsingDapper(int entitiesCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
-            string sql = $"INSERT INTO {tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SimpleBenchmarkEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)";
 
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
                 var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
 
-                generatedEntity.Id = dbConnection.ExecuteScalar<int>(sql,
+                generatedEntity.Id = dbConnection.ExecuteScalar<int>(_insertSql,
                     new {
                             FirstName = generatedEntity.FirstName,
                             LastName = generatedEntity.LastName,
@@ -43,24 +50,17 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapper()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
-            
-            _testContext.QueriedEntities.AddRange(dbConnection.Query<SimpleBenchmarkEntity>($"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {tableName}"));
+            _testContext.QueriedEntities.AddRange(dbConnection.Query<SimpleBenchmarkEntity>(_selectAllSql));
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Dapper")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingDapper()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
-            string sql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {tableName} where {nameof(SimpleBenchmarkEntity.Id)}=@Id";
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
-                _testContext.QueriedEntities.AddRange(
-                    dbConnection.Query<SimpleBenchmarkEntity>(
-                        sql,
-                        new { Id = entity.Id }));
+                _testContext.QueriedEntities.AddRange(dbConnection.Query<SimpleBenchmarkEntity>(_selectByIdSql,new { Id = entity.Id }));
             }
         }
 
@@ -68,16 +68,13 @@
         public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingDapper()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
             var entityIndex = _testContext.InsertedEntities.Count;
-            string sql = $"UPDATE {tableName} SET {nameof(SimpleBenchmarkEntity.FirstName)}=@{nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}=@{nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}=@{nameof(SimpleBenchmarkEntity.DateOfBirth)}  WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
                 var newEntity = this.GenerateSimpleBenchmarkEntity(entityIndex++);
                 newEntity.Id = entity.Id;
-
-                Assert.AreEqual(dbConnection.Execute(sql,newEntity),1);
+                dbConnection.Execute(_updateSql,newEntity);
 
                 _testContext.UpdatedEntities.Add(newEntity);
             }
@@ -87,12 +84,10 @@
         public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingDapper()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
-            string sql = $"DELETE FROM {tableName} WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
-                Assert.AreEqual(dbConnection.Execute(sql, entity),1);
+                dbConnection.Execute(_deleteByIdSql, entity);
             }
         }
     }

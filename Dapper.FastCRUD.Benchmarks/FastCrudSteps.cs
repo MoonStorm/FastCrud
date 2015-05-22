@@ -6,6 +6,7 @@
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
+    using FastCrud = global::Dapper.DapperExtensions;
 
     [Binding]
     public class FastCrudTests : EntityGenerationSteps
@@ -26,7 +27,7 @@
             {
                 var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
 
-                dbConnection.Insert(generatedEntity, commandTimeout: (TimeSpan?)null);
+                FastCrud.Insert(dbConnection, generatedEntity);
                 // the entity already has the associated id set
 
                 Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
@@ -37,7 +38,8 @@
         [Then(@"I should have (.*) benchmark entities in the database")]
         public void ThenIShouldHaveSingleIntKeyEntitiesInTheDatabase(int entitiesCount)
         {
-            var entities = _testContext.DatabaseConnection.Get<SimpleBenchmarkEntity>(commandTimeout: (TimeSpan?)null);
+            var dbConnection = _testContext.DatabaseConnection;
+            var entities =  FastCrud.Get<SimpleBenchmarkEntity>(dbConnection);
             Assert.AreEqual(entities.Count(), entitiesCount);
         }
 
@@ -45,17 +47,16 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingFastCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            _testContext.QueriedEntities.AddRange(dbConnection.Get<SimpleBenchmarkEntity>(commandTimeout: (TimeSpan?)null));
+            _testContext.QueriedEntities.AddRange(FastCrud.Get<SimpleBenchmarkEntity>(dbConnection));
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Fast Crud")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingFastCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var tableName = _testContext.DatabaseConnection.GetTableName<SimpleBenchmarkEntity>();
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
-                _testContext.QueriedEntities.Add(dbConnection.Get<SimpleBenchmarkEntity>(new SimpleBenchmarkEntity() {Id = entity.Id}));
+                _testContext.QueriedEntities.Add(FastCrud.Get<SimpleBenchmarkEntity>(dbConnection, new SimpleBenchmarkEntity() {Id = entity.Id}));
             }
         }
 
@@ -69,7 +70,7 @@
             {
                 var newEntity = this.GenerateSimpleBenchmarkEntity(entityIndex++);
                 newEntity.Id = entity.Id;
-                Assert.IsTrue(dbConnection.Update(newEntity));
+                FastCrud.Update(dbConnection, newEntity);
                 _testContext.UpdatedEntities.Add(newEntity);
             }
         }
@@ -81,7 +82,7 @@
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
-                Assert.IsTrue(DapperExtensions.Delete(dbConnection, entity));
+                FastCrud.Delete(dbConnection, entity);
             }
         }
     }
