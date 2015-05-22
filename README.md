@@ -1,4 +1,4 @@
-The fastest micro-orm type extension for Dapper.
+The fastest micro-orm extension for Dapper.
 
 For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
 
