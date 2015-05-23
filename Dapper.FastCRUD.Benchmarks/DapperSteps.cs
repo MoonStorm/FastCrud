@@ -16,7 +16,7 @@
         private DatabaseTestContext _testContext;
 
         private const string _tableName = "SimpleBenchmarkEntities";
-        private string _insertSql = $"INSERT INTO {_tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SimpleBenchmarkEntity.Id)} VALUES (@FirstName, @LastName, @BirthDate)";
+        private string _insertSql = $"INSERT INTO {_tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SimpleBenchmarkEntity.Id)} VALUES (@FirstName, @LastName, @DateOfBirth)";
         private string _selectAllSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName}";
         private string _selectByIdSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName} where {nameof(SimpleBenchmarkEntity.Id)}=@Id";
         private string _updateSql = $"UPDATE {_tableName} SET {nameof(SimpleBenchmarkEntity.FirstName)}=@{nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}=@{nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}=@{nameof(SimpleBenchmarkEntity.DateOfBirth)}  WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
@@ -38,7 +38,7 @@
                 {
                     sqlInsertCommand.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = generatedEntity.FirstName });
                     sqlInsertCommand.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = generatedEntity.LastName });
-                    sqlInsertCommand.Parameters.Add(new SqlParameter("@BirthDate", SqlDbType.DateTime) { Value = generatedEntity.DateOfBirth });
+                    sqlInsertCommand.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = generatedEntity.DateOfBirth });
                     generatedEntity.Id = (int)sqlInsertCommand.ExecuteScalar();
                 }
 
@@ -55,14 +55,7 @@
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
                 var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
-
-                generatedEntity.Id = dbConnection.ExecuteScalar<int>(_insertSql,
-                    new {
-                            FirstName = generatedEntity.FirstName,
-                            LastName = generatedEntity.LastName,
-                            BirthDate = generatedEntity.DateOfBirth
-                        });
-
+                generatedEntity.Id = dbConnection.ExecuteScalar<int>(_insertSql, generatedEntity);
                 Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
                 _testContext.InsertedEntities.Add(generatedEntity);
             }
@@ -97,7 +90,6 @@
                 var newEntity = this.GenerateSimpleBenchmarkEntity(entityIndex++);
                 newEntity.Id = entity.Id;
                 dbConnection.Execute(_updateSql,newEntity);
-
                 _testContext.UpdatedEntities.Add(newEntity);
             }
         }
@@ -109,7 +101,7 @@
 
             foreach (var entity in _testContext.InsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
-                dbConnection.Execute(_deleteByIdSql, entity);
+                dbConnection.Execute(_deleteByIdSql, new {Id=entity.Id});
             }
         }
     }

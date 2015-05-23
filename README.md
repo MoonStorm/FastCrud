@@ -80,36 +80,33 @@ Without taking this away from you, Dapper.FastCRUD helps by giving you the found
 Let's have a look at how it performs against other similar libraries out there (``Dapper.SimpleCRUD v1.8.7``, ``DapperExtensions v1.4.4 ``).
 
 ##### Automatic Benchmark Report (Last Run: Friday, May 22, 2015)
-|   |  Operation | Count |Time (ms) |
-------------|------------|--------------|-----------
-Dapper | update | 20000 | 7,406.61 
-Fast Crud | update | 20000 | 7,388.05 
-Dapper Extensions | update | 20000 | 10,110.19 
-Simple Crud | update | 20000 | 14,007.36 
-Dapper | select by id | 20000 | 3,022.25 
-Fast Crud | select by id | 20000 | 3,608.53 
-Dapper Extensions | select by id | 20000 | 6,129.52 
-Simple Crud | select by id | 20000 | 9,572.73 
-Dapper | delete | 20000 | 6,069.14 
-Fast Crud | delete | 20000 | 6,750.90 
-Dapper Extensions | delete | 20000 | 7,986.23 
-Simple Crud | delete | 20000 | 10,993.32 
-Dapper | insert | 20000 | 7,533.32 
-Fast Crud | insert | 20000 | 8,160.50 
-Dapper Extensions | insert | 20000 | 8,605.20 
-Simple Crud | insert | 20000 | 12,064.94 
-Dapper | select all - no warmup | 1 | 57.20 
-Fast Crud | select all - no warmup | 1 | 108.42 
-Dapper Extensions | select all - no warmup | 1 | 105.92 
-Simple Crud | select all - no warmup | 1 | 821.56 
-Dapper | select all - with warmup | 1 | 52.84 
-Fast Crud | select all - with warmup | 1 | 47.33 
-Dapper Extensions | select all - with warmup | 1 | 68.30 
-Simple Crud | select all - with warmup | 1 | 94.88 
+|           |  Operation | Count |Time (ms) | Time/op (μs) |
+------------|------------|-------|----------|--------------
+Dapper | update | 20000 | 4,661.49 | 233.07  
+Fast Crud | update | 20000 | 6,615.83 | 330.79  
+Dapper Extensions | update | 20000 | 9,403.26 | 470.16  
+Simple Crud | update | 20000 | 12,440.48 | 622.02  
+Dapper | select by id | 20000 | 3,236.20 | 161.81  
+Fast Crud | select by id | 20000 | 3,206.13 | 160.31  
+Dapper Extensions | select by id | 20000 | 4,942.36 | 247.12  
+Simple Crud | select by id | 20000 | 8,876.17 | 443.81  
+Dapper | delete | 20000 | 5,449.36 | 272.47  
+Fast Crud | delete | 20000 | 5,877.00 | 293.85  
+Dapper Extensions | delete | 20000 | 7,576.21 | 378.81  
+Simple Crud | delete | 20000 | 10,358.85 | 517.94  
+Dapper | insert | 20000 | 6,849.83 | 342.49  
+Fast Crud | insert | 20000 | 7,530.56 | 376.53  
+Dapper Extensions | insert | 20000 | 9,614.40 | 480.72  
+Simple Crud | insert | 20000 | 13,653.25 | 682.66  
+Dapper | select all | 3 | 183.37 | 61,123.67  
+Fast Crud | select all | 3 | 198.23 | 66,078.20  
+Dapper Extensions | select all | 3 | 247.01 | 82,337.67  
+Simple Crud | select all | 3 | 1,086.00 | 362,000.03  
 
-Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run and the ``auto-create statistics`` feature of the db is turned off.
-Database growth and other factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records. 
-Environment details: Windows 7, SQL Server 2012 SP2 Developer Edition, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD
+
+Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run, data file is pre-allocated, and the statistics are turned off.
+External factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records. 
+Environment details: Windows 7, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD
 
 ##### Install via NuGet and Enjoy !
 

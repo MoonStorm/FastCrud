@@ -10,46 +10,50 @@ Scenario Outline: Insert Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
+	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb   | benchmark entities | 20000        | Dapper            |
 
-Scenario Outline: Batch Select No Filter No Warmup Benchmark
+#Scenario Outline: Batch Select No Filter No Warmup Benchmark
+#	Given I have initialized a <database type> database
+#	When I insert <entity count> <entity type> using ADO .NET
+#	And I refresh the database connection
+#	And I start the stopwatch
+#	And I select all the <entity type> using <micro orm>
+#	And I stop the stopwatch
+#	And I report the stopwatch value for <micro orm> finished processing 1 operations of type select all - no warmup
+#	Then I should have queried <entity count> entities
+#	And the queried entities should be the same as the ones I inserted
+#	And I cleanup the <database type> database
+#	Examples: 
+#	| database type | entity type        | entity count | micro orm         |
+#	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+#	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+#	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+#	| LocalDb   | benchmark entities | 20000        | Dapper            |
+
+Scenario Outline: Batch Select No Filter
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> using ADO .NET
 	And I refresh the database connection
 	And I start the stopwatch
 	And I select all the <entity type> using <micro orm>
-	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm> finished processing 1 operations of type select all - no warmup
-	Then I should have queried <entity count> entities
-	And the queried entities should be the same as the ones I inserted
-	And I cleanup the <database type> database
-	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
-
-Scenario Outline: Batch Select No Filter With Warmup Benchmark
-	Given I have initialized a <database type> database
-	When I insert <entity count> <entity type> using <micro orm>
-	And I refresh the database connection
-	And I start the stopwatch
+	And I clear all the queried entities
+	And I select all the <entity type> using <micro orm>
+	And I clear all the queried entities
 	And I select all the <entity type> using <micro orm>
 	And I stop the stopwatch
-	And I report the stopwatch value for <micro orm> finished processing 1 operations of type select all - with warmup
+	And I report the stopwatch value for <micro orm> finished processing 3 operations of type select all
 	Then I should have queried <entity count> entities
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
+	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb   | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Delete Benchmark
 	Given I have initialized a <database type> database
@@ -63,10 +67,10 @@ Scenario Outline: Single Delete Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
+	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb   | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Select Id Filter Benchmark
 	Given I have initialized a <database type> database
@@ -81,10 +85,10 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
+	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb   | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
@@ -99,7 +103,7 @@ Scenario Outline: Single Update Benchmark
 	Then I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| MsSqlServer   | benchmark entities | 20000        | Simple Crud       |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper Extensions |
-	| MsSqlServer   | benchmark entities | 20000        | Fast Crud         |
-	| MsSqlServer   | benchmark entities | 20000        | Dapper            |
+	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb   | benchmark entities | 20000        | Dapper            |

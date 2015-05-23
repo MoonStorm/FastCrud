@@ -97,7 +97,7 @@
         }
 
         [When(@"I report the stopwatch value for (.*) finished processing (.*) operations of type (.*)")]
-        public void WhenIReportTheStopwatchValueFor(string ormType, int entityCount, string operation)
+        public void WhenIReportTheStopwatchValueFor(string ormType, int opCount, string operation)
         {
             Trace.WriteLine($"Stopwatch reported: {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} milliseconds for {ormType}");
 
@@ -105,8 +105,8 @@
             var docsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../README.MD");
             var docsContents = File.ReadAllText(docsPath);
 
-            var reportTitle = $"{ormType} | {operation} | {entityCount} |";
-            var report = $"{reportTitle} {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} {Environment.NewLine}";
+            var reportTitle = $"{ormType} | {operation} | {opCount} |";
+            var report = $"{reportTitle} {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} | {_testContext.Stopwatch.Elapsed.TotalMilliseconds*1000/opCount:0,0.00}  {Environment.NewLine}";
 
             var benchmarkHeaderRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report)[^{Environment.NewLine}]*", RegexOptions.Singleline);
             var emptySpaceInsertRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report(.*?{Environment.NewLine}){{3,3}})\s*?", RegexOptions.Singleline);
@@ -145,8 +145,14 @@
             CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.InsertedEntities);
         }
 
+        [When(@"I clear all the queried entities")]
+        public void WhenIClearAllTheQueriedEntities()
+        {
+            _testContext.QueriedEntities.Clear();
+        }
+
         [When(@"I clear all the inserted entities")]
-        public void WhenIClearAllTheEntities()
+        public void WhenIClearAllTheInsertedEntities()
         {
             _testContext.InsertedEntities.Clear();
         }
@@ -173,7 +179,8 @@
 
             using (var command = _testContext.DatabaseConnection.CreateCommand())
             {
-                command.CommandText = $@"CREATE TABLE Workstations (
+                command.CommandText =
+                    $@"CREATE TABLE Workstations (
 	                        WorkstationId integer primary key AUTOINCREMENT,
 	                        Name nvarchar(50) NULL,
                             AccessLevel int NOT NULL DEFAULT(1)
@@ -181,6 +188,19 @@
 
                 command.ExecuteNonQuery();
             }
+
+            ////using (var command = _testContext.DatabaseConnection.CreateCommand())
+            ////{
+            ////    command.CommandText =
+            ////        $@"CREATE TABLE SimpleBenchmarkEntities(
+	           ////         Id integer primary key AUTOINCREMENT,
+            ////            FirstName nvarchar(50) NULL,
+	           ////         LastName  nvarchar(50) NOT NULL,
+            ////            DateOfBirth datetime NULL
+            ////        ";
+
+            ////    command.ExecuteNonQuery();
+            ////}
 
             using (var command = _testContext.DatabaseConnection.CreateCommand())
             {
@@ -359,8 +379,10 @@
                 var server = new Server(new ServerConnection(dataConnection));
                 var database = new Database(server, DatabaseName);
                 database.Create();
-
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_CREATE_STATISTICS OFF"); // for benchmarking purposes
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_UPDATE_STATISTICS OFF"); // for benchmarking purposes
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} MODIFY FILE(NAME=[{DatabaseName}], SIZE=50MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY SIMPLE"); // for benchmarking purposes                
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
@@ -418,8 +440,8 @@
 
                 ////var database = serverManagement.Databases[MsSqlDatabaseName];
                 //////database.ExecuteNonQuery(@"CHECKPOINT;");
-                database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
-                database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
+                ////database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
+                ////database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
             }
 
             _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName}");
