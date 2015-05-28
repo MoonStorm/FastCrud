@@ -56,8 +56,7 @@ By default the script looks into the ``app.config`` file for a connection string
 When this is all done, open up the ``*Config.tt`` file and save it. Alternatively right click on the file and click on ``Run Custom Tool``. Your entities will be generated.
 
 #### Rules
-To understand the logic behind the CRUD operations, let's have a look at an entity ``Employee``, produced by the T4 template.
-
+To understand the logic behind the CRUD operations, let's have a look at an entity ``Employee``, produced by the T4 template. The same rules apply for code first entities with mappings set at runtime.
 ```
     /// <summary>
     /// A class which represents the Employee table.
