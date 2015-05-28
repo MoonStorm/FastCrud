@@ -23,7 +23,7 @@ Code first entities are also supported which can either be decorated with attrib
 - dbConnection.Get(new Entity() {Id = 10});
 - dbConnection.Update(updatedEntity);
 - dbConnection.Delete(entity)
-- dbConnection.Search<Entity>(
+- dbConnection.Find<Entity>(
         whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam", 
         orderClause:$"{nameof(Entity.LastName)} DESC", 
 		skipRowsCount:10, limitRowsCount:20,
@@ -90,7 +90,20 @@ In case you have primary keys and other fields that are not database generated, 
 #### Multi-Mappings
 This is a unique concept that helps in data migration accross multiple types of databases, partial updates, and so much more.
 Every entity has a default mapping attached, which informs FastCrud about how to construct the SQL queries. This default mapping can be set or queried via ``OrmConfiguration.SetDefaultEntityMapping`` and ``OrmConfiguration.GetDefaultEntityMapping``. 
+
 Alternatively you can have other mappings tweaked for the same entities, which can be passed to any of the CRUD methods. These mappings should be built once and reused, and you can do so by either cloning an existing instance or by creating one from scratch.
+```
+    var partialUpdateMapping = OrmConfiguration
+        .GetDefaultEntityMapping<Employee>()
+        .Clone()
+        .UpdatePropertiesExcluding(prop=>prop.IsExcludedFromUpdates=true, nameof(Employee.LastName));
+    databaseConnection.Update(
+        new Employee { 
+            Id=id, 
+            LastName="The only field that is going to get updated"
+        }, 
+        entityMappingOverride:customMapping);
+```
 
 #### Manual Sql Constructs
 ``dbConnection.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
