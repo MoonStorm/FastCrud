@@ -13,7 +13,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
 - A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations. 
-Existing POCO entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
+Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 #### Usage:
 - using Dapper.FastCrud
@@ -30,9 +30,16 @@ Existing POCO entities are also supported which can either be decorated with att
         queryParameters: new {FirstNameParam: "John"});
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 
-#### POCO
-You can provide information about the entities that are going to be used in DB operations, without decorating them with attributes, using ``OrmConfiguration.SetDefaultEntityMapping``.
-Alternatively you can let the library create the default mappings, which can then be queried via ``OrmConfiguration.GetDefaultEntityMapping``, tweaked and set back again as defaults or for multi-mapping purposes.
+#### POCOs
+You can provide information about the entities that are going to be used in DB operations, without decorating them with attributes, using ``OrmConfiguration.RegisterEntity`` or  ``OrmConfiguration.SetDefaultEntityMapping``.
+```
+OrmConfiguration.RegisterEntity<Building>()
+                .SetTableName("Buildings")
+                .SetProperty(nameof(Building.BuildingId), PropertyMappingOptions.KeyProperty)
+                .SetProperty(nameof(Building.Name));
+
+```
+Alternatively you can let the library create the default mappings, which can then be queried via ``OrmConfiguration.GetDefaultEntityMapping``, tweaked and set back again as defaults or for multi-mapping purposes. 
 
 
 #### Entity Generation

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$-beta</version>
+    <version>$version$-beta1</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -29,7 +29,7 @@ Features:
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
 - A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations.
-Existing POCO entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
+Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 Examples of usage:
 -------------------
@@ -47,12 +47,20 @@ Examples of usage:
 
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 More details and benchmarks are available on the project site.
-
     </description>
     <releaseNotes>
+Version 2.0 introduced the following breaking changes:
+- All the extensions were moved to Dapper.FastCrud namespace to avoid clashes with other extensions.
+- Configuration was moved to the static class OrmConfiguration.
+- Find was deprecated in favor of Search.
+
+The following enhancements were added in version 2.0:
+- Runtime mappings for code first entities.
+- Simultaneous multiple mappings per entity type.
+- Rudimentary SQL builder with alias support.
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
-    <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql</tags>
+    <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
     </frameworkAssemblies>

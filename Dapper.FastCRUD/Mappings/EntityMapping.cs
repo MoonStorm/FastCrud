@@ -170,7 +170,7 @@
         /// <param name="databaseColumnName">Optional database column name override.</param>
         public EntityMapping<TEntity> SetProperty<TProperty>(
             Expression<Func<TEntity, TProperty>> property,
-            PropertyMappingOptions options,
+            PropertyMappingOptions options = PropertyMappingOptions.None,
             string databaseColumnName = null)
         {
             this.ValidateState();
@@ -316,7 +316,7 @@
         /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
         /// <param name="options">Column options</param>
         /// <param name="databaseColumnName">Optional database column name override.</param>
-        public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
+        public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options=PropertyMappingOptions.None, string databaseColumnName = null)
         {
             this.ValidateState();
 

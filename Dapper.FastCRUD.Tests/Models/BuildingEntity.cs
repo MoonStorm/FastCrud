@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Dapper.FastCrud.Tests.Models
 {
-    public partial class Building
+    public class Building
     {
+        public int BuildingId { get; set; }
+
+        public string Name { get; set; }
+
         protected bool Equals(Building other)
         {
             return this.BuildingId == other.BuildingId && string.Equals(this.Name, other.Name);

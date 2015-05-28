@@ -29,11 +29,20 @@
         }
 
         /// <summary>
+        /// Registers a new entity. Please continue setting up property mappings and other entity options with the returned default entity mapping instance.
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        public static EntityMapping<TEntity> RegisterEntity<TEntity>()
+        {
+            return SetDefaultEntityMapping(new EntityMapping<TEntity>());
+        }
+
+        /// <summary>
         /// Sets the default entity type mapping for the entity type.
         /// This must be called before any query operations were made on the entity.
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        public static void SetDefaultEntityMapping<TEntity>(EntityMapping<TEntity> mappings)
+        public static EntityMapping<TEntity> SetDefaultEntityMapping<TEntity>(EntityMapping<TEntity> mappings)
         {
             if (mappings == null)
             {
@@ -46,6 +55,7 @@
             }
 
             GetEntityDescriptor<TEntity>().DefaultEntityMapping = mappings;
+            return mappings;
         }
 
         /// <summary>
