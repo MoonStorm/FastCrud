@@ -98,11 +98,28 @@
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="entityToInsert"></param>
-        /// <param name="transaction"></param>
-        /// <param name="commandTimeout"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
         public static void Insert<T>(this IDbConnection connection, T entityToInsert, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {
             GetEntityDescriptor<T>().SingleInsertOperation.Execute(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+        }
+
+        /// <summary>
+        /// Updates a record in the database.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="entityToUpdate"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="properties">
+        /// List of properties to include in the update. (e.g. $"{nameof(User.Name)}", "${nameof(User.IsLoggedIn}")
+        /// Everything else will be ignored. 
+        /// </param>
+        /// <returns>True if the item was updated.</returns>
+        public static bool UpdatePartial<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null, params FormattableString[] properties)
+        {
+            return GetEntityDescriptor<T>().SingleUpdateOperation.Execute(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
         }
 
 
@@ -111,10 +128,14 @@
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="entityToUpdate"></param>
-        /// <param name="transaction"></param>
-        /// <param name="commandTimeout"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="updatePropertyRestrictions">
+        /// List of properties to include in the update. (e.g. $"{nameof(User.Name)}", "${nameof(User.IsLoggedIn}")
+        /// Everything else will be ignored. 
+        /// </param>
         /// <returns>True if the item was updated.</returns>
-        public static bool Update<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        public static bool Update<T>(this IDbConnection connection, T entityToUpdate, IDbTransaction transaction = null, TimeSpan? commandTimeout = null, params FormattableString[] updatePropertyRestrictions)
         {
             return GetEntityDescriptor<T>().SingleUpdateOperation.Execute(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
         }
@@ -125,8 +146,8 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
         /// <param name="entityToDelete"></param>
-        /// <param name="transaction"></param>
-        /// <param name="commandTimeout"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
         /// <returns>True if the entity was found and successfully deleted.</returns>
         public static bool Delete<T>(this IDbConnection connection, T entityToDelete, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
         {

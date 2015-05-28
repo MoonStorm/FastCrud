@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dapper.FastCrud.Providers
+namespace Dapper.FastCrud
 {
-    internal interface IOperationDescriptor<T>
+    public interface ISqlBuilder
     {
     }
 }
