@@ -29,6 +29,7 @@ Features:
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
 - A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations.
+The installation package includes a sample config file SampleModelGeneratorConfig.tt which you can rename and tweak at will. 
 Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 Examples of usage:
@@ -39,7 +40,7 @@ Examples of usage:
 - dbConnection.Get(new Entity() {Id = 10});
 - dbConnection.Update(updatedEntity);
 - dbConnection.Delete(entity)
-- dbConnection.Search&lt;Entity&gt;(
+- dbConnection.Find&lt;Entity&gt;(
       whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam",
       orderClause:$"{nameof(Entity.LastName)} DESC",
       skipRowsCount:10, limitRowsCount:20,
@@ -52,7 +53,6 @@ More details and benchmarks are available on the project site.
 Version 2.0 introduced the following breaking changes:
 - All the extensions were moved to Dapper.FastCrud namespace to avoid clashes with other extensions.
 - Configuration was moved to the static class OrmConfiguration.
-- Find was deprecated in favor of Search.
 
 The following enhancements were added in version 2.0:
 - Runtime mappings for code first entities.
