@@ -110,7 +110,7 @@ Alternatively you can have other mappings tweaked for the same entities, which c
 
 #### Speed
 Most of us love Dapper for its speed. 
-Without taking this away from you, Dapper.FastCRUD helps by giving you type safety and can even be used as the foundation of your DAL repositories.
+Without taking this away from you, Dapper.FastCRUD helps by giving you type safety and can even be used as foundation for  your DAL repositories.
 Let's have a look at how it performs against other similar libraries out there (``Dapper.SimpleCRUD v1.8.7``, ``DapperExtensions v1.4.4 ``).
 
 ##### Automatic Benchmark Report (Last Run: Thursday, May 28, 2015)
