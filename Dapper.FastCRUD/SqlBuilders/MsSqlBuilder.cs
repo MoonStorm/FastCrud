@@ -9,7 +9,7 @@ namespace Dapper.FastCrud.SqlBuilders
     using System.Globalization;
     using Dapper.FastCrud.Mappings;
 
-    internal class MsStatementSqlBuilder:GenericStatementSqlBuilder
+    internal class MsStatementSqlBuilder : GenericStatementSqlBuilder
     {
         public MsStatementSqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, true, "[", "]", "[", "]")
@@ -19,9 +19,9 @@ namespace Dapper.FastCrud.SqlBuilders
         public override string ConstructFullInsertStatement()
         {
             string outputQuery;
-            if (KeyDatabaseGeneratedProperties.Length > 0)
+            if (DatabaseGeneratedProperties.Length > 0)
             {
-                var outputColumns = string.Join(",", KeyDatabaseGeneratedProperties.Select(propInfo => $"inserted.{propInfo.PropertyName}"));
+                var outputColumns = string.Join(",", DatabaseGeneratedProperties.Select(propInfo => $"inserted.{propInfo.PropertyName}"));
                 outputQuery = $"OUTPUT {outputColumns}";
             }
             else

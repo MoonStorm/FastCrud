@@ -7,7 +7,7 @@
 
     internal interface ISqlStatements
     {
-        IStatementSqlBuilder StatementSqlBuilder { get; }
+        ISqlBuilder SqlBuilder { get; }
     }
 
     internal interface ISqlStatements<TEntity>: ISqlStatements
@@ -16,14 +16,14 @@
 
         IEnumerable<TEntity> BatchSelect(
             IDbConnection connection,
-            FormattableString whereClause,
-            FormattableString orderClause,
-            int? skipRowsCount,
-            int? limitRowsCount,
-            object queryParameters,
-            bool streamResults,
-            IDbTransaction transaction,
-            TimeSpan? commandTimeout);
+            FormattableString whereClause = null,
+            FormattableString orderClause = null,
+            int? skipRowsCount = null,
+            int? limitRowsCount = null,
+            object queryParameters = null,
+            bool streamResults = false,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null);
 
         bool SingleDelete(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
 

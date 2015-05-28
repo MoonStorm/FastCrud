@@ -9,7 +9,7 @@
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
-        private readonly IStatementSqlBuilder _statementSqlBuilder;
+        private readonly IStatementSqlBuilder _sqlBuilder;
         private readonly string _singleInsertSql;
         private readonly string _singleUpdateSql;
         private readonly string _singleDeleteSql;
@@ -18,13 +18,21 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public GenericSqlStatements(IStatementSqlBuilder statementSqlBuilder)
+        public GenericSqlStatements(IStatementSqlBuilder sqlBuilder)
         {
-            _statementSqlBuilder = statementSqlBuilder;
-            _singleInsertSql = statementSqlBuilder.ConstructFullInsertStatement();
-            _singleUpdateSql = statementSqlBuilder.ConstructFullUpdateStatement();
-            _singleDeleteSql = statementSqlBuilder.ConstructFullDeleteStatement();
-            _singleSelectSql = statementSqlBuilder.ConstructFullSingleSelectStatement();
+            _sqlBuilder = sqlBuilder;
+            _singleInsertSql = sqlBuilder.ConstructFullInsertStatement();
+            _singleUpdateSql = sqlBuilder.ConstructFullUpdateStatement();
+            _singleDeleteSql = sqlBuilder.ConstructFullDeleteStatement();
+            _singleSelectSql = sqlBuilder.ConstructFullSingleSelectStatement();
+        }
+
+        public ISqlBuilder SqlBuilder
+        {
+            get
+            {
+                return this._sqlBuilder;
+            }
         }
 
         public void SingleInsert(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
@@ -34,7 +42,7 @@
             if (insertedEntity != null)
             {
                 // copy all the key properties back onto our entity
-                foreach (var propMapping in _statementSqlBuilder.KeyDatabaseGeneratedProperties)
+                foreach (var propMapping in _sqlBuilder.DatabaseGeneratedProperties)
                 {
                     var propDescriptor = propMapping.Descriptor;
                     var updatedKeyValue = propDescriptor.GetValue(insertedEntity);
@@ -55,7 +63,7 @@
             TimeSpan? commandTimeout)
         {
             return connection.Query<TEntity>(
-                _statementSqlBuilder.ConstructFullBatchSelectStatement(
+                _sqlBuilder.ConstructFullBatchSelectStatement(
                     whereClause:whereClause,
                     orderClause:orderClause,
                     skipRowsCount:skipRowsCount,

@@ -24,10 +24,10 @@ namespace Dapper.FastCrud.SqlBuilders
         {
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ";
 
-            if (this.KeyDatabaseGeneratedProperties.Length > 0)
+            if (this.DatabaseGeneratedProperties.Length > 0)
             {
                 // we have an identity column, so we can fetch the rest of them
-                if (this.KeyDatabaseGeneratedProperties.Length == 1)
+                if (this.KeyDatabaseGeneratedProperties.Length == 1 && this.DatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
                     sql += $"SELECT last_insert_rowid() as {this.KeyDatabaseGeneratedProperties[0].PropertyName}";
@@ -36,10 +36,10 @@ namespace Dapper.FastCrud.SqlBuilders
                 {
                     var databaseGeneratedColumnSelection = string.Join(
                         ",",
-                        this.KeyDatabaseGeneratedProperties.Select(
-                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
+                        this.DatabaseGeneratedProperties.Select(
+                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
                     sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.KeyDatabaseGeneratedProperties[0].DatabaseColumn}{ColumnEndDelimiter} = last_insert_rowid()";
+                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.KeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = last_insert_rowid()";
                 }
             }
             return sql;

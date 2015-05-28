@@ -5,7 +5,7 @@
     using System.Linq;
     using Dapper.FastCrud.Mappings;
 
-    internal class PostgreStatementSqlBuilder:GenericStatementSqlBuilder
+    internal class PostgreStatementSqlBuilder : GenericStatementSqlBuilder
     {
         public PostgreStatementSqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, true, string.Empty)
@@ -14,14 +14,14 @@
 
         public override string ConstructFullInsertStatement()
         {
-            string outputQuery = this.KeyDatabaseGeneratedProperties.Length > 0
+            string outputQuery = this.DatabaseGeneratedProperties.Length > 0
                          ? string.Format(
                              CultureInfo.InvariantCulture,
                              "RETURNING {0}",
                              string.Join(
                                  ",",
-                                 this.KeyDatabaseGeneratedProperties.Select(
-                                     propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter} AS {propInfo.PropertyName}")))
+                                 this.DatabaseGeneratedProperties.Select(
+                                     propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}")))
                          : string.Empty;
 
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}";

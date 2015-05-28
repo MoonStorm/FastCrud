@@ -172,7 +172,7 @@
 
         private void SetupSqLiteDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.SqLite;
+            OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
 
             _testContext.DatabaseConnection = new SQLiteConnection(connectionString);
             _testContext.DatabaseConnection.Open();
@@ -241,7 +241,7 @@
 
         private void SetupPostgreSqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.PostgreSql;
+            OrmConfiguration.DefaultDialect = SqlDialect.PostgreSql;
 
             using (var dataConnection = new NpgsqlConnection(connectionString))
             {
@@ -309,7 +309,7 @@
 
         private void SetupMySqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.MySql;
+            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
             using (var dataConnection = new MySqlConnection(connectionString))
             {
@@ -370,7 +370,7 @@
 
         private void SetupMsSqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.MsSql;
+            OrmConfiguration.DefaultDialect = SqlDialect.MsSql;
 
             using (var dataConnection = new SqlConnection(connectionString))
             {

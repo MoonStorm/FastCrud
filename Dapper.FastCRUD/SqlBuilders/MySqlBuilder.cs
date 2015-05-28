@@ -6,9 +6,9 @@
     using System.Text;
     using Dapper.FastCrud.Mappings;
 
-    internal class MyStatementSqlBuilder:GenericStatementSqlBuilder
+    internal class MySqlBuilder:GenericStatementSqlBuilder
     {
-        public MyStatementSqlBuilder(EntityMapping entityMapping)
+        public MySqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, false, "`")
         {
         }
@@ -20,7 +20,7 @@
             if (this.KeyDatabaseGeneratedProperties.Length > 0)
             {
                 // we have an identity column, so we can fetch the rest of them
-                if(this.KeyDatabaseGeneratedProperties.Length == 1)
+                if(this.KeyDatabaseGeneratedProperties.Length == 1 && this.DatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
                     sql += $"SELECT LAST_INSERT_ID() as {this.KeyDatabaseGeneratedProperties[0].PropertyName}";
@@ -29,10 +29,10 @@
                 {
                     var databaseGeneratedColumnSelection = string.Join(
                         ",",
-                        this.KeyDatabaseGeneratedProperties.Select(
-                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
+                        this.DatabaseGeneratedProperties.Select(
+                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
                     sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.KeyDatabaseGeneratedProperties[0].DatabaseColumn}{ColumnEndDelimiter} = LAST_INSERT_ID()";
+                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.KeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = LAST_INSERT_ID()";
                 }
             }
             return sql;

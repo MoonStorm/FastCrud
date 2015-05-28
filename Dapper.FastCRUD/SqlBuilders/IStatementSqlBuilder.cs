@@ -11,13 +11,7 @@
         PropertyMapping[] InsertProperties { get; }
         PropertyMapping[] UpdateProperties { get; }
         PropertyMapping[] KeyDatabaseGeneratedProperties { get; }
-
-        string GetTableName(string alias = null);
-        string ConstructKeysWhereClause(string alias = null);
-        string ConstructColumnEnumerationForSelect(string alias = null);
-        string ConstructColumnEnumerationForInsert();
-        string ConstructParamEnumerationForInsert();
-        string ConstructUpdateClause(string alias = null);
+        PropertyMapping[] DatabaseGeneratedProperties { get; }
 
         string ConstructFullSingleSelectStatement();
         string ConstructFullBatchSelectStatement(

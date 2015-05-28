@@ -30,9 +30,10 @@
 
             this.SelectProperties = this.EntityMapping.PropertyMappings.Select(propMapping => propMapping.Value).ToArray();
             this.KeyProperties = this.EntityMapping.PropertyMappings.Where(propMapping => propMapping.Value.IsKey).Select(propMapping => propMapping.Value).ToArray();
-            this.InsertProperties = this.UpdateProperties.Except(KeyDatabaseGeneratedProperties).ToArray();
-            this.UpdateProperties = this.SelectProperties.Except(KeyProperties).ToArray();
-            this.KeyDatabaseGeneratedProperties = this.KeyProperties.Where(propInfo => propInfo.IsDatabaseGenerated).ToArray();
+            this.DatabaseGeneratedProperties = this.SelectProperties.Where(propInfo => propInfo.IsDatabaseGenerated).ToArray();
+            this.KeyDatabaseGeneratedProperties = this.KeyProperties.Intersect(this.DatabaseGeneratedProperties).ToArray();
+            this.UpdateProperties = this.SelectProperties.Except(this.KeyProperties).Where(propInfo => !propInfo.IsExcludedFromUpdates).ToArray();
+            this.InsertProperties = this.SelectProperties.Except(this.DatabaseGeneratedProperties).ToArray();
         }
 
         public virtual string GetTableName(string alias = null)
@@ -52,7 +53,7 @@
             var sqlAlias = alias == null ? string.Empty : $"{alias}.";
             return string.Join(
                 " AND ",
-                KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter}=@{propInfo.PropertyName}"));
+                KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}=@{propInfo.PropertyName}"));
         }
 
         public virtual string ConstructColumnEnumerationForSelect(string alias = null)
@@ -63,18 +64,18 @@
                 SelectProperties.Select(
                     propInfo =>
                         {
-                            if (propInfo.DatabaseColumn != propInfo.PropertyName)
+                            if (propInfo.DatabaseColumnName != propInfo.PropertyName)
                             {
-                                return $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter} AS {propInfo.PropertyName}";
+                                return $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}";
                             }
 
-                            return $"{sqlAlias}{propInfo.DatabaseColumn}";
+                            return $"{sqlAlias}{propInfo.DatabaseColumnName}";
                         }));
         }
 
         public virtual string ConstructColumnEnumerationForInsert()
         {
-            return string.Join(",", InsertProperties.Select(propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter}"));
+            return string.Join(",", InsertProperties.Select(propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}"));
         }
 
         public virtual string ConstructParamEnumerationForInsert()
@@ -87,7 +88,7 @@
             var sqlAlias = alias == null ? string.Empty : $"{alias}.";
             return string.Join(
                 ",",
-                UpdateProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumn}{ColumnEndDelimiter}=@{propInfo.PropertyName}"));
+                UpdateProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}=@{propInfo.PropertyName}"));
         }
 
         public abstract string ConstructFullInsertStatement();
@@ -126,5 +127,6 @@
         public PropertyMapping[] InsertProperties { get; private set; }
         public PropertyMapping[] UpdateProperties { get; private set; }
         public PropertyMapping[] KeyDatabaseGeneratedProperties { get; private set; }
+        public PropertyMapping[] DatabaseGeneratedProperties { get; private set; }
     }
 }

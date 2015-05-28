@@ -6,7 +6,7 @@
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
-    using FastCrud = global::Dapper.DapperExtensions;
+    using FastCrud = global::Dapper.FastCrud.DapperExtensions;
 
     [Binding]
     public class FastCrudTests : EntityGenerationSteps

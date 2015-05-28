@@ -1,31 +1,138 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using System;
     using System.ComponentModel;
 
-    internal class PropertyMapping
+    /// <summary>
+    /// Reeturns mapping information held for a particular property.
+    /// </summary>
+    public class PropertyMapping
     {
-        private readonly PropertyMappingOptions _options;
+        private PropertyMappingOptions _options;
+        private readonly EntityMapping _entityMapping;
+        private string _databaseColumnName;
+        private int _order;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public PropertyMapping(PropertyMappingOptions options, PropertyDescriptor descriptor, string databaseColumn = null)
+        public PropertyMapping(EntityMapping entityMapping, int order,  PropertyMappingOptions options, PropertyDescriptor descriptor, string databaseColumn = null)
         {
+            _order = order;
+            _entityMapping = entityMapping;
             _options = options;
-            this.DatabaseColumn = databaseColumn??descriptor.Name;
+            _databaseColumnName = databaseColumn??descriptor.Name;
             this.Descriptor = descriptor;
         }
 
-        public bool IsKey => (_options & PropertyMappingOptions.KeyProperty) == PropertyMappingOptions.KeyProperty;
-        public bool IsDatabaseGenerated => (_options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty;
-        public bool IsExcludedFromUpdates => (_options & PropertyMappingOptions.ExcludedFromUpdates) == PropertyMappingOptions.ExcludedFromUpdates;
-        public string DatabaseColumn { get; private set; }
+        public bool IsKey
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.KeyProperty) == PropertyMappingOptions.KeyProperty;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                    _options |= PropertyMappingOptions.KeyProperty;
+                else
+                {
+                    _options&=~PropertyMappingOptions.KeyProperty;
+                }
+            }
+        }
+
+        public bool IsDatabaseGenerated
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.DatabaseGeneratedProperty;
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.DatabaseGeneratedProperty;
+                }
+            }
+        }
+
+        public bool IsExcludedFromUpdates
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.ExcludedFromUpdates) == PropertyMappingOptions.ExcludedFromUpdates;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.ExcludedFromUpdates;
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.ExcludedFromUpdates;
+                }
+            }
+        }
+
+        public int Order
+        {
+            get
+            {
+                return _order;
+            }
+        }
+
+        public string DatabaseColumnName
+        {
+            get
+            {
+                return _databaseColumnName;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(nameof(DatabaseColumnName));
+                }
+
+                _databaseColumnName = value;
+            }
+        }
+
         public PropertyDescriptor Descriptor { get; private set; }
         public string PropertyName => Descriptor.Name;
 
+        public PropertyMappingOptions Options
+        {
+            get
+            {
+                return _options;
+            }
+            set
+            {
+                this.ValidateState();
+
+                _options = value;
+            }
+        }
+
         protected bool Equals(PropertyMapping other)
         {
-            return this.PropertyName.Equals(other.PropertyName);
+            return this._entityMapping.Equals(other._entityMapping) && this.PropertyName.Equals(other.PropertyName);
         }
 
         /// <summary>
@@ -72,5 +179,14 @@
         {
             return !Equals(left, right);
         }
+
+        private void ValidateState()
+        {
+            if (_entityMapping.IsFrozen)
+            {
+                throw new InvalidOperationException("No further modifications are allowed for this entity mapping. Please clone the entity mapping instead.");
+            }
+        }
+
     }
 }
