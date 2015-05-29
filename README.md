@@ -43,7 +43,7 @@ Alternatively you can let the library create the default mappings, which can the
 
 
 #### Entity Generation
-Entity generation can be easily performed by adjusting your (``*Config.tt``) file. You'll need a LocalDb or an MsSql server that contains the schema. 
+Entity generation can be easily performed by adjusting your (``*Config.tt``) file. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet to update this file. You'll need a LocalDb or an MsSql server that contains the schema. 
 By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
 ```
 <?xml version="1.0" encoding="utf-8"?>
