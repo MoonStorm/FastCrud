@@ -5,9 +5,9 @@
     using System.Linq;
     using Dapper.FastCrud.Mappings;
 
-    internal class PostgreStatementSqlBuilder : GenericStatementSqlBuilder
+    internal class PostgreSqlBuilder : GenericStatementSqlBuilder
     {
-        public PostgreStatementSqlBuilder(EntityMapping entityMapping)
+        public PostgreSqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, true, string.Empty)
         {
         }

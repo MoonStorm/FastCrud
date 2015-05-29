@@ -50,13 +50,13 @@
                 switch (entityMapping.Dialect)
                 {
                     case SqlDialect.MsSql:
-                        sqlStatements = new GenericSqlStatements<TEntity>(new MsStatementSqlBuilder(entityMapping));
+                        sqlStatements = new GenericSqlStatements<TEntity>(new MsSqlBuilder(entityMapping));
                         break;
                     case SqlDialect.MySql:
                         sqlStatements = new GenericSqlStatements<TEntity>(new MySqlBuilder(entityMapping));
                         break;
                     case SqlDialect.PostgreSql:
-                        sqlStatements = new GenericSqlStatements<TEntity>(new PostgreStatementSqlBuilder(entityMapping));
+                        sqlStatements = new GenericSqlStatements<TEntity>(new PostgreSqlBuilder(entityMapping));
                         break;
                     case SqlDialect.SqLite:
                         sqlStatements = new GenericSqlStatements<TEntity>(new SqLiteBuilder(entityMapping));

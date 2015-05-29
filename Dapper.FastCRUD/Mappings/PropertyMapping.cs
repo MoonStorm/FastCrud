@@ -11,7 +11,7 @@
         private PropertyMappingOptions _options;
         private readonly EntityMapping _entityMapping;
         private string _databaseColumnName;
-        private int _order;
+        private readonly int _order;
 
         /// <summary>
         /// Default constructor.
@@ -25,6 +25,9 @@
             this.Descriptor = descriptor;
         }
 
+        /// <summary>
+        /// Gets or sets a flag indicating the property is mapped to a primary key.
+        /// </summary>
         public bool IsKey
         {
             get
@@ -44,6 +47,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets a flag indicating the property is mapped to a database generated field.
+        /// </summary>
         public bool IsDatabaseGenerated
         {
             get
@@ -65,6 +71,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets a flag that indicates the curent property will be excluded from updates.
+        /// </summary>
         public bool IsExcludedFromUpdates
         {
             get
@@ -86,6 +95,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets the currently assigned order.
+        /// </summary>
         public int Order
         {
             get
@@ -94,6 +106,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets the database column name.
+        /// </summary>
         public string DatabaseColumnName
         {
             get
@@ -113,9 +128,19 @@
             }
         }
 
+        /// <summary>
+        /// Gets the property descriptor of the property attached to the entity type.
+        /// </summary>
         public PropertyDescriptor Descriptor { get; private set; }
+
+        /// <summary>
+        /// Gets the property name.
+        /// </summary>
         public string PropertyName => Descriptor.Name;
 
+        /// <summary>
+        /// Gets or sets the full set of options.
+        /// </summary>
         public PropertyMappingOptions Options
         {
             get
@@ -128,6 +153,16 @@
 
                 _options = value;
             }
+        }
+
+        /// <summary>
+        /// Removes the current property mapping.
+        /// </summary>
+        public void Remove()
+        {
+            this.ValidateState();
+
+            _entityMapping.RemoveProperty(this.PropertyName);
         }
 
         protected bool Equals(PropertyMapping other)

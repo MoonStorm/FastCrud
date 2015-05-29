@@ -1,15 +1,9 @@
 ﻿namespace Dapper.FastCrud
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Data;
-    using System.Runtime.CompilerServices;
-    using System.Threading;
-    using Dapper.FastCrud;
     using Dapper.FastCrud.Mappings;
-    using Dapper.FastCrud.SqlStatements;
 
     /// <summary>
     /// Class for Dapper extensions
@@ -115,25 +109,6 @@
             EntityMapping<TEntity> entityMappingOverride = null)
         {
             OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleInsert(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
-        }
-
-        /// <summary>
-        /// Updates a record in the database.
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="entityToUpdate"></param>
-        /// <param name="transaction">Transaction to attach the query to.</param>
-        /// <param name="commandTimeout">The command timeout.</param>
-        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
-        /// <returns>True if the item was updated.</returns>
-        public static bool UpdatePartial<TEntity>(
-            this IDbConnection connection, 
-            TEntity entityToUpdate, 
-            IDbTransaction transaction = null, 
-            TimeSpan? commandTimeout = null, 
-            EntityMapping<TEntity> entityMappingOverride = null)
-        {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdate(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
         }
 
 

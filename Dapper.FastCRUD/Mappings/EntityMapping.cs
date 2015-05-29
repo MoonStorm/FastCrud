@@ -89,7 +89,7 @@
             }
         }
 
-        protected void RemoveProperty(string propertyName)
+        internal void RemoveProperty(string propertyName)
         {
             PropertyMappings.Remove(propertyName);
         }

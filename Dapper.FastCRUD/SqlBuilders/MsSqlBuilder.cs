@@ -9,9 +9,9 @@ namespace Dapper.FastCrud.SqlBuilders
     using System.Globalization;
     using Dapper.FastCrud.Mappings;
 
-    internal class MsStatementSqlBuilder : GenericStatementSqlBuilder
+    internal class MsSqlBuilder : GenericStatementSqlBuilder
     {
-        public MsStatementSqlBuilder(EntityMapping entityMapping)
+        public MsSqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, true, "[", "]", "[", "]")
         {
         }
