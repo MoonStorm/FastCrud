@@ -1,5 +1,7 @@
 The fastest micro-orm extension for Dapper.
 
+**Please switch to the BETA branch for documentation regarding pre-release versions of Dapper.FastCrud**
+
 For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
 
 The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
