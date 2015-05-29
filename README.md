@@ -8,7 +8,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
 - Entities having composite primary keys are supported
-- Multiple entity mappings are supported.
+- Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
