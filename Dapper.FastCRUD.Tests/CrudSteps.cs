@@ -16,6 +16,7 @@
         public CrudSteps(DatabaseTestContext testContext)
         {
             _testContext = testContext;
+            Assert.NotNull(OrmConfiguration.GetDefaultEntityMapping<Employee>());
         }
 
         [When(@"I insert (.*) building entities")]

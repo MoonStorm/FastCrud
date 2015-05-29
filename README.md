@@ -12,7 +12,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
-- A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations. 
+- A generic T4 template is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator. Entity domain partitioning and generation can be achieved via separate template configurations. 
 Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 #### Usage:

@@ -115,8 +115,8 @@
         /// <summary>
         /// Updates a record in the database.
         /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="entityToUpdate"></param>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="entityToUpdate">The entity you wish to update.</param>
         /// <param name="transaction">Transaction to attach the query to.</param>
         /// <param name="commandTimeout">The command timeout.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
@@ -134,9 +134,9 @@
         /// <summary>
         /// Deletes an entity by its primary keys.
         /// </summary>
-        /// <typeparam name="T">Entity Type</typeparam>
-        /// <param name="connection"></param>
-        /// <param name="entityToDelete"></param>
+        /// <typeparam name="TEntity">Entity Type</typeparam>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="entityToDelete">The entity you wish to remove.</param>
         /// <param name="transaction">Transaction to attach the query to.</param>
         /// <param name="commandTimeout">The command timeout.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
@@ -154,9 +154,11 @@
         /// <summary>
         /// Gets the table name for an entity type
         /// </summary>
-        public static ISqlBuilder GetSqlBuilder<TEntity>(this IDbConnection connection)
+        /// <param name="connection">Database connection.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        public static ISqlBuilder GetSqlBuilder<TEntity>(this IDbConnection connection, EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlBuilder<TEntity>();
+            return OrmConfiguration.GetSqlBuilder<TEntity>(entityMappingOverride);
         }
 
     }

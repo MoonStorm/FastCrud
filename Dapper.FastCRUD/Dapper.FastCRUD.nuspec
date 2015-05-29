@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$-beta2</version>
+    <version>$version$-beta3</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -28,8 +28,7 @@ Features:
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
-- A generic T4 template is also provided for convenience. Entity domain partitioning and generation can be achieved via separate template configurations.
-The installation package includes a sample config file SampleModelGeneratorConfig.tt which you can rename and tweak at will. 
+- A generic T4 template is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 Examples of usage:
@@ -53,6 +52,7 @@ More details and benchmarks are available on the project site.
 Version 2.0 introduced the following breaking changes:
 - All the extensions were moved to Dapper.FastCrud namespace to avoid clashes with other extensions.
 - Configuration was moved to the static class OrmConfiguration.
+- The T4 template was moved into a different package.
 
 The following enhancements were added in version 2.0:
 - Runtime mappings for code first entities.
@@ -62,14 +62,10 @@ The following enhancements were added in version 2.0:
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
     </frameworkAssemblies>
   </metadata>
   <files>
     <file src="bin\Release\v4.6\Dapper.FastCrud.Net46.dll" target="lib\net46" />
     <file src="bin\Release\v4.5\Dapper.FastCrud.dll" target="lib\net45" />
-    <file src="Package\GenericModelGenerator.tt" target="Content\Models" />
-    <file src="Package\SampleModelGeneratorConfig.tt" target="Content\Models" />
-    <file src="Package\install.ps1" target="Tools" />
   </files>
 </package>
