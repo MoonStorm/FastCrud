@@ -103,6 +103,28 @@ Alternatively you can have other mappings tweaked for the same entities, which c
         }, 
         entityMappingOverride:customMapping);
 ```
+In the previous example, only the ``LastName`` field will be updated. 
+
+You can also remove entire property mappings, which allows you to work with a subset of your pre-generated entity for any db operations, useful for large denormalized tables:
+```
+   var partialSetMapping =
+        OrmConfiguration.GetDefaultEntityMapping<CompanyInformation>()
+                        .RemoveAllPropertiesExcluding(
+                            nameof(CompanyInformation.Id),
+                            nameof(CompanyInformation.Email),
+                            nameof(CompanyInformation.Phone),
+                            nameof(CompanyInformation.Name));
+
+```
+This custom mapping override can then be passed to any CRUD methods, just be careful not to use it for inserts.
+
+You can also create a mapping that uses a different dialect, useful for migrating data from one database type to another.
+```
+    var destinationMapping = OrmConfiguration
+    	.GetDefaultEntityMapping<CompanyInformation>
+    	.SetDialect(SqlDialect.SqLite);
+```
+You can then pass this mapping to the insert method.
 
 #### Manual Sql Constructs
 ``dbConnection.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
