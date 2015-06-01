@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>Dapper.FastCrud.ModelGenerator</id>
+        <version>2.0.0</version>
+        <title>Dapper.FastCRUD.ModelGenerator</title>
+        <authors>MoonStorm</authors>
+        <owners>MoonStorm</owners>
+        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+        <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
+        <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+Entity generation for Dapper.FastCrud from a LocalDb or MsSqlServer.
+Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
+Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
+
+More details are available on the project site.
+</description>
+        <summary>Entity generation for Dapper.FastCrud</summary>
+        <releaseNotes></releaseNotes>
+        <copyright>Copyright 2015</copyright>
+        <tags>dapper fastcrud entity generator orm</tags>
+        <dependencies>
+        </dependencies>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework="" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="GenericModelGenerator.tt" target="Content\Models\GenericModelGenerator.tt" />
+        <file src="SampleModelGeneratorConfig.tt" target="Content\Models\SampleModelGeneratorConfig.tt" />
+        <file src="Install.ps1" target="Tools\Install.ps1" />
+    </files>
+</package>

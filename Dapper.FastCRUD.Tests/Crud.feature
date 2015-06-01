@@ -65,6 +65,18 @@ Scenario Outline: Update by primary keys
 	| SqLite        | building    | 1            |
 	| PostgreSql    | building    | 1            |
 
+Scenario Outline: Partial update
+	Given I have initialized a <database type> database
+	When I insert <entity count> <entity type> entities
+	And I partially update all the inserted <entity type> entities
+	And I query for all the <entity type> entities
+	Then the queried entities should be the same as the ones I updated
+	Examples: 
+	| database type | entity type | entity count |
+	| LocalDb       | employee    | 1            |
+	| MySql         | employee    | 1            |
+	| PostgreSql    | employee    | 1            |
+
 Scenario Outline: Delete by primary keys
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities

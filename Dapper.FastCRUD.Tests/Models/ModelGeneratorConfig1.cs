@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\src\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models
@@ -15,17 +15,6 @@ namespace Dapper.FastCrud.Tests.Models
 	using System.ComponentModel.DataAnnotations;
 	using System.ComponentModel.DataAnnotations.Schema;
 	using System.Collections.Generic;
-
-    /// <summary>
-    /// A class which represents the Buildings table.
-    /// </summary>
-	[Table("Buildings")]
-	public partial class Building
-	{
-		[Key]
-		public virtual int BuildingId { get; set; }
-		public virtual string Name { get; set; }
-	}
 
     /// <summary>
     /// A class which represents the SimpleBenchmarkEntities table.

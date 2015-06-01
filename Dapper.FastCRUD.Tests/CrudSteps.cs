@@ -3,6 +3,7 @@
     using System;
     using System.Data.SqlTypes;
     using System.Linq;
+    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -15,6 +16,7 @@
         public CrudSteps(DatabaseTestContext testContext)
         {
             _testContext = testContext;
+            Assert.NotNull(OrmConfiguration.GetDefaultEntityMapping<Employee>());
         }
 
         [When(@"I insert (.*) building entities")]
@@ -147,6 +149,56 @@
                                                                                                        EmployeeId = insertedEntity.EmployeeId
                                                                                                    }));
             }
+        }
+
+        [When(@"I partially update all the inserted employee entities")]
+        public void WhenIPartiallyUpdateAllTheInsertedEmployeeEntities()
+        {
+            // prepare a new mapping
+            var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>();
+            Assert.IsTrue(defaultMapping.IsFrozen);
+
+            var lastNamePropMapping = defaultMapping.GetProperty(employee => employee.LastName);
+            try
+            {
+                // updates are not possible when the mapping is frozen
+                defaultMapping.SetProperty(nameof(Employee.LastName), PropertyMappingOptions.ExcludedFromUpdates);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException)
+            {                
+            }
+
+            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop=>prop.IsExcludedFromUpdates=true, nameof(Employee.LastName));
+
+            foreach (var insertedEntity in _testContext.InsertedEntities.OfType<Employee>())
+            {
+                var partialUpdatedEntity = new Employee()
+                {
+                    UserId = insertedEntity.UserId,
+                    EmployeeId = insertedEntity.EmployeeId,
+                    BirthDate = new DateTime(2020, 03, 01),
+                    WorkstationId = 10 + insertedEntity.WorkstationId,
+                    FirstName = "Updated " + insertedEntity.FirstName,
+
+                    // all of the above should be excluded with the exception of this one
+                    LastName = "Updated " + insertedEntity.LastName
+                };
+                _testContext.UpdatedEntities.Add(new Employee()
+                                                     {
+                                                        UserId = insertedEntity.UserId,
+                                                        KeyPass = insertedEntity.KeyPass,
+                                                        EmployeeId = insertedEntity.EmployeeId,
+                                                        BirthDate = insertedEntity.BirthDate,
+                                                        WorkstationId = insertedEntity.WorkstationId,
+                                                        FirstName = insertedEntity.FirstName,
+
+                                                        // all of the above should be excluded with the difference of this one
+                                                        LastName = "Updated " + insertedEntity.LastName
+                                                    });
+                _testContext.DatabaseConnection.Update(partialUpdatedEntity, entityMappingOverride:customMapping);
+            }
+
         }
 
         [When(@"I update all the inserted employee entities")]

@@ -1,112 +1,77 @@
 ﻿namespace Dapper.FastCrud
 {
     using System;
-    using System.ComponentModel;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using Dapper.FastCrud.Providers;
+    using System.Threading;
+    using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.SqlBuilders;
+    using Dapper.FastCrud.SqlStatements;
 
-    /// <summary>
-    /// Class for Dapper extensions
-    /// </summary>
     internal class EntityDescriptor
     {
-    }
+        private IDictionary<EntityMapping, ISqlStatements> _registeredEntityMappings = new Dictionary<EntityMapping, ISqlStatements>();
 
-    internal abstract class EntityDescriptor<TEntity> : EntityDescriptor
-    {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        protected EntityDescriptor()
+        // this can be set by the developer, prior to making any sql statement calls
+        // alternatively it is set by us on first usage
+        private volatile EntityMapping _defaultEntityMapping = null;
+
+        public EntityMapping DefaultEntityMapping
         {
-            Type entityType = typeof (TEntity);
-            this.SelectPropertyDescriptors =
-                TypeDescriptor.GetProperties(entityType)
-                    .Cast<PropertyDescriptor>()
-                    .Where(
-                        p =>
-                            IsSimpleSqlType(p.PropertyType)
-                            && p.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit))
-                    .ToArray();
-            this.KeyPropertyDescriptors = this.SelectPropertyDescriptors.Where(propInfo => propInfo.Attributes.OfType<KeyAttribute>().Any()).ToArray();
-            this.TableDescriptor = TypeDescriptor.GetAttributes(entityType)
-                .OfType<TableAttribute>().SingleOrDefault() ?? new TableAttribute(entityType.Name);
-            this.DatabaseGeneratedIdentityPropertyDescriptors = this.SelectPropertyDescriptors
-                .Where(propInfo => propInfo.Attributes.OfType<DatabaseGeneratedAttribute>()
-                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
-                .ToArray();
-            this.DatabaseGeneratedPropertyDescriptors = this.SelectPropertyDescriptors
-                .Where(propInfo => propInfo.Attributes.OfType<DatabaseGeneratedAttribute>()
-                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Computed || dbGenerated.DatabaseGeneratedOption==DatabaseGeneratedOption.Identity))
-                .ToArray();
-
-            // everything can be updateable, with the exception of the primary keys
-            this.UpdatePropertyDescriptors = this.SelectPropertyDescriptors.Except(this.KeyPropertyDescriptors).ToArray();
-
-            // we consider properties that go into an insert only the ones that are not auto-generated 
-            this.InsertPropertyDescriptors = this.SelectPropertyDescriptors.Except(this.DatabaseGeneratedPropertyDescriptors).ToArray();
+            get
+            {
+                return _defaultEntityMapping;
+            }
+            set
+            {
+                _defaultEntityMapping = value;
+            }
         }
 
-        public abstract string TableName { get; }
-
-        public PropertyDescriptor[] DatabaseGeneratedIdentityPropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] DatabaseGeneratedPropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] SelectPropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] InsertPropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] UpdatePropertyDescriptors { get; private set; }
-        public PropertyDescriptor[] KeyPropertyDescriptors { get; private set; }
-        public TableAttribute TableDescriptor { get; private set; }
-
-        public ISingleDeleteEntityOperationDescriptor<TEntity> SingleDeleteOperation { get; set; }
-        public ISingleSelectEntityOperationDescriptor<TEntity> SingleSelectOperation { get; set; }
-        public ISingleInsertEntityOperationDescriptor<TEntity> SingleInsertOperation { get; set; }
-        public ISingleUpdateEntityOperationDescriptor<TEntity> SingleUpdateOperation { get; set; }
-        public IBatchSelectEntityOperationDescriptor<TEntity> BatchSelectOperation { get; set; }
-
+        /// <summary>
+        /// Returns the sql statements for an entity mapping, or the default one if the argument is null.
+        /// If none is present, an auto-generated mapping will be constructed and registered.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public DynamicParameters CreateParameters<T>(PropertyDescriptor[] propDescriptors, T source)
+        public ISqlStatements GetSqlStatements<TEntity>(EntityMapping entityMapping = null)
         {
-            var parameters = new DynamicParameters();
-            foreach (var propDescriptor in propDescriptors)
+            // set the default entity mapping if not already set
+            if (_defaultEntityMapping == null)
             {
-                parameters.Add("@"+propDescriptor.Name, propDescriptor.GetValue(source));
+                _defaultEntityMapping = entityMapping ?? new AutoGeneratedEntityMapping<TEntity>();
             }
 
-            return parameters;
+            entityMapping = entityMapping ?? _defaultEntityMapping;
+
+            ISqlStatements sqlStatements;
+            var originalRegisteredEntityMappings = _registeredEntityMappings;
+            if (!originalRegisteredEntityMappings.TryGetValue(entityMapping, out sqlStatements))
+            {
+                switch (entityMapping.Dialect)
+                {
+                    case SqlDialect.MsSql:
+                        sqlStatements = new GenericSqlStatements<TEntity>(new MsSqlBuilder(entityMapping));
+                        break;
+                    case SqlDialect.MySql:
+                        sqlStatements = new GenericSqlStatements<TEntity>(new MySqlBuilder(entityMapping));
+                        break;
+                    case SqlDialect.PostgreSql:
+                        sqlStatements = new GenericSqlStatements<TEntity>(new PostgreSqlBuilder(entityMapping));
+                        break;
+                    case SqlDialect.SqLite:
+                        sqlStatements = new GenericSqlStatements<TEntity>(new SqLiteBuilder(entityMapping));
+                        break;
+                    default:
+                        throw new NotSupportedException($"Dialect {entityMapping.Dialect} is not supported");
+                }
+
+                entityMapping.IsFrozen = true;
+
+                Interlocked.Exchange(
+                    ref _registeredEntityMappings,
+                    new Dictionary<EntityMapping, ISqlStatements>(originalRegisteredEntityMappings) { [entityMapping] = sqlStatements });
+            }
+            return sqlStatements;
         }
-
-        private static readonly Type[] SimpleSqlTypes = new[]
-        {
-            typeof (byte),
-            typeof (sbyte),
-            typeof (short),
-            typeof (ushort),
-            typeof (int),
-            typeof (uint),
-            typeof (long),
-            typeof (ulong),
-            typeof (float),
-            typeof (double),
-            typeof (decimal),
-            typeof (bool),
-            typeof (string),
-            typeof (char),
-            typeof (Guid),
-            typeof (DateTime),
-            typeof (DateTimeOffset),
-            typeof (byte[])
-        };
-
-        private static bool IsSimpleSqlType(Type type)
-        {
-            var underlyingType = Nullable.GetUnderlyingType(type);
-            type = underlyingType ?? type;
-            return type.IsEnum || SimpleSqlTypes.Contains(type);
-        }
-
     }
 }
-

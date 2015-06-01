@@ -177,6 +177,30 @@ this.ScenarioSetup(scenarioInfo);
         }
         
         [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Partial update")]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "1", null)]
+        public virtual void PartialUpdate(string databaseType, string entityType, string entityCount, string[] exampleTags)
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update", exampleTags);
+#line 68
+this.ScenarioSetup(scenarioInfo);
+#line 69
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 70
+ testRunner.When(string.Format("I insert {0} {1} entities", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 71
+ testRunner.And(string.Format("I partially update all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 72
+ testRunner.And(string.Format("I query for all the {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 73
+ testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Delete by primary keys")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", null)]
@@ -191,21 +215,21 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void DeleteByPrimaryKeys(string databaseType, string entityType, string entityCount, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys", exampleTags);
-#line 68
+#line 80
 this.ScenarioSetup(scenarioInfo);
-#line 69
+#line 81
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 70
+#line 82
  testRunner.When(string.Format("I insert {0} {1} entities", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 71
+#line 83
  testRunner.And("I clear all the inserted entities", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 72
+#line 84
  testRunner.And(string.Format("I insert {0} {1} entities", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 73
+#line 85
  testRunner.And(string.Format("I delete all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 74
+#line 86
  testRunner.And(string.Format("I query for all the {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 75
+#line 87
  testRunner.Then(string.Format("I should have {0} {1} entities in the database", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();

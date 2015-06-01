@@ -10,6 +10,8 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Tests.Models;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
     using MySql.Data.MySqlClient;
@@ -172,7 +174,7 @@
 
         private void SetupSqLiteDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.SqLite;
+            SetupOrmConfiguration(SqlDialect.SqLite);
 
             _testContext.DatabaseConnection = new SQLiteConnection(connectionString);
             _testContext.DatabaseConnection.Open();
@@ -241,7 +243,7 @@
 
         private void SetupPostgreSqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.PostgreSql;
+            SetupOrmConfiguration(SqlDialect.PostgreSql);
 
             using (var dataConnection = new NpgsqlConnection(connectionString))
             {
@@ -309,7 +311,7 @@
 
         private void SetupMySqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.MySql;
+            SetupOrmConfiguration(SqlDialect.MySql);
 
             using (var dataConnection = new MySqlConnection(connectionString))
             {
@@ -370,7 +372,7 @@
 
         private void SetupMsSqlDatabase(string connectionString)
         {
-            DapperExtensions.Dialect = SqlDialect.MsSql;
+            SetupOrmConfiguration(SqlDialect.MsSql);
 
             using (var dataConnection = new SqlConnection(connectionString))
             {
@@ -477,6 +479,17 @@
             ////{
             ////    Directory.Delete(FinalDatabaseFolder, true);
             ////}
+        }
+
+        private void SetupOrmConfiguration(SqlDialect dialect)
+        {
+            OrmConfiguration.DefaultDialect = dialect;
+
+            OrmConfiguration.RegisterEntity<Building>()
+                .SetTableName("Buildings")
+                .SetProperty(nameof(Building.BuildingId), PropertyMappingOptions.KeyProperty)
+                .SetProperty(nameof(Building.Name));
+
         }
     }
 }
