@@ -12,7 +12,7 @@ For .NET 4.5, the code contains the polyfills for the missing FormattableString 
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
 - Fast pre-computed entity queries
 - A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
-- A generic T4 template is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator. Entity domain partitioning and generation can be achieved via separate template configurations. 
+- A generic T4 template is also provided for convenience in the NuGet package ``Dapper.FastCrud.ModelGenerator``. Entity domain partitioning and generation can be achieved via separate template configurations. 
 Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
 #### Usage:
@@ -43,7 +43,7 @@ Alternatively you can let the library create the default mappings, which can the
 
 
 #### Entity Generation
-Entity generation can be easily performed by adjusting your (``*Config.tt``) file. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. You'll need a LocalDb or an MsSql server that contains the schema. 
+Entity generation can be easily performed by installing the NuGet package ``Dapper.FastCrud.ModelGenerator`` and adjusting your (``*Config.tt``) files. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. You'll need a LocalDb or an MsSql server that contains the schema. 
 By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
 ```
 <?xml version="1.0" encoding="utf-8"?>
