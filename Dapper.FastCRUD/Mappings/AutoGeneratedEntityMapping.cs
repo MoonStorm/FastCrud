@@ -62,12 +62,14 @@
         {
             foreach (var property in TypeDescriptor.GetProperties(EntityType).OfType<PropertyDescriptor>())
             {
-                if (IsSimpleSqlType(property.PropertyType) && property.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit))
+                ForeignKeyAttribute foreignKey = null;
+                if (IsSimpleSqlType(property.PropertyType)
+                    && property.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit))
                 {
                     var propertyMappingOptions = PropertyMappingOptions.None;
                     if (property.Attributes.OfType<KeyAttribute>().Any())
                     {
-                        propertyMappingOptions|=PropertyMappingOptions.KeyProperty;
+                        propertyMappingOptions |= PropertyMappingOptions.KeyProperty;
                     }
 
                     if (
@@ -77,11 +79,15 @@
                                     dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed
                                     || dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
                     {
-                        propertyMappingOptions|=PropertyMappingOptions.DatabaseGeneratedProperty;
+                        propertyMappingOptions |= PropertyMappingOptions.DatabaseGeneratedProperty;
                     }
 
                     var databaseColumnName = property.Attributes.OfType<ColumnAttribute>().FirstOrDefault()?.Name;
                     this.SetPropertyInternal(property, propertyMappingOptions, databaseColumnName);
+                }
+                else if((foreignKey = property.Attributes.OfType<ForeignKeyAttribute>().SingleOrDefault())!= null)
+                {
+                    this.SetPropertyInternal(property, PropertyMappingOptions.None, null, foreignKey.Name);
                 }
             }
         }

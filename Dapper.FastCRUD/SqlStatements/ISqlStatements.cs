@@ -7,7 +7,7 @@
 
     internal interface ISqlStatements
     {
-        ISqlBuilder SqlBuilder { get; }
+        IStatementSqlBuilder SqlBuilder { get; }
     }
 
     internal interface ISqlStatements<TEntity>: ISqlStatements

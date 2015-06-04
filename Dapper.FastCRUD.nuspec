@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Dapper.FastCrud</id>
+    <version>$version$</version>
+    <title>Dapper.FastCRUD</title>
+    <authors>MoonStorm</authors>
+    <owners>MoonStorm</owners>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>The fastest micro-orm type extension for Dapper.</summary>
+    <description>
+The fastest micro-orm type extension for Dapper.
+
+For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
+
+The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
+For .NET 4.5, the package will also install the dependency 'StringInterpolationBridge', which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015.
+
+Features:
+----------
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
+- Entities having composite primary keys are supported
+- Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
+- All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
+- Fast pre-computed entity queries
+- A simple Sql builder with alias support is provided, which is very useful when manual SQL queries are unavoidable.
+- A generic T4 template is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
+Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
+
+Examples of usage:
+-------------------
+- using Dapper.FastCrud
+- dbConnection.Insert(newEntity);
+- dbConnection.Get()
+- dbConnection.Get(new Entity() {Id = 10});
+- dbConnection.Update(updatedEntity);
+- dbConnection.Delete(entity)
+- dbConnection.Find&lt;Entity&gt;(
+      whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam",
+      orderClause:$"{nameof(Entity.LastName)} DESC",
+      skipRowsCount:10, limitRowsCount:20,
+      queryParameters: new {FirstNameParam: "John"});
+
+This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
+More details and benchmarks are available on the project site.
+    </description>
+    <releaseNotes>
+- .NET 4.5 polyfills for string interpolation were removed and a library dependency was added instead.
+    </releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
+    <frameworkAssemblies>
+    </frameworkAssemblies>
+    <dependencies>
+      <group>
+        <dependency id="Dapper" version="1.38" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="StringInterpolationBridge" version="0.9.1"/>
+      </group>
+      <group targetFramework="net46">
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="$assemblydir$Dapper.FastCrud.Net46.dll" target="lib\net46" />
+    <file src="$assemblydir$Dapper.FastCrud.dll" target="lib\net45" />
+  </files>
+</package>

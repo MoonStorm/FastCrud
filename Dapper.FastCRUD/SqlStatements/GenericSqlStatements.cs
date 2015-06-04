@@ -27,7 +27,7 @@
             _singleSelectSql = sqlBuilder.ConstructFullSingleSelectStatement();
         }
 
-        public ISqlBuilder SqlBuilder
+        public IStatementSqlBuilder SqlBuilder
         {
             get
             {

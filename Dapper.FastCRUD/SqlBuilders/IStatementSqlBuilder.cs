@@ -12,6 +12,9 @@
         PropertyMapping[] UpdateProperties { get; }
         PropertyMapping[] KeyDatabaseGeneratedProperties { get; }
         PropertyMapping[] DatabaseGeneratedProperties { get; }
+        PropertyMapping[] ForeignEntityProperties { get; }
+
+        EntityMapping EntityMapping { get; }
 
         string ConstructFullSingleSelectStatement();
         string ConstructFullBatchSelectStatement(
@@ -23,5 +26,6 @@
         string ConstructFullInsertStatement();
         string ConstructFullUpdateStatement();
         string ConstructFullDeleteStatement();
+        string GetColumnName(PropertyMapping propMapping, string alias = null);
     }
 }

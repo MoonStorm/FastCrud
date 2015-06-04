@@ -94,15 +94,15 @@
             PropertyMappings.Remove(propertyName);
         }
 
-        protected void SetPropertyInternal(string propertyName, PropertyMappingOptions options, string databaseColumnName)
+        protected void SetPropertyInternal(string propertyName, PropertyMappingOptions options, string databaseColumnName, string referencedPropertyName = null)
         {
             var propDescriptor = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().Single(propInfo => propInfo.Name == propertyName);
-            this.SetPropertyInternal(propDescriptor, options, databaseColumnName);
+            this.SetPropertyInternal(propDescriptor, options, databaseColumnName, referencedPropertyName);
         }
 
-        protected void SetPropertyInternal(PropertyDescriptor property, PropertyMappingOptions options, string databaseColumnName)
+        protected void SetPropertyInternal(PropertyDescriptor property, PropertyMappingOptions options, string databaseColumnName, string referencedPropertyName = null)
         {
-            this.PropertyMappings[property.Name] = new PropertyMapping(this, this.PropertyMappings.Count, options, property, databaseColumnName);
+            this.PropertyMappings[property.Name] = new PropertyMapping(this, this.PropertyMappings.Count, options, property, databaseColumnName, referencedPropertyName);
         }
     }
 

@@ -17,20 +17,6 @@ namespace Dapper.FastCrud.Tests.Models
 	using System.Collections.Generic;
 
     /// <summary>
-    /// A class which represents the SimpleBenchmarkEntities table.
-    /// </summary>
-	[Table("SimpleBenchmarkEntities")]
-	public partial class SimpleBenchmarkEntity
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual int Id { get; set; }
-		public virtual string FirstName { get; set; }
-		public virtual string LastName { get; set; }
-		public virtual DateTime? DateOfBirth { get; set; }
-	}
-
-    /// <summary>
     /// A class which represents the Employee table.
     /// </summary>
 	[Table("Employee")]
@@ -47,7 +33,23 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual string LastName { get; set; }
 		public virtual string FirstName { get; set; }
 		public virtual DateTime BirthDate { get; set; }
-		public virtual int? WorkstationId { get; set; }
+		public virtual long? WorkstationId { get; set; }
+		[ForeignKey("WorkstationId")]
+		public virtual Workstation Workstation { get; set; }
+	}
+
+    /// <summary>
+    /// A class which represents the SimpleBenchmarkEntities table.
+    /// </summary>
+	[Table("SimpleBenchmarkEntities")]
+	public partial class SimpleBenchmarkEntity
+	{
+		[Key]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public virtual int Id { get; set; }
+		public virtual string FirstName { get; set; }
+		public virtual string LastName { get; set; }
+		public virtual DateTime? DateOfBirth { get; set; }
 	}
 
     /// <summary>
@@ -62,6 +64,7 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual string Name { get; set; }
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 		public virtual int AccessLevel { get; set; }
+		public virtual IEnumerable<Employee> Employees { get; set; }
 	}
 
 }

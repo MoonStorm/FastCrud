@@ -12,7 +12,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.NET46", "Da
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{779A2AF3-1566-4AA9-BF0D-1CAAA439736A}"
 	ProjectSection(SolutionItems) = preProject
+		Dapper.FastCrud.ModelGenerator.nuspec = Dapper.FastCrud.ModelGenerator.nuspec
+		Dapper.FastCRUD.nuspec = Dapper.FastCRUD.nuspec
+		Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt = Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt
 		README.md = README.md
+		Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt = Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Benchmarks", "Dapper.FastCRUD.Benchmarks\Dapper.FastCRUD.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"

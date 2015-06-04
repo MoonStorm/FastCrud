@@ -12,7 +12,7 @@ This is the configuration file for GenericModelGenerator.tt
 	ClassSuffix = "";
     IncludeViews = true;
     IncludeRelationships = false;
-	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "HangFire."};
+	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire."};
 #>
 <#@ include file="GenericModelGenerator.tt" #>
 <#+

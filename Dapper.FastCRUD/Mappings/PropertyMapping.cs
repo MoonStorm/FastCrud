@@ -12,17 +12,68 @@
         private readonly EntityMapping _entityMapping;
         private string _databaseColumnName;
         private readonly int _order;
+        private string _foreignKeyPropertyName;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public PropertyMapping(EntityMapping entityMapping, int order,  PropertyMappingOptions options, PropertyDescriptor descriptor, string databaseColumn = null)
+        public PropertyMapping(EntityMapping entityMapping, int order,  PropertyMappingOptions options, PropertyDescriptor descriptor, string databaseColumn = null, string foreignKeyPropertyName = null)
         {
             _order = order;
             _entityMapping = entityMapping;
             _options = options;
-            _databaseColumnName = databaseColumn??descriptor.Name;
+            this.ForeignKeyPropertyName = foreignKeyPropertyName;
+            _databaseColumnName = databaseColumn??(((_options&PropertyMappingOptions.ReferencingForeignEntity)==PropertyMappingOptions.ReferencingForeignEntity)?null: descriptor.Name);
             this.Descriptor = descriptor;
+        }
+
+        /// <summary>
+        /// Gets or sets the property name that represents the foreign key to be used for fetching the referenced entity. 
+        /// This can only be set on properties that have an entity type.
+        /// </summary>
+        public string ForeignKeyPropertyName
+        {
+            get
+            {
+                return _foreignKeyPropertyName;
+            }
+            set
+            {
+                this.ValidateState();
+
+                this._foreignKeyPropertyName = value;
+                if (string.IsNullOrEmpty(_foreignKeyPropertyName))
+                {
+                    _options |= PropertyMappingOptions.ReferencingForeignEntity;
+                }
+                else
+                {
+                    _options&=~PropertyMappingOptions.ReferencingForeignEntity;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating the property is referencing a foreign entity.
+        /// One can be set via <see cref="ForeignKeyPropertyName"/>.
+        /// </summary>
+        public bool IsReferencingForeignEntity
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    throw new InvalidOperationException($"'{nameof(IsReferencingForeignEntity)}' cannot be set. Please use '{nameof(ForeignKeyPropertyName)}' instead.");
+                }
+
+                this.ForeignKeyPropertyName = null;
+            }
         }
 
         /// <summary>

@@ -61,13 +61,14 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	public virtual <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
 <#}#>
 <# if (IncludeRelationships) { #>
-<#foreach(Key key in from k in tbl.OuterKeys select k)
+<#foreach(var tableKey in from k in tbl.OuterKeys group k by k.ReferencedTableName into gk select new {ReferencedTableName=gk.Key, Keys=gk})
 {#>
-		public virtual <#=tables[key.ReferencedTableName].ClassName #> <#=tables[key.ReferencedTableName].ClassName #> { get; set; }
+		[ForeignKey("<#=string.Join(",", tableKey.Keys.Select(key => tbl[key.ReferencingTableColumnName].PropertyName))#>")]
+		public virtual <#=tables[tableKey.ReferencedTableName].ClassName #> <#=tables[tableKey.ReferencedTableName].ClassName #> { get; set; }
 <#}#>
-<#foreach(Key key in from k in tbl.InnerKeys select k)
+<#foreach(var tableKey in from k in tbl.InnerKeys group k by k.ReferencingTableName into gk select new {ReferencingTableName=gk.Key, Keys=gk})
 {#>
-		public virtual IEnumerable<<#=tables[key.ReferencingTableName].ClassName #>> <#=tables[key.ReferencingTableName].CleanName #> { get; set; }
+		public virtual IEnumerable<<#=tables[tableKey.ReferencingTableName].ClassName #>> <#=Pluralize(tables[tableKey.ReferencingTableName].CleanName) #> { get; set; }
 <#}#>
 <#}#>
 	}
@@ -324,6 +325,12 @@ static string Singularize(string word)
 {
 	var singularword = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Singularize(word);
 	return singularword;
+}
+
+static string Pluralize(string word)
+{
+	var pluralWord = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Pluralize(word);
+	return pluralWord;
 }
 		
 static string RemoveTablePrefixes(string word)

@@ -11,10 +11,10 @@ This is the configuration file for GenericModelGenerator.tt
 	ClassPrefix = "";
 	ClassSuffix = "";
     IncludeViews = true;
-    IncludeRelationships = false;
+    IncludeRelationships = true;
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire.", "Building"};
 #>
-<#@ include file="..\..\Dapper.FastCRUD\Package\GenericModelGenerator.tt" #>
+<#@ include file="..\..\Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt" #>
 <#+
 	void ConfigureTableMappings(Tables tables){
 		/*
