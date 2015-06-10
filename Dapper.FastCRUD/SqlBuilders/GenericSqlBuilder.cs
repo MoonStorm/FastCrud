@@ -44,11 +44,11 @@
             this.KeyDatabaseGeneratedProperties = this.KeyProperties
                 .Intersect(this.DatabaseGeneratedProperties)
                 .ToArray();
-            this.UpdateProperties = this.SelectProperties.Except(this.KeyProperties)
+            this.UpdateProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromUpdates)
                 .ToArray();
             this.InsertProperties = this.SelectProperties
-                .Except(this.DatabaseGeneratedProperties)
+                .Where(propInfo => !propInfo.IsExcludedFromInserts)
                 .ToArray();
             this.ForeignEntityProperties =
                 this.EntityMapping.PropertyMappings
@@ -67,6 +67,11 @@
                                 ? $"{TableStartDelimiter}{EntityMapping.TableName}{TableEndDelimiter}"
                                 : $"{TableStartDelimiter}{EntityMapping.SchemaName}{TableEndDelimiter}.{TableStartDelimiter}{EntityMapping.TableName}{TableEndDelimiter}";
             return $"{fullTableName}{sqlAlias}";
+        }
+
+        public string GetColumnName(string propertyName, string alias = null)
+        {
+            return this.GetColumnName(this.EntityMapping.PropertyMappings[propertyName], alias);
         }
 
         public virtual string GetColumnName(PropertyMapping propMapping, string alias = null)

@@ -23,13 +23,18 @@
         DatabaseGeneratedProperty = 0x02,
 
         /// <summary>
-        /// Useful for partial updates, a property marked with this option will be excluded from any <c>Update</c> and <c>Insert</c> operations.
+        /// Useful for partial updates, a property marked with this option will be excluded from any <c>Update</c> operations.
         /// </summary>
         ExcludedFromUpdates = 0x04,
 
         /// <summary>
+        /// Useful for partial updates and identity columns, a property marked with this option will be excluded from any <c>Insert</c> operations.
+        /// </summary>
+        ExcludedFromInserts = 0x08,
+
+        /// <summary>
         /// Denotes a property generated through foreign key constraints.
         /// </summary>
-        ReferencingForeignEntity = 0x08 | ExcludedFromUpdates
+        ReferencingForeignEntity = 0x10
     }
 }

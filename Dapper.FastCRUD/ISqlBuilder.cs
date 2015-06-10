@@ -15,5 +15,7 @@
         string ConstructParamEnumerationForInsert();
 
         string ConstructUpdateClause(string alias = null);
+
+        string GetColumnName(string propertyName, string alias = null);
     }
 }

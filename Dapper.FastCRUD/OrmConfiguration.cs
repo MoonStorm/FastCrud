@@ -75,6 +75,17 @@
             }
         }
 
+        /// <summary>
+        /// Returns an SQL builder helpful for constructing verbatim SQL queries.
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="entityMapping">If NULL, de default entity mapping will be used.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity> entityMapping = null)
+        {
+            return GetEntityDescriptor<TEntity>().GetSqlStatements<TEntity>(entityMapping).SqlBuilder;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static EntityDescriptor GetEntityDescriptor<TEntity>()
         {
@@ -97,12 +108,6 @@
         internal static ISqlStatements<TEntity> GetSqlStatements<TEntity>(EntityMapping entityMapping = null)
         {
             return (ISqlStatements<TEntity>)GetEntityDescriptor<TEntity>().GetSqlStatements<TEntity>(entityMapping);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping entityMapping = null)
-        {
-            return GetEntityDescriptor<TEntity>().GetSqlStatements<TEntity>(entityMapping).SqlBuilder;
         }
     }
 }

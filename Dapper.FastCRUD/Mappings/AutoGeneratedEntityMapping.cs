@@ -72,14 +72,19 @@
                         propertyMappingOptions |= PropertyMappingOptions.KeyProperty;
                     }
 
-                    if (
-                        property.Attributes.OfType<DatabaseGeneratedAttribute>()
-                                .Any(
-                                    dbGenerated =>
-                                    dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed
-                                    || dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
+                    if (property.Attributes.OfType<DatabaseGeneratedAttribute>()
+                                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
                     {
                         propertyMappingOptions |= PropertyMappingOptions.DatabaseGeneratedProperty;
+                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromInserts;
+                    }
+
+                    if (property.Attributes.OfType<DatabaseGeneratedAttribute>()
+                                .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
+                    {
+                        propertyMappingOptions |= PropertyMappingOptions.DatabaseGeneratedProperty;
+                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromInserts;
+                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromUpdates;
                     }
 
                     var databaseColumnName = property.Attributes.OfType<ColumnAttribute>().FirstOrDefault()?.Name;

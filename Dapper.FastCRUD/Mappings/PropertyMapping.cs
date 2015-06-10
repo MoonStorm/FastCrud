@@ -44,11 +44,13 @@
                 this._foreignKeyPropertyName = value;
                 if (string.IsNullOrEmpty(_foreignKeyPropertyName))
                 {
-                    _options |= PropertyMappingOptions.ReferencingForeignEntity;
+                    _options &= ~PropertyMappingOptions.ReferencingForeignEntity;
                 }
                 else
                 {
-                    _options&=~PropertyMappingOptions.ReferencingForeignEntity;
+                    _options |= PropertyMappingOptions.ReferencingForeignEntity;
+                    _options |= PropertyMappingOptions.ExcludedFromInserts;
+                    _options |= PropertyMappingOptions.ExcludedFromUpdates;
                 }
             }
         }
@@ -118,6 +120,30 @@
                 else
                 {
                     _options &= ~PropertyMappingOptions.DatabaseGeneratedProperty;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a flag that indicates the curent property will be excluded from updates.
+        /// </summary>
+        public bool IsExcludedFromInserts
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.ExcludedFromInserts) == PropertyMappingOptions.ExcludedFromInserts;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.ExcludedFromInserts;
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.ExcludedFromInserts;
                 }
             }
         }
