@@ -16,23 +16,28 @@
         {
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ";
 
-            if (this.KeyDatabaseGeneratedProperties.Length > 0)
+            if (this.InsertKeyDatabaseGeneratedProperties.Length > 0)
             {
                 // we have an identity column, so we can fetch the rest of them
-                if(this.KeyDatabaseGeneratedProperties.Length == 1 && this.DatabaseGeneratedProperties.Length == 1)
+                if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
-                    sql += $"SELECT LAST_INSERT_ID() as {this.KeyDatabaseGeneratedProperties[0].PropertyName}";
+                    sql += $"SELECT LAST_INSERT_ID() as {this.InsertKeyDatabaseGeneratedProperties[0].PropertyName}";
                 }
                 else
                 {
                     var databaseGeneratedColumnSelection = string.Join(
                         ",",
-                        this.DatabaseGeneratedProperties.Select(
-                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
+                        this.InsertDatabaseGeneratedProperties.Select(
+                            propInfo =>
+                            $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
                     sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.KeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = LAST_INSERT_ID()";
+                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.InsertKeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = LAST_INSERT_ID()";
                 }
+            }
+            else if(this.InsertDatabaseGeneratedProperties.Length > 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has database generated fields that don't contain a primary key. Either mark the primary key as database generated or remove the database generated flag from all the fields or mark all these fields as included in the insert operation.");
             }
             return sql;
         }

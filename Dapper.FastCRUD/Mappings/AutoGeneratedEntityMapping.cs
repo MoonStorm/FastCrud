@@ -66,33 +66,40 @@
                 if (IsSimpleSqlType(property.PropertyType)
                     && property.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit))
                 {
-                    var propertyMappingOptions = PropertyMappingOptions.None;
+                    var propMapping = this.SetPropertyInternal(property);
+
+                    var databaseColumnName = property.Attributes.OfType<ColumnAttribute>().FirstOrDefault()?.Name;
+                    if (!string.IsNullOrEmpty(databaseColumnName))
+                    {
+                        propMapping.SetDatabaseColumnName(databaseColumnName);
+                    }
+
                     if (property.Attributes.OfType<KeyAttribute>().Any())
                     {
-                        propertyMappingOptions |= PropertyMappingOptions.KeyProperty;
+                        propMapping.SetPrimaryKey();
                     }
 
                     if (property.Attributes.OfType<DatabaseGeneratedAttribute>()
                                 .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
                     {
-                        propertyMappingOptions |= PropertyMappingOptions.DatabaseGeneratedProperty;
-                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromInserts;
+                        propMapping.SetDatabaseGenerated();
                     }
 
                     if (property.Attributes.OfType<DatabaseGeneratedAttribute>()
                                 .Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
                     {
-                        propertyMappingOptions |= PropertyMappingOptions.DatabaseGeneratedProperty;
-                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromInserts;
-                        propertyMappingOptions |= PropertyMappingOptions.ExcludedFromUpdates;
+                        propMapping.SetDatabaseGenerated();
+                        propMapping.ExcludeFromInserts().ExcludeFromUpdates();
                     }
-
-                    var databaseColumnName = property.Attributes.OfType<ColumnAttribute>().FirstOrDefault()?.Name;
-                    this.SetPropertyInternal(property, propertyMappingOptions, databaseColumnName);
                 }
                 else if((foreignKey = property.Attributes.OfType<ForeignKeyAttribute>().SingleOrDefault())!= null)
                 {
-                    this.SetPropertyInternal(property, PropertyMappingOptions.None, null, foreignKey.Name);
+                    this.SetPropertyInternal(property).SetForeignKeys(
+                        foreignKey.Name
+                        .Split(',')
+                        .Select(foreignKeyPropName => foreignKeyPropName.Trim())
+                        .Where(foreignKeyPropName => !string.IsNullOrWhiteSpace(foreignKeyPropName))
+                        .ToArray());
                 }
             }
         }

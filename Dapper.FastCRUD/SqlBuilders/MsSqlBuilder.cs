@@ -19,9 +19,9 @@ namespace Dapper.FastCrud.SqlBuilders
         public override string ConstructFullInsertStatement()
         {
             string outputQuery;
-            if (DatabaseGeneratedProperties.Length > 0)
+            if (InsertDatabaseGeneratedProperties.Length > 0)
             {
-                var outputColumns = string.Join(",", DatabaseGeneratedProperties.Select(propInfo => $"inserted.{propInfo.PropertyName}"));
+                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{propInfo.PropertyName}"));
                 outputQuery = $"OUTPUT {outputColumns}";
             }
             else

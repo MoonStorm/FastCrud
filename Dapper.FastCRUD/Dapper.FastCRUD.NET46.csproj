@@ -57,6 +57,7 @@
     <Compile Include="Mappings\PropertyMappingOptions.cs" />
     <Compile Include="OrmConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Requires.cs" />
     <Compile Include="SqlBuilders\GenericSqlBuilder.cs" />
     <Compile Include="SqlBuilders\IStatementSqlBuilder.cs" />
     <Compile Include="SqlBuilders\MsSqlBuilder.cs" />

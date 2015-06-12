@@ -14,6 +14,7 @@
     public abstract class EntityMapping
     {
         private volatile bool _isFrozen;
+        private IDictionary<string, PropertyMapping> _propertyMappings;
         //private static long _currentGlobalId = long.MinValue;
         //private readonly long _id;
 
@@ -24,7 +25,7 @@
         {
             //this._id = Interlocked.Increment(ref _currentGlobalId);
             this.EntityType = entityType;
-            this.PropertyMappings = new Dictionary<string, PropertyMapping>();
+            this._propertyMappings = new Dictionary<string, PropertyMapping>();
             this.TableName = entityType.Name;
             this.Dialect = OrmConfiguration.DefaultDialect;
         }
@@ -68,7 +69,13 @@
         /// </summary>
         public Type EntityType { get; private set; }
 
-        internal IDictionary<string, PropertyMapping> PropertyMappings { get; private set; }
+        internal IDictionary<string, PropertyMapping> PropertyMappings
+        {
+            get
+            {
+                return _propertyMappings;
+            }
+        }
 
         protected void ValidateState()
         {
@@ -94,15 +101,20 @@
             PropertyMappings.Remove(propertyName);
         }
 
-        protected void SetPropertyInternal(string propertyName, PropertyMappingOptions options, string databaseColumnName, string referencedPropertyName = null)
+        protected PropertyMapping SetPropertyInternal(string propertyName)
         {
             var propDescriptor = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().Single(propInfo => propInfo.Name == propertyName);
-            this.SetPropertyInternal(propDescriptor, options, databaseColumnName, referencedPropertyName);
+            return this.SetPropertyInternal(propDescriptor);
         }
 
-        protected void SetPropertyInternal(PropertyDescriptor property, PropertyMappingOptions options, string databaseColumnName, string referencedPropertyName = null)
+        protected PropertyMapping SetPropertyInternal(PropertyDescriptor property)
         {
-            this.PropertyMappings[property.Name] = new PropertyMapping(this, this.PropertyMappings.Count, options, property, databaseColumnName, referencedPropertyName);
+            return this.SetPropertyInternal(new PropertyMapping(this, this.PropertyMappings.Count, property));
+        }
+
+        protected PropertyMapping SetPropertyInternal(PropertyMapping propertyMapping)
+        {
+            return this.PropertyMappings[propertyMapping.PropertyName] = propertyMapping;
         }
     }
 
@@ -166,18 +178,38 @@
         /// Sets the mapping options for a property.
         /// </summary>
         /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
+        /// <param name="propertySetupFct">A callback which will be called for setting up the property mapping.</param>
+        public EntityMapping<TEntity> SetProperty<TProperty>(
+            Expression<Func<TEntity, TProperty>> property,
+            Action<PropertyMapping> propertySetupFct)
+        {
+            this.ValidateState();
+
+            Requires.NotNull(property, nameof(property));
+            Requires.NotNull(propertySetupFct, nameof(propertySetupFct));
+
+            var propName = ((MemberExpression)property.Body).Member.Name;
+            var propMapping = this.SetPropertyInternal(propName);
+            propertySetupFct(propMapping);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the mapping options for a property.
+        /// </summary>
+        /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
         /// <param name="options">Column options</param>
         /// <param name="databaseColumnName">Optional database column name override.</param>
+        [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
         public EntityMapping<TEntity> SetProperty<TProperty>(
             Expression<Func<TEntity, TProperty>> property,
             PropertyMappingOptions options = PropertyMappingOptions.None,
             string databaseColumnName = null)
         {
-            this.ValidateState();
+            Requires.NotNull(property, nameof(property));
 
             var propName = ((MemberExpression)property.Body).Member.Name;
-            this.SetPropertyInternal(propName, options, databaseColumnName);
-            return this;
+            return this.SetProperty(propName, options, databaseColumnName);
         }
 
         /// <summary>
@@ -316,11 +348,37 @@
         /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
         /// <param name="options">Column options</param>
         /// <param name="databaseColumnName">Optional database column name override.</param>
+        [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
         public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options=PropertyMappingOptions.None, string databaseColumnName = null)
         {
             this.ValidateState();
+            Requires.NotNull(propertyName, nameof(propertyName));
 
-            this.SetPropertyInternal(propertyName, options, databaseColumnName);
+            var propMapping = this.SetPropertyInternal(propertyName);
+            if (!string.IsNullOrEmpty(databaseColumnName))
+            {
+                propMapping.DatabaseColumnName = databaseColumnName;
+            }
+            if ((options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty)
+            {
+                propMapping.IsDatabaseGenerated = true;
+            }
+            if ((options & PropertyMappingOptions.KeyProperty) == PropertyMappingOptions.KeyProperty)
+            {
+                propMapping.IsPrimaryKey = true;
+            }
+            if ((options & PropertyMappingOptions.ExcludedFromInserts) == PropertyMappingOptions.ExcludedFromInserts)
+            {
+                propMapping.IsExcludedFromInserts = true;
+            }
+            if ((options & PropertyMappingOptions.ExcludedFromUpdates) == PropertyMappingOptions.ExcludedFromUpdates)
+            {
+                propMapping.IsExcludedFromUpdates = true;
+            }
+            if ((options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity)
+            {
+                throw new NotSupportedException("It is not possible to set up foreign keys via this method.");
+            }
             return this;
         }
 
@@ -329,10 +387,13 @@
         /// </summary>
         public EntityMapping<TEntity> Clone()
         {
-            var clonedMappings = new EntityMapping<TEntity>().SetSchemaName(this.SchemaName).SetTableName(this.TableName).SetDialect(this.Dialect);
-            foreach (var propMapping in this.GetProperties())
+            var clonedMappings = new EntityMapping<TEntity>()
+                .SetSchemaName(this.SchemaName)
+                .SetTableName(this.TableName)
+                .SetDialect(this.Dialect);
+            foreach (var clonedPropMapping in this.PropertyMappings.Select(propNameMapping => propNameMapping.Value.Clone(clonedMappings)))
             {
-                clonedMappings.SetPropertyInternal(propMapping.Descriptor, propMapping.Options, propMapping.DatabaseColumnName);
+                clonedMappings.SetPropertyInternal(clonedPropMapping);
             }
 
             return clonedMappings;

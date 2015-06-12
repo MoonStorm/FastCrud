@@ -1,7 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Collections.Generic;
     using Dapper.FastCrud.Mappings;
 
     internal interface IStatementSqlBuilder:ISqlBuilder
@@ -10,8 +9,8 @@
         PropertyMapping[] KeyProperties { get; }
         PropertyMapping[] InsertProperties { get; }
         PropertyMapping[] UpdateProperties { get; }
-        PropertyMapping[] KeyDatabaseGeneratedProperties { get; }
-        PropertyMapping[] DatabaseGeneratedProperties { get; }
+        PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
+        PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
         PropertyMapping[] ForeignEntityProperties { get; }
 
         EntityMapping EntityMapping { get; }

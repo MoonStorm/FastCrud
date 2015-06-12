@@ -42,7 +42,7 @@
             if (insertedEntity != null)
             {
                 // copy all the key properties back onto our entity
-                foreach (var propMapping in _sqlBuilder.DatabaseGeneratedProperties)
+                foreach (var propMapping in _sqlBuilder.InsertDatabaseGeneratedProperties)
                 {
                     var propDescriptor = propMapping.Descriptor;
                     var updatedKeyValue = propDescriptor.GetValue(insertedEntity);

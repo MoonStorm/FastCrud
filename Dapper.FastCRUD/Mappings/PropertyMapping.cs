@@ -12,18 +12,17 @@
         private readonly EntityMapping _entityMapping;
         private string _databaseColumnName;
         private readonly int _order;
-        private string _foreignKeyPropertyName;
+        private string[] _foreignKeyPropertyNames = new string[0];
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public PropertyMapping(EntityMapping entityMapping, int order,  PropertyMappingOptions options, PropertyDescriptor descriptor, string databaseColumn = null, string foreignKeyPropertyName = null)
+        internal PropertyMapping(EntityMapping entityMapping, int order, PropertyDescriptor descriptor)
         {
             _order = order;
             _entityMapping = entityMapping;
-            _options = options;
-            this.ForeignKeyPropertyName = foreignKeyPropertyName;
-            _databaseColumnName = databaseColumn??(((_options&PropertyMappingOptions.ReferencingForeignEntity)==PropertyMappingOptions.ReferencingForeignEntity)?null: descriptor.Name);
+            _options = PropertyMappingOptions.None;
+            _databaseColumnName = descriptor.Name;
             this.Descriptor = descriptor;
         }
 
@@ -31,33 +30,43 @@
         /// Gets or sets the property name that represents the foreign key to be used for fetching the referenced entity. 
         /// This can only be set on properties that have an entity type.
         /// </summary>
-        public string ForeignKeyPropertyName
+        public string[] ForeignKeyPropertyNames
         {
             get
             {
-                return _foreignKeyPropertyName;
+                return _foreignKeyPropertyNames;
             }
             set
             {
                 this.ValidateState();
 
-                this._foreignKeyPropertyName = value;
-                if (string.IsNullOrEmpty(_foreignKeyPropertyName))
+                this._foreignKeyPropertyNames = value??new string[0];
+                if (this._foreignKeyPropertyNames.Length == 0)
                 {
                     _options &= ~PropertyMappingOptions.ReferencingForeignEntity;
                 }
                 else
                 {
                     _options |= PropertyMappingOptions.ReferencingForeignEntity;
-                    _options |= PropertyMappingOptions.ExcludedFromInserts;
-                    _options |= PropertyMappingOptions.ExcludedFromUpdates;
+                    this.IsExcludedFromUpdates = true;
+                    this.IsExcludedFromInserts = true;
                 }
             }
         }
 
         /// <summary>
+        /// Sets the property name that represents the foreign key to be used for fetching the referenced entity. 
+        /// This can only be set on properties that have an entity type.
+        /// </summary>
+        public PropertyMapping SetForeignKeys(params string[] propertyNames)
+        {
+            this.ForeignKeyPropertyNames = propertyNames;
+            return this;
+        }
+
+        /// <summary>
         /// Gets a flag indicating the property is referencing a foreign entity.
-        /// One can be set via <see cref="ForeignKeyPropertyName"/>.
+        /// One can be set via <see cref="ForeignKeyPropertyNames"/>.
         /// </summary>
         public bool IsReferencingForeignEntity
         {
@@ -71,17 +80,30 @@
 
                 if (value)
                 {
-                    throw new InvalidOperationException($"'{nameof(IsReferencingForeignEntity)}' cannot be set. Please use '{nameof(ForeignKeyPropertyName)}' instead.");
+                    throw new InvalidOperationException($"'{nameof(IsReferencingForeignEntity)}' cannot be set. Please use '{nameof(ForeignKeyPropertyNames)}' instead.");
                 }
 
-                this.ForeignKeyPropertyName = null;
+                this.ForeignKeyPropertyNames = null;
+            }
+        }
+
+        [Obsolete("Please use IsPrimaryKey or SetPrimaryKey instead.")]
+        public bool IsKey
+        {
+            get
+            {
+                return this.IsPrimaryKey;
+            }
+            set
+            {
+                this.IsPrimaryKey = value;
             }
         }
 
         /// <summary>
         /// Gets or sets a flag indicating the property is mapped to a primary key.
         /// </summary>
-        public bool IsKey
+        public bool IsPrimaryKey
         {
             get
             {
@@ -92,12 +114,24 @@
                 this.ValidateState();
 
                 if (value)
+                {
                     _options |= PropertyMappingOptions.KeyProperty;
+                    this.IsExcludedFromUpdates = true;
+                }
                 else
                 {
-                    _options&=~PropertyMappingOptions.KeyProperty;
+                    _options &= ~PropertyMappingOptions.KeyProperty;
                 }
             }
+        }
+
+        /// <summary>
+        /// Marks the property as primary key.
+        /// </summary>
+        public PropertyMapping SetPrimaryKey(bool isPrimaryKey = true)
+        {
+            this.IsPrimaryKey = isPrimaryKey;
+            return this;
         }
 
         /// <summary>
@@ -116,12 +150,22 @@
                 if (value)
                 {
                     _options |= PropertyMappingOptions.DatabaseGeneratedProperty;
+                    this.IsExcludedFromInserts = true;
                 }
                 else
                 {
                     _options &= ~PropertyMappingOptions.DatabaseGeneratedProperty;
                 }
             }
+        }
+
+        /// <summary>
+        /// Indicates that the property is mapped to a database generated field.
+        /// </summary>
+        public PropertyMapping SetDatabaseGenerated(bool isDatabaseGenerated = true)
+        {
+            this.IsDatabaseGenerated = isDatabaseGenerated;
+            return this;
         }
 
         /// <summary>
@@ -149,6 +193,24 @@
         }
 
         /// <summary>
+        /// The property will be included in insert operations.
+        /// </summary>
+        public PropertyMapping IncludeInInserts()
+        {
+            this.IsExcludedFromInserts = false;
+            return this;
+        }
+
+        /// <summary>
+        /// The property will be excluded from update operations.
+        /// </summary>
+        public PropertyMapping ExcludeFromInserts()
+        {
+            this.IsExcludedFromInserts = true;
+            return this;
+        }
+
+        /// <summary>
         /// Gets or sets a flag that indicates the curent property will be excluded from updates.
         /// </summary>
         public bool IsExcludedFromUpdates
@@ -170,6 +232,24 @@
                     _options &= ~PropertyMappingOptions.ExcludedFromUpdates;
                 }
             }
+        }
+
+        /// <summary>
+        /// The property will be included in update operations.
+        /// </summary>
+        public PropertyMapping IncludeInUpdates()
+        {
+            this.IsExcludedFromUpdates = false;
+            return this;
+        }
+
+        /// <summary>
+        /// The property will be excluded from update operations.
+        /// </summary>
+        public PropertyMapping ExcludeFromUpdates()
+        {
+            this.IsExcludedFromUpdates = true;
+            return this;
         }
 
         /// <summary>
@@ -196,13 +276,19 @@
             {
                 this.ValidateState();
 
-                if (string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException(nameof(DatabaseColumnName));
-                }
-
+                Requires.NotNullOrEmpty(value, nameof(this.DatabaseColumnName));
                 _databaseColumnName = value;
+                _foreignKeyPropertyNames = new string[0];
             }
+        }
+
+        /// <summary>
+        /// Sets the database column name.
+        /// </summary>
+        public PropertyMapping SetDatabaseColumnName(string dbColumnName)
+        {
+            this.DatabaseColumnName = dbColumnName;
+            return this;
         }
 
         /// <summary>
@@ -218,17 +304,11 @@
         /// <summary>
         /// Gets or sets the full set of options.
         /// </summary>
-        public PropertyMappingOptions Options
+        internal PropertyMappingOptions Options
         {
             get
             {
                 return _options;
-            }
-            set
-            {
-                this.ValidateState();
-
-                _options = value;
             }
         }
 
@@ -240,6 +320,16 @@
             this.ValidateState();
 
             _entityMapping.RemoveProperty(this.PropertyName);
+        }
+
+        internal PropertyMapping Clone(EntityMapping newEntityMapping)
+        {
+            var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this._order, this.Descriptor);
+            clonedPropertyMapping._options = this._options;
+            clonedPropertyMapping._databaseColumnName = this._databaseColumnName;
+            clonedPropertyMapping._foreignKeyPropertyNames = new string[this._foreignKeyPropertyNames.Length];
+            Array.Copy(this._foreignKeyPropertyNames, clonedPropertyMapping._foreignKeyPropertyNames, this._foreignKeyPropertyNames.Length);
+            return clonedPropertyMapping;
         }
 
         protected bool Equals(PropertyMapping other)

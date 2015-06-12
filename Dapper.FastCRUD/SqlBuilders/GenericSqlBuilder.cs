@@ -13,7 +13,6 @@
         {            
         }
 
-
         protected GenericStatementSqlBuilder(
             EntityMapping entityMapping,
             bool usesTableSchema,
@@ -35,14 +34,14 @@
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
             this.KeyProperties = this.EntityMapping.PropertyMappings
-                .Where(propMapping => propMapping.Value.IsKey)
+                .Where(propMapping => propMapping.Value.IsPrimaryKey)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
-            this.DatabaseGeneratedProperties = this.SelectProperties
-                .Where(propInfo => propInfo.IsDatabaseGenerated)
+            this.InsertDatabaseGeneratedProperties = this.SelectProperties
+                .Where(propInfo => propInfo.IsDatabaseGenerated && propInfo.IsExcludedFromInserts)
                 .ToArray();
-            this.KeyDatabaseGeneratedProperties = this.KeyProperties
-                .Intersect(this.DatabaseGeneratedProperties)
+            this.InsertKeyDatabaseGeneratedProperties = this.KeyProperties
+                .Intersect(this.InsertDatabaseGeneratedProperties)
                 .ToArray();
             this.UpdateProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromUpdates)
@@ -185,7 +184,7 @@
         public PropertyMapping[] KeyProperties { get; private set; }
         public PropertyMapping[] InsertProperties { get; private set; }
         public PropertyMapping[] UpdateProperties { get; private set; }
-        public PropertyMapping[] KeyDatabaseGeneratedProperties { get; private set; }
-        public PropertyMapping[] DatabaseGeneratedProperties { get; private set; }
+        public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; private set; }
+        public PropertyMapping[] InsertDatabaseGeneratedProperties { get; private set; }
     }
 }

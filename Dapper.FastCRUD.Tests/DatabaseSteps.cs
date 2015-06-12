@@ -412,12 +412,13 @@
 	                    [LastName] [nvarchar](50) NOT NULL,
 	                    [FirstName] [nvarchar](50) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
-	                    [WorkstationId] [int] NULL,
+	                    [WorkstationId] [bigint] NULL,
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
                         (
 	                        [UserId] ASC,
 	                        [EmployeeId] ASC
-                        ))");
+                        ),
+                        CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
 	                    [BuildingId] [int]  NOT NULL,

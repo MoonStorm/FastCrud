@@ -14,13 +14,13 @@
 
         public override string ConstructFullInsertStatement()
         {
-            string outputQuery = this.DatabaseGeneratedProperties.Length > 0
+            string outputQuery = this.InsertDatabaseGeneratedProperties.Length > 0
                          ? string.Format(
                              CultureInfo.InvariantCulture,
                              "RETURNING {0}",
                              string.Join(
                                  ",",
-                                 this.DatabaseGeneratedProperties.Select(
+                                 this.InsertDatabaseGeneratedProperties.Select(
                                      propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}")))
                          : string.Empty;
 
