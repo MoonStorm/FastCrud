@@ -118,21 +118,21 @@
             int? skipRowsCount = null,
             int? limitRowsCount = null,
             object queryParameters = null,
-            bool streamResult = false, 
-            IDbTransaction transaction = null, 
+            bool streamResult = false,
+            IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
             return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelect(
-                connection, 
-                whereClause:whereClause,
-                orderClause:orderClause,
-                skipRowsCount:skipRowsCount,
-                limitRowsCount:limitRowsCount,
-                queryParameters:queryParameters,
-                streamResults:streamResult,
-                transaction:transaction,
-                commandTimeout:commandTimeout);
+                connection,
+                whereClause: whereClause,
+                orderClause: orderClause,
+                skipRowsCount: skipRowsCount,
+                limitRowsCount: limitRowsCount,
+                queryParameters: queryParameters,
+                streamResults: streamResult,
+                transaction: transaction,
+                commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -244,6 +244,34 @@
             EntityMapping<TEntity> entityMappingOverride = null)
         {
             return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdateAsync(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+        }
+
+        /// <summary>
+        /// Queries the database for a set of records.
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="connection"></param>
+        /// <param name="queryParameters"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="whereClause">Where clause (e.g. $"{nameof(User.Name)} = @UserName and {nameof(User.LoggedIn)} = @UserLoggedIn" )</param>
+        /// <param name="orderClause">Order clause (e.g. $"{nameof(User.Name)} ASC, {nameof(User.LoggedIn)} DESC" )</param>
+        /// <param name="skipRowsCount">Number of rows to skip.</param>
+        /// <param name="limitRowsCount">Maximum number of rows to return.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>Gets a list of all entities</returns>
+        public static async Task<int> CountAsync<TEntity>(
+            this IDbConnection connection,
+            FormattableString whereClause = null,
+            object queryParameters = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
+        {
+            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).CountAsync(
+                connection,
+                whereClause: whereClause,
+                queryParameters: queryParameters,
+                commandTimeout: commandTimeout);
         }
 
         /// <summary>

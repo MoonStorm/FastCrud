@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using Dapper.FastCrud.Mappings;
 
@@ -56,6 +57,14 @@
                 KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}=@{propInfo.PropertyName}"));
         }
 
+        public virtual string ConstructKeyColumnEnumeration(string alias = null)
+        {
+            var sqlAlias = alias == null ? string.Empty : $"{alias}.";
+            return string.Join(
+                ",",
+                KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}"));
+        }
+
         public virtual string ConstructColumnEnumerationForSelect(string alias = null)
         {
             var sqlAlias = alias == null ? string.Empty : $"{alias}.";
@@ -101,6 +110,18 @@
         public virtual string ConstructFullDeleteStatement()
         {
             return $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}";
+        }
+        
+        public string ConstructFullCountStatement(FormattableString whereClause = null)
+        {
+            var sql = $"SELECT COUNT({this.ConstructKeyColumnEnumeration()}) FROM{this.GetTableName()}";
+
+            if (whereClause != null)
+            {
+                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+            }
+
+            return sql;
         }
 
         public virtual string ConstructFullSingleSelectStatement()

@@ -49,5 +49,8 @@
         Task<TEntity> SingleSelectAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
 
         Task<bool> SingleUpdateAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+
+        Task<int> CountAsync(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, TimeSpan? commandTimeout = null);
+
     }
 }

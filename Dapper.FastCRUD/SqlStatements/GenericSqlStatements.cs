@@ -157,5 +157,13 @@
         {
             return (await connection.ExecuteAsync(_singleUpdateSql, keyEntity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds)) > 0;
         }
+
+        public async Task<int> CountAsync(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, TimeSpan? commandTimeout = null)
+        {
+            return await connection.ExecuteScalarAsync<int>(
+                _sqlBuilder.ConstructFullCountStatement(whereClause),
+                queryParameters,
+                commandTimeout: (int?)commandTimeout?.TotalSeconds);
+        }
     }
 }

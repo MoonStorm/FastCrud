@@ -23,5 +23,6 @@
         string ConstructFullInsertStatement();
         string ConstructFullUpdateStatement();
         string ConstructFullDeleteStatement();
+        string ConstructFullCountStatement(FormattableString whereClause = null);
     }
 }
