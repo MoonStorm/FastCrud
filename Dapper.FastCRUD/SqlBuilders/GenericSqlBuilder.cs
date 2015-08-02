@@ -114,7 +114,7 @@
         
         public string ConstructFullCountStatement(FormattableString whereClause = null)
         {
-            var sql = $"SELECT COUNT({this.ConstructKeyColumnEnumeration()}) FROM{this.GetTableName()}";
+            var sql = $"SELECT COUNT({this.ConstructKeyColumnEnumeration()}) FROM {this.GetTableName()}";
 
             if (whereClause != null)
             {
