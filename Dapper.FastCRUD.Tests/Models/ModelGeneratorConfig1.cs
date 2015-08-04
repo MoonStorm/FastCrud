@@ -64,6 +64,7 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual string Name { get; set; }
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 		public virtual int AccessLevel { get; set; }
+		[ForeignKey("WorkstationId")]
 		public virtual IEnumerable<Employee> Employees { get; set; }
 	}
 

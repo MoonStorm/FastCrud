@@ -72,6 +72,7 @@
     <Compile Include="SqlBuilders\MySqlBuilder.cs" />
     <Compile Include="SqlBuilders\PostgreSqlBuilder.cs" />
     <Compile Include="SqlBuilders\SqLiteBuilder.cs" />
+    <Compile Include="SqlBuilders\EntityRelationship.cs" />
     <Compile Include="SqlDialect.cs" />
     <Compile Include="SqlStatements\GenericSqlStatements.cs" />
     <Compile Include="SqlStatements\ISqlStatements.cs" />

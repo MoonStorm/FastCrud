@@ -94,7 +94,7 @@
                 }
                 else if((foreignKey = property.Attributes.OfType<ForeignKeyAttribute>().SingleOrDefault())!= null)
                 {
-                    this.SetPropertyInternal(property).SetForeignKeys(
+                    this.SetPropertyInternal(property).SetRelationship(
                         foreignKey.Name
                         .Split(',')
                         .Select(foreignKeyPropName => foreignKeyPropName.Trim())

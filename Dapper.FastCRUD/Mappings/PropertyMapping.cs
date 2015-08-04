@@ -12,7 +12,7 @@
         private readonly EntityMapping _entityMapping;
         private string _databaseColumnName;
         private readonly int _order;
-        private string[] _foreignKeyPropertyNames = new string[0];
+        private string[] _relationshipPropertyNames;
 
         /// <summary>
         /// Default constructor.
@@ -27,63 +27,61 @@
         }
 
         /// <summary>
-        /// Gets or sets the property name that represents the foreign key to be used for fetching the referenced entity. 
-        /// This can only be set on properties that have an entity type.
+        /// Gets or sets the property names that are used in the primary - foreign entity relationships. 
+        /// This can only be set on properties that have an entity type (in case of children-parent relationships) or are of type IEnumerable (in case of parent-children relationships).
         /// </summary>
-        public string[] ForeignKeyPropertyNames
+        public string[] RelationshipPropertyNames
         {
             get
             {
-                return _foreignKeyPropertyNames;
+                return _relationshipPropertyNames;
             }
             set
             {
                 this.ValidateState();
 
-                this._foreignKeyPropertyNames = value??new string[0];
-                if (this._foreignKeyPropertyNames.Length == 0)
-                {
-                    _options &= ~PropertyMappingOptions.ReferencingForeignEntity;
-                }
-                else
+                this._relationshipPropertyNames = value;
+                if (value != null)
                 {
                     _options |= PropertyMappingOptions.ReferencingForeignEntity;
                     this.IsExcludedFromUpdates = true;
                     this.IsExcludedFromInserts = true;
                 }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.ReferencingForeignEntity;
+                }
             }
         }
 
         /// <summary>
-        /// Sets the property name that represents the foreign key to be used for fetching the referenced entity. 
-        /// This can only be set on properties that have an entity type.
+        /// Sets the property names that are used in the primary - foreign entity relationships. 
+        /// This can only be set on properties that have an entity type (in case of children-parent relationships) or are of type IEnumerable (in case of parent-children relationships).
         /// </summary>
-        public PropertyMapping SetForeignKeys(params string[] propertyNames)
+        public PropertyMapping SetRelationship(params string[] propertyNames)
         {
-            this.ForeignKeyPropertyNames = propertyNames;
+            this.RelationshipPropertyNames = propertyNames;
+            return this;
+        }
+
+        /// <summary>
+        /// Removes any relationships with foreign entities, in either parent-children or children-parent relationships. 
+        /// </summary>
+        public PropertyMapping RemoveRelationship()
+        {
+            this.RelationshipPropertyNames = null;
             return this;
         }
 
         /// <summary>
         /// Gets a flag indicating the property is referencing a foreign entity.
-        /// One can be set via <see cref="ForeignKeyPropertyNames"/>.
+        /// One can be set via <see cref="SetRelationship"/>.
         /// </summary>
         public bool IsReferencingForeignEntity
         {
             get
             {
                 return (_options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity;
-            }
-            set
-            {
-                this.ValidateState();
-
-                if (value)
-                {
-                    throw new InvalidOperationException($"'{nameof(IsReferencingForeignEntity)}' cannot be set. Please use '{nameof(ForeignKeyPropertyNames)}' instead.");
-                }
-
-                this.ForeignKeyPropertyNames = null;
             }
         }
 
@@ -278,7 +276,7 @@
 
                 Requires.NotNullOrEmpty(value, nameof(this.DatabaseColumnName));
                 _databaseColumnName = value;
-                _foreignKeyPropertyNames = new string[0];
+                _relationshipPropertyNames = new string[0];
             }
         }
 
@@ -327,8 +325,14 @@
             var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this._order, this.Descriptor);
             clonedPropertyMapping._options = this._options;
             clonedPropertyMapping._databaseColumnName = this._databaseColumnName;
-            clonedPropertyMapping._foreignKeyPropertyNames = new string[this._foreignKeyPropertyNames.Length];
-            Array.Copy(this._foreignKeyPropertyNames, clonedPropertyMapping._foreignKeyPropertyNames, this._foreignKeyPropertyNames.Length);
+            if (this._relationshipPropertyNames != null)
+            {
+                clonedPropertyMapping._relationshipPropertyNames = new string[this._relationshipPropertyNames.Length];
+                Array.Copy(
+                    this._relationshipPropertyNames,
+                    clonedPropertyMapping._relationshipPropertyNames,
+                    this._relationshipPropertyNames.Length);
+            }
             return clonedPropertyMapping;
         }
 

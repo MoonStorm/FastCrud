@@ -68,6 +68,7 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 <#}#>
 <#foreach(var tableKey in from k in tbl.InnerKeys group k by k.ReferencingTableName into gk select new {ReferencingTableName=gk.Key, Keys=gk})
 {#>
+		[ForeignKey("<#=string.Join(",", tableKey.Keys.Select(key => tbl[key.ReferencingTableColumnName].PropertyName))#>")]
 		public virtual IEnumerable<<#=tables[tableKey.ReferencingTableName].ClassName #>> <#=Pluralize(tables[tableKey.ReferencingTableName].CleanName) #> { get; set; }
 <#}#>
 <#}#>

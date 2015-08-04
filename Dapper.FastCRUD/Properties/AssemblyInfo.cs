@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Dapper.FastCRUD")]
 [assembly: AssemblyDescription("A simple and fast wrapper for Dapper.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MoonStorm")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Dapper.FastCRUD")]
 [assembly: AssemblyCopyright("Copyright © Dan Cristiu 2015")]
 [assembly: AssemblyTrademark("")]
@@ -36,5 +36,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.1.39")]
+[assembly: AssemblyVersion("2.0.1.40")]
 // [assembly: AssemblyFileVersion("1.0.0.*")]

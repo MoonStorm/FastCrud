@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -8,9 +9,12 @@
 
     internal abstract class GenericStatementSqlBuilder:IStatementSqlBuilder
     {
+        private ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
+
         protected GenericStatementSqlBuilder(EntityMapping entityMapping, bool usesTableSchema, string tableAndColumnDelimiter)
             :this(entityMapping,usesTableSchema,tableAndColumnDelimiter,tableAndColumnDelimiter,tableAndColumnDelimiter,tableAndColumnDelimiter)
         {            
+            _entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
         }
 
         protected GenericStatementSqlBuilder(
@@ -54,6 +58,13 @@
                 .Where(propMapping => propMapping.Value.IsReferencingForeignEntity)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
+        }
+
+        public virtual EntityRelationship GetRelationship(IStatementSqlBuilder destination)
+        {
+            return _entityRelationships.GetOrAdd(
+                destination,
+                (destinationSqlBuilder) => new EntityRelationship(this, destinationSqlBuilder));
         }
 
         public virtual string GetTableName(string alias = null)
@@ -131,9 +142,9 @@
             }
             queryBuilder.Append($" FROM {this.GetTableName()}");
 
-            IStatementSqlBuilder joinLeftSqlBuilder = this;
+            IStatementSqlBuilder leftSqlBuilder = this;
 
-            foreach (var additionalInclude in additionalIncludes)
+            foreach (var rightSqlBuilder in additionalIncludes)
             {
                 // find the property linked to this entity
                 var atLeastOneLinkProp = false;
