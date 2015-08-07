@@ -28,5 +28,6 @@
         string GetColumnName(PropertyMapping propMapping, string alias = null);
 
         EntityRelationship GetRelationship(IStatementSqlBuilder destination);
+        string ConstructFullCountStatement(FormattableString whereClause = null);
     }
 }
