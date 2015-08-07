@@ -23,6 +23,7 @@ Code first entities are also supported which can either be decorated with attrib
 - dbConnection.Get(new Entity() {Id = 10});
 - dbConnection.Update(updatedEntity);
 - dbConnection.Delete(entity)
+- dbConnection.Count()
 - dbConnection.Find<Entity>(
         whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam", 
         orderClause:$"{nameof(Entity.LastName)} DESC", 

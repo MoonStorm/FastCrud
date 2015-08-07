@@ -24,5 +24,6 @@
         public List<object> InsertedEntities { get; private set; }
         public List<object> QueriedEntities { get; set; }
         public List<object> UpdatedEntities { get; set; }
+        public int QueriedEntitiesDbCount { get; set; }
     }
 }

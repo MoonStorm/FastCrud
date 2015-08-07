@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\beta\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models
@@ -64,6 +64,7 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual string Name { get; set; }
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 		public virtual int AccessLevel { get; set; }
+		public virtual int InventoryIndex { get; set; }
 		[ForeignKey("WorkstationId")]
 		public virtual IEnumerable<Employee> Employees { get; set; }
 	}

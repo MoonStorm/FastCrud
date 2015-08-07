@@ -184,6 +184,7 @@
                 command.CommandText =
                     $@"CREATE TABLE Workstations (
 	                        WorkstationId integer primary key AUTOINCREMENT,
+                            InventoryIndex int NOT NULL,
 	                        Name nvarchar(50) NULL,
                             AccessLevel int NOT NULL DEFAULT(1)
                         )";
@@ -277,6 +278,7 @@
                         CREATE TABLE Workstations (
 	                        WorkstationId BIGSERIAL,
 	                        Name varchar(50) NOT NULL,
+                            InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
 	                        PRIMARY KEY (WorkstationId)
                         );
@@ -349,6 +351,7 @@
                         CREATE TABLE `Workstations` (
 	                        WorkstationId bigint NOT NULL AUTO_INCREMENT,
 	                        Name nvarchar(50) NOT NULL,
+                            InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
 	                        PRIMARY KEY (WorkstationId)
                         );
@@ -399,6 +402,7 @@
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Workstations](
 	                    [WorkstationId] [bigint] IDENTITY(2,1) NOT NULL,
 	                    [Name] [nvarchar](50) NULL,
+                        [InventoryIndex] [int] NOT NULL,
                         [AccessLevel] [int] NOT NULL DEFAULT(1),
                         CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED 
                         (

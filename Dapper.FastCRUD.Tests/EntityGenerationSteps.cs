@@ -13,9 +13,8 @@
         {
             return new Employee()
             {
-                WorkstationId = entityIndex++,
                 FirstName = $"First Name {entityIndex}",
-                LastName = $"Last Name {entityIndex}",
+                LastName = $"Last Name {entityIndex++}",
                 BirthDate = new DateTime(rnd.Next(2000,2010), rnd.Next(1,12),rnd.Next(1,28), rnd.Next(0,23), rnd.Next(0,59), rnd.Next(0,59))
             };
         }
@@ -24,6 +23,7 @@
         {
             return new Workstation()
             {
+                InventoryIndex = entityIndex,
                 Name = $"Workstation {entityIndex++}"
             };
         }

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using Dapper.FastCrud.Mappings;
@@ -95,6 +96,14 @@
             return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, alias)}=@{propInfo.PropertyName}"));
         }
 
+        public virtual string ConstructKeyColumnEnumeration(string alias = null)
+        {
+            var sqlAlias = alias == null ? string.Empty : $"{alias}.";
+            return string.Join(
+                ",",
+                KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}"));
+        }
+
         public virtual string ConstructColumnEnumerationForSelect(string alias = null)
         {
             return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, alias)));
@@ -126,6 +135,18 @@
         {
             return $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}";
         }
+        
+        public string ConstructFullCountStatement(FormattableString whereClause = null)
+        {
+            var sql = $"SELECT COUNT(*) FROM {this.GetTableName()}"; //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
+
+            if (whereClause != null)
+            {
+                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+            }
+
+            return sql;
+        }
 
         public virtual string ConstructFullSingleSelectStatement()
         {
@@ -135,43 +156,43 @@
         public virtual string ConstructMultiSelectStatement(IStatementSqlBuilder[] additionalIncludes)
         {
             var queryBuilder = new StringBuilder();
-            queryBuilder.Append($"SELECT {this.ConstructColumnEnumerationForSelect(this.GetTableName())}");
-            foreach (var additionalInclude in additionalIncludes)
-            {
-                queryBuilder.Append($",{additionalInclude.ConstructColumnEnumerationForSelect(additionalInclude.GetTableName())}");
-            }
-            queryBuilder.Append($" FROM {this.GetTableName()}");
+            //queryBuilder.Append($"SELECT {this.ConstructColumnEnumerationForSelect(this.GetTableName())}");
+            //foreach (var additionalInclude in additionalIncludes)
+            //{
+            //    queryBuilder.Append($",{additionalInclude.ConstructColumnEnumerationForSelect(additionalInclude.GetTableName())}");
+            //}
+            //queryBuilder.Append($" FROM {this.GetTableName()}");
 
-            IStatementSqlBuilder leftSqlBuilder = this;
+            //IStatementSqlBuilder leftSqlBuilder = this;
 
-            foreach (var rightSqlBuilder in additionalIncludes)
-            {
-                // find the property linked to this entity
-                var atLeastOneLinkProp = false;
-                var joinLeftProps = joinLeftSqlBuilder.ForeignEntityProperties
-                    .Where(propInfo => propInfo.Descriptor.PropertyType == additionalInclude.EntityMapping.EntityType)
-                    .Select(propInfo => joinLeftSqlBuilder.EntityMapping.PropertyMappings[propInfo.PropertyName]);
+            //foreach (var rightSqlBuilder in additionalIncludes)
+            //{
+            //    // find the property linked to this entity
+            //    var atLeastOneLinkProp = false;
+            //    var joinLeftProps = joinLeftSqlBuilder.ForeignEntityProperties
+            //        .Where(propInfo => propInfo.Descriptor.PropertyType == additionalInclude.EntityMapping.EntityType)
+            //        .Select(propInfo => joinLeftSqlBuilder.EntityMapping.PropertyMappings[propInfo.PropertyName]);
 
-                foreach (var joinLeftProp in joinLeftProps)
-                {
-                    if (!atLeastOneLinkProp)
-                    {
-                        atLeastOneLinkProp = true;
-                        queryBuilder.Append($" LEFT OUTER JOIN {additionalInclude.GetTableName()} ON ");
-                    }
-                    else
-                    {
-                        queryBuilder.Append(" AND ");
-                    }
-                    queryBuilder.Append( $"{joinLeftSqlBuilder.GetColumnName(joinLeftProp, joinLeftSqlBuilder.GetTableName())}={additionalInclude.GetColumnName(joinLeftProp, additionalInclude.GetTableName())}");
-                }
+            //    foreach (var joinLeftProp in joinLeftProps)
+            //    {
+            //        if (!atLeastOneLinkProp)
+            //        {
+            //            atLeastOneLinkProp = true;
+            //            queryBuilder.Append($" LEFT OUTER JOIN {additionalInclude.GetTableName()} ON ");
+            //        }
+            //        else
+            //        {
+            //            queryBuilder.Append(" AND ");
+            //        }
+            //        queryBuilder.Append( $"{joinLeftSqlBuilder.GetColumnName(joinLeftProp, joinLeftSqlBuilder.GetTableName())}={additionalInclude.GetColumnName(joinLeftProp, additionalInclude.GetTableName())}");
+            //    }
 
-                if (!atLeastOneLinkProp)
-                {
-                    throw new InvalidOperationException($"No foreign key constraint was found between the primary entity {joinLeftSqlBuilder.EntityMapping.EntityType} and the foreign entity {additionalInclude.EntityMapping.EntityType}");
-                }
-                joinLeftSqlBuilder = additionalInclude;
-            }
+            //    if (!atLeastOneLinkProp)
+            //    {
+            //        throw new InvalidOperationException($"No foreign key constraint was found between the primary entity {joinLeftSqlBuilder.EntityMapping.EntityType} and the foreign entity {additionalInclude.EntityMapping.EntityType}");
+            //    }
+            //    joinLeftSqlBuilder = additionalInclude;
+            //}
 
             return queryBuilder.ToString();
         }
