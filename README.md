@@ -43,7 +43,7 @@ OrmConfiguration.RegisterEntity<Building>()
 Alternatively you can let the library create the default mappings, which can then be queried via ``OrmConfiguration.GetDefaultEntityMapping``, tweaked and set back again as defaults or for multi-mapping purposes. 
 
 
-#### Entity Generation
+#### Entity generation
 Entity generation can be easily performed by installing the NuGet package ``Dapper.FastCrud.ModelGenerator`` and adjusting your (``*Config.tt``) files. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. You'll need a LocalDb or an MsSql server that contains the schema. 
 By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
 ```
@@ -86,20 +86,19 @@ To understand the logic behind the CRUD operations, let's have a look at an enti
 - The ``DatabaseGenerated`` attribute is generated for database fields that are either identity columns or have a default value. 
 An ``Insert`` operation will always exclude properties decorated with a ``DatabaseGenerated`` attribute, but will update the entity with the database generated values on return.
 In case you have primary keys and other fields that are not database generated, it's your responsibility to set them up prior to calling ``Insert``.
-- While this was not produced by the T4 template, you can use the ``Column`` attribute to override the column name, if you so desire, in a code first approach.
 
-#### Code First
+#### Runtime entity registration
 You don't have to use the T4 template or the attributes to describe your entity. You can register the entities at runtime.
 ```
     OrmConfiguration.RegisterEntity<Building>()
         .SetTableName("Buildings")
         .SetProperty(building => buildingRenovationDate)
-        .SetProperty(building => building.BuildingId,prop => prop.SetPrimaryKey()..SetDatabaseGenerated().SetDatabaseColumnName("Id"))
+        .SetProperty(building => building.BuildingId,prop => prop.SetPrimaryKey().SetDatabaseGenerated())
         .SetProperty(building => building.Name, prop=> prop.SetDatabaseColumnName("BuildingName"));
 
 ```
 
-#### Multi-Mappings
+#### Multi-mappings
 This is a unique concept that helps in data migration accross multiple types of databases, partial updates, and so much more.
 Every entity has a default mapping attached, which informs FastCrud about how to construct the SQL queries. This default mapping can be set or queried via ``OrmConfiguration.SetDefaultEntityMapping`` and ``OrmConfiguration.GetDefaultEntityMapping``. 
 
@@ -139,8 +138,18 @@ You can also create a mapping that uses a different dialect, useful for migratin
 ```
 You can then pass this mapping to the insert method.
 
-#### Manual Sql Constructs
+#### Manual Sql constructs
 ``OrmConfiguration.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
+
+#### FAQ
+##### No database column name overrides?
+Short answer: No.
+Long answer: There is support in the library for overriding the default database column name bound to a property, both in the form of a standard framework attribute (``ColumnAttribute``) or at runtime (``SetDatabaseColumnName``). I would STRONGLY advise against going down this path. If you do this, all the verbatim clauses that you'll use sooner or later will fail with the ``nameof(Entity.Property)`` operator. You'll need to use the ``ISqlBuilder`` extensively to properly resolve your properties to DB fields. The objects at this level are low level database entities. You shouldn't be afraid to apply rename refactoring if you know you've used ``nameof`` everywhere. Rename refactoring at this level won't impact your business level/DTO entities.
+##### What about relationships?
+Due to the complexity of JOINs, you'll have to deal with this manually for the time being. Again, make extensive use of ``nameof`` and the sql builder present in this library. The experimental support in the provided T4 template or in the library should not be used at this point.
+##### Postgresql is using no table/column delimiter!
+True. While it was very easy for me to add one, I realized it would be a bad idea for general use. For example, if a table had a "Name" field, ``where {nameof(Entity.Name)}='John'`` would stop working. It would need to be changed to ``where \"{nameof(Entity.Name)}\"='John'`` or if the library had enforced the delimiters ``where {sqlBuilder.GetColumnName(nameof(Entity.Name))}='John'``. Not pretty. 
+However I realize that this should be the developer's choice, so I will add a way of setting the delimiters at runtime.
 
 #### Speed
 Most of us love Dapper for its speed. 
