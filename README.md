@@ -142,14 +142,14 @@ You can then pass this mapping to the insert method.
 ``OrmConfiguration.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
 
 #### FAQ
-##### No database column name overrides?
+###### No database column name overrides?
 Short answer: No.
 Long answer: There is support in the library for overriding the default database column name bound to a property, both in the form of a standard framework attribute (``ColumnAttribute``) or at runtime (``SetDatabaseColumnName``). I would STRONGLY advise against going down this path. If you do this, all the verbatim clauses that you'll use sooner or later will fail with the ``nameof(Entity.Property)`` operator. You'll need to use the ``ISqlBuilder`` extensively to properly resolve your properties to DB fields. The objects at this level are low level database entities. You shouldn't be afraid to apply rename refactoring if you know you've used ``nameof`` everywhere. Rename refactoring at this level won't impact your business level/DTO entities.
-##### What about relationships?
+###### What about relationships?
 Due to the complexity of JOINs, you'll have to deal with this manually for the time being. Again, make extensive use of ``nameof`` and the sql builder present in this library. The experimental support in the provided T4 template or in the library should not be used at this point.
-##### Postgresql is using no table/column delimiter!
-True. While it was very easy for me to add one, I realized it would be a bad idea for general use. For example, if a table had a "Name" field, ``where {nameof(Entity.Name)}='John'`` would stop working. It would need to be changed to ``where \"{nameof(Entity.Name)}\"='John'`` or if the library had enforced the delimiters ``where {sqlBuilder.GetColumnName(nameof(Entity.Name))}='John'``. Not pretty. 
-However I realize that this should be the developer's choice, so I will add a way of setting the delimiters at runtime.
+###### Postgresql dialect should use a table/column delimiter!
+While it is very easy for me to add one, I realized it would be a bad idea for general use. If you used delimiters to create your tables, all your queries that use non-delimited names would fail. In my opinion, a pretty rubbish behavior. For example, if a table had a "Name" field, ``where {nameof(Entity.Name)}='John'`` would stop working. It would need to be changed to ``where \"{nameof(Entity.Name)}\"='John'`` or, if the library had enforced the delimiters, ``where {sqlBuilder.GetColumnName(nameof(Entity.Name))}='John'``. Not pretty. 
+However I understand that this should be the developer's choice, so I will add a way of setting the delimiters at runtime at some point in the future.
 
 #### Speed
 Most of us love Dapper for its speed. 
