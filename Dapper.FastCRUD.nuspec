@@ -53,6 +53,7 @@ More details and benchmarks are available on the project site.
 - async methods added
 - count method added
 - fix for database column name overrides
+- easier entity registration for code-first
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
