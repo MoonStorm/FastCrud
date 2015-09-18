@@ -52,6 +52,7 @@ More details and benchmarks are available on the project site.
 - .NET 4.5 polyfills for string interpolation were removed and a library dependency was added instead.
 - async methods added
 - count method added
+- fix for database column name overrides
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
