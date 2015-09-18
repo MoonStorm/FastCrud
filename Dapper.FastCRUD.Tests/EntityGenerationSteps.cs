@@ -32,7 +32,6 @@
         {
             return new Building()
             {
-                BuildingId = entityIndex,
                 Name = $"Building {entityIndex++}"
             };
         }

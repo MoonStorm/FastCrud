@@ -175,6 +175,15 @@
         }
 
         /// <summary>
+        /// Registers a regular property.
+        /// </summary>
+        /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
+        public EntityMapping<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> property)
+        {
+            return this.SetProperty(property, (Action<PropertyMapping>)null);
+        }
+
+        /// <summary>
         /// Sets the mapping options for a property.
         /// </summary>
         /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
@@ -190,7 +199,10 @@
 
             var propName = ((MemberExpression)property.Body).Member.Name;
             var propMapping = this.SetPropertyInternal(propName);
-            propertySetupFct(propMapping);
+            if (propertySetupFct != null)
+            {
+                propertySetupFct(propMapping);
+            }
             return this;
         }
 
@@ -203,7 +215,7 @@
         [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
         public EntityMapping<TEntity> SetProperty<TProperty>(
             Expression<Func<TEntity, TProperty>> property,
-            PropertyMappingOptions options = PropertyMappingOptions.None,
+            PropertyMappingOptions options,
             string databaseColumnName = null)
         {
             Requires.NotNull(property, nameof(property));
@@ -349,7 +361,7 @@
         /// <param name="options">Column options</param>
         /// <param name="databaseColumnName">Optional database column name override.</param>
         [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
-        public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options=PropertyMappingOptions.None, string databaseColumnName = null)
+        public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
         {
             this.ValidateState();
             Requires.NotNull(propertyName, nameof(propertyName));

@@ -86,6 +86,18 @@ To understand the logic behind the CRUD operations, let's have a look at an enti
 - The ``DatabaseGenerated`` attribute is generated for database fields that are either identity columns or have a default value. 
 An ``Insert`` operation will always exclude properties decorated with a ``DatabaseGenerated`` attribute, but will update the entity with the database generated values on return.
 In case you have primary keys and other fields that are not database generated, it's your responsibility to set them up prior to calling ``Insert``.
+- While this was not produced by the T4 template, you can use the ``Column`` attribute to override the column name, if you so desire, in a code first approach.
+
+#### Code First
+You don't have to use the T4 template or the attributes to describe your entity. You can register the entities at runtime.
+```
+    OrmConfiguration.RegisterEntity<Building>()
+        .SetTableName("Buildings")
+        .SetProperty(building => buildingRenovationDate)
+        .SetProperty(building => building.BuildingId,prop => prop.SetPrimaryKey()..SetDatabaseGenerated().SetDatabaseColumnName("Id"))
+        .SetProperty(building => building.Name, prop=> prop.SetDatabaseColumnName("BuildingName"));
+
+```
 
 #### Multi-Mappings
 This is a unique concept that helps in data migration accross multiple types of databases, partial updates, and so much more.
@@ -128,7 +140,7 @@ You can also create a mapping that uses a different dialect, useful for migratin
 You can then pass this mapping to the insert method.
 
 #### Manual Sql Constructs
-``dbConnection.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
+``OrmConfiguration.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
 
 #### Speed
 Most of us love Dapper for its speed. 

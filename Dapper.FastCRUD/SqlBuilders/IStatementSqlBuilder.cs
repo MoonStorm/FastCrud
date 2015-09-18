@@ -25,7 +25,7 @@
         string ConstructFullInsertStatement();
         string ConstructFullUpdateStatement();
         string ConstructFullDeleteStatement();
-        string GetColumnName(PropertyMapping propMapping, string alias = null);
+        string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization);
 
         EntityRelationship GetRelationship(IStatementSqlBuilder destination);
         string ConstructFullCountStatement(FormattableString whereClause = null);

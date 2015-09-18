@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Text;
     using Dapper.FastCrud.Mappings;
 
@@ -68,11 +68,11 @@
                 (destinationSqlBuilder) => new EntityRelationship(this, destinationSqlBuilder));
         }
 
-        public virtual string GetTableName(string alias = null)
+        public virtual string GetTableName(string tableAlias = null)
         {
-            var sqlAlias = alias == null
+            var sqlAlias = tableAlias == null
                 ? string.Empty
-                : $" AS {alias}";
+                : $" AS {tableAlias}";
 
             var fullTableName = ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(EntityMapping.SchemaName))
                                 ? $"{TableStartDelimiter}{EntityMapping.TableName}{TableEndDelimiter}"
@@ -80,38 +80,46 @@
             return $"{fullTableName}{sqlAlias}";
         }
 
-        public string GetColumnName(string propertyName, string alias = null)
+        public string GetColumnName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> property, string tableAlias = null)
         {
-            return this.GetColumnName(this.EntityMapping.PropertyMappings[propertyName], alias);
+            var propName = ((MemberExpression)property.Body).Member.Name;
+            return this.GetColumnName(propName, tableAlias);
         }
 
-        public virtual string GetColumnName(PropertyMapping propMapping, string alias = null)
+        public string GetColumnName(string propertyName, string tableAlias = null)
         {
-            var sqlAlias = alias == null ? string.Empty : $"{alias}.";
-            return $"{sqlAlias}{this.ColumnStartDelimiter}{propMapping.DatabaseColumnName}{this.ColumnEndDelimiter}";
+            return this.GetColumnName(this.EntityMapping.PropertyMappings[propertyName], tableAlias, false);
+        }
+
+        public virtual string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization)
+        {
+            var sqlTableAlias = tableAlias == null ? string.Empty : $"{tableAlias}.";
+            var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
+                                     ? $" AS {propMapping.PropertyName}"
+                                     : string.Empty;
+            return $"{sqlTableAlias}{this.ColumnStartDelimiter}{propMapping.DatabaseColumnName}{this.ColumnEndDelimiter}{sqlColumnAlias}";
         }
 
         public virtual string ConstructKeysWhereClause(string alias = null)
         {
-            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, alias)}=@{propInfo.PropertyName}"));
+            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, alias, false)}=@{propInfo.PropertyName}"));
         }
 
-        public virtual string ConstructKeyColumnEnumeration(string alias = null)
+        public virtual string ConstructKeyColumnEnumeration(string tableAlias = null)
         {
-            var sqlAlias = alias == null ? string.Empty : $"{alias}.";
             return string.Join(
                 ",",
-                KeyProperties.Select(propInfo => $"{sqlAlias}{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter}"));
+                KeyProperties.Select(propInfo => GetColumnName(propInfo, tableAlias, true)));
         }
 
-        public virtual string ConstructColumnEnumerationForSelect(string alias = null)
+        public virtual string ConstructColumnEnumerationForSelect(string tableAlias = null)
         {
-            return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, alias)));
+            return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
         }
 
         public virtual string ConstructColumnEnumerationForInsert()
         {
-            return string.Join(",", this.InsertProperties.Select(propInfo => this.GetColumnName(propInfo)));
+            return string.Join(",", this.InsertProperties.Select(propInfo => this.GetColumnName(propInfo, null, false)));
         }
 
         public virtual string ConstructParamEnumerationForInsert()
@@ -119,9 +127,9 @@
             return string.Join(",", this.InsertProperties.Select(propInfo => $"@{propInfo.PropertyName}"));
         }
 
-        public virtual string ConstructUpdateClause(string alias = null)
+        public virtual string ConstructUpdateClause(string tableAlias = null)
         {
-            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, alias)}=@{propInfo.PropertyName}"));
+            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
         }
 
         public abstract string ConstructFullInsertStatement();

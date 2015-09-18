@@ -23,7 +23,7 @@
     public class DatabaseSteps
     {
         private DatabaseTestContext _testContext;
-        private const string DatabaseName = "TestDatabase";
+        private const string DatabaseName = "TestFastCrudDatabase";
         //private static string OriginalDatabaseFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data");
         //private static string FinalDatabaseFolder = Path.Combine(OriginalDatabaseFolder, $"FastCrudDatabaseTests");
 
@@ -208,8 +208,8 @@
             using (var command = _testContext.DatabaseConnection.CreateCommand())
             {
                 command.CommandText = $@"CREATE TABLE Buildings (
-	                        BuildingId integer primary key,
-	                        Name nvarchar(50) NULL
+	                        Id integer primary key AUTOINCREMENT,
+	                        BuildingName nvarchar(50) NULL
                         )";
 
                 command.ExecuteNonQuery();
@@ -284,9 +284,9 @@
                         );
 
                         CREATE TABLE Buildings (
-	                        BuildingId int NOT NULL,
-	                        Name varchar(50) NULL,
-	                        PRIMARY KEY (BuildingId)
+	                        Id SERIAL,
+	                        BuildingName varchar(50) NULL,
+	                        PRIMARY KEY (Id)
                         );
                     ";
                     command.ExecuteNonQuery();
@@ -340,7 +340,7 @@
 	                        PRIMARY KEY (UserId, EmployeeId)
                         );
 
-                        ALTER TABLE Employee auto_increment=2;
+                        ALTER TABLE `Employee` auto_increment=2;
 
                         CREATE TRIGGER `Employee_Assign_UUID`
                             BEFORE INSERT ON Employee
@@ -356,13 +356,16 @@
 	                        PRIMARY KEY (WorkstationId)
                         );
 
-                        ALTER TABLE Workstations auto_increment=2;
+                        ALTER TABLE `Workstations` auto_increment=2;
 
                         CREATE TABLE `Buildings` (
-	                        BuildingId int NOT NULL,
-	                        Name nvarchar(50) NULL,
-	                        PRIMARY KEY (BuildingId)
+	                        Id int NOT NULL AUTO_INCREMENT,
+	                        BuildingName nvarchar(50) NULL,
+	                        PRIMARY KEY (Id)
                         );
+
+                        ALTER TABLE `Buildings` auto_increment=2;
+
                     ";
                     command.ExecuteNonQuery();
                 }
@@ -425,11 +428,11 @@
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
-	                    [BuildingId] [int]  NOT NULL,
-	                    [Name] [nvarchar](50) NULL,
+	                    [Id] [int] IDENTITY(2,1) NOT NULL,
+	                    [BuildingName] [nvarchar](50) NULL,
                         CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED 
                         (
-	                        [BuildingId] ASC
+	                        [Id] ASC
                         ))");
 
                 ////// attach the test dbs
@@ -466,14 +469,21 @@
                 var database = serverManagement.Databases[DatabaseName];
                 if (database != null)
                 {
-                    // drop any active connections
-                    database.UserAccess = DatabaseUserAccess.Single;
-                    database.Alter(TerminationClause.RollbackTransactionsImmediately);
-                    database.Refresh();
+                    try
+                    {
+                        // drop any active connections
+                        database.UserAccess = DatabaseUserAccess.Single;
+                        database.Alter(TerminationClause.RollbackTransactionsImmediately);
+                        database.Refresh();
 
-                    database.UserAccess = DatabaseUserAccess.Multiple;
-                    database.Alter(TerminationClause.RollbackTransactionsImmediately);
-                    database.Refresh();
+                        database.UserAccess = DatabaseUserAccess.Multiple;
+                        database.Alter(TerminationClause.RollbackTransactionsImmediately);
+                        database.Refresh();
+                    }
+                    catch (Exception ex)
+                    {
+                        // this may fail if the db files are no longer there
+                    }
 
                     database.Drop();
                     //serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
@@ -492,9 +502,8 @@
 
             OrmConfiguration.RegisterEntity<Building>()
                 .SetTableName("Buildings")
-                .SetProperty(nameof(Building.BuildingId), PropertyMappingOptions.KeyProperty)
-                .SetProperty(nameof(Building.Name));
-
+                .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseColumnName("Id").SetDatabaseGenerated())
+                .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"));
         }
     }
 }

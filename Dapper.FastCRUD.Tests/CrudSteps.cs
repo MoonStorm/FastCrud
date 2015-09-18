@@ -1,8 +1,6 @@
 ﻿namespace Dapper.FastCrud.Tests
 {
     using System;
-    using System.ComponentModel.Design;
-    using System.Data.SqlTypes;
     using System.Linq;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Tests.Models;
@@ -150,10 +148,11 @@
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
         public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int max, int skip)
         {
+            var sqlBuilder = OrmConfiguration.GetSqlBuilder<Workstation>();
             _testContext.QueriedEntities.AddRange(
                 _testContext.DatabaseConnection.Find<Workstation>(
-                    whereClause: $"{nameof(Workstation.WorkstationId)} IS NOT NULL",
-                    orderClause: $"{nameof(Workstation.InventoryIndex)} DESC",
+                    whereClause: $"{sqlBuilder.GetColumnName(nameof(Workstation.WorkstationId))} IS NOT NULL",
+                    orderClause: $"{sqlBuilder.GetColumnName(nameof(Workstation.InventoryIndex))} DESC",
                     skipRowsCount: skip,
                     limitRowsCount: max));
         }

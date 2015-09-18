@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dapper.FastCrud.SqlBuilders
+﻿namespace Dapper.FastCrud.SqlBuilders
 {
+    using System;
     using System.Globalization;
+    using System.Linq;
     using Dapper.FastCrud.Mappings;
 
     internal class MsSqlBuilder : GenericStatementSqlBuilder
@@ -21,7 +17,7 @@ namespace Dapper.FastCrud.SqlBuilders
             string outputQuery;
             if (InsertDatabaseGeneratedProperties.Length > 0)
             {
-                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{propInfo.PropertyName}"));
+                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo,null,true)}"));
                 outputQuery = $"OUTPUT {outputColumns}";
             }
             else

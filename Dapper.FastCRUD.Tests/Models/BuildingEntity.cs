@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dapper.FastCrud.Tests.Models
+﻿namespace Dapper.FastCrud.Tests.Models
 {
+    using System;
+    using System.ComponentModel.DataAnnotations.Schema;
+
+    /// <summary>
+    /// Code first entity. Do not set attributes!
+    /// </summary>
     public class Building
     {
         public int BuildingId { get; set; }

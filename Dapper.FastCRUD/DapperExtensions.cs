@@ -341,10 +341,13 @@
         }
 
         /// <summary>
-        /// Gets the table name for an entity type
+        /// Returns an SQL builder helpful for constructing verbatim SQL queries.
+        /// This will just forward the call to <see cref="OrmConfiguration.GetSqlBuilder{TEntity}"/>.
         /// </summary>
-        /// <param name="connection">Database connection.</param>
-        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="entityMappingOverride">If NULL, de default entity mapping will be used.</param>
+        /// <param name="connection">Not used.</param>
+        [Obsolete("Please use OrmConfiguration.GetSqlBuilder<TEntity> instead",false)]
         public static ISqlBuilder GetSqlBuilder<TEntity>(this IDbConnection connection, EntityMapping<TEntity> entityMappingOverride = null)
         {
             return OrmConfiguration.GetSqlBuilder<TEntity>(entityMappingOverride);

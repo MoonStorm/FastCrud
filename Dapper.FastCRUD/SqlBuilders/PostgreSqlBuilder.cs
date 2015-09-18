@@ -7,9 +7,16 @@
 
     internal class PostgreSqlBuilder : GenericStatementSqlBuilder
     {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <remarks>
+        /// http://www.postgresql.org/docs/8.0/static/sql-syntax.html#SQL-SYNTAX-IDENTIFIERS
+        /// </remarks>
         public PostgreSqlBuilder(EntityMapping entityMapping)
             : base(entityMapping, true, string.Empty)
         {
+            // decided not to use the standard delimiter (double quotes) due to problems when using nameof(columnName) without the delimiter in various clauses
         }
 
         public override string ConstructFullInsertStatement()
