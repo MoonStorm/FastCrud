@@ -94,7 +94,7 @@ You don't have to use the T4 template or the attributes to describe your entity.
         .SetTableName("Buildings")
         .SetProperty(building => buildingRenovationDate)
         .SetProperty(building => building.BuildingId,prop => prop.SetPrimaryKey().SetDatabaseGenerated())
-        .SetProperty(building => building.Name, prop=> prop.SetDatabaseColumnName("BuildingName"));
+        .SetProperty(building => building.Name);
 
 ```
 
