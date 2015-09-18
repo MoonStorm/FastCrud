@@ -55,16 +55,16 @@ To understand the logic behind the CRUD operations, let's have a look at an enti
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual int UserId { get; set; }
+		public int UserId { get; set; }
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-		public virtual Guid EmployeeId { get; set; }
+		public Guid EmployeeId { get; set; }
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-		public virtual Guid KeyPass { get; set; }
-		public virtual string LastName { get; set; }
-		public virtual string FirstName { get; set; }
-		public virtual DateTime BirthDate { get; set; }
-		public virtual int? WorkstationId { get; set; }
+		public Guid KeyPass { get; set; }
+		public string LastName { get; set; }
+		public string FirstName { get; set; }
+		public DateTime BirthDate { get; set; }
+		public int? WorkstationId { get; set; }
 	}
 
 ```
