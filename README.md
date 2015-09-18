@@ -44,7 +44,7 @@ By default the script looks into the ``app.config`` file for a connection string
 ```
 When this is all done, open up the ``*Config.tt`` file and save it. Alternatively right click on the file and click on ``Run Custom Tool``. Your entities will be generated.
 
-#### Rules
+#### CRUD behavior
 To understand the logic behind the CRUD operations, let's have a look at an entity ``Employee``, produced by the T4 template. The same rules apply for code first entities with mappings set at runtime.
 ```
     /// <summary>
@@ -116,7 +116,6 @@ You can also remove entire property mappings, which allows you to work with a su
                             nameof(CompanyInformation.Name));
 
 ```
-This custom mapping override can then be passed to any CRUD methods, just be careful not to use it for inserts.
 
 You can also create a mapping that uses a different dialect, useful for migrating data from one database type to another.
 ```
