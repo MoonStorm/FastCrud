@@ -33,7 +33,7 @@ This is where the power of the C# 6 compiler comes into play, and leaves no chan
 
 #### Entity generation
 Entity generation can be easily performed by installing the NuGet package ``Dapper.FastCrud.ModelGenerator`` and by creating  your own (``*Config.tt``) files that use the generic template provided in this package. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. For this approach, you'll need a LocalDb or an MsSql server that contains the schema. 
-By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
+By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise creating a separate ``.config`` file and adjusting your ``*Config.tt`` accordingly.
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
