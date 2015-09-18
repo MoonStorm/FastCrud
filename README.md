@@ -3,7 +3,7 @@ The fastest micro-orm extension for Dapper.
 For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
 
 The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
-For .NET 4.5, the package will also install the dependency ``StringInterpolationBridge``, which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015.
+For .NET 4.5, the package has a dependency on ``StringInterpolationBridge``, which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015. The reason why the polyfills were not directly included in the library is to avoid clashes with other libraries that will sooner or later make use of them.
 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
