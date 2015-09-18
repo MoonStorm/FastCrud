@@ -31,18 +31,6 @@ Code first entities are also supported which can either be decorated with attrib
         queryParameters: new {FirstNameParam: "John"});
 This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
 
-#### POCOs
-You can provide information about the entities that are going to be used in DB operations, without decorating them with attributes, using ``OrmConfiguration.RegisterEntity`` or  ``OrmConfiguration.SetDefaultEntityMapping``.
-```
-OrmConfiguration.RegisterEntity<Building>()
-                .SetTableName("Buildings")
-                .SetProperty(nameof(Building.BuildingId), PropertyMappingOptions.KeyProperty)
-                .SetProperty(nameof(Building.Name));
-
-```
-Alternatively you can let the library create the default mappings, which can then be queried via ``OrmConfiguration.GetDefaultEntityMapping``, tweaked and set back again as defaults or for multi-mapping purposes. 
-
-
 #### Entity generation
 Entity generation can be easily performed by installing the NuGet package ``Dapper.FastCrud.ModelGenerator`` and adjusting your (``*Config.tt``) files. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. You'll need a LocalDb or an MsSql server that contains the schema. 
 By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
@@ -87,7 +75,7 @@ To understand the logic behind the CRUD operations, let's have a look at an enti
 An ``Insert`` operation will always exclude properties decorated with a ``DatabaseGenerated`` attribute, but will update the entity with the database generated values on return.
 In case you have primary keys and other fields that are not database generated, it's your responsibility to set them up prior to calling ``Insert``.
 
-#### Runtime entity registration
+#### Entity registration at runtime
 You don't have to use the T4 template or the attributes to describe your entity. You can register the entities at runtime.
 ```
     OrmConfiguration.RegisterEntity<Building>()
