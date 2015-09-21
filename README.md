@@ -141,7 +141,7 @@ Long answer: There is support in the library for overriding the default database
 Due to the complexity of JOINs, you'll have to deal with this manually for the time being. Again, make extensive use of ``nameof`` and the sql builder present in this library. The experimental support in the provided T4 template or in the library should not be used at this point.
 
 ###### Postgresql dialect should use a table/column delimiter!
-While it is very easy for me to add one, I realized it would be a bad idea for general use. If you used delimiters to create your tables, all your queries that use non-delimited names would fail. In my opinion, a rubbish behavior exposed by  Postgresql. For example, if a table had a "Name" field, ``where {nameof(Entity.Name)}='John'`` would stop working. It would need to be changed to ``where \"{nameof(Entity.Name)}\"='John'`` or, if the library had enforced the delimiters, ``where {sqlBuilder.GetColumnName(nameof(Entity.Name))}='John'``. Not pretty. 
+While it is very easy for me to add one, I realized it would be a bad idea for general use. If you used delimiters to create your tables, all your queries that use non-delimited names would fail. For example, if a table had a "Name" field, ``where {nameof(Entity.Name)}='John'`` would stop working. It would need to be changed to ``where \"{nameof(Entity.Name)}\"='John'`` or, if the library had enforced the delimiters, ``where {sqlBuilder.GetColumnName(nameof(Entity.Name))}='John'``. Not pretty. 
 
 However, I understand that this should be the developer's choice, so I will add a way of setting the delimiters at runtime at some point in the future.
 
