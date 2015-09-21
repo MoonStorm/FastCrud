@@ -1,9 +1,7 @@
-The fastest micro-orm extension for Dapper.
+``Dapper.FastCrud`` is the fastest micro-orm extension for Dapper. It is built around essential features of the C# 6 that has finally raised the simplicity of raw SQL constructs to acceptable maintenance levels.
 
-For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
-
-The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
-For .NET 4.5, the package has a dependency on ``StringInterpolationBridge``, which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015. The reason why the polyfills were not directly included in the library is to avoid clashes with other libraries that will sooner or later make use of them.
+The package contains the .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
+For .NET 4.5, the package has a dependency on ``StringInterpolationBridge``, which contains the polyfills required when using string interpolation with the C# 6 compiler in VS2015. The reason why the polyfills were not directly included in the library is to avoid clashes with other libraries that sooner or later will make use of them as well.
 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
