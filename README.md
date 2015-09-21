@@ -94,7 +94,7 @@ Alternatively you can have other mappings tweaked for the same entities, which c
 ```
     var partialUpdateMapping = OrmConfiguration
         .GetDefaultEntityMapping<Employee>()
-        .Clone()
+        .Clone() // clone it if you don't want to modify the default
         .UpdatePropertiesExcluding(prop=>prop.IsExcludedFromUpdates=true, nameof(Employee.LastName));
     databaseConnection.Update(
         new Employee { 
@@ -107,8 +107,9 @@ In the previous example, only the ``LastName`` field will be updated.
 
 You can also remove entire property mappings, which allows you to work with a subset of your pre-generated entity for any db operations, useful for large denormalized tables:
 ```
-   var partialSetMapping =
-        OrmConfiguration.GetDefaultEntityMapping<CompanyInformation>()
+   var partialSetMapping = OrmConfiguration
+   			.GetDefaultEntityMapping<CompanyInformation>()
+   			. Clone() // clone it if you don't want to modify the default
                         .RemoveAllPropertiesExcluding(
                             nameof(CompanyInformation.Id),
                             nameof(CompanyInformation.Email),
@@ -121,6 +122,7 @@ You can also create a mapping that uses a different dialect, useful for migratin
 ```
     var destinationMapping = OrmConfiguration
     	.GetDefaultEntityMapping<CompanyInformation>
+    	.Clone() // clone it if you don't want to modify the default
     	.SetDialect(SqlDialect.SqLite);
 ```
 You can then pass this mapping to the insert method.
