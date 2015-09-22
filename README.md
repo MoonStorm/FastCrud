@@ -106,9 +106,9 @@ In the previous example, only the ``LastName`` field will be updated.
 You can also remove entire property mappings, which allows you to work with a subset of your pre-generated entity for any db operations, useful for large denormalized tables:
 ```
    var partialSetMapping = OrmConfiguration
-   			.GetDefaultEntityMapping<CompanyInformation>()
-   			. Clone() // clone it if you don't want to modify the default
-                        .RemoveAllPropertiesExcluding(
+      .GetDefaultEntityMapping<CompanyInformation>()
+      .Clone() // clone it if you don't want to modify the default
+      .RemoveAllPropertiesExcluding(
                             nameof(CompanyInformation.Id),
                             nameof(CompanyInformation.Email),
                             nameof(CompanyInformation.Phone),
