@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Data.SQLite;
@@ -10,7 +9,6 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Tests.Models;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;

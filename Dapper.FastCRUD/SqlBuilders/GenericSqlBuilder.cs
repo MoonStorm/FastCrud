@@ -205,6 +205,11 @@
             return queryBuilder.ToString();
         }
 
+        protected string ResolveParameters(FormattableString query)
+        {
+            
+        }
+
         public abstract string ConstructFullBatchSelectStatement(
             FormattableString whereClause = null,
             FormattableString orderClause = null,

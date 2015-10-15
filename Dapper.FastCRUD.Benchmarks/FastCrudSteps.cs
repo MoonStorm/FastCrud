@@ -1,6 +1,5 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
-    using System;
     using System.Linq;
     using Dapper.FastCrud.Tests;
     using Dapper.FastCrud.Tests.Models;

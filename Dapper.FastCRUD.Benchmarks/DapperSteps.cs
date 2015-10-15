@@ -1,9 +1,7 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
-    using System;
     using System.Data;
     using System.Data.SqlClient;
-    using System.Diagnostics;
     using System.Linq;
     using Dapper.FastCrud.Tests;
     using Dapper.FastCrud.Tests.Models;

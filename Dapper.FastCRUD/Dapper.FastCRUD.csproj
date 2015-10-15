@@ -62,8 +62,12 @@
     <Compile Include="Mappings\PropertyMapping.cs" />
     <Compile Include="Mappings\PropertyMappingOptions.cs" />
     <Compile Include="OrmConfiguration.cs" />
+    <Compile Include="ParameterResolvers\EntityDeferredSqlBuilderParameterResolver.cs" />
+    <Compile Include="ParameterResolvers\IParameterResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Requires.cs" />
+    <Compile Include="ParameterResolvers\DeferredSqlBuilderParameterResolver.cs" />
+    <Compile Include="Sql.cs" />
     <Compile Include="SqlBuilders\GenericSqlBuilder.cs" />
     <Compile Include="SqlBuilders\IStatementSqlBuilder.cs" />
     <Compile Include="SqlBuilders\MsSqlBuilder.cs" />
