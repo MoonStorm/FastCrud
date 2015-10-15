@@ -1,9 +1,6 @@
-The fastest micro-orm extension for Dapper.
+``Dapper.FastCrud`` is the fastest micro-orm extension for Dapper. It is built around essential features of the C# 6 that has finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings.
 
-For Dapper constructs in general, it is recommended to use Visual Studio 2015 for features such as nameof and string interpolation, but that's not a requirement.
-
-The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project. 
-For .NET 4.5, the package will also install the dependency ``StringInterpolationBridge``, which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015.
+[![moonstorm MyGet Build Status](https://www.myget.org/BuildSource/Badge/moonstorm?identifier=669ece00-23a8-4f36-ad44-95822c66bee2)](https://www.myget.org/)
 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
@@ -15,132 +12,9 @@ For .NET 4.5, the package will also install the dependency ``StringInterpolation
 - A generic T4 template is also provided for convenience in the NuGet package ``Dapper.FastCrud.ModelGenerator``. Entity domain partitioning and generation can be achieved via separate template configurations. 
 Code first entities are also supported which can either be decorated with attributes such as Table, Key and DatabaseGenerated, or can have their mappings programmatically set.
 
-#### Usage:
-- using Dapper.FastCrud
-- OrmConfiguration.DefaultDialect = SqlDialect.MsSql | MySql | SqLite | PostgreSql
-- dbConnection.Insert(newEntity);
-- dbConnection.Get()
-- dbConnection.Get(new Entity() {Id = 10});
-- dbConnection.Update(updatedEntity);
-- dbConnection.Delete(entity)
-- dbConnection.Count()
-- dbConnection.Find<Entity>(
-        whereClause:$"{nameof(Entity.FirstName)}=@FirstNameParam", 
-        orderClause:$"{nameof(Entity.LastName)} DESC", 
-		skipRowsCount:10, limitRowsCount:20,
-        queryParameters: new {FirstNameParam: "John"});
-This is where the power of the C# 6 compiler comes into play, and leaves no chance to mistypings or to problems arising from db entity refactorings.
+#### WIKI
+[The wiki](https://github.com/MoonStorm/Dapper.FastCRUD/wiki) is a great place for learning more about this library.
 
-#### POCOs
-You can provide information about the entities that are going to be used in DB operations, without decorating them with attributes, using ``OrmConfiguration.RegisterEntity`` or  ``OrmConfiguration.SetDefaultEntityMapping``.
-```
-OrmConfiguration.RegisterEntity<Building>()
-                .SetTableName("Buildings")
-                .SetProperty(nameof(Building.BuildingId), PropertyMappingOptions.KeyProperty)
-                .SetProperty(nameof(Building.Name));
-
-```
-Alternatively you can let the library create the default mappings, which can then be queried via ``OrmConfiguration.GetDefaultEntityMapping``, tweaked and set back again as defaults or for multi-mapping purposes. 
-
-
-#### Entity Generation
-Entity generation can be easily performed by installing the NuGet package ``Dapper.FastCrud.ModelGenerator`` and adjusting your (``*Config.tt``) files. Use the sample config template for inspiration. Do not modify the ``GenericModelGenerator.tt`` as that will prevent future upgrades via NuGet. You'll need a LocalDb or an MsSql server that contains the schema. 
-By default the script looks into the ``app.config`` file for a connection string, but I would strongly advise to use a separate ``.config`` file and adjust the template config accordingly.
-```
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <connectionStrings>
-    <add name="EntityGeneration" providerName="System.Data.SqlClient" connectionString="Data Source=(LocalDb)\v11.0;AttachDbFilename=|DataDirectory|\TestDatabase.mdf;Initial Catalog=TestDatabase;Integrated Security=True" />
-  </connectionStrings>
-</configuration>
-```
-When this is all done, open up the ``*Config.tt`` file and save it. Alternatively right click on the file and click on ``Run Custom Tool``. Your entities will be generated.
-
-#### Rules
-To understand the logic behind the CRUD operations, let's have a look at an entity ``Employee``, produced by the T4 template. The same rules apply for code first entities with mappings set at runtime.
-```
-    /// <summary>
-    /// A class which represents the Employee table.
-    /// </summary>
-	[Table("Employees")]
-	public partial class Employee
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual int UserId { get; set; }
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-		public virtual Guid EmployeeId { get; set; }
-		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-		public virtual Guid KeyPass { get; set; }
-		public virtual string LastName { get; set; }
-		public virtual string FirstName { get; set; }
-		public virtual DateTime BirthDate { get; set; }
-		public virtual int? WorkstationId { get; set; }
-	}
-
-```
-- The ``Table`` attribute specifies the table used to produce the entity.  
-- The ``Key`` attribute is used to mark the properties that represent the primary key, and in this particular case, we're dealing with a composite key.
-``Update``, ``Get``, ``Delete`` will always use the properties decorated with a ``Key`` attribute to identify the entity the operation is targeting.
-- The ``DatabaseGenerated`` attribute is generated for database fields that are either identity columns or have a default value. 
-An ``Insert`` operation will always exclude properties decorated with a ``DatabaseGenerated`` attribute, but will update the entity with the database generated values on return.
-In case you have primary keys and other fields that are not database generated, it's your responsibility to set them up prior to calling ``Insert``.
-- While this was not produced by the T4 template, you can use the ``Column`` attribute to override the column name, if you so desire, in a code first approach.
-
-#### Code First
-You don't have to use the T4 template or the attributes to describe your entity. You can register the entities at runtime.
-```
-    OrmConfiguration.RegisterEntity<Building>()
-        .SetTableName("Buildings")
-        .SetProperty(building => buildingRenovationDate)
-        .SetProperty(building => building.BuildingId,prop => prop.SetPrimaryKey()..SetDatabaseGenerated().SetDatabaseColumnName("Id"))
-        .SetProperty(building => building.Name, prop=> prop.SetDatabaseColumnName("BuildingName"));
-
-```
-
-#### Multi-Mappings
-This is a unique concept that helps in data migration accross multiple types of databases, partial updates, and so much more.
-Every entity has a default mapping attached, which informs FastCrud about how to construct the SQL queries. This default mapping can be set or queried via ``OrmConfiguration.SetDefaultEntityMapping`` and ``OrmConfiguration.GetDefaultEntityMapping``. 
-
-Alternatively you can have other mappings tweaked for the same entities, which can be passed to any of the CRUD methods. These mappings should be built once and reused, and you can do so by either cloning an existing instance or by creating one from scratch.
-```
-    var partialUpdateMapping = OrmConfiguration
-        .GetDefaultEntityMapping<Employee>()
-        .Clone()
-        .UpdatePropertiesExcluding(prop=>prop.IsExcludedFromUpdates=true, nameof(Employee.LastName));
-    databaseConnection.Update(
-        new Employee { 
-            Id=id, 
-            LastName="The only field that is going to get updated"
-        }, 
-        entityMappingOverride:customMapping);
-```
-In the previous example, only the ``LastName`` field will be updated. 
-
-You can also remove entire property mappings, which allows you to work with a subset of your pre-generated entity for any db operations, useful for large denormalized tables:
-```
-   var partialSetMapping =
-        OrmConfiguration.GetDefaultEntityMapping<CompanyInformation>()
-                        .RemoveAllPropertiesExcluding(
-                            nameof(CompanyInformation.Id),
-                            nameof(CompanyInformation.Email),
-                            nameof(CompanyInformation.Phone),
-                            nameof(CompanyInformation.Name));
-
-```
-This custom mapping override can then be passed to any CRUD methods, just be careful not to use it for inserts.
-
-You can also create a mapping that uses a different dialect, useful for migrating data from one database type to another.
-```
-    var destinationMapping = OrmConfiguration
-    	.GetDefaultEntityMapping<CompanyInformation>
-    	.SetDialect(SqlDialect.SqLite);
-```
-You can then pass this mapping to the insert method.
-
-#### Manual Sql Constructs
-``OrmConfiguration.GetSqlBuilder<TEntity>()`` gives you access to an SQL builder which is really helpful when you have to construct your own SQL queries.
 
 #### Speed
 Most of us love Dapper for its speed. 
