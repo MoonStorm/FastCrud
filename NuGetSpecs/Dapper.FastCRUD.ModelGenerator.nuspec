@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
-        <id>$id$</id>
-		    <version>$version$</version>
-        <title>$id$</title>
+        <id>Dapper.FastCrud.ModelGenerator</id>
+		<version>$version$</version>
+        <title>Dapper.FastCrud.ModelGenerator</title>
         <authors>MoonStorm</authors>
         <owners>MoonStorm</owners>
         <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>

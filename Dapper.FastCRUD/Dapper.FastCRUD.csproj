@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Dapper.FastCrud.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Dapper.FastCrud.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants Condition=" '$(TargetFrameworkVersion.Replace(&quot;v&quot;,&quot;&quot;))' &gt;= '4.6' ">NET_46_OR_GREATER</DefineConstants>

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
+    <id>Dapper.FastCrud</id>
     <version>$version$</version>
-    <title>$id$</title>
+    <title>Dapper.FastCrud</title>
     <authors>MoonStorm</authors>
     <owners>MoonStorm</owners>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
@@ -71,7 +71,9 @@ More details and benchmarks are available on the project site.
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\$configuration$\Dapper.FastCrud.Net46.dll" target="lib\net46" />
-    <file src="bin\$configuration$\Dapper.FastCrud.dll" target="lib\net45" />
+    <file src="..\Dapper.FastCRUD\bin\$configuration$\Dapper.FastCrud.Net46.dll" target="lib\net46" />
+    <file src="..\Dapper.FastCRUD\bin\$configuration$\Dapper.FastCrud.Net46.xml" target="lib\net46" />
+    <file src="..\Dapper.FastCRUD\bin\$configuration$\Dapper.FastCrud.dll" target="lib\net45" />
+    <file src="..\Dapper.FastCRUD\bin\$configuration$\Dapper.FastCrud.xml" target="lib\net45" />
   </files>
 </package>
