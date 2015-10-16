@@ -5,12 +5,14 @@
     using System.Data;
     using System.Linq;
     using System.Threading.Tasks;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
         private readonly IStatementSqlBuilder _sqlBuilder;
+        private readonly EntityDescriptor _entityDescriptor;
         private readonly string _singleInsertSql;
         private readonly string _singleUpdateSql;
         private readonly string _singleDeleteSql;
@@ -19,8 +21,9 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public GenericSqlStatements(IStatementSqlBuilder sqlBuilder)
+        public GenericSqlStatements(EntityDescriptor entityDescriptor, IStatementSqlBuilder sqlBuilder)
         {
+            _entityDescriptor = entityDescriptor;
             _sqlBuilder = sqlBuilder;
             _singleInsertSql = sqlBuilder.ConstructFullInsertStatement();
             _singleUpdateSql = sqlBuilder.ConstructFullUpdateStatement();

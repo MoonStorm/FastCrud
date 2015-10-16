@@ -1,4 +1,5 @@
-﻿namespace Dapper.FastCrud
+﻿// the namespace is intentionally not in sync with the file location
+namespace Dapper.FastCrud
 {
     using System;
     using System.Linq.Expressions;
@@ -8,6 +9,12 @@
     /// </summary>
     public interface ISqlBuilder
     {
+        /// <summary>
+        /// Returns a delimited SQL identifier.
+        /// </summary>
+        /// <param name="sqlIdentifier">Non-delimited SQL identifier</param>
+        string GetDelimitedIdentifier(string sqlIdentifier);
+
         /// <summary>
         /// Returns the table name associated with the current entity.
         /// </summary>

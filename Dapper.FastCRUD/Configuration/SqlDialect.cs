@@ -1,4 +1,5 @@
-﻿namespace Dapper.FastCrud
+﻿// the namespace is intentionally not in sync with the file location
+namespace Dapper.FastCrud
 {
     public enum SqlDialect
     {

@@ -1,18 +1,21 @@
-﻿namespace Dapper.FastCrud.ParameterResolvers
+﻿namespace Dapper.FastCrud.Formatters
 {
-    using System;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
     /// Deferrs the resolution of a parameter for a specified entity until the query is ready to produce the SQL.
     /// </summary>
-    internal class EntityDeferredSqlBuilderParameterResolver<TEntity>:DeferredSqlBuilderParameterResolver
+    internal class SqlEntityFormattableParameter<TEntity>:SqlParameterFormatter
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public EntityDeferredSqlBuilderParameterResolver(EntityMapping entityMappingOverride, Func<ISqlBuilder, string> externalParameterResolver)
-            : base(typeof(TEntity), entityMappingOverride, externalParameterResolver)
+        public SqlEntityFormattableParameter(
+            SqlParameterElementType elementType,
+            string parameterValue,
+            EntityMapping entityMappingOverride)
+            : base(elementType, parameterValue, typeof(TEntity), entityMappingOverride)
         {
         }
 
@@ -22,8 +25,8 @@
         /// </summary>
         protected override ISqlBuilder GetSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
         {
-            return (entityDescriptor ?? OrmConfiguration.GetEntityDescriptor<TEntity>())
-                    .GetSqlStatements<TEntity>(entityMapping)
+            return ((entityDescriptor as EntityDescriptor<TEntity>) ?? OrmConfiguration.GetEntityDescriptor<TEntity>())
+                    .GetSqlStatements(entityMapping)
                     .SqlBuilder;
         }
     }
