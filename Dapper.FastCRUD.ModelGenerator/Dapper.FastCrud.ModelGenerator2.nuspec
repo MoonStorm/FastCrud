@@ -28,8 +28,8 @@ More details are available on the project site.
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt" target="Content\Models\GenericModelGenerator.tt" />
-        <file src="Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt" target="Content\Models\SampleModelGeneratorConfig.tt" />
-        <file src="Dapper.FastCRUD.ModelGenerator\Install.ps1" target="Tools\Install.ps1" />
+        <file src="GenericModelGenerator.tt" target="Content\Models\GenericModelGenerator.tt" />
+        <file src="SampleModelGeneratorConfig.tt" target="Content\Models\SampleModelGeneratorConfig.tt" />
+        <file src="Install.ps1" target="Tools\Install.ps1" />
     </files>
 </package>
