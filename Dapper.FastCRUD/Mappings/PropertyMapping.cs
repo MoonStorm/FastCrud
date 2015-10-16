@@ -2,6 +2,7 @@
 {
     using System;
     using System.ComponentModel;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Reeturns mapping information held for a particular property.

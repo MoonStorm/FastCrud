@@ -3,12 +3,21 @@
     using System;
     using System.Globalization;
     using System.Linq;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
     internal class MsSqlBuilder : GenericStatementSqlBuilder
     {
-        public MsSqlBuilder(EntityMapping entityMapping)
-            : base(entityMapping, true, "[", "]", "[", "]")
+        public MsSqlBuilder(
+            SqlDialectConfiguration configuration, 
+            EntityDescriptor entityDescriptor, 
+            EntityMapping entityMapping)
+            : base(
+                  entityDescriptor, 
+                  entityMapping, 
+                  configuration.IsUsingSchemas,
+                  configuration.IdentifierStartDelimiter,
+                  configuration.IdentifierEndDelimiter)
         {
         }
 
@@ -25,7 +34,7 @@
                 outputQuery = string.Empty;
             }
 
-            return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) {outputQuery} VALUES ({this.ConstructParamEnumerationForInsert()}) ";
+            return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) {outputQuery} VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);
         }
 
         public override string ConstructFullBatchSelectStatement(
@@ -38,11 +47,11 @@
             var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}";
             if (whereClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+                sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
             }
             if (orderClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " ORDER BY {0}", orderClause);
+                sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
             if (skipRowsCount.HasValue)
             {

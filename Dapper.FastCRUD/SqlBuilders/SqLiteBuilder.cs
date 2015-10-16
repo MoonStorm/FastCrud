@@ -3,12 +3,21 @@
     using System;
     using System.Globalization;
     using System.Linq;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
     internal class SqLiteBuilder:GenericStatementSqlBuilder
     {
-        public SqLiteBuilder(EntityMapping entityMapping)
-            : base(entityMapping, false, string.Empty)
+        public SqLiteBuilder(
+            SqlDialectConfiguration configuration,
+            EntityDescriptor entityDescriptor,
+            EntityMapping entityMapping)
+            : base(
+                  entityDescriptor, 
+                  entityMapping, 
+                  configuration.IsUsingSchemas,
+                  configuration.IdentifierStartDelimiter,
+                  configuration.IdentifierEndDelimiter)
         {
             if (this.KeyProperties.Length > 1)
             {
@@ -26,16 +35,16 @@
                 if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
-                    sql += $"SELECT last_insert_rowid() as {this.InsertKeyDatabaseGeneratedProperties[0].PropertyName}";
+                    sql += $"SELECT last_insert_rowid() as {this.GetDelimitedIdentifier(this.InsertKeyDatabaseGeneratedProperties[0].PropertyName)}";
                 }
                 else
                 {
                     var databaseGeneratedColumnSelection = string.Join(
                         ",",
                         this.InsertDatabaseGeneratedProperties.Select(
-                            propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
+                            propInfo => this.GetColumnName(propInfo, null, true)));
                     sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.InsertKeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = last_insert_rowid()";
+                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.GetColumnName(this.InsertKeyDatabaseGeneratedProperties[0],null,false)} = last_insert_rowid()";
                 }
             }
             else if (this.InsertDatabaseGeneratedProperties.Length > 0)
@@ -57,11 +66,11 @@
 
             if (whereClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+                sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
             }
             if (orderClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " ORDER BY {0}", orderClause);
+                sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
 
             if (limitRowsCount.HasValue)

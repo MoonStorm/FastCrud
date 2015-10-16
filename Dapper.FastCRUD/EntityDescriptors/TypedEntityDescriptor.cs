@@ -41,29 +41,45 @@
         {
             entityMapping = entityMapping ?? DefaultEntityMapping;
 
+            entityMapping.IsFrozen = true;
+
             ISqlStatements sqlStatements;
+            IStatementSqlBuilder statementSqlBuilder;
+
             var originalRegisteredEntityMappings = _registeredEntityMappings;
             if (!originalRegisteredEntityMappings.TryGetValue(entityMapping, out sqlStatements))
             {
                 switch (entityMapping.Dialect)
                 {
                     case SqlDialect.MsSql:
-                        sqlStatements = new GenericSqlStatements<TEntity>(this, new MsSqlBuilder(entityMapping));
+                        statementSqlBuilder = new MsSqlBuilder(
+                            OrmConfiguration.GetDialectConfiguration(SqlDialect.MsSql),
+                            this,
+                            entityMapping);
                         break;
                     case SqlDialect.MySql:
-                        sqlStatements = new GenericSqlStatements<TEntity>(this, new MySqlBuilder(entityMapping));
+                        statementSqlBuilder = new MySqlBuilder(
+                            OrmConfiguration.GetDialectConfiguration(SqlDialect.MySql),
+                            this,
+                            entityMapping);
                         break;
                     case SqlDialect.PostgreSql:
-                        sqlStatements = new GenericSqlStatements<TEntity>(this, new PostgreSqlBuilder(entityMapping));
+                        statementSqlBuilder = new PostgreSqlBuilder(
+                            OrmConfiguration.GetDialectConfiguration(SqlDialect.PostgreSql),
+                            this,
+                            entityMapping);
                         break;
                     case SqlDialect.SqLite:
-                        sqlStatements = new GenericSqlStatements<TEntity>(this, new SqLiteBuilder(entityMapping));
+                        statementSqlBuilder = new SqLiteBuilder(
+                            OrmConfiguration.GetDialectConfiguration(SqlDialect.SqLite),
+                            this,
+                            entityMapping);
                         break;
                     default:
                         throw new NotSupportedException($"Dialect {entityMapping.Dialect} is not supported");
                 }
 
-                entityMapping.IsFrozen = true;
+                sqlStatements = new GenericSqlStatements<TEntity>(statementSqlBuilder);
 
                 // replace the original collection
                 // rather than using a lock, we prefer the risk of missing a registration or two as they will get captured eventually

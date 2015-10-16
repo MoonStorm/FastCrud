@@ -3,20 +3,22 @@
     using System;
     using System.Globalization;
     using System.Linq;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
     internal class PostgreSqlBuilder : GenericStatementSqlBuilder
     {
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        /// <remarks>
-        /// http://www.postgresql.org/docs/8.0/static/sql-syntax.html#SQL-SYNTAX-IDENTIFIERS
-        /// </remarks>
-        public PostgreSqlBuilder(EntityMapping entityMapping)
-            : base(entityMapping, true, string.Empty)
+        public PostgreSqlBuilder(
+            SqlDialectConfiguration configuration,
+            EntityDescriptor entityDescriptor,
+            EntityMapping entityMapping)
+            : base(
+                  entityDescriptor, 
+                  entityMapping, 
+                  configuration.IsUsingSchemas,
+                  configuration.IdentifierStartDelimiter,
+                  configuration.IdentifierEndDelimiter)
         {
-            // decided not to use the standard delimiter (double quotes) due to problems when using nameof(columnName) without the delimiter in various clauses
         }
 
         public override string ConstructFullInsertStatement()
@@ -28,7 +30,7 @@
                              string.Join(
                                  ",",
                                  this.InsertDatabaseGeneratedProperties.Select(
-                                     propInfo => $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}")))
+                                     propInfo => this.GetColumnName(propInfo,null,true))))
                          : string.Empty;
 
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}";
@@ -47,11 +49,11 @@
 
             if (whereClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+                sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
             }
             if (orderClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " ORDER BY {0}", orderClause);
+                sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
             if (limitRowsCount.HasValue)
             {

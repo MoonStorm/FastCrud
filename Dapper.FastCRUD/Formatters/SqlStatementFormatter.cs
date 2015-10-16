@@ -3,6 +3,7 @@
     using System;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Used to properly format the parameters of a query

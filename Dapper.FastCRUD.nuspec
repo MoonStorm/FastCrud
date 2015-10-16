@@ -8,7 +8,7 @@
     <owners>MoonStorm</owners>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/Dapper.FastCRUD/logo.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>The fastest micro-orm type extension for Dapper.</summary>
     <description>

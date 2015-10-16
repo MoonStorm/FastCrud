@@ -3,12 +3,21 @@
     using System;
     using System.Globalization;
     using System.Linq;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
     internal class MySqlBuilder:GenericStatementSqlBuilder
     {
-        public MySqlBuilder(EntityMapping entityMapping)
-            : base(entityMapping, false, "`")
+        public MySqlBuilder(
+            SqlDialectConfiguration configuration,
+            EntityDescriptor entityDescriptor,
+            EntityMapping entityMapping)
+            : base(
+                  entityDescriptor, 
+                  entityMapping, 
+                  configuration.IsUsingSchemas,
+                  configuration.IdentifierStartDelimiter,
+                  configuration.IdentifierEndDelimiter)
         {
         }
 
@@ -22,7 +31,7 @@
                 if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
-                    sql += $"SELECT LAST_INSERT_ID() as {this.InsertKeyDatabaseGeneratedProperties[0].PropertyName}";
+                    sql += $"SELECT LAST_INSERT_ID() as {this.GetDelimitedIdentifier(this.InsertKeyDatabaseGeneratedProperties[0].PropertyName)}";
                 }
                 else
                 {
@@ -30,9 +39,9 @@
                         ",",
                         this.InsertDatabaseGeneratedProperties.Select(
                             propInfo =>
-                            $"{ColumnStartDelimiter}{propInfo.DatabaseColumnName}{ColumnEndDelimiter} AS {propInfo.PropertyName}"));
+                            $"{this.GetColumnName(propInfo, null, true)}"));
                     sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {ColumnStartDelimiter}{this.InsertKeyDatabaseGeneratedProperties[0].DatabaseColumnName}{ColumnEndDelimiter} = LAST_INSERT_ID()";
+                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.GetColumnName(this.InsertKeyDatabaseGeneratedProperties[0],null,false)} = LAST_INSERT_ID()";
                 }
             }
             else if(this.InsertDatabaseGeneratedProperties.Length > 0)
@@ -53,11 +62,11 @@
 
             if (whereClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " WHERE {0}", whereClause);
+                sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
             }
             if (orderClause != null)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " ORDER BY {0}", orderClause);
+                sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
 
             if (skipRowsCount.HasValue)

@@ -4,6 +4,7 @@
     using System.Runtime.CompilerServices;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// This SQL builder can be used for mapping table and column names to their SQL counterparts.

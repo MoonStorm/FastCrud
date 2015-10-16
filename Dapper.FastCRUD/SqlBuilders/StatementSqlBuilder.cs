@@ -15,11 +15,6 @@
     {
         private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
 
-        protected GenericStatementSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping, bool usesTableSchema, string startEndIdentifierDelimiter)
-            :this(entityDescriptor, entityMapping,usesTableSchema,startEndIdentifierDelimiter,startEndIdentifierDelimiter)
-        {            
-        }
-
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
             EntityMapping entityMapping,
@@ -225,7 +220,7 @@
         {
             return _entityRelationships.GetOrAdd(
                 destination,
-                (destinationSqlBuilder) => new EntityRelationship(this, destinationSqlBuilder));
+                destinationSqlBuilder => new EntityRelationship(this, destinationSqlBuilder));
         }
 
         public virtual string ConstructMultiSelectStatement(IStatementSqlBuilder[] additionalIncludes)

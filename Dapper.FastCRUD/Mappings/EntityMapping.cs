@@ -6,6 +6,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Holds information about table mapped properties for a particular entity type.

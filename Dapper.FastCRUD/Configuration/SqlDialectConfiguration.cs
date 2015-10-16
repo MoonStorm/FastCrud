@@ -1,4 +1,5 @@
-﻿namespace Dapper.FastCrud.Configuration
+﻿// ReSharper disable once CheckNamespace (the namespace is intentionally not in sync with the file location)
+namespace Dapper.FastCrud
 {
     /// <summary>
     /// Used for setting various database options.
