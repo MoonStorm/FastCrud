@@ -1,0 +1,2 @@
+.nuget\nuget.exe pack Dapper.FastCRUD\Dapper.FastCRUD.nuspec -OutputDirectory Releases -Version %PackageVersion% 
+.nuget\nuget.exe pack Dapper.FastCRUD.ModelGenerator\Dapper.FastCRUD.ModelGenerator.nuspec -OutputDirectory Releases -Version %PackageVersion%

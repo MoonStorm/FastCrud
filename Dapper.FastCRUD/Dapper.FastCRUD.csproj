@@ -52,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\PropertyChangedNotifier.cs" />
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Configuration\SqlDialectConfiguration.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />

@@ -4,17 +4,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD", "Dapper.FastCRUD\Dapper.FastCRUD.csproj", "{0044043B-C8EC-497C-8B58-ABE028014D24}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C198D9B5-6ECC-4F86-8C08-B64FB025267B} = {C198D9B5-6ECC-4F86-8C08-B64FB025267B}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.NET46", "Dapper.FastCRUD\Dapper.FastCRUD.NET46.csproj", "{C198D9B5-6ECC-4F86-8C08-B64FB025267B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{779A2AF3-1566-4AA9-BF0D-1CAAA439736A}"
 	ProjectSection(SolutionItems) = preProject
-		Dapper.FastCrud.ModelGenerator.nuspec = Dapper.FastCrud.ModelGenerator.nuspec
-		Dapper.FastCRUD.nuspec = Dapper.FastCRUD.nuspec
+		Dapper.FastCRUD.ModelGenerator\Dapper.FastCRUD.ModelGenerator.nuspec = Dapper.FastCRUD.ModelGenerator\Dapper.FastCRUD.ModelGenerator.nuspec
+		Dapper.FastCRUD\Dapper.FastCRUD.nuspec = Dapper.FastCRUD\Dapper.FastCRUD.nuspec
 		Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt = Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt
+		Dapper.FastCRUD.ModelGenerator\Install.ps1 = Dapper.FastCRUD.ModelGenerator\Install.ps1
 		logo.png = logo.png
 		README.md = README.md
 		Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt = Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt
