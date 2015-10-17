@@ -67,7 +67,7 @@
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
             // check to see whether we are the ones being called
-            if (this.Equals(formatProvider))
+            if (!this.Equals(formatProvider))
             {
                 return null;
             }

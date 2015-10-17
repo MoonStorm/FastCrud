@@ -51,7 +51,7 @@
         {
             var expectedSql = string.Join(
                 ",",
-                _selectColumnNames.Select(colName => $"-{_dialectConfiguration.IdentifierStartDelimiter}{colName}{_dialectConfiguration.IdentifierEndDelimiter}"));
+                _selectColumnNames.Select(colName => $"{_dialectConfiguration.IdentifierStartDelimiter}{colName}{_dialectConfiguration.IdentifierEndDelimiter}"));
             Assert.That(_rawSqlStatement, Is.EqualTo(expectedSql));
         }
 

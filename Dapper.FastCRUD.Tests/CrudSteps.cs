@@ -151,8 +151,8 @@
             var sqlBuilder = OrmConfiguration.GetSqlBuilder<Workstation>();
             _testContext.QueriedEntities.AddRange(
                 _testContext.DatabaseConnection.Find<Workstation>(
-                    whereClause: $"{sqlBuilder.GetColumnName(nameof(Workstation.WorkstationId))} IS NOT NULL",
-                    orderClause: $"{sqlBuilder.GetColumnName(nameof(Workstation.InventoryIndex))} DESC",
+                    whereClause: $"{nameof(Workstation.WorkstationId):C} IS NOT NULL",
+                    orderClause: $"{nameof(Workstation.InventoryIndex):C} DESC",
                     skipRowsCount: skip,
                     limitRowsCount: max));
         }

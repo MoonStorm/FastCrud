@@ -10,10 +10,10 @@ Scenario Outline: Insert Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb   | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 20000        | Dapper            |
 
 #Scenario Outline: Batch Select No Filter No Warmup Benchmark
 #	Given I have initialized a <database type> database
@@ -50,10 +50,10 @@ Scenario Outline: Batch Select No Filter
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb   | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Delete Benchmark
 	Given I have initialized a <database type> database
@@ -67,10 +67,10 @@ Scenario Outline: Single Delete Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb   | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Select Id Filter Benchmark
 	Given I have initialized a <database type> database
@@ -85,10 +85,10 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb   | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 20000        | Dapper            |
 
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
@@ -103,7 +103,7 @@ Scenario Outline: Single Update Benchmark
 	Then I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb   | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb   | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb   | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 20000        | Dapper            |
