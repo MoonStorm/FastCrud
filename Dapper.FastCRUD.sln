@@ -9,13 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.NET46", "Da
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{779A2AF3-1566-4AA9-BF0D-1CAAA439736A}"
 	ProjectSection(SolutionItems) = preProject
-		Dapper.FastCRUD.ModelGenerator\Dapper.FastCRUD.ModelGenerator.nuspec = Dapper.FastCRUD.ModelGenerator\Dapper.FastCRUD.ModelGenerator.nuspec
-		Dapper.FastCRUD\Dapper.FastCRUD.nuspec = Dapper.FastCRUD\Dapper.FastCRUD.nuspec
-		Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt = Dapper.FastCRUD.ModelGenerator\GenericModelGenerator.tt
-		Dapper.FastCRUD.ModelGenerator\Install.ps1 = Dapper.FastCRUD.ModelGenerator\Install.ps1
+		NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec = NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec
+		NuGetSpecs\Dapper.FastCRUD.nuspec = NuGetSpecs\Dapper.FastCRUD.nuspec
+		NuGetSpecs\GenericModelGenerator.tt = NuGetSpecs\GenericModelGenerator.tt
+		NuGetSpecs\Install.ps1 = NuGetSpecs\Install.ps1
 		logo.png = logo.png
 		README.md = README.md
-		Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt = Dapper.FastCRUD.ModelGenerator\SampleModelGeneratorConfig.tt
+		NuGetSpecs\SampleModelGeneratorConfig.tt = NuGetSpecs\SampleModelGeneratorConfig.tt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Benchmarks", "Dapper.FastCRUD.Benchmarks\Dapper.FastCRUD.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"

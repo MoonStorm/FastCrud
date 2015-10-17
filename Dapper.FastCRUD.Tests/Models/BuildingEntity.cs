@@ -1,5 +1,7 @@
 ﻿namespace Dapper.FastCrud.Tests.Models
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     /// <summary>
     /// Code first entity. Do not set attributes!
     /// </summary>

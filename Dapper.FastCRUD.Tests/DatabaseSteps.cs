@@ -30,6 +30,14 @@
             this._testContext = testContext;
         }
 
+        [AfterScenario]
+        public void Cleanup()
+        {
+            _testContext.DatabaseConnection?.Close();
+            _testContext.DatabaseConnection?.Dispose();
+            OrmConfiguration.ClearEntityRegistrations();
+        }
+
         [Given(@"I have initialized a PostgreSql database")]
         public void GivenIHaveInitializedPostgreSqlDatabase()
         {
@@ -163,13 +171,6 @@
             CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.UpdatedEntities);
         }
 
-        [AfterScenario]
-        public void Cleanup()
-        {
-            _testContext.DatabaseConnection?.Close();
-            _testContext.DatabaseConnection?.Dispose();
-        }
-
         private void SetupSqLiteDatabase(string connectionString)
         {
             SetupOrmConfiguration(SqlDialect.SqLite);
@@ -262,29 +263,29 @@
                 using (var command = dataConnection.CreateCommand())
                 {
                     command.CommandText =$@"
-                        CREATE TABLE Employee (
-	                        UserId SERIAL,
-                            EmployeeId uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
-	                        KeyPass uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
-	                        LastName varchar(50) NOT NULL,
-	                        FirstName varchar(50) NOT NULL,
-	                        BirthDate timestamp NOT NULL,
-                            WorkstationId int NULL,
-	                        PRIMARY KEY (UserId, EmployeeId)
+                        CREATE TABLE ""Employee"" (
+	                        ""UserId"" SERIAL,
+                            ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
+	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
+	                        ""LastName"" varchar(50) NOT NULL,
+	                        ""FirstName"" varchar(50) NOT NULL,
+	                        ""BirthDate"" timestamp NOT NULL,
+                            ""WorkstationId"" int NULL,
+	                        PRIMARY KEY (""UserId"", ""EmployeeId"")
                         );
 
-                        CREATE TABLE Workstations (
-	                        WorkstationId BIGSERIAL,
-	                        Name varchar(50) NOT NULL,
-                            InventoryIndex int NOT NULL,
-                            AccessLevel int NOT NULL DEFAULT 1,
-	                        PRIMARY KEY (WorkstationId)
+                        CREATE TABLE ""Workstations"" (
+	                        ""WorkstationId"" BIGSERIAL,
+	                        ""Name"" varchar(50) NOT NULL,
+                            ""InventoryIndex"" int NOT NULL,
+                            ""AccessLevel"" int NOT NULL DEFAULT 1,
+	                        PRIMARY KEY (""WorkstationId"")
                         );
 
-                        CREATE TABLE Buildings (
-	                        Id SERIAL,
-	                        BuildingName varchar(50) NULL,
-	                        PRIMARY KEY (Id)
+                        CREATE TABLE ""Buildings"" (
+	                        ""Id"" SERIAL,
+	                        ""BuildingName"" varchar(50) NULL,
+	                        PRIMARY KEY (""Id"")
                         );
                     ";
                     command.ExecuteNonQuery();

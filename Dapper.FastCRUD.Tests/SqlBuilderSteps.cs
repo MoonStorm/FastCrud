@@ -11,11 +11,10 @@
     public sealed class SqlBuilderSteps
     {
         private IStatementSqlBuilder _currentSqlBuilder;
+        private SqlDialectConfiguration _dialectConfiguration;
         private string _rawSqlStatement;
         private string[] _selectColumnNames;
 
-        private string _dbColumnStartDelimiter;
-        private string _dbColumnEndDelimiter;
 
         [Given(@"I extract the SQL builder for LocalDb and workstation")]
         public void GivenIExtractTheSQLBuilderForLocalDbAndWorkstation()
@@ -52,7 +51,7 @@
         {
             var expectedSql = string.Join(
                 ",",
-                _selectColumnNames.Select(colName => $"{_dbColumnStartDelimiter}{colName}{_dbColumnEndDelimiter}"));
+                _selectColumnNames.Select(colName => $"-{_dialectConfiguration.IdentifierStartDelimiter}{colName}{_dialectConfiguration.IdentifierEndDelimiter}"));
             Assert.That(_rawSqlStatement, Is.EqualTo(expectedSql));
         }
 
@@ -62,27 +61,7 @@
 
             // in real library usage, people will use the ISqlBuilder, but for our tests we're gonna need more than that
             _currentSqlBuilder = OrmConfiguration.GetSqlBuilder<TEntity>() as IStatementSqlBuilder;
-
-            switch (dialect)
-            {
-                case SqlDialect.MsSql:
-                    _dbColumnStartDelimiter = "[";
-                    _dbColumnEndDelimiter = "]";
-                    break;
-                case SqlDialect.MySql:
-                    _dbColumnStartDelimiter = _dbColumnEndDelimiter = "`";
-                    break;
-                case SqlDialect.PostgreSql:
-                    _dbColumnStartDelimiter = _dbColumnEndDelimiter = "";
-                    //_dbColumnStartDelimiter = _dbColumnEndDelimiter = "\"";
-                    break;
-                case SqlDialect.SqLite:
-                    _dbColumnStartDelimiter = _dbColumnEndDelimiter = "";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
+            _dialectConfiguration = OrmConfiguration.GetDialectConfiguration();
             _selectColumnNames = _currentSqlBuilder.SelectProperties.Select(propInfo => propInfo.DatabaseColumnName).ToArray();
         }
     }
