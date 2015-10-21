@@ -8,16 +8,8 @@
 
     internal class SqLiteBuilder:GenericStatementSqlBuilder
     {
-        public SqLiteBuilder(
-            SqlDialectConfiguration configuration,
-            EntityDescriptor entityDescriptor,
-            EntityMapping entityMapping)
-            : base(
-                  entityDescriptor, 
-                  entityMapping, 
-                  configuration.IsUsingSchemas,
-                  configuration.IdentifierStartDelimiter,
-                  configuration.IdentifierEndDelimiter)
+        public SqLiteBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+            : base(entityDescriptor, entityMapping, SqlDialect.SqLite)
         {
             if (this.KeyProperties.Length > 1)
             {

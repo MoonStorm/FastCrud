@@ -8,16 +8,8 @@
 
     internal class MsSqlBuilder : GenericStatementSqlBuilder
     {
-        public MsSqlBuilder(
-            SqlDialectConfiguration configuration, 
-            EntityDescriptor entityDescriptor, 
-            EntityMapping entityMapping)
-            : base(
-                  entityDescriptor, 
-                  entityMapping, 
-                  configuration.IsUsingSchemas,
-                  configuration.IdentifierStartDelimiter,
-                  configuration.IdentifierEndDelimiter)
+        public MsSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+            : base(entityDescriptor, entityMapping, SqlDialect.MsSql)
         {
         }
 

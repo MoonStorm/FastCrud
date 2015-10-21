@@ -18,18 +18,20 @@
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
             EntityMapping entityMapping,
-            bool usesTableSchema,
-            string identifierStartDelimiter,
-            string identifierEndDelimiter
-            )
+            SqlDialect dialect)
         {
+            this.UsesSchemaForTableNames = OrmConfiguration.Conventions.IsUsingSqlSchemas(dialect);
+
+            string identifierStartDelimiter, identifierEndDelimiter;
+            OrmConfiguration.Conventions.GetSqlIdentifierDelimiters(dialect, out identifierStartDelimiter, out identifierEndDelimiter);
+            this.IdentifierStartDelimiter = identifierStartDelimiter;
+            this.IdentifierEndDelimiter = identifierEndDelimiter;
+
+
             _entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
             this.StatementFormatter = new SqlStatementFormatter(entityDescriptor,entityMapping,this);
             this.EntityDescriptor = entityDescriptor;
             this.EntityMapping = entityMapping;
-            this.UsesSchemaForTableNames = usesTableSchema;
-            this.IdentifierStartDelimiter = identifierStartDelimiter;
-            this.IdentifierEndDelimiter = identifierEndDelimiter;
 
             this.SelectProperties = this.EntityMapping.PropertyMappings
                 .Where(propMapping => !propMapping.Value.IsReferencingForeignEntity)

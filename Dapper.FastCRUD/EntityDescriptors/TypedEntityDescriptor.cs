@@ -41,7 +41,7 @@
         {
             entityMapping = entityMapping ?? DefaultEntityMapping;
 
-            entityMapping.IsFrozen = true;
+            entityMapping.FreezeMapping();
 
             ISqlStatements sqlStatements;
             IStatementSqlBuilder statementSqlBuilder;
@@ -52,28 +52,16 @@
                 switch (entityMapping.Dialect)
                 {
                     case SqlDialect.MsSql:
-                        statementSqlBuilder = new MsSqlBuilder(
-                            OrmConfiguration.GetDialectConfiguration(SqlDialect.MsSql),
-                            this,
-                            entityMapping);
+                        statementSqlBuilder = new MsSqlBuilder(this, entityMapping);
                         break;
                     case SqlDialect.MySql:
-                        statementSqlBuilder = new MySqlBuilder(
-                            OrmConfiguration.GetDialectConfiguration(SqlDialect.MySql),
-                            this,
-                            entityMapping);
+                        statementSqlBuilder = new MySqlBuilder(this, entityMapping);
                         break;
                     case SqlDialect.PostgreSql:
-                        statementSqlBuilder = new PostgreSqlBuilder(
-                            OrmConfiguration.GetDialectConfiguration(SqlDialect.PostgreSql),
-                            this,
-                            entityMapping);
+                        statementSqlBuilder = new PostgreSqlBuilder(this, entityMapping);
                         break;
                     case SqlDialect.SqLite:
-                        statementSqlBuilder = new SqLiteBuilder(
-                            OrmConfiguration.GetDialectConfiguration(SqlDialect.SqLite),
-                            this,
-                            entityMapping);
+                        statementSqlBuilder = new SqLiteBuilder(this, entityMapping);
                         break;
                     default:
                         throw new NotSupportedException($"Dialect {entityMapping.Dialect} is not supported");

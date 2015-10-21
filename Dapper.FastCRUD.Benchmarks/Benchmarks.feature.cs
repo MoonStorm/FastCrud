@@ -66,10 +66,10 @@ namespace Dapper.FastCrud.Benchmarks
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Insert Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "20000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "20000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "20000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "20000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "100000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "100000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "100000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "100000", "Dapper", null)]
         public virtual void InsertBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert Benchmark", exampleTags);

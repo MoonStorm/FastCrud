@@ -5,6 +5,7 @@ namespace Dapper.FastCrud
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlStatements;
@@ -16,41 +17,8 @@ namespace Dapper.FastCrud
     public static class OrmConfiguration
     {
         private static volatile SqlDialect _currentDefaultDialect = SqlDialect.MsSql;
+        private static volatile OrmConventions _currentOrmConventions = new OrmConventions();
         private static readonly ConcurrentDictionary<Type, EntityDescriptor> _entityDescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
-        private static readonly Dictionary<SqlDialect, SqlDialectConfiguration> _dialectConfiguration = new Dictionary<SqlDialect, SqlDialectConfiguration>();
-
-        static OrmConfiguration()
-        {
-            // initialize some settings    
-            _dialectConfiguration[SqlDialect.MsSql] = new SqlDialectConfiguration()
-                                                          {
-                                                              IdentifierStartDelimiter = "[",
-                                                              IdentifierEndDelimiter = "]",
-                                                              IsUsingSchemas = true
-                                                          };
-
-            _dialectConfiguration[SqlDialect.SqLite] = new SqlDialectConfiguration()
-                                                           {
-                                                               IdentifierStartDelimiter = string.Empty,
-                                                               IdentifierEndDelimiter = string.Empty,
-                                                               IsUsingSchemas = false
-                                                           };
-
-            _dialectConfiguration[SqlDialect.PostgreSql] = new SqlDialectConfiguration()
-                                                               {
-                                                                   IdentifierStartDelimiter = "\"",
-                                                                   IdentifierEndDelimiter = "\"",
-                                                                   IsUsingSchemas = true
-                                                               };
-
-            _dialectConfiguration[SqlDialect.MySql] = new SqlDialectConfiguration()
-                                                          {
-                                                              IdentifierStartDelimiter = "`",
-                                                              IdentifierEndDelimiter = "`",
-                                                              IsUsingSchemas = false
-                                                          };
-
-        }
 
         /// <summary>
         /// Clears all the recorded entity registrations and entity ORM mappings.
@@ -123,28 +91,18 @@ namespace Dapper.FastCrud
         }
 
         /// <summary>
-        /// Returns the configuration for the current SQL dialect, as set by <see cref="DefaultDialect"/>. 
+        /// Gets or sets the conventions used by the library. Subclass <see cref="OrmConventions"/> to provide your own set of conventions.
         /// </summary>
-        public static SqlDialectConfiguration GetDialectConfiguration()
-        {
-            return GetDialectConfiguration(DefaultDialect);
-        }
-
-        /// <summary>
-        /// Returns a clone for the configuration for a SQL dialect. 
-        /// </summary>
-        public static SqlDialectConfiguration GetDialectConfiguration(SqlDialect dialect)
-        {
-            return _dialectConfiguration[dialect].Clone();
-        }
-
-        /// <summary>
-        /// Set the configuration for a SQL dialect. 
-        /// </summary>
-        public static void SetDialectConfiguration(SqlDialect dialect, SqlDialectConfiguration configuration)
-        {
-            Requires.NotNull(configuration, nameof(configuration));
-            _dialectConfiguration[dialect] = configuration.Clone();
+        public static OrmConventions Conventions {
+            get
+            {
+                return _currentOrmConventions;
+            }
+            set
+            {
+                Requires.NotNull(value, nameof(Conventions));
+                _currentOrmConventions = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

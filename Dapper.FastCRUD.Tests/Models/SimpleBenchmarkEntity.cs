@@ -1,7 +1,17 @@
 ﻿namespace Dapper.FastCrud.Tests.Models
 {
-    public partial class SimpleBenchmarkEntity
+    using System;
+
+    /// <summary>
+    /// This entity has no attributes on purpose!
+    /// </summary>
+    public class SimpleBenchmarkEntity
     {
+        public virtual int Id { get; set; }
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual DateTime? DateOfBirth { get; set; }
+
         protected bool Equals(SimpleBenchmarkEntity other)
         {
             return this.Id == other.Id && string.Equals(this.FirstName, other.FirstName) && string.Equals(this.LastName, other.LastName) && this.DateOfBirth.Equals(other.DateOfBirth);

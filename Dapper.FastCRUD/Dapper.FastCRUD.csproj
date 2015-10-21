@@ -57,7 +57,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Configuration\SqlDialectConfiguration.cs" />
+    <Compile Include="Configuration\OrmConventions.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />
     <Compile Include="EntityDescriptors\TypedEntityDescriptor.cs" />

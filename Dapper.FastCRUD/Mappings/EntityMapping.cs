@@ -50,14 +50,6 @@
             {
                 return _isFrozen;
             }
-            set
-            {
-                if (_isFrozen && !value)
-                {
-                    throw new ArgumentException("The entity mappings can't have the frozen flag reset", nameof(IsFrozen));
-                }
-                _isFrozen = value;
-            }
         }
 
         /// <summary>
@@ -70,12 +62,21 @@
         /// </summary>
         public Type EntityType { get; private set; }
 
+        /// <summary>
+        /// Gets the property mapping asscoiated with the entity.
+        /// </summary>
         internal IDictionary<string, PropertyMapping> PropertyMappings
         {
             get
             {
                 return _propertyMappings;
             }
+        }
+
+        internal void FreezeMapping()
+        {
+            
+            _isFrozen = true;
         }
 
         protected void ValidateState()

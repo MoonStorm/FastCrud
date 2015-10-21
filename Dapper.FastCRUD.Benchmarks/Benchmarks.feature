@@ -10,10 +10,10 @@ Scenario Outline: Insert Benchmark
 	And I cleanup the <database type> database
 	Examples: 
 	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 20000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 20000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 20000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 20000        | Dapper            |
+	| LocalDb       | benchmark entities | 100000        | Simple Crud       |
+	| LocalDb       | benchmark entities | 100000        | Dapper Extensions |
+	| LocalDb       | benchmark entities | 100000        | Fast Crud         |
+	| LocalDb       | benchmark entities | 100000        | Dapper            |
 
 #Scenario Outline: Batch Select No Filter No Warmup Benchmark
 #	Given I have initialized a <database type> database

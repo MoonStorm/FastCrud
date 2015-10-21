@@ -11,9 +11,9 @@
     public sealed class SqlBuilderSteps
     {
         private IStatementSqlBuilder _currentSqlBuilder;
-        private SqlDialectConfiguration _dialectConfiguration;
         private string _rawSqlStatement;
         private string[] _selectColumnNames;
+        private SqlDialect _currentDialect;
 
 
         [Given(@"I extract the SQL builder for LocalDb and workstation")]
@@ -49,9 +49,11 @@
         [Then(@"I should get a valid select column enumeration")]
         public void ThenIShouldGetAValidSelectColumnEnumeration()
         {
+            string startDelimiter, endDelimiter;
+            OrmConfiguration.Conventions.GetSqlIdentifierDelimiters(_currentDialect, out startDelimiter, out endDelimiter);
             var expectedSql = string.Join(
                 ",",
-                _selectColumnNames.Select(colName => $"{_dialectConfiguration.IdentifierStartDelimiter}{colName}{_dialectConfiguration.IdentifierEndDelimiter}"));
+                _selectColumnNames.Select(colName => $"{startDelimiter}{colName}{endDelimiter}"));
             Assert.That(_rawSqlStatement, Is.EqualTo(expectedSql));
         }
 
@@ -61,7 +63,7 @@
 
             // in real library usage, people will use the ISqlBuilder, but for our tests we're gonna need more than that
             _currentSqlBuilder = OrmConfiguration.GetSqlBuilder<TEntity>() as IStatementSqlBuilder;
-            _dialectConfiguration = OrmConfiguration.GetDialectConfiguration();
+            _currentDialect = dialect;
             _selectColumnNames = _currentSqlBuilder.SelectProperties.Select(propInfo => propInfo.DatabaseColumnName).ToArray();
         }
     }

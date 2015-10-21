@@ -8,16 +8,8 @@
 
     internal class PostgreSqlBuilder : GenericStatementSqlBuilder
     {
-        public PostgreSqlBuilder(
-            SqlDialectConfiguration configuration,
-            EntityDescriptor entityDescriptor,
-            EntityMapping entityMapping)
-            : base(
-                  entityDescriptor, 
-                  entityMapping, 
-                  configuration.IsUsingSchemas,
-                  configuration.IdentifierStartDelimiter,
-                  configuration.IdentifierEndDelimiter)
+        public PostgreSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+            : base(entityDescriptor, entityMapping, SqlDialect.PostgreSql)
         {
         }
 

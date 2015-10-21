@@ -18,7 +18,7 @@
         }
 
         [When(@"I insert (.*) benchmark entities using Fast Crud")]
-        public void WhenIInsertSingleIntKeyEntitiesUsingSimpleCrud(int entitiesCount)
+        public void WhenIInsertSingleIntKeyEntitiesUsingFastCrud(int entitiesCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
 

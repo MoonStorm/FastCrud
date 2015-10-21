@@ -8,16 +8,8 @@
 
     internal class MySqlBuilder:GenericStatementSqlBuilder
     {
-        public MySqlBuilder(
-            SqlDialectConfiguration configuration,
-            EntityDescriptor entityDescriptor,
-            EntityMapping entityMapping)
-            : base(
-                  entityDescriptor, 
-                  entityMapping, 
-                  configuration.IsUsingSchemas,
-                  configuration.IdentifierStartDelimiter,
-                  configuration.IdentifierEndDelimiter)
+        public MySqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+            : base(entityDescriptor, entityMapping, SqlDialect.MySql)
         {
         }
 

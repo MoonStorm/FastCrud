@@ -1,0 +1,242 @@
+﻿namespace Dapper.FastCrud.Configuration
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Dapper.FastCrud.Mappings;
+
+    /// <summary>
+    /// Default convensions used by the library.
+    /// </summary>
+    public class OrmConventions
+    {
+        private readonly List<Tuple<Regex, string>> _pluralRegexMatchesConversion = new List<Tuple<Regex, string>>();
+        private static readonly Type[] _simpleSqlTypes = new[]
+        {
+            typeof (byte),
+            typeof (sbyte),
+            typeof (short),
+            typeof (ushort),
+            typeof (int),
+            typeof (uint),
+            typeof (long),
+            typeof (ulong),
+            typeof (float),
+            typeof (double),
+            typeof (decimal),
+            typeof (bool),
+            typeof (string),
+            typeof (char),
+            typeof (Guid),
+            typeof (DateTime),
+            typeof (DateTimeOffset),
+            typeof (byte[])
+        };
+
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        protected internal OrmConventions()
+        {
+            // to avoid adding another dependency, we'll try to add the most used pluralization forms
+            // borrowed from https://github.com/MehdiK/Humanizer/blob/cbe0495d258bee13a76f9be535017d8677554d6a/src/Humanizer/Inflections/Vocabularies.cs
+            this.AddEntityToTableNameConversionRule("$", "s");
+            this.AddEntityToTableNameConversionRule("s$", "s");
+            this.AddEntityToTableNameConversionRule("(ax|test)is$", "$1es");
+            this.AddEntityToTableNameConversionRule("(octop|vir|alumn|fung)us$", "$1i");
+            this.AddEntityToTableNameConversionRule("(alias|status)$", "$1es");
+            this.AddEntityToTableNameConversionRule("(bu)s$", "$1ses");
+            this.AddEntityToTableNameConversionRule("(buffal|tomat|volcan)o$", "$1oes");
+            this.AddEntityToTableNameConversionRule("([ti])um$", "$1a");
+            this.AddEntityToTableNameConversionRule("sis$", "ses");
+            this.AddEntityToTableNameConversionRule("(?:([^f])fe|([lr])f)$", "$1$2ves");
+            this.AddEntityToTableNameConversionRule("(hive)$", "$1s");
+            this.AddEntityToTableNameConversionRule("([^aeiouy]|qu)y$", "$1ies");
+            this.AddEntityToTableNameConversionRule("(x|ch|ss|sh)$", "$1es");
+            this.AddEntityToTableNameConversionRule("(matr|vert|ind)ix|ex$", "$1ices");
+            this.AddEntityToTableNameConversionRule("([m|l])ouse$", "$1ice");
+            this.AddEntityToTableNameConversionRule("^(ox)$", "$1en");
+            this.AddEntityToTableNameConversionRule("(quiz)$", "$1zes");
+            this.AddEntityToTableNameConversionRule("(campus)$", "$1es");
+            this.AddEntityToTableNameConversionRule("^is$", "are");
+        }
+
+        /// <summary>
+        /// Resolves an entity type name into a sql table name. 
+        /// </summary>
+        public virtual string GetTableName(Type entityType)
+        {
+            TableAttribute tableNameAttribute;
+            if ((tableNameAttribute = TypeDescriptor.GetAttributes(entityType).OfType<TableAttribute>().SingleOrDefault()) != null)
+            {
+                return tableNameAttribute.Name;
+            }
+
+            var entityTypeName = entityType.Name;
+            foreach (var tableNameConversionRule in _pluralRegexMatchesConversion)
+            {
+                var sqlTableName = tableNameConversionRule.Item1.Replace(entityTypeName, tableNameConversionRule.Item2);
+                if (!ReferenceEquals(sqlTableName, entityTypeName))
+                {
+                    return sqlTableName;
+                }
+            }
+
+            return entityTypeName;
+        }
+
+        /// <summary>
+        /// Returns the schema name for an entity type. It can return null.
+        /// In order for the schema to be used, you must also ensure that <see cref="IsUsingSqlSchemas"/> for the dialect also returns <c>true</c>.
+        /// </summary>
+        public virtual string GetSchemaName(Type entityType)
+        {
+            return TypeDescriptor.GetAttributes(entityType).OfType<TableAttribute>().SingleOrDefault()?.Schema;
+        }
+
+        /// <summary>
+        /// Returns true if the SQL dialect supports schemas in the building of the statements.
+        /// </summary>
+        public virtual bool IsUsingSqlSchemas(SqlDialect dialect)
+        {
+            return dialect == SqlDialect.MsSql || dialect == SqlDialect.PostgreSql;
+        }
+
+        /// <summary>
+        /// Gets the SQL identifier delimiters. 
+        /// </summary>
+        public virtual void GetSqlIdentifierDelimiters(SqlDialect dialect, out string startDelimiter, out string endDelimiter)
+        {
+            switch (dialect)
+            {
+                case SqlDialect.MsSql:
+                    startDelimiter = "[";
+                    endDelimiter = "]";
+                    break;
+                case SqlDialect.PostgreSql:
+                    startDelimiter = endDelimiter = "\"";
+                    break;
+                case SqlDialect.MySql:
+                    startDelimiter = endDelimiter = "`";
+                    break;
+                default:
+                    startDelimiter = endDelimiter = string.Empty;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Gets the entity properties mapped to database columns.
+        /// </summary>
+        public virtual IEnumerable<PropertyDescriptor> GetEntityProperties(Type entityType)
+        {
+            return TypeDescriptor.GetProperties(entityType)
+                .OfType<PropertyDescriptor>()
+                .Where(propDesc => 
+                    !propDesc.IsReadOnly 
+                    && propDesc.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit)
+                    && this.IsSimpleSqlType(propDesc.PropertyType));
+        }
+
+        /// <summary>
+        ///  Sets up an entity property mapping.
+        /// </summary>
+        public virtual void ConfigureEntityPropertyMapping(PropertyMapping propertyMapping)
+        {
+            // set the Id property to be the primary database generated key in case we don't find any orm attributes on the entity or on the properties
+            if(string.Equals(propertyMapping.PropertyName, "id", StringComparison.InvariantCultureIgnoreCase)
+                && !TypeDescriptor.GetAttributes(propertyMapping.EntityMapping.EntityType).OfType<TableAttribute>().Any()
+                && !this.GetEntityProperties(propertyMapping.EntityMapping.EntityType).Any(
+                    propDesc => propDesc.Attributes.OfType<Attribute>().Any(
+                        propAttr => propAttr is ColumnAttribute || propAttr is KeyAttribute || propAttr is DatabaseGeneratedAttribute)))
+            {
+                propertyMapping.SetPrimaryKey();
+                propertyMapping.SetDatabaseGenerated();
+                return;
+            }
+
+            var propertyAttributes = propertyMapping.Descriptor.Attributes;
+
+            var columnAttribute = propertyAttributes.OfType<ColumnAttribute>().FirstOrDefault();
+
+            var databaseColumnName = columnAttribute?.Name;
+            if (!string.IsNullOrEmpty(databaseColumnName))
+            {
+                propertyMapping.SetDatabaseColumnName(databaseColumnName);
+            }
+
+            if (propertyAttributes.OfType<KeyAttribute>().Any())
+            {
+                propertyMapping.SetPrimaryKey();
+            }
+
+            var databaseGeneratedAttributes = propertyAttributes.OfType<DatabaseGeneratedAttribute>();
+
+            if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
+            {
+                propertyMapping.SetDatabaseGenerated();
+            }
+
+            if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
+            {
+                propertyMapping.SetDatabaseGenerated();
+                propertyMapping.ExcludeFromInserts().ExcludeFromUpdates();
+            }
+
+            //ForeignKeyAttribute foreignKey = null;
+            //if (IsSimpleSqlType(property.PropertyType) && allowSetter)
+            //{
+            //    var propMapping = this.SetPropertyInternal(property);
+
+            //}
+            //else if((foreignKey = propertyAttributes.OfType<ForeignKeyAttribute>().SingleOrDefault())!= null)
+            //{
+            //    ormAttributesDetected = true;
+            //    this.SetPropertyInternal(property).SetRelationship(
+            //        foreignKey.Name
+            //        .Split(',')
+            //        .Select(foreignKeyPropName => foreignKeyPropName.Trim())
+            //        .Where(foreignKeyPropName => !string.IsNullOrWhiteSpace(foreignKeyPropName))
+            //        .ToArray());
+            //}
+        }
+
+        /// <summary>
+        /// Return true if an entity property of the given type should be considered for a database mapping.
+        /// </summary>
+        protected virtual bool IsSimpleSqlType(Type propertyType)
+        {
+            var underlyingType = Nullable.GetUnderlyingType(propertyType);
+            propertyType = underlyingType ?? propertyType;
+            return propertyType.IsEnum || _simpleSqlTypes.Contains(propertyType);
+        }
+
+        /// <summary>
+        /// Clears all the entity to table name conventions.
+        /// </summary>
+        protected void ClearEntityToTableNameConversionRules()
+        {
+            _pluralRegexMatchesConversion.Clear();
+        }
+
+        /// <summary>
+        /// Adds a new rule used for converting an entity class name into a table name.
+        /// The rule will be added with the highest priority.
+        /// </summary>
+        /// <param name="classNameRegex">The regex that will have to match the class name (e.g. "(buffal|tomat|volcan)o$" ) </param>
+        /// <param name="sqlTableNameMatchReplacement">The match used to form the sql table name (e.g. "$1oes")</param>
+        protected void AddEntityToTableNameConversionRule(string classNameRegex, string sqlTableNameMatchReplacement)
+        {
+            _pluralRegexMatchesConversion.Insert(
+                0,
+                new Tuple<Regex, string>(
+                    new Regex(classNameRegex, RegexOptions.Compiled),
+                    sqlTableNameMatchReplacement));
+        }
+    }
+}

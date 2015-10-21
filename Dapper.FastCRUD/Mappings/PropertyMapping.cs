@@ -10,7 +10,6 @@
     public class PropertyMapping
     {
         private PropertyMappingOptions _options;
-        private readonly EntityMapping _entityMapping;
         private string _databaseColumnName;
         private readonly int _order;
         private string[] _relationshipPropertyNames;
@@ -21,9 +20,9 @@
         internal PropertyMapping(EntityMapping entityMapping, int order, PropertyDescriptor descriptor)
         {
             _order = order;
-            _entityMapping = entityMapping;
             _options = PropertyMappingOptions.None;
             _databaseColumnName = descriptor.Name;
+            this.EntityMapping = entityMapping;
             this.Descriptor = descriptor;
         }
 
@@ -98,6 +97,11 @@
                 this.IsPrimaryKey = value;
             }
         }
+
+        /// <summary>
+        /// Gets the entity mapping this property mapping is attached to.
+        /// </summary>
+        public EntityMapping EntityMapping { get; private set; }
 
         /// <summary>
         /// Gets or sets a flag indicating the property is mapped to a primary key.
@@ -318,7 +322,7 @@
         {
             this.ValidateState();
 
-            _entityMapping.RemoveProperty(this.PropertyName);
+            this.EntityMapping.RemoveProperty(this.PropertyName);
         }
 
         internal PropertyMapping Clone(EntityMapping newEntityMapping)
@@ -339,7 +343,7 @@
 
         protected bool Equals(PropertyMapping other)
         {
-            return this._entityMapping.Equals(other._entityMapping) && this.PropertyName.Equals(other.PropertyName);
+            return this.EntityMapping.Equals(other.EntityMapping) && this.PropertyName.Equals(other.PropertyName);
         }
 
         /// <summary>
@@ -389,7 +393,7 @@
 
         private void ValidateState()
         {
-            if (_entityMapping.IsFrozen)
+            if (this.EntityMapping.IsFrozen)
             {
                 throw new InvalidOperationException("No further modifications are allowed for this entity mapping. Please clone the entity mapping instead.");
             }

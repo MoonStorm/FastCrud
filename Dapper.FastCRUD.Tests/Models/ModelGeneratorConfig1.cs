@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\v11.0;AttachDbFilename=D:\Projects\Dapper.FastCRUD\master\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=D:\Projects\Dapper.FastCRUD\master\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models
@@ -36,20 +36,6 @@ namespace Dapper.FastCrud.Tests.Models
 		public virtual long? WorkstationId { get; set; }
 		[ForeignKey("WorkstationId")]
 		public virtual Workstation Workstation { get; set; }
-	}
-
-    /// <summary>
-    /// A class which represents the SimpleBenchmarkEntities table.
-    /// </summary>
-	[Table("SimpleBenchmarkEntities")]
-	public partial class SimpleBenchmarkEntity
-	{
-		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual int Id { get; set; }
-		public virtual string FirstName { get; set; }
-		public virtual string LastName { get; set; }
-		public virtual DateTime? DateOfBirth { get; set; }
 	}
 
     /// <summary>

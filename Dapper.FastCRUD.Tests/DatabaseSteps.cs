@@ -4,8 +4,10 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data.SqlClient;
+    using System.Data.SqlServerCe;
     using System.Data.SQLite;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -63,6 +65,19 @@
         {
             this.CleanupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
             this.SetupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
+        }
+
+        [Given(@"I have initialized a SQLCE database")]
+        public void GivenIHaveInitializedSqlCeDatabase()
+        {
+            this.CleanupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
+            this.SetupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
+        }
+
+        [Then(@"I cleanup the SQLCE database")]
+        public void ThenICleanupTheSqlCeDatabase()
+        {
+            this.CleanupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
         }
 
         [Then(@"I cleanup the LocalDb database")]
@@ -169,6 +184,36 @@
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIUpdated()
         {
             CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.UpdatedEntities);
+        }
+
+        private void SetupSqlCeDatabase(string connectionString)
+        {
+            SetupOrmConfiguration(SqlDialect.MsSql);
+
+            connectionString = string.Format(
+                CultureInfo.InvariantCulture,
+                connectionString,
+                Path.Combine(Path.GetDirectoryName(typeof(DatabaseSteps).Assembly.Location), $"{DatabaseName}.sdf"));
+
+            // create the database
+            using(var sqlCeEngine = new SqlCeEngine(connectionString))
+            {
+                sqlCeEngine.CreateDatabase();
+            }
+
+            _testContext.DatabaseConnection = new SqlCeConnection(connectionString);
+            _testContext.DatabaseConnection.Open();
+
+            using(var command = _testContext.DatabaseConnection.CreateCommand())
+            {
+                command.CommandText = @"CREATE TABLE [SimpleBenchmarkEntities](
+	                    [Id] [int] IDENTITY(2,1) PRIMARY KEY,
+	                    [FirstName] [nvarchar](50) NULL,
+	                    [LastName] [nvarchar](50) NOT NULL,
+	                    [DateOfBirth] [datetime] NULL
+                )";
+                command.ExecuteNonQuery();
+            }
         }
 
         private void SetupSqLiteDatabase(string connectionString)
@@ -455,6 +500,18 @@
 
             _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName}");
             _testContext.DatabaseConnection.Open();
+        }
+
+        private void CleanupSqlCeDatabase(string connectionString)
+        {
+            _testContext.DatabaseConnection?.Close();
+
+            var dbFile = Path.Combine(Path.GetDirectoryName(typeof(DatabaseSteps).Assembly.Location), $"{DatabaseName}.sdf");
+
+            if (File.Exists(dbFile))
+            {
+                File.Delete(dbFile);
+            }
         }
 
         private void CleanupMsSqlDatabase(string connectionString)
