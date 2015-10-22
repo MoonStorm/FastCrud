@@ -18,36 +18,41 @@ Code first entities are also supported which can either be decorated with attrib
 
 #### Speed
 Most of us love Dapper for its speed. 
-Without taking this away from you, Dapper.FastCRUD helps by giving you type safety and can even be used as foundation for  your DAL repositories.
-Let's have a look at how it performs against other similar libraries out there (``Dapper.SimpleCRUD v1.8.7``, ``DapperExtensions v1.4.4 ``).
+Let's have a look at how ``Fast Crud`` performs against other similar libraries out there (``Dapper.SimpleCRUD v1.9.1``, ``DapperExtensions v1.4.4 ``).
 
-##### Automatic Benchmark Report (Last Run: Thursday, May 28, 2015)
-|           |  Operation | Count |Time (ms) | Time/op (μs) |
-------------|------------|-------|----------|--------------
-Dapper | update | 20000 | 4,219.74 | 210.99  
-Fast Crud | update | 20000 | 4,254.11 | 212.71  
-Dapper Extensions | update | 20000 | 5,673.44 | 283.67  
-Simple Crud | update | 20000 | 7,250.60 | 362.53  
-Dapper | select by id | 20000 | 2,120.96 | 106.05  
-Fast Crud | select by id | 20000 | 2,502.21 | 125.11  
-Dapper Extensions | select by id | 20000 | 3,558.76 | 177.94  
-Simple Crud | select by id | 20000 | 5,893.90 | 294.70  
-Dapper | delete | 20000 | 3,824.91 | 191.25  
-Fast Crud | delete | 20000 | 3,717.07 | 185.85  
-Dapper Extensions | delete | 20000 | 4,622.52 | 231.13  
-Simple Crud | delete | 20000 | 5,953.60 | 297.68  
-Dapper | insert | 20000 | 4,352.63 | 217.63  
-Fast Crud | insert | 20000 | 4,877.35 | 243.87  
-Dapper Extensions | insert | 20000 | 6,106.09 | 305.30  
-Simple Crud | insert | 20000 | 9,029.64 | 451.48  
-Dapper | select all | 3 | 134.95 | 44,984.57  
-Fast Crud | select all | 3 | 185.02 | 61,672.73  
-Dapper Extensions | select all | 3 | 203.24 | 67,745.60  
-Simple Crud | select all | 3 | 875.43 | 291,808.73  
+##### Automatic Benchmark Report (Last Run: Wednesday, October 21, 2015)
+|  Library   |  Operation | Count |Time (ms) | Time/op (μs) |
+|------------|------------|-------|----------|--------------|
+||||||
+| Dapper | insert | 30000 | 9,673.86 | 322.46 |
+| Fast Crud | insert | 30000 | 9,872.64 | 329.09 |
+| Dapper Extensions | insert | 30000 | 12,274.04 | 409.13 |
+| Simple Crud | insert | 30000 | 18,435.22 | 614.51 |
+||||||
+| Dapper | update | 30000 | 9,669.60 | 322.32 |
+| Fast Crud | update | 30000 | 9,826.25 | 327.54 |
+| Dapper Extensions | update | 30000 | 14,889.08 | 496.30 |
+| Simple Crud | update | 30000 | 18,865.06 | 628.84 |
+||||||
+| Dapper | delete | 30000 | 7,343.11 | 244.77  |
+| Fast Crud | delete | 30000 | 7,553.49 | 251.78  |
+| Dapper Extensions | delete | 30000 | 10,001.75 | 333.39  |
+| Simple Crud | delete | 30000 | 13,295.85 | 443.20  |
+||||||
+| Dapper | select by id | 30000 | 5,577.01 | 185.90  |
+| Fast Crud | select by id | 30000 | 5,931.15 | 197.70  |
+| Dapper Extensions | select by id | 30000 | 8,061.54 | 268.72  |
+| Simple Crud | select by id | 30000 | 11,682.05 | 389.40  |
+||||||
+| Dapper | select all | 3 | 279.12 | 93,040.73  |
+| Fast Crud | select all | 3 | 286.60 | 95,533.40  |
+| Dapper Extensions | select all | 3 | 291.21 | 97,070.13  |
+| Simple Crud | select all | 3 | 818.81 | 272,935.37  |
 
 
 Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run, data file is pre-allocated, and the statistics are turned off.
 External factors might influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records. 
+
 Environment details: Windows 7, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD
 
 ##### Install via NuGet and Enjoy !

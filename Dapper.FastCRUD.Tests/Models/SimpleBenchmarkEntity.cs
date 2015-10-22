@@ -1,12 +1,14 @@
 ﻿namespace Dapper.FastCrud.Tests.Models
 {
     using System;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
-    /// <summary>
-    /// This entity has no attributes on purpose!
-    /// </summary>
+    [Table("SimpleBenchmarkEntities")]
     public class SimpleBenchmarkEntity
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public virtual int Id { get; set; }
         public virtual string FirstName { get; set; }
         public virtual string LastName { get; set; }

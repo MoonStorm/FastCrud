@@ -128,8 +128,8 @@
             var docsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../README.MD");
             var docsContents = File.ReadAllText(docsPath);
 
-            var reportTitle = $"{ormType} | {operation} | {opCount} |";
-            var report = $"{reportTitle} {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} | {_testContext.Stopwatch.Elapsed.TotalMilliseconds*1000/opCount:0,0.00}  {Environment.NewLine}";
+            var reportTitle = $"| {ormType} | {operation} | {opCount} |";
+            var report = $"{reportTitle} {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} | {_testContext.Stopwatch.Elapsed.TotalMilliseconds*1000/opCount:0,0.00} |{Environment.NewLine}";
 
             var benchmarkHeaderRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report)[^{Environment.NewLine}]*", RegexOptions.Singleline);
             var emptySpaceInsertRegex = new Regex($@"(?<=#+\s*?Automatic Benchmark Report(.*?{Environment.NewLine}){{3,3}})\s*?", RegexOptions.Singleline);
