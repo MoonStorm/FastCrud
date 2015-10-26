@@ -1,4 +1,5 @@
-﻿namespace Dapper.FastCrud.Configuration
+﻿// ReSharper disable once CheckNamespace (the namespace is intentionally not in sync with the file location) 
+namespace Dapper.FastCrud
 {
     using System;
     using System.Collections.Generic;
@@ -7,14 +8,21 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Dapper.FastCrud.Configuration.DialectOptions;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
-    /// Default convensions used by the library.
+    /// Default conventions used by the library.
     /// </summary>
     public class OrmConventions
     {
         private readonly List<Tuple<Regex, string>> _pluralRegexMatchesConversion = new List<Tuple<Regex, string>>();
+
+        private static readonly SqlDatabaseOptions _defaultMsSqlDatabaseOptions = new MsSqlDatabaseOptions();
+        private static readonly SqlDatabaseOptions _defaultMySqlDatabaseOptions = new MySqlDatabaseOptions();
+        private static readonly SqlDatabaseOptions _defaultPostgreSqlDatabaseOptions = new PostreSqlDatabaseOptions();
+        private static readonly SqlDatabaseOptions _defaultGenericSqlDatabaseOptions = new SqlDatabaseOptions();
+
         private static readonly Type[] _simpleSqlTypes = new[]
         {
             typeof (byte),
@@ -100,33 +108,20 @@
         }
 
         /// <summary>
-        /// Returns true if the SQL dialect supports schemas in the building of the statements.
+        /// Returns various database specific options to be used by the sql builder for the specified dialect.
         /// </summary>
-        public virtual bool IsUsingSqlSchemas(SqlDialect dialect)
-        {
-            return dialect == SqlDialect.MsSql || dialect == SqlDialect.PostgreSql;
-        }
-
-        /// <summary>
-        /// Gets the SQL identifier delimiters. 
-        /// </summary>
-        public virtual void GetSqlIdentifierDelimiters(SqlDialect dialect, out string startDelimiter, out string endDelimiter)
+        public virtual SqlDatabaseOptions GetDatabaseOptions(SqlDialect dialect)
         {
             switch (dialect)
             {
                 case SqlDialect.MsSql:
-                    startDelimiter = "[";
-                    endDelimiter = "]";
-                    break;
+                    return _defaultMsSqlDatabaseOptions;
                 case SqlDialect.PostgreSql:
-                    startDelimiter = endDelimiter = "\"";
-                    break;
+                    return _defaultPostgreSqlDatabaseOptions;
                 case SqlDialect.MySql:
-                    startDelimiter = endDelimiter = "`";
-                    break;
+                    return _defaultMySqlDatabaseOptions;
                 default:
-                    startDelimiter = endDelimiter = string.Empty;
-                    break;
+                    return _defaultGenericSqlDatabaseOptions;
             }
         }
 

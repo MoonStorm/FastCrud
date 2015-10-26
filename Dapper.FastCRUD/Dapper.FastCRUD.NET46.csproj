@@ -53,8 +53,12 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Configuration\DialectOptions\MsSqlDatabaseOptions.cs" />
+    <Compile Include="Configuration\DialectOptions\MySqlDatabaseOptions.cs" />
+    <Compile Include="Configuration\DialectOptions\PostreSqlDatabaseOptions.cs" />
     <Compile Include="Configuration\OrmConfiguration.cs" />
     <Compile Include="Configuration\OrmConventions.cs" />
+    <Compile Include="Configuration\SqlDatabaseOptions.cs" />
     <Compile Include="Validations\Requires.cs" />
     <None Include="Configuration\PropertyChangedNotifier.cs" />
     <Compile Include="Configuration\SqlDialect.cs" />

@@ -7,6 +7,7 @@
     {
         Table,
         Column,
+        TableAndColumn,
         Identifier,
     }
 }

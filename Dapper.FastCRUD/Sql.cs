@@ -48,7 +48,7 @@
         }
 
         /// <summary>
-        /// Returns a parameter formatter for name of the database column attached to the specified property of the main entity.
+        /// Returns a parameter formatter for the name of the database column attached to the specified property of the main entity.
         /// If you wish to resolve the column name of another entity, please use the generic overload instead.
         /// </summary>
         /// <param name="propertyName">Name of the property (e.g. <code>nameof(entity.propname)</code>)</param>
@@ -58,6 +58,19 @@
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             return new SqlParameterFormatter(SqlParameterElementType.Column, propertyName, entityMappingOverride);
+        }
+
+        /// <summary>
+        /// Returns a parameter formatter for the combined table and column attached to the specified property of the main entity.
+        /// If you wish to resolve the column name of another entity, please use the generic overload instead.
+        /// </summary>
+        /// <param name="propertyName">Name of the property (e.g. <code>nameof(entity.propname)</code>)</param>
+        /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IFormattable TableAndColumn(string propertyName, EntityMapping entityMappingOverride = null)
+        {
+            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            return new SqlParameterFormatter(SqlParameterElementType.TableAndColumn, propertyName, entityMappingOverride);
         }
 
         /// <summary>
@@ -71,5 +84,18 @@
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             return new SqlEntityFormattableParameter<TEntity>(SqlParameterElementType.Column, propertyName, entityMappingOverride);
         }
+
+        /// <summary>
+        /// Returns a parameter formatter for the combined table and column attached to the property of the provided entity.
+        /// If you wish to resolve the column name of the main entity, please use the non-generic overload instead.
+        /// </summary>
+        /// <param name="propertyName">Name of the property (e.g. <code>nameof(entity.propname)</code>)</param>
+        /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
+        public static IFormattable TableAndColumn<TEntity>(string propertyName, EntityMapping entityMappingOverride = null)
+        {
+            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            return new SqlEntityFormattableParameter<TEntity>(SqlParameterElementType.TableAndColumn, propertyName, entityMappingOverride);
+        }
+
     }
 }

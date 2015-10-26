@@ -67,5 +67,13 @@ namespace Dapper.FastCrud
         /// </summary>
         /// <param name="tableAlias">Optional table alias.</param>
         string ConstructUpdateClause(string tableAlias = null);
+
+        /// <summary>
+        /// Produces a formatted string from a formattable string.
+        /// Table and column names will be resolved, and identifier will be properly delimited.
+        /// </summary>
+        /// <param name="rawSql">The raw sql to format</param>
+        /// <returns>Properly formatted SQL statement</returns>
+        string Format(FormattableString rawSql);
     }
 }

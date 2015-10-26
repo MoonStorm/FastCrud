@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Formatters
 {
     using System;
+    using System.Globalization;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
@@ -77,18 +78,17 @@
             string stringArg;
             if ((stringArg = arg as string) != null)
             {
-                if (format != null && format.Length == 1)
-                {
-                    switch (format[0])
+                    switch (format)
                     {
-                        case 'T':
+                        case "TC":
+                            return string.Format(CultureInfo.InvariantCulture,"{0}.{1}",this.MainEntitySqlBuilder.GetTableName(), this.MainEntitySqlBuilder.GetColumnName(stringArg));
+                        case "T":
                             return this.MainEntitySqlBuilder.GetTableName();
-                        case 'C':
+                        case "C":
                             return this.MainEntitySqlBuilder.GetColumnName(stringArg);
-                        case 'I':
+                        case "I":
                             return this.MainEntitySqlBuilder.GetDelimitedIdentifier(stringArg);
                     }
-                }
             }
 
             IFormattable formattableArg;

@@ -5,7 +5,6 @@ namespace Dapper.FastCrud
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlStatements;

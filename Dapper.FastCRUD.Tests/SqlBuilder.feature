@@ -11,3 +11,18 @@ Scenario Outline: Select all columns
 	| MySql         | workstation    |
 	| SqLite        | workstation    |
 
+Scenario Outline: Manual query
+	Given I extract the SQL builder for <database type> and <entity type>
+	When I construct a complex join query for <entity type> using <sql query builder method>
+	Then I should get a valid join query statement for <entity type>
+	Examples: 
+	| database type | entity type | sql query builder method                       |
+	| LocalDb       | workstation | individual identifier resolvers                |
+	| PostgreSql    | workstation | individual identifier resolvers                |
+	| MySql         | workstation | individual identifier resolvers                |
+	| SqLite        | workstation | individual identifier resolvers                |
+	| LocalDb       | workstation | combined table and column identifier resolvers |
+	| PostgreSql    | workstation | combined table and column identifier resolvers |
+	| MySql         | workstation | combined table and column identifier resolvers |
+	| SqLite        | workstation | combined table and column identifier resolvers |
+

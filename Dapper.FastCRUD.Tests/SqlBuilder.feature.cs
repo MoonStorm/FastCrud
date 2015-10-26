@@ -84,6 +84,31 @@ this.ScenarioSetup(scenarioInfo);
 #line hidden
             this.ScenarioCleanup();
         }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Manual query")]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "individual identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "individual identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "individual identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "individual identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "combined table and column identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "combined table and column identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "combined table and column identifier resolvers", null)]
+        [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "combined table and column identifier resolvers", null)]
+        public virtual void ManualQuery(string databaseType, string entityType, string sqlQueryBuilderMethod, string[] exampleTags)
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Manual query", exampleTags);
+#line 14
+this.ScenarioSetup(scenarioInfo);
+#line 15
+ testRunner.Given(string.Format("I extract the SQL builder for {0} and {1}", databaseType, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 16
+ testRunner.When(string.Format("I construct a complex join query for {0} using {1}", entityType, sqlQueryBuilderMethod), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 17
+ testRunner.Then(string.Format("I should get a valid join query statement for {0}", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            this.ScenarioCleanup();
+        }
     }
 }
 #pragma warning restore

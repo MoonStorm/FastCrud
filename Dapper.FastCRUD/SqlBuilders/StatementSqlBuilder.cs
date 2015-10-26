@@ -20,12 +20,10 @@
             EntityMapping entityMapping,
             SqlDialect dialect)
         {
-            this.UsesSchemaForTableNames = OrmConfiguration.Conventions.IsUsingSqlSchemas(dialect);
-
-            string identifierStartDelimiter, identifierEndDelimiter;
-            OrmConfiguration.Conventions.GetSqlIdentifierDelimiters(dialect, out identifierStartDelimiter, out identifierEndDelimiter);
-            this.IdentifierStartDelimiter = identifierStartDelimiter;
-            this.IdentifierEndDelimiter = identifierEndDelimiter;
+            var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(dialect);
+            this.UsesSchemaForTableNames = databaseOptions.IsUsingSchemas;
+            this.IdentifierStartDelimiter = databaseOptions.StartDelimiter;
+            this.IdentifierEndDelimiter = databaseOptions.EndDelimiter;
 
 
             _entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
@@ -64,6 +62,17 @@
         /// Gets the statement formatter to be used for parameter resolution.
         /// </summary>
         protected SqlStatementFormatter StatementFormatter { get; }
+
+        /// <summary>
+        /// Produces a formatted string from a formattable string.
+        /// Table and column names will be resolved, and identifier will be properly delimited.
+        /// </summary>
+        /// <param name="rawSql">The raw sql to format</param>
+        /// <returns>Properly formatted SQL statement</returns>
+        public virtual string Format(FormattableString rawSql)
+        {
+            return rawSql.ToString(this.StatementFormatter);
+        }
 
         /// <summary>
         /// Returns the table name associated with the current entity.

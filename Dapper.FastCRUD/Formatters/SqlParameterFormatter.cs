@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Formatters
 {
     using System;
+    using System.Globalization;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
@@ -113,6 +114,8 @@
                     return sqlBuilder.GetColumnName(this.ParameterValue);
                 case SqlParameterElementType.Table:
                     return sqlBuilder.GetTableName();
+                case SqlParameterElementType.TableAndColumn:
+                    return string.Format(CultureInfo.InvariantCulture,"{0}.{1}", sqlBuilder.GetTableName(), sqlBuilder.GetColumnName(this.ParameterValue));
                 case SqlParameterElementType.Identifier:
                     return sqlBuilder.GetDelimitedIdentifier(this.ParameterValue);
                 default:

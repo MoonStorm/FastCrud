@@ -51,6 +51,7 @@ namespace Dapper.FastCrud.Tests.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 		public virtual int AccessLevel { get; set; }
 		public virtual int InventoryIndex { get; set; }
+		public virtual int? BuildingId { get; set; }
 		[ForeignKey("WorkstationId")]
 		public virtual IEnumerable<Employee> Employees { get; set; }
 	}

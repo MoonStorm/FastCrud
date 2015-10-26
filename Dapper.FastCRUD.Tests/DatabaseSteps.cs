@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data.SqlClient;
+    using System.Data.SqlLocalDb;
     using System.Data.SqlServerCe;
     using System.Data.SQLite;
     using System.Diagnostics;
@@ -23,7 +24,7 @@
     public class DatabaseSteps
     {
         private DatabaseTestContext _testContext;
-        private const string DatabaseName = "TestFastCrudDatabase";
+        private const string DatabaseName = "FastCrudTestDatabase";
         //private static string OriginalDatabaseFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data");
         //private static string FinalDatabaseFolder = Path.Combine(OriginalDatabaseFolder, $"FastCrudDatabaseTests");
 
@@ -50,8 +51,8 @@
         [Given(@"I have initialized a LocalDb database")]
         public void GivenIHaveInitializedLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
-            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.CleanupLocalDbDatabase();
+            this.SetupLocalDbDatabase();
         }
 
         [Given(@"I have initialized a SqLite database")]
@@ -83,7 +84,7 @@
         [Then(@"I cleanup the LocalDb database")]
         public void ThenICleanupTheLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.CleanupLocalDbDatabase();
         }
 
         [Given(@"I have initialized a MsSqlServer database")]
@@ -230,7 +231,8 @@
 	                        WorkstationId integer primary key AUTOINCREMENT,
                             InventoryIndex int NOT NULL,
 	                        Name nvarchar(50) NULL,
-                            AccessLevel int NOT NULL DEFAULT(1)
+                            AccessLevel int NOT NULL DEFAULT(1),
+                            BuildingId int NULL
                         )";
 
                 command.ExecuteNonQuery();
@@ -324,6 +326,7 @@
 	                        ""Name"" varchar(50) NOT NULL,
                             ""InventoryIndex"" int NOT NULL,
                             ""AccessLevel"" int NOT NULL DEFAULT 1,
+                            ""BuildingId"" int NULL,
 	                        PRIMARY KEY (""WorkstationId"")
                         );
 
@@ -397,6 +400,7 @@
 	                        Name nvarchar(50) NOT NULL,
                             InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
+                            BuildingId int NULL,
 	                        PRIMARY KEY (WorkstationId)
                         );
 
@@ -420,6 +424,14 @@
             _testContext.DatabaseConnection.Open();
         }
 
+        private void SetupLocalDbDatabase()
+        {
+            var localDbProvider = new SqlLocalDbProvider();
+            var localInstance = localDbProvider.CreateInstance(DatabaseName); // instance name = db name, the api will always use the latest version
+            localInstance.Start();
+            this.SetupMsSqlDatabase(localInstance.CreateConnectionStringBuilder().ConnectionString);
+        }
+
         private void SetupMsSqlDatabase(string connectionString)
         {
             SetupOrmConfiguration(SqlDialect.MsSql);
@@ -431,10 +443,12 @@
                 var server = new Server(new ServerConnection(dataConnection));
                 var database = new Database(server, DatabaseName);
                 database.Create();
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET SINGLE_USER"); // for benchmarking purposes                                
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET COMPATIBILITY_LEVEL = 110"); // for benchmarking purposes                
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY BULK_LOGGED"); // for benchmarking purposes                
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_CREATE_STATISTICS OFF"); // for benchmarking purposes
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_UPDATE_STATISTICS OFF"); // for benchmarking purposes
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} MODIFY FILE(NAME=[{DatabaseName}], SIZE=50MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY SIMPLE"); // for benchmarking purposes                
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} MODIFY FILE(NAME=[{DatabaseName}], SIZE=100MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
@@ -451,6 +465,7 @@
 	                    [Name] [nvarchar](50) NULL,
                         [InventoryIndex] [int] NOT NULL,
                         [AccessLevel] [int] NOT NULL DEFAULT(1),
+                        [BuildingId] [int] NULL,
                         CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED 
                         (
 	                        [WorkstationId] ASC
@@ -479,26 +494,17 @@
 	                        [Id] ASC
                         ))");
 
-                ////// attach the test dbs
-                ////var dataFiles = new StringCollection();
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET MULTI_USER"); // for benchmarking purposes                                
 
-                ////var finalSqlDatabaseDataFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}.mdf");
-                ////var finalSqlDatabaseLogFilePath = Path.Combine(FinalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf");
-
-                ////Directory.CreateDirectory(FinalDatabaseFolder);
-                ////File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}.mdf"), finalSqlDatabaseDataFilePath, true);
-                ////File.Copy(Path.Combine(OriginalDatabaseFolder, $"{MsSqlDatabaseName}_log.ldf"), finalSqlDatabaseLogFilePath, true);
-
-                ////dataFiles.AddRange(new[] { finalSqlDatabaseDataFilePath, finalSqlDatabaseLogFilePath });
-                ////serverManagement.AttachDatabase(MsSqlDatabaseName, dataFiles);
-
-                ////var database = serverManagement.Databases[MsSqlDatabaseName];
-                //////database.ExecuteNonQuery(@"CHECKPOINT;");
-                ////database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
-                ////database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
+                // no longer required. local db instances are destroyed and re-created
+                //database.ExecuteNonQuery(@"CHECKPOINT;");               
+                //database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
+                //database.ExecuteNonQuery(@"DBCC FREESYSTEMCACHE('ALL') WITH NO_INFOMSGS;");
+                //database.ExecuteNonQuery(@"DBCC FREESESSIONCACHE WITH NO_INFOMSGS;");
+                //database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
             }
 
-            _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName}");
+            _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName};Max Pool Size=1; Pooling = False");
             _testContext.DatabaseConnection.Open();
         }
 
@@ -511,6 +517,26 @@
             if (File.Exists(dbFile))
             {
                 File.Delete(dbFile);
+            }
+        }
+
+        private void CleanupLocalDbDatabase()
+        {
+            SqlLocalDbApi.AutomaticallyDeleteInstanceFiles = true;
+            SqlLocalDbApi.StopOptions=StopInstanceOptions.KillProcess;
+
+            var localDbProvider = new SqlLocalDbProvider();
+            var localDbInstanceInfo = localDbProvider.GetInstances().FirstOrDefault(instance => instance.Name==DatabaseName);
+            if (localDbInstanceInfo != null)
+            {
+                var localDbInstance = localDbProvider.GetInstance(DatabaseName);
+                if (!localDbInstance.IsRunning)
+                {
+                    localDbInstance.Start();
+                }
+                this.CleanupMsSqlDatabase(localDbInstance.CreateConnectionStringBuilder().ConnectionString);
+                SqlLocalDbApi.StopInstance(DatabaseName,TimeSpan.FromSeconds(20.0));
+                SqlLocalDbApi.DeleteInstance(DatabaseName);
             }
         }
 
