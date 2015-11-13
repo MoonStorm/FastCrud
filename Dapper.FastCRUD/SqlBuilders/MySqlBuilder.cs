@@ -13,9 +13,12 @@
         {
         }
 
-        public override string ConstructFullInsertStatement()
+        /// <summary>
+        /// Constructs a full insert statement
+        /// </summary>
+        protected override string ConstructFullInsertStatementInternal()
         {
-            var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ";
+            var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ".ToString(CultureInfo.InvariantCulture);
 
             if (this.InsertKeyDatabaseGeneratedProperties.Length > 0)
             {
@@ -23,7 +26,7 @@
                 if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
                 {
                     // just one, this is going to be easy
-                    sql += $"SELECT LAST_INSERT_ID() as {this.GetDelimitedIdentifier(this.InsertKeyDatabaseGeneratedProperties[0].PropertyName)}";
+                    sql += $"SELECT LAST_INSERT_ID() as {this.GetDelimitedIdentifier(this.InsertKeyDatabaseGeneratedProperties[0].PropertyName)}".ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
@@ -32,25 +35,27 @@
                         this.InsertDatabaseGeneratedProperties.Select(
                             propInfo =>
                             $"{this.GetColumnName(propInfo, null, true)}"));
-                    sql +=
-                        $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.GetColumnName(this.InsertKeyDatabaseGeneratedProperties[0],null,false)} = LAST_INSERT_ID()";
+                    sql += $"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.GetColumnName(this.InsertKeyDatabaseGeneratedProperties[0], null, false)} = LAST_INSERT_ID()".ToString(CultureInfo.InvariantCulture);
                 }
             }
-            else if(this.InsertDatabaseGeneratedProperties.Length > 0)
+            else if (this.InsertDatabaseGeneratedProperties.Length > 0)
             {
                 throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has database generated fields that don't contain a primary key. Either mark the primary key as database generated or remove the database generated flag from all the fields or mark all these fields as included in the insert operation.");
             }
             return sql;
         }
 
-        public override string ConstructFullBatchSelectStatement(
+        /// <summary>
+        /// Constructs a full batch select statement
+        /// </summary>
+        protected override string ConstructFullBatchSelectStatementInternal(
             FormattableString whereClause = null,
             FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
             object queryParameters = null)
         {
-            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}";
+            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture);
 
             if (whereClause != null)
             {

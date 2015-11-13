@@ -5,6 +5,8 @@ namespace Dapper.FastCrud
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using Dapper.FastCrud.Configuration;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlStatements;
@@ -18,6 +20,7 @@ namespace Dapper.FastCrud
         private static volatile SqlDialect _currentDefaultDialect = SqlDialect.MsSql;
         private static volatile OrmConventions _currentOrmConventions = new OrmConventions();
         private static readonly ConcurrentDictionary<Type, EntityDescriptor> _entityDescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        private static volatile SqlStatementOptions _defaultStatementOptions = new SqlStatementOptions();
 
         /// <summary>
         /// Clears all the recorded entity registrations and entity ORM mappings.
@@ -72,6 +75,22 @@ namespace Dapper.FastCrud
         public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity> entityMapping = null)
         {
             return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping).SqlBuilder;
+        }
+
+        /// <summary>
+        /// Gets or sets the default command options. 
+        /// </summary>
+        public static SqlStatementOptions DefaultSqlStatementOptions
+        {
+            get
+            {
+                return _defaultStatementOptions;
+            }
+            //set
+            //{
+            //    Requires.NotNull(value, nameof(DefaultSqlStatementOptions));
+            //    _defaultStatementOptions = value;
+            //}
         }
 
         /// <summary>

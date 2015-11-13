@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace (the namespace is intentionally not in sync with the file location) 
-namespace Dapper.FastCrud
+﻿namespace Dapper.FastCrud.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -9,6 +8,7 @@ namespace Dapper.FastCrud
     using System.Linq;
     using System.Text.RegularExpressions;
     using Dapper.FastCrud.Configuration.DialectOptions;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>

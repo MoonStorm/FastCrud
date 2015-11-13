@@ -7,13 +7,28 @@
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
     using System.Text;
+    using System.Threading;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
 
     internal abstract class GenericStatementSqlBuilder:IStatementSqlBuilder
     {
-        private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
+        //private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
+        private readonly Lazy<string> _noAliasKeysWhereClause;
+        private readonly Lazy<string> _noAliasTableName;
+        private readonly Lazy<string> _noAliasKeyColumnEnumeration;
+        private readonly Lazy<string> _noAliasColumnEnumerationForSelect;
+        private readonly Lazy<string> _columnEnumerationForInsert;
+        private readonly Lazy<string> _paramEnumerationForInsert;
+        private readonly Lazy<string> _noAliasUpdateClause;
+        private readonly Lazy<string> _fullInsertStatement;
+        private readonly Lazy<string> _fullSingleUpdateStatement;
+        private readonly Lazy<string> _noConditionFullBatchUpdateStatement;
+        private readonly Lazy<string> _fullSingleDeleteStatement;
+        private readonly Lazy<string> _noConditionFullBatchDeleteStatement;
+        private readonly Lazy<string> _noConditionFullCountStatement;
+        private readonly Lazy<string> _fullSingleSelectStatement; 
 
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
@@ -26,7 +41,7 @@
             this.IdentifierEndDelimiter = databaseOptions.EndDelimiter;
 
 
-            _entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
+            //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
             this.StatementFormatter = new SqlStatementFormatter(entityDescriptor,entityMapping,this);
             this.EntityDescriptor = entityDescriptor;
             this.EntityMapping = entityMapping;
@@ -56,7 +71,35 @@
                 .Where(propMapping => propMapping.Value.IsReferencingForeignEntity)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
+
+            _noAliasTableName = new Lazy<string>(()=>this.GetTableNameInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noAliasKeysWhereClause = new Lazy<string>(()=>this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noAliasKeyColumnEnumeration = new Lazy<string>(() => this.ConstructKeyColumnEnumerationInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noAliasColumnEnumerationForSelect = new Lazy<string>(() => this.ConstructColumnEnumerationForSelectInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _columnEnumerationForInsert = new Lazy<string>(()=>this.ConstructColumnEnumerationForInsertInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _paramEnumerationForInsert = new Lazy<string>(()=>this.ConstructParamEnumerationForInsertInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noAliasUpdateClause = new Lazy<string>(()=>this.ConstructUpdateClauseInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _fullInsertStatement = new Lazy<string>(()=>this.ConstructFullInsertStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleUpdateStatement = new Lazy<string>(()=>this.ConstructFullSingleUpdateStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullBatchUpdateStatement = new Lazy<string>(()=>this.ConstructFullBatchUpdateStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleDeleteStatement = new Lazy<string>(()=>this.ConstructFullSingleDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullBatchDeleteStatement = new Lazy<string>(()=>this.ConstructFullBatchDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullCountStatement = new Lazy<string>(()=>this.ConstructFullCountStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
         }
+
+        public EntityDescriptor EntityDescriptor { get; }
+        public EntityMapping EntityMapping { get; }
+        public PropertyMapping[] ForeignEntityProperties { get; }
+        public PropertyMapping[] SelectProperties { get; }
+        public PropertyMapping[] KeyProperties { get; }
+        public PropertyMapping[] InsertProperties { get; }
+        public PropertyMapping[] UpdateProperties { get; }
+        public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
+        public PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
+        protected string IdentifierStartDelimiter { get; }
+        protected string IdentifierEndDelimiter { get; }
+        protected bool UsesSchemaForTableNames { get; }
 
         /// <summary>
         /// Gets the statement formatter to be used for parameter resolution.
@@ -69,7 +112,8 @@
         /// </summary>
         /// <param name="rawSql">The raw sql to format</param>
         /// <returns>Properly formatted SQL statement</returns>
-        public virtual string Format(FormattableString rawSql)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string Format(FormattableString rawSql)
         {
             return rawSql.ToString(this.StatementFormatter);
         }
@@ -77,21 +121,17 @@
         /// <summary>
         /// Returns the table name associated with the current entity.
         /// </summary>
-        public virtual string GetTableName(string tableAlias = null)
+        /// <param name="tableAlias">Optional table alias using AS.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetTableName(string tableAlias = null)
         {
-            var sqlAlias = tableAlias == null
-                ? string.Empty
-                : $" AS {this.GetDelimitedIdentifier(tableAlias)}";
-
-            var fullTableName = ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
-                                ? $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}"
-                                : $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
-            return  $"{fullTableName}{sqlAlias}".ToString(CultureInfo.InvariantCulture);
+            return tableAlias == null ? _noAliasTableName.Value : this.GetTableNameInternal(tableAlias);
         }
 
         /// <summary>
         /// Returns the name of the database column attached to the specified property.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> property, string tableAlias = null)
         {
             var propName = ((MemberExpression)property.Body).Member.Name;
@@ -101,15 +141,21 @@
         /// <summary>
         /// Returns the name of the database column attached to the specified property.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string tableAlias = null)
         {
             return this.GetColumnName(this.EntityMapping.PropertyMappings[propertyName], tableAlias, false);
         }
 
         /// <summary>
-        /// Returns the name of the database column attached to the specified property.
+        /// Resolves a column name
         /// </summary>
-        public virtual string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization)
+        /// <param name="propMapping">Property mapping</param>
+        /// <param name="tableAlias">Table alias</param>
+        /// <param name="performColumnAliasNormalization"></param>
+        /// <returns>If true and the database column name differs from the property name, an AS clause will be added</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization)
         {
             var sqlTableAlias = tableAlias == null ? string.Empty : $"{this.GetDelimitedIdentifier(tableAlias)}.";
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
@@ -121,85 +167,138 @@
         /// <summary>
         /// Constructs a condition of form <code>ColumnName=@PropertyName and ...</code> with all the key columns (e.g. <code>Id=@Id and EmployeeId=@EmployeeId</code>)
         /// </summary>
-        public virtual string ConstructKeysWhereClause(string tableAlias = null)
+        /// <param name="tableAlias">Optional table alias.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructKeysWhereClause(string tableAlias = null)
         {
-            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+            return tableAlias == null ? _noAliasKeysWhereClause.Value : this.ConstructKeysWhereClauseInternal(tableAlias);
         }
 
         /// <summary>
         /// Constructs an enumeration of the key values.
         /// </summary>
-        public virtual string ConstructKeyColumnEnumeration(string tableAlias = null)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructKeyColumnEnumeration(string tableAlias = null)
         {
-            return string.Join(",", this.KeyProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
+            return tableAlias == null ? _noAliasKeyColumnEnumeration.Value : this.ConstructKeyColumnEnumerationInternal(tableAlias);
         }
 
         /// <summary>
         /// Constructs an enumeration of all the selectable columns (i.e. all the columns corresponding to entity properties which are not part of a relationship).
         /// (e.g. Id, HouseNo, AptNo)
         /// </summary>
-        public virtual string ConstructColumnEnumerationForSelect(string tableAlias = null)
+        /// <param name="tableAlias">Optional table alias.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructColumnEnumerationForSelect(string tableAlias = null)
         {
-            return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
+            return tableAlias == null ? _noAliasColumnEnumerationForSelect.Value : this.ConstructColumnEnumerationForSelectInternal(tableAlias);
         }
 
         /// <summary>
         /// Constructs an enumeration of all the columns available for insert.
         /// (e.g. HouseNo, AptNo)
         /// </summary>
-        public virtual string ConstructColumnEnumerationForInsert()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructColumnEnumerationForInsert()
         {
-            return string.Join(",", this.InsertProperties.Select(propInfo => this.GetColumnName(propInfo, null, false)));
+            return _columnEnumerationForInsert.Value;
         }
 
         /// <summary>
         /// Constructs an enumeration of all the parameters denoting properties that are bound to columns available for insert.
         /// (e.g. @HouseNo, @AptNo)
         /// </summary>
-        public virtual string ConstructParamEnumerationForInsert()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructParamEnumerationForInsert()
         {
-            return string.Join(",", this.InsertProperties.Select(propInfo => $"@{propInfo.PropertyName}"));
+            return _paramEnumerationForInsert.Value;
         }
 
         /// <summary>
         /// Constructs a update clause of form <code>ColumnName=@PropertyName, ...</code> with all the updateable columns (e.g. <code>EmployeeId=@EmployeeId,DeskNo=@DeskNo</code>)
         /// </summary>
         /// <param name="tableAlias">Optional table alias.</param>
-        public virtual string ConstructUpdateClause(string tableAlias = null)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructUpdateClause(string tableAlias = null)
         {
-            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+            return tableAlias == null ? _noAliasUpdateClause.Value : this.ConstructUpdateClauseInternal(tableAlias);
         }
 
         /// <summary>
-        /// Constructs a full insert statement
+        /// Constructs an insert statement for a single entity.
         /// </summary>
-        public abstract string ConstructFullInsertStatement();
-
-        /// <summary>
-        /// Constructs a full update statement
-        /// </summary>
-        public virtual string ConstructFullUpdateStatement()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullInsertStatement()
         {
-            return $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}".ToString(CultureInfo.InvariantCulture);
+            return _fullInsertStatement.Value;
         }
 
         /// <summary>
-        /// Constructs a full delete statement
+        /// Constructs an update statement for a single entity.
         /// </summary>
-        public virtual string ConstructFullDeleteStatement()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullSingleUpdateStatement()
         {
-            return $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}";
+            return _fullSingleUpdateStatement.Value;
         }
-        
+
         /// <summary>
-        /// Constructs a full count statement
+        /// Constructs a batch select statement.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullBatchUpdateStatement(FormattableString whereClause = null)
+        {
+            return whereClause == null ? _noConditionFullBatchUpdateStatement.Value : this.ConstructFullBatchUpdateStatement(whereClause);
+        }
+
+        /// <summary>
+        /// Constructs a delete statement for a single entity.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullSingleDeleteStatement()
+        {
+            return _fullSingleDeleteStatement.Value;
+        }
+
+        /// <summary>
+        /// Constructs a batch delete statement.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullBatchDeleteStatement(FormattableString whereClause = null)
+        {
+            return whereClause == null ? _noConditionFullBatchDeleteStatement.Value : this.ConstructFullBatchDeleteStatementInternal(whereClause);
+        }
+
+        /// <summary>
+        /// Constructs a full count statement, optionally with a where clause.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructFullCountStatement(FormattableString whereClause = null)
         {
-            //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
-            return (whereClause == null)
-                       ? $"SELECT COUNT(*) FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture)
-                       : $"SELECT COUNT(*) FROM {this.GetTableName()} WHERE {whereClause}".ToString(this.StatementFormatter);
+            return whereClause == null ? _noConditionFullCountStatement.Value : this.ConstructFullCountStatementInternal(whereClause);
+        }
+
+        /// <summary>
+        /// Constructs a select statement for a single entity
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullSingleSelectStatement()
+        {
+            return _fullSingleSelectStatement.Value;
+        }
+
+        /// <summary>
+        /// Constructs a batch select statement
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructFullBatchSelectStatement(
+            FormattableString whereClause = null,
+            FormattableString orderClause = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
+            object queryParameters = null)
+        {
+            return this.ConstructFullBatchSelectStatementInternal(whereClause, orderClause, skipRowsCount, limitRowsCount, queryParameters);
         }
 
         /// <summary>
@@ -217,86 +316,202 @@
                 this.IdentifierEndDelimiter);
         }
 
+        //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)
+        //{
+        //    return _entityRelationships.GetOrAdd(
+        //        destination,
+        //        destinationSqlBuilder => new EntityRelationship(this, destinationSqlBuilder));
+        //}
+
+        //public string ConstructMultiSelectStatement(IStatementSqlBuilder[] additionalIncludes)
+        //{
+        //    var queryBuilder = new StringBuilder();
+        //    //queryBuilder.Append($"SELECT {this.ConstructColumnEnumerationForSelect(this.GetTableName())}");
+        //    //foreach (var additionalInclude in additionalIncludes)
+        //    //{
+        //    //    queryBuilder.Append($",{additionalInclude.ConstructColumnEnumerationForSelect(additionalInclude.GetTableName())}");
+        //    //}
+        //    //queryBuilder.Append($" FROM {this.GetTableName()}");
+
+        //    //IStatementSqlBuilder leftSqlBuilder = this;
+
+        //    //foreach (var rightSqlBuilder in additionalIncludes)
+        //    //{
+        //    //    // find the property linked to this entity
+        //    //    var atLeastOneLinkProp = false;
+        //    //    var joinLeftProps = joinLeftSqlBuilder.ForeignEntityProperties
+        //    //        .Where(propInfo => propInfo.Descriptor.PropertyType == additionalInclude.EntityMapping.EntityType)
+        //    //        .Select(propInfo => joinLeftSqlBuilder.EntityMapping.PropertyMappings[propInfo.PropertyName]);
+
+        //    //    foreach (var joinLeftProp in joinLeftProps)
+        //    //    {
+        //    //        if (!atLeastOneLinkProp)
+        //    //        {
+        //    //            atLeastOneLinkProp = true;
+        //    //            queryBuilder.Append($" LEFT OUTER JOIN {additionalInclude.GetTableName()} ON ");
+        //    //        }
+        //    //        else
+        //    //        {
+        //    //            queryBuilder.Append(" AND ");
+        //    //        }
+        //    //        queryBuilder.Append( $"{joinLeftSqlBuilder.GetColumnName(joinLeftProp, joinLeftSqlBuilder.GetTableName())}={additionalInclude.GetColumnName(joinLeftProp, additionalInclude.GetTableName())}");
+        //    //    }
+
+        //    //    if (!atLeastOneLinkProp)
+        //    //    {
+        //    //        throw new InvalidOperationException($"No foreign key constraint was found between the primary entity {joinLeftSqlBuilder.EntityMapping.EntityType} and the foreign entity {additionalInclude.EntityMapping.EntityType}");
+        //    //    }
+        //    //    joinLeftSqlBuilder = additionalInclude;
+        //    //}
+
+        //    return queryBuilder.ToString();
+        //}
+
         /// <summary>
-        /// Constructs a select statement for a single entity type
+        /// Returns the table name associated with the current entity.
         /// </summary>
-        public virtual string ConstructFullSingleSelectStatement()
+        protected virtual string GetTableNameInternal(string tableAlias = null)
+        {
+            var sqlAlias = tableAlias == null
+                ? string.Empty
+                : $" AS {this.GetDelimitedIdentifier(tableAlias)}";
+
+            var fullTableName = ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+                                ? $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}"
+                                : $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
+            return $"{fullTableName}{sqlAlias}".ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Constructs a condition of form <code>ColumnName=@PropertyName and ...</code> with all the key columns (e.g. <code>Id=@Id and EmployeeId=@EmployeeId</code>)
+        /// </summary>
+        protected virtual string ConstructKeysWhereClauseInternal(string tableAlias = null)
+        {
+            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+        }
+
+        /// <summary>
+        /// Constructs an enumeration of the key values.
+        /// </summary>
+        protected virtual string ConstructKeyColumnEnumerationInternal(string tableAlias = null)
+        {
+            return string.Join(",", this.KeyProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
+        }
+
+        /// <summary>
+        /// Constructs an enumeration of all the selectable columns (i.e. all the columns corresponding to entity properties which are not part of a relationship).
+        /// (e.g. Id, HouseNo, AptNo)
+        /// </summary>
+        protected virtual string ConstructColumnEnumerationForSelectInternal(string tableAlias = null)
+        {
+            return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
+        }
+
+        /// <summary>
+        /// Constructs an enumeration of all the columns available for insert.
+        /// (e.g. HouseNo, AptNo)
+        /// </summary>
+        protected virtual string ConstructColumnEnumerationForInsertInternal()
+        {
+            return string.Join(",", this.InsertProperties.Select(propInfo => this.GetColumnName(propInfo, null, false)));
+        }
+
+        /// <summary>
+        /// Constructs an enumeration of all the parameters denoting properties that are bound to columns available for insert.
+        /// (e.g. @HouseNo, @AptNo)
+        /// </summary>
+        protected virtual string ConstructParamEnumerationForInsertInternal()
+        {
+            return string.Join(",", this.InsertProperties.Select(propInfo => $"@{propInfo.PropertyName}"));
+        }
+
+        /// <summary>
+        /// Constructs a update clause of form <code>ColumnName=@PropertyName, ...</code> with all the updateable columns (e.g. <code>EmployeeId=@EmployeeId,DeskNo=@DeskNo</code>)
+        /// </summary>
+        /// <param name="tableAlias">Optional table alias.</param>
+        protected virtual string ConstructUpdateClauseInternal(string tableAlias = null)
+        {
+            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+        }
+
+        /// <summary>
+        /// Constructs a full insert statement
+        /// </summary>
+        protected abstract string ConstructFullInsertStatementInternal();
+
+        /// <summary>
+        /// Constructs an update statement for a single entity.
+        /// </summary>
+        protected virtual string ConstructFullSingleUpdateStatementInternal()
+        {
+            return $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}".ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Constructs a batch select statement.
+        /// </summary>
+        protected virtual string ConstructFullBatchUpdateStatementInternal(FormattableString whereClause = null)
+        {
+            var updateStatement = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()}";
+            if (whereClause != null)
+            {
+                return $"{updateStatement} WHERE {whereClause}".ToString(this.StatementFormatter);
+            }
+
+            return updateStatement.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Constructs a delete statement for a single entity.
+        /// </summary>
+        protected virtual string ConstructFullSingleDeleteStatementInternal()
+        {
+            return $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}".ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Constructs a batch delete statement.
+        /// </summary>
+        protected virtual string ConstructFullBatchDeleteStatementInternal(FormattableString whereClause = null)
+        {
+            var deleteStatement = $"DELETE FROM {this.GetTableName()}";
+            if (whereClause != null)
+            {
+                return $"{deleteStatement} WHERE {whereClause}".ToString(this.StatementFormatter);
+            }
+
+            return deleteStatement.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Constructs a full count statement, optionally with a where clause.
+        /// </summary>
+        protected virtual string ConstructFullCountStatementInternal(FormattableString whereClause = null)
+        {
+            //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
+            return (whereClause == null)
+                       ? $"SELECT COUNT(*) FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture)
+                       : $"SELECT COUNT(*) FROM {this.GetTableName()} WHERE {whereClause}".ToString(this.StatementFormatter);
+        }
+
+        /// <summary>
+        /// Constructs a select statement for a single entity
+        /// </summary>
+        protected virtual string ConstructFullSingleSelectStatementInternal()
         {
             return
                 $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}"
                     .ToString(CultureInfo.InvariantCulture);
         }
 
-        public virtual EntityRelationship GetRelationship(IStatementSqlBuilder destination)
-        {
-            return _entityRelationships.GetOrAdd(
-                destination,
-                destinationSqlBuilder => new EntityRelationship(this, destinationSqlBuilder));
-        }
-
-        public virtual string ConstructMultiSelectStatement(IStatementSqlBuilder[] additionalIncludes)
-        {
-            var queryBuilder = new StringBuilder();
-            //queryBuilder.Append($"SELECT {this.ConstructColumnEnumerationForSelect(this.GetTableName())}");
-            //foreach (var additionalInclude in additionalIncludes)
-            //{
-            //    queryBuilder.Append($",{additionalInclude.ConstructColumnEnumerationForSelect(additionalInclude.GetTableName())}");
-            //}
-            //queryBuilder.Append($" FROM {this.GetTableName()}");
-
-            //IStatementSqlBuilder leftSqlBuilder = this;
-
-            //foreach (var rightSqlBuilder in additionalIncludes)
-            //{
-            //    // find the property linked to this entity
-            //    var atLeastOneLinkProp = false;
-            //    var joinLeftProps = joinLeftSqlBuilder.ForeignEntityProperties
-            //        .Where(propInfo => propInfo.Descriptor.PropertyType == additionalInclude.EntityMapping.EntityType)
-            //        .Select(propInfo => joinLeftSqlBuilder.EntityMapping.PropertyMappings[propInfo.PropertyName]);
-
-            //    foreach (var joinLeftProp in joinLeftProps)
-            //    {
-            //        if (!atLeastOneLinkProp)
-            //        {
-            //            atLeastOneLinkProp = true;
-            //            queryBuilder.Append($" LEFT OUTER JOIN {additionalInclude.GetTableName()} ON ");
-            //        }
-            //        else
-            //        {
-            //            queryBuilder.Append(" AND ");
-            //        }
-            //        queryBuilder.Append( $"{joinLeftSqlBuilder.GetColumnName(joinLeftProp, joinLeftSqlBuilder.GetTableName())}={additionalInclude.GetColumnName(joinLeftProp, additionalInclude.GetTableName())}");
-            //    }
-
-            //    if (!atLeastOneLinkProp)
-            //    {
-            //        throw new InvalidOperationException($"No foreign key constraint was found between the primary entity {joinLeftSqlBuilder.EntityMapping.EntityType} and the foreign entity {additionalInclude.EntityMapping.EntityType}");
-            //    }
-            //    joinLeftSqlBuilder = additionalInclude;
-            //}
-
-            return queryBuilder.ToString();
-        }
-
-        public abstract string ConstructFullBatchSelectStatement(
+        /// <summary>
+        /// Constructs a full batch select statement
+        /// </summary>
+        protected abstract string ConstructFullBatchSelectStatementInternal(
             FormattableString whereClause = null,
             FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
             object queryParameters = null);
-
-        protected string IdentifierStartDelimiter { get;}
-        protected string IdentifierEndDelimiter { get;}
-        protected bool UsesSchemaForTableNames { get; }
-
-        public EntityDescriptor EntityDescriptor { get; }
-        public EntityMapping EntityMapping { get; }
-        public PropertyMapping[] ForeignEntityProperties { get; }
-        public PropertyMapping[] SelectProperties { get; }
-        public PropertyMapping[] KeyProperties { get; }
-        public PropertyMapping[] InsertProperties { get; }
-        public PropertyMapping[] UpdateProperties { get; }
-        public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
-        public PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
     }
 }

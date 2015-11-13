@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.SqlBuilders;
 
     internal interface ISqlStatements
@@ -13,46 +14,84 @@
 
     internal interface ISqlStatements<TEntity>: ISqlStatements
     {
-        void SingleInsert(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs a SELECT operation on a single entity, using its keys
+        /// </summary>
+        TEntity SelectById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        IEnumerable<TEntity> BatchSelect(
-            IDbConnection connection,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
-            object queryParameters = null,
-            bool streamResults = false,
-            IDbTransaction transaction = null,
-            TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs a SELECT operation on a single entity, using its keys
+        /// </summary>
+        Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        bool SingleDelete(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an INSERT operation
+        /// </summary>
+        void Insert(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        TEntity SingleSelect(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an INSERT operation
+        /// </summary>
+        Task InsertAsync(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        bool SingleUpdate(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an UPDATE operation on an entity identified by its keys.
+        /// </summary>
+        bool UpdateById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        Task SingleInsertAsync(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an UPDATE operation on an entity identified by its keys.
+        /// </summary>
+        Task<bool> UpdateByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        Task<IEnumerable<TEntity>> BatchSelectAsync(
-            IDbConnection connection,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
-            object queryParameters = null,
-            IDbTransaction transaction = null,
-            TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
+        /// </summary>
+        int BatchUpdate(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions);
 
-        Task<bool> SingleDeleteAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
+        /// </summary>
+        Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions);
 
-        Task<TEntity> SingleSelectAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs a DELETE operation on a single entity identified by its keys.
+        /// </summary>
+        bool DeleteById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions);
 
-        Task<bool> SingleUpdateAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs a DELETE operation on a single entity identified by its keys.
+        /// </summary>
+        Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementoptions);
 
-        Task<int> CountAsync(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, IDbTransaction transaction = null, TimeSpan ? commandTimeout = null);
+        /// <summary>
+        /// Performs a DELETE operation using a WHERE clause.
+        /// </summary>
+        int BatchDelete(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions);
 
-        int Count(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, IDbTransaction transaction = null, TimeSpan? commandTimeout = null);
+        /// <summary>
+        /// Performs a DELETE operation using a WHERE clause.
+        /// </summary>
+        Task<int> BatchDeleteAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions);
 
+        /// <summary>
+        /// Performs a COUNT on a range of items.
+        /// </summary>
+        int Count(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions);
+
+        /// <summary>
+        /// Performs a COUNT on a range of items.
+        /// </summary>
+        Task<int> CountAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions);
+
+        /// <summary>
+        /// Performs a common SELECT 
+        /// </summary>
+        IEnumerable<TEntity> BatchSelect(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions);
+
+        /// <summary>
+        /// Performs a common SELECT 
+        /// </summary>
+        Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions);
     }
 }

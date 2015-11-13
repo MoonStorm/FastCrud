@@ -13,12 +13,15 @@
         {
         }
 
-        public override string ConstructFullInsertStatement()
+        /// <summary>
+        /// Constructs a full insert statement
+        /// </summary>
+        protected override string ConstructFullInsertStatementInternal()
         {
             string outputQuery;
             if (InsertDatabaseGeneratedProperties.Length > 0)
             {
-                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo,null,true)}"));
+                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
                 outputQuery = $"OUTPUT {outputColumns}";
             }
             else
@@ -29,14 +32,17 @@
             return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) {outputQuery} VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);
         }
 
-        public override string ConstructFullBatchSelectStatement(
+        /// <summary>
+        /// Constructs a full batch select statement
+        /// </summary>
+        protected override string ConstructFullBatchSelectStatementInternal(
             FormattableString whereClause = null,
             FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
             object queryParameters = null)
         {
-            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}";
+            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture);
             if (whereClause != null)
             {
                 sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);

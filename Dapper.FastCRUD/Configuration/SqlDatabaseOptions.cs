@@ -1,5 +1,4 @@
-﻿// ReSharper disable once CheckNamespace (the namespace is intentionally not in sync with the file location) 
-namespace Dapper.FastCrud
+﻿namespace Dapper.FastCrud.Configuration
 {
     /// <summary>
     /// Stores database options linked to a particular dialect.

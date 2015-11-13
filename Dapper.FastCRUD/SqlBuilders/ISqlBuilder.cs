@@ -1,4 +1,4 @@
-﻿// the namespace is intentionally not in sync with the file location
+﻿// ReSharper disable once CheckNamespace (the namespace is intentionally not in sync with the file location) 
 namespace Dapper.FastCrud
 {
     using System;

@@ -12,6 +12,26 @@
     internal static class Requires
     {
         /// <summary>
+        /// Throws an exception if the specified parameter's value is the default.
+        /// </summary>
+        /// <typeparam name="T">The type of the parameter.</typeparam>
+        /// <param name="value">The value of the argument.</param>
+        /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
+        /// <returns>The value of the parameter.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>default</c></exception>
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T NotDefault<T>(T value, string parameterName)
+        {
+            if (EqualityComparer<T>.Default.Equals(value, default(T)))
+            {
+                throw new ArgumentOutOfRangeException(parameterName, $"Parameter {parameterName} is expected to have a value different than its default.");
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// Throws an exception if the specified parameter's value is null.
         /// </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>

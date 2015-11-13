@@ -13,31 +13,37 @@
         {
         }
 
-        public override string ConstructFullInsertStatement()
+        /// <summary>
+        /// Constructs a full insert statement
+        /// </summary>
+        protected override string ConstructFullInsertStatementInternal()
         {
             string outputQuery = this.InsertDatabaseGeneratedProperties.Length > 0
-                         ? string.Format(
-                             CultureInfo.InvariantCulture,
-                             "RETURNING {0}",
-                             string.Join(
-                                 ",",
-                                 this.InsertDatabaseGeneratedProperties.Select(
-                                     propInfo => this.GetColumnName(propInfo,null,true))))
-                         : string.Empty;
+             ? string.Format(
+                 CultureInfo.InvariantCulture,
+                 "RETURNING {0}",
+                 string.Join(
+                     ",",
+                     this.InsertDatabaseGeneratedProperties.Select(
+                         propInfo => this.GetColumnName(propInfo, null, true))))
+             : string.Empty;
 
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}";
 
-            return sql;
+            return sql.ToString(CultureInfo.InvariantCulture);
         }
 
-        public override string ConstructFullBatchSelectStatement(
+        /// <summary>
+        /// Constructs a full batch select statement
+        /// </summary>
+        protected override string ConstructFullBatchSelectStatementInternal(
             FormattableString whereClause = null,
             FormattableString orderClause = null,
-            int? skipRowsCount = null,
-            int? limitRowsCount = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
             object queryParameters = null)
         {
-            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}";
+            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture);
 
             if (whereClause != null)
             {

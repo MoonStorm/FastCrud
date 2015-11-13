@@ -3,15 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
     /// Class for Dapper extensions
     /// </summary>
-    public static class DapperExtensions
+    [Obsolete("Will be removed in a future version", false)]
+    public static class ObsoleteDapperExtensions
     {
         /// <summary>
         /// Queries the database for a single record based on its primary keys.
@@ -19,21 +18,20 @@
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="connection">Database connection.</param>
         /// <param name="entityKeys">The entity from which the primary keys will be extracted and used for filtering.</param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static TEntity Get<TEntity>(
-            this IDbConnection connection,
-            TEntity entityKeys,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            this IDbConnection connection, 
+            TEntity entityKeys, 
+            IDbTransaction transaction = null, 
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity, 
-                IStandardSqlStatementOptionsGetter, 
-                IStandardSqlStatementOptionsBuilder<TEntity>, 
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .SelectSingleEntityById(connection, entityKeys, resolvedOptions);
+            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SelectSingleEntityById(connection, entityKeys, transaction, commandTimeout);
         }
-
 
         /// <summary>
         /// Queries the database for a single record based on its primary keys.
@@ -41,148 +39,67 @@
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="connection">Database connection.</param>
         /// <param name="entityKeys">The entity from which the primary keys will be extracted and used for filtering.</param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(
+        [Obsolete("Will be removed in a future version", false)]
+        public static async Task<TEntity> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .SelectSingleEntityByIdAsync(connection, entityKeys, resolvedOptions);
+            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SelectSingleEntityByIdAsync(connection, entityKeys, transaction, commandTimeout);
         }
 
         /// <summary>
-        /// Inserts an entity into the database, updating its properties based on the database generated fields.
+        /// Returns all the records in the database.
         /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="connection"></param>
-        /// <param name="entityToInsert"></param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
-        public static void Insert<TEntity>(
+        /// <param name="streamResult">If set to true, the resulting list of entities is not entirely loaded in memory. This is useful for processing large result sets.</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
+        public static IEnumerable<TEntity> Get<TEntity>(
             this IDbConnection connection,
-            TEntity entityToInsert,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            bool streamResult = false,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null, 
+            EntityMapping<TEntity> entityMappingOverride = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                            .Insert(connection, entityToInsert, resolvedOptions);
+            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelect(
+                connection,
+                streamResults: streamResult,
+                transaction: transaction,
+                commandTimeout: commandTimeout);
         }
 
         /// <summary>
-        /// Inserts an entity into the database.
+        /// Returns all the records in the database.
         /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="connection"></param>
-        /// <param name="entityToInsert"></param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
-        public static Task InsertAsync<TEntity>(
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
+        public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(
             this IDbConnection connection,
-            TEntity entityToInsert,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .InsertAsync(connection, entityToInsert, resolvedOptions);
+            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelectAsync(
+                connection,
+                transaction: transaction,
+                commandTimeout: commandTimeout);
         }
-
-        /// <summary>
-        /// Updates a record in the database.
-        /// </summary>
-        /// <param name="connection">Database connection.</param>
-        /// <param name="entityToUpdate">The entity you wish to update.</param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
-        /// <returns>True if the item was updated.</returns>
-        public static bool Update<TEntity>(
-            this IDbConnection connection,
-            TEntity entityToUpdate,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-        {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .UpdateSingleEntityById(connection, entityToUpdate, resolvedOptions);
-        }
-
-        /// <summary>
-        /// Updates a record in the database.
-        /// </summary>
-        /// <param name="connection">Database connection.</param>
-        /// <param name="entityToUpdate">The entity you wish to update.</param>
-        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
-        /// <returns>True if the item was updated.</returns>
-        public static Task<bool> UpdateAsync<TEntity>(
-            this IDbConnection connection,
-            TEntity entityToUpdate,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-        {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .UpdateSingleEntityByIdAsync(connection, entityToUpdate, resolvedOptions);
-        }
-
-        ///// <summary>
-        ///// Returns all the records in the database.
-        ///// </summary>
-        ///// <typeparam name="TEntity">Entity type</typeparam>
-        ///// <param name="connection"></param>
-        ///// <param name="streamResult">If set to true, the resulting list of entities is not entirely loaded in memory. This is useful for processing large result sets.</param>
-        ///// <param name="transaction">Transaction to attach the query to.</param>
-        ///// <param name="commandTimeout">The command timeout.</param>
-        ///// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
-        ///// <returns>Gets a list of all entities</returns>
-        //public static IEnumerable<TEntity> Get<TEntity>(
-        //    this IDbConnection connection,
-        //    bool streamResult = false,
-        //    IDbTransaction transaction = null,
-        //    TimeSpan? commandTimeout = null, 
-        //    EntityMapping<TEntity> entityMappingOverride = null)
-        //{
-        //    return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelect(
-        //        connection,
-        //        streamResults: streamResult,
-        //        transaction: transaction,
-        //        commandTimeout: commandTimeout);
-        //}
-
-        ///// <summary>
-        ///// Returns all the records in the database.
-        ///// </summary>
-        ///// <typeparam name="TEntity">Entity type</typeparam>
-        ///// <param name="connection"></param>
-        ///// <param name="transaction">Transaction to attach the query to.</param>
-        ///// <param name="commandTimeout">The command timeout.</param>
-        ///// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
-        ///// <returns>Gets a list of all entities</returns>
-        //public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(
-        //    this IDbConnection connection,
-        //    IDbTransaction transaction = null,
-        //    TimeSpan? commandTimeout = null,
-        //    EntityMapping<TEntity> entityMappingOverride = null)
-        //{
-        //    return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelectAsync(
-        //        connection,
-        //        transaction: transaction,
-        //        commandTimeout: commandTimeout);
-        //}
 
         /// <summary>
         /// Queries the database for a set of records.
@@ -199,6 +116,7 @@
         /// <param name="limitRowsCount">Maximum number of rows to return.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static IEnumerable<TEntity> Find<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
@@ -237,6 +155,7 @@
         /// <param name="limitRowsCount">Maximum number of rows to return.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static async Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
@@ -259,6 +178,84 @@
                 commandTimeout: commandTimeout);
         }
 
+        /// <summary>
+        /// Inserts an entity into the database.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="entityToInsert"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        [Obsolete("Will be removed in a future version", false)]
+        public static void Insert<TEntity>(
+            this IDbConnection connection, 
+            TEntity entityToInsert, 
+            IDbTransaction transaction = null, 
+            TimeSpan? commandTimeout = null, 
+            EntityMapping<TEntity> entityMappingOverride = null)
+        {
+            OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleInsert(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+        }
+
+        /// <summary>
+        /// Inserts an entity into the database.
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="entityToInsert"></param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        [Obsolete("Will be removed in a future version", false)]
+        public static async Task InsertAsync<TEntity>(
+            this IDbConnection connection,
+            TEntity entityToInsert,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
+        {
+            await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleInsertAsync(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+        }
+
+
+        /// <summary>
+        /// Updates a record in the database.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="entityToUpdate">The entity you wish to update.</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>True if the item was updated.</returns>
+        [Obsolete("Will be removed in a future version", false)]
+        public static bool Update<TEntity>(
+            this IDbConnection connection, 
+            TEntity entityToUpdate, 
+            IDbTransaction transaction = null, 
+            TimeSpan? commandTimeout = null, 
+            EntityMapping<TEntity> entityMappingOverride = null)
+        {
+            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdate(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+        }
+
+        /// <summary>
+        /// Updates a record in the database.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="entityToUpdate">The entity you wish to update.</param>
+        /// <param name="transaction">Transaction to attach the query to.</param>
+        /// <param name="commandTimeout">The command timeout.</param>
+        /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
+        /// <returns>True if the item was updated.</returns>
+        [Obsolete("Will be removed in a future version", false)]
+        public static async Task<bool> UpdateAsync<TEntity>(
+            this IDbConnection connection,
+            TEntity entityToUpdate,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null)
+        {
+            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdateAsync(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+        }
 
         /// <summary>
         /// Queries the database for a set of records.
@@ -271,6 +268,7 @@
         /// <param name="whereClause">Where clause (e.g. $"{nameof(User.Name)} = @UserName and {nameof(User.LoggedIn)} = @UserLoggedIn" )</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static int Count<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
@@ -298,6 +296,7 @@
         /// <param name="whereClause">Where clause (e.g. $"{nameof(User.Name)} = @UserName and {nameof(User.LoggedIn)} = @UserLoggedIn" )</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static async Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
@@ -324,6 +323,7 @@
         /// <param name="commandTimeout">The command timeout.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>True if the entity was found and successfully deleted.</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static bool Delete<TEntity>(
             this IDbConnection connection, 
             TEntity entityToDelete, 
@@ -344,6 +344,7 @@
         /// <param name="commandTimeout">The command timeout.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>True if the entity was found and successfully deleted.</returns>
+        [Obsolete("Will be removed in a future version", false)]
         public static async Task<bool> DeleteAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToDelete,
@@ -365,15 +366,6 @@
         public static ISqlBuilder GetSqlBuilder<TEntity>(this IDbConnection connection, EntityMapping<TEntity> entityMappingOverride = null)
         {
             return OrmConfiguration.GetSqlBuilder<TEntity>(entityMappingOverride);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static TOptionsGetterInterface ResolveOptions<TEntity, TOptionsGetterInterface, TOptionsSetterInterface, TOptionsConcreteImpl>(Action<TOptionsSetterInterface> optionsSetter)
-            where TOptionsConcreteImpl : TOptionsGetterInterface, TOptionsSetterInterface, new()
-        {
-            var options = new TOptionsConcreteImpl();
-            optionsSetter?.Invoke(options);
-            return options;
         }
 
     }

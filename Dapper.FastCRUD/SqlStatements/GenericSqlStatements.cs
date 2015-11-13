@@ -1,20 +1,17 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
-    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
         private readonly IStatementSqlBuilder _sqlBuilder;
-        private readonly string _singleInsertSql;
-        private readonly string _singleUpdateSql;
-        private readonly string _singleDeleteSql;
-        private readonly string _singleSelectSql;
 
         /// <summary>
         /// Default constructor.
@@ -22,30 +19,51 @@
         public GenericSqlStatements(IStatementSqlBuilder sqlBuilder)
         {
             _sqlBuilder = sqlBuilder;
-            _singleInsertSql = sqlBuilder.ConstructFullInsertStatement();
-            _singleUpdateSql = sqlBuilder.ConstructFullUpdateStatement();
-            _singleDeleteSql = sqlBuilder.ConstructFullDeleteStatement();
-            _singleSelectSql = sqlBuilder.ConstructFullSingleSelectStatement();
         }
 
-        public IStatementSqlBuilder SqlBuilder
+        public IStatementSqlBuilder SqlBuilder => this._sqlBuilder;
+
+        /// <summary>
+        /// Performs a SELECT operation on a single entity, using its keys
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
         {
-            get
-            {
-                return this._sqlBuilder;
-            }
+            return connection.Query<TEntity>(
+                _sqlBuilder.ConstructFullSingleSelectStatement(),
+                keyEntity,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).SingleOrDefault();
         }
 
-        public void SingleInsert(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs an async SELECT operation on a single entity, using its keys
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        {
+            return (await connection.QueryAsync<TEntity>(
+                _sqlBuilder.ConstructFullSingleSelectStatement(),
+                keyEntity,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).SingleOrDefault();
+        }
+
+
+        /// <summary>
+        /// Performs an INSERT operation
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Insert(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions)
         {
             if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
             {
                 var insertedEntity =
                     connection.Query<TEntity>(
-                        this._singleInsertSql,
+                        _sqlBuilder.ConstructFullInsertStatement(),
                         entity,
-                        transaction: transaction,
-                        commandTimeout: (int?)commandTimeout?.TotalSeconds).FirstOrDefault();
+                        transaction: statementOptions.Transaction,
+                        commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
 
                 // copy all the database generated props back onto our entity
                 this.CopyEntity(insertedEntity, entity, _sqlBuilder.InsertDatabaseGeneratedProperties);
@@ -53,145 +71,211 @@
             else
             {
                 connection.Execute(
-                    this._singleInsertSql,
+                    _sqlBuilder.ConstructFullInsertStatement(),
                     entity,
-                    transaction: transaction,
-                    commandTimeout: (int?)commandTimeout?.TotalSeconds);
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
             }
         }
 
-        public IEnumerable<TEntity> BatchSelect(
-            IDbConnection connection,
-            FormattableString whereClause,
-            FormattableString orderClause,
-            int? skipRowsCount,
-            int? limitRowsCount,
-            object queryParameters,
-            bool streamResults,
-            IDbTransaction transaction,
-            TimeSpan? commandTimeout)
-        {
-            return connection.Query<TEntity>(
-                _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause:whereClause,
-                    orderClause:orderClause,
-                    skipRowsCount:skipRowsCount,
-                    limitRowsCount:limitRowsCount),
-                queryParameters,
-                buffered: !streamResults,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds);
-        }
-
-        public bool SingleDelete(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
-        {
-            return connection.Execute(
-                _singleDeleteSql,
-                keyEntity,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds) > 0;
-        }
-
-        public TEntity SingleSelect(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
-        {
-            return connection.Query<TEntity>(
-                _singleSelectSql,
-                keyEntity,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds).SingleOrDefault();
-        }
-
-        public bool SingleUpdate(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
-        {
-            return connection.Execute(_singleUpdateSql, keyEntity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds) > 0;
-        }
-
-        public async Task SingleInsertAsync(IDbConnection connection, TEntity entity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs an INSERT operation
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Task InsertAsync(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions)
         {
             if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
             {
                 var insertedEntity =
                     (await
                      connection.QueryAsync<TEntity>(
-                         this._singleInsertSql,
+                         _sqlBuilder.ConstructFullInsertStatement(),
                          entity,
-                         transaction: transaction,
-                         commandTimeout: (int?)commandTimeout?.TotalSeconds)).FirstOrDefault();
+                         transaction: statementOptions.Transaction,
+                         commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).FirstOrDefault();
                 // copy all the database generated props back onto our entity
                 this.CopyEntity(insertedEntity, entity, _sqlBuilder.InsertDatabaseGeneratedProperties);
             }
             else
             {
                 connection.Execute(
-                    this._singleInsertSql,
+                    _sqlBuilder.ConstructFullInsertStatement(),
                     entity,
-                    transaction: transaction,
-                    commandTimeout: (int?)commandTimeout?.TotalSeconds);
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
             }
         }
 
-        public async Task<IEnumerable<TEntity>> BatchSelectAsync(
-        IDbConnection connection,
-        FormattableString whereClause = null,
-        FormattableString orderClause = null,
-        int? skipRowsCount = null,
-        int? limitRowsCount = null,
-        object queryParameters = null,
-        IDbTransaction transaction = null,
-        TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs an UPDATE opration on an entity identified by its keys.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool UpdateById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
         {
-            return await connection.QueryAsync<TEntity>(
-                _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause: whereClause,
-                    orderClause: orderClause,
-                    skipRowsCount: skipRowsCount,
-                    limitRowsCount: limitRowsCount),
-                queryParameters,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds);
+            return connection.Execute(
+                _sqlBuilder.ConstructFullSingleUpdateStatement(), 
+                keyEntity, 
+                transaction: 
+                statementOptions.Transaction, 
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
         }
 
-        public async Task<bool> SingleDeleteAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs an UPDATE opration on an entity identified by its keys.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Task<bool> UpdateByIdAsync(
+            IDbConnection connection,
+            TEntity keyEntity,
+            IStandardSqlStatementOptionsGetter statementOptions)
+        {
+            return (await connection.ExecuteAsync(
+                _sqlBuilder.ConstructFullSingleUpdateStatement(), 
+                keyEntity, 
+                transaction: statementOptions.Transaction, 
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)) > 0;
+        }
+
+        /// <summary>
+        /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int BatchUpdate(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions)
+        {
+            return connection.Execute(
+                _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
+                entity,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions)
+        {
+            return connection.ExecuteAsync(
+                _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
+                entity,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Performs a DELETE operation on a single entity identified by its keys.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool DeleteById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        {
+            return connection.Execute(
+                _sqlBuilder.ConstructFullSingleDeleteStatement(),
+                keyEntity,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
+        }
+
+        /// <summary>
+        /// Performs a DELETE operation on a single entity identified by its keys.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementoptions)
         {
             return await connection.ExecuteAsync(
-                _singleDeleteSql,
+                _sqlBuilder.ConstructFullSingleDeleteStatement(),
                 keyEntity,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds) > 0;
+                transaction: statementoptions.Transaction,
+                commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds) > 0;
         }
 
-        public async Task<TEntity> SingleSelectAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs a DELETE operation using a WHERE clause.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int BatchDelete(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
         {
-            return (await connection.QueryAsync<TEntity>(
-                _singleSelectSql,
-                keyEntity,
-                transaction: transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds)).SingleOrDefault();
+            return connection.Execute(
+                _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout:(int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
-        public async Task<bool> SingleUpdateAsync(IDbConnection connection, TEntity keyEntity, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs a DELETE operation using a WHERE clause.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Task<int> BatchDeleteAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
         {
-            return (await connection.ExecuteAsync(_singleUpdateSql, keyEntity, transaction: transaction, commandTimeout: (int?)commandTimeout?.TotalSeconds)) > 0;
+            return connection.ExecuteAsync(
+                _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
-        public async Task<int> CountAsync(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
-        {
-            return await connection.ExecuteScalarAsync<int>(
-                _sqlBuilder.ConstructFullCountStatement(whereClause),
-                queryParameters,
-                transaction:transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds);
-        }
-
-        public int Count(IDbConnection connection, FormattableString whereClause = null, object queryParameters = null, IDbTransaction transaction = null, TimeSpan? commandTimeout = null)
+        /// <summary>
+        /// Performs a COUNT on a range of items.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Count(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteScalar<int>(
-                _sqlBuilder.ConstructFullCountStatement(whereClause),
-                queryParameters,
-                transaction:transaction,
-                commandTimeout: (int?)commandTimeout?.TotalSeconds);
+                _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
+        /// <summary>
+        /// Performs a COUNT on a range of items.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Task<int> CountAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
+        {
+            return connection.ExecuteScalarAsync<int>(
+                _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Performs a common SELECT 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions)
+        {
+            return connection.Query<TEntity>(
+                _sqlBuilder.ConstructFullBatchSelectStatement(
+                    whereClause: statementoptions.WhereClause,
+                    orderClause: statementoptions.OrderClause,
+                    skipRowsCount: statementoptions.SkipResults,
+                    limitRowsCount: statementoptions.LimitResults),
+                statementoptions.Parameters,
+                buffered: !statementoptions.ForceStreamResults,
+                transaction: statementoptions.Transaction,
+                commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds);
+        }
+
+        /// <summary>
+        /// Performs a common SELECT 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions)
+        {
+            return connection.QueryAsync<TEntity>(
+                _sqlBuilder.ConstructFullBatchSelectStatement(
+                    whereClause: statementoptions.WhereClause,
+                    orderClause: statementoptions.OrderClause,
+                    skipRowsCount: statementoptions.SkipResults,
+                    limitRowsCount: statementoptions.LimitResults),
+                statementoptions.Parameters,
+                transaction: statementoptions.Transaction,
+                commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyEntity(TEntity source, TEntity destination, PropertyMapping[] properties)
         {
             foreach (var propMapping in properties)
