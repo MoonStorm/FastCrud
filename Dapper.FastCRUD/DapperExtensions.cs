@@ -25,15 +25,11 @@
             TEntity entityKeys,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity, 
-                IStandardSqlStatementOptionsGetter, 
-                IStandardSqlStatementOptionsBuilder<TEntity>, 
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .SelectSingleEntityById(connection, entityKeys, resolvedOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .SelectById(connection, entityKeys, options);
         }
-
 
         /// <summary>
         /// Queries the database for a single record based on its primary keys.
@@ -48,13 +44,10 @@
             TEntity entityKeys,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .SelectSingleEntityByIdAsync(connection, entityKeys, resolvedOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .SelectByIdAsync(connection, entityKeys, options);
         }
 
         /// <summary>
@@ -68,13 +61,10 @@
             TEntity entityToInsert,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                            .Insert(connection, entityToInsert, resolvedOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                            .Insert(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -88,13 +78,10 @@
             TEntity entityToInsert,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .InsertAsync(connection, entityToInsert, resolvedOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .InsertAsync(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -109,20 +96,20 @@
             TEntity entityToUpdate,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
-
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .UpdateSingleEntityById(connection, entityToUpdate, resolvedOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .UpdateById(connection, entityToUpdate, options);
         }
 
         /// <summary>
         /// Updates a record in the database.
         /// </summary>
         /// <param name="connection">Database connection.</param>
-        /// <param name="entityToUpdate">The entity you wish to update.</param>
+        /// <param name="entityToUpdate">
+        /// The entity you wish to update.
+        /// For partial updates use an entity mapping override.
+        /// </param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>True if the item was updated.</returns>
         public static Task<bool> UpdateAsync<TEntity>(
@@ -130,13 +117,54 @@
             TEntity entityToUpdate,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var resolvedOptions = ResolveOptions<TEntity,
-                IStandardSqlStatementOptionsGetter,
-                IStandardSqlStatementOptionsBuilder<TEntity>,
-                StandardSqlStatementOptionsBuilder<TEntity>>(statementOptions);
+            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .UpdateByIdAsync(connection, entityToUpdate, options);
+        }
 
-            return OrmConfiguration.GetSqlStatements<TEntity>(resolvedOptions.EntityMappingOverride)
-                                   .UpdateSingleEntityByIdAsync(connection, entityToUpdate, resolvedOptions);
+        /// <summary>
+        /// Updates a number of records in the database.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="updateData">
+        /// The data used to update the records. 
+        /// The primary keys will be ignored.
+        /// For partial updates use an entity mapping override.
+        /// </param>
+        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
+        /// <returns>The number of records updated.</returns>
+        public static int BatchUpdate<TEntity>(
+            this IDbConnection connection,
+            TEntity updateData,
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+        {
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .BatchUpdate(connection, updateData, options);
+        }
+
+        /// <summary>
+        /// Updates a number of records in the database.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="updateData">
+        /// The data used to update the records. 
+        /// The primary keys will be ignored.
+        /// For partial updates use an entity mapping override.
+        /// </param>
+        /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
+        /// <returns>The number of records updated.</returns>
+        public static Task<int> BatchUpdateAsync<TEntity>(
+            this IDbConnection connection,
+            TEntity updateData,
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+        {
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            statementOptions?.Invoke(options);
+            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
+                                   .BatchUpdateAsync(connection, updateData, options);
         }
 
         ///// <summary>
@@ -367,14 +395,12 @@
             return OrmConfiguration.GetSqlBuilder<TEntity>(entityMappingOverride);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static TOptionsGetterInterface ResolveOptions<TEntity, TOptionsGetterInterface, TOptionsSetterInterface, TOptionsConcreteImpl>(Action<TOptionsSetterInterface> optionsSetter)
-            where TOptionsConcreteImpl : TOptionsGetterInterface, TOptionsSetterInterface, new()
-        {
-            var options = new TOptionsConcreteImpl();
-            optionsSetter?.Invoke(options);
-            return options;
-        }
-
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static ISqlStatementOptionsGetter ResolveOptions<TEntity, TOptionsBuilderInterface>(TOptionsBuilderInterface options, Action<TOptionsBuilderInterface> optionsSetter)
+        //    where TOptionsBuilderInterface: class, IStandardSqlStatementOptionsSetter<TEntity,TOptionsBuilderInterface>, ISqlStatementOptionsGetter
+        //{
+        //    optionsSetter?.Invoke(options);
+        //    return options;
+        //}
     }
 }

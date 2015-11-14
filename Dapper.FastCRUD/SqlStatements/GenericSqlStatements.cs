@@ -27,7 +27,7 @@
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
@@ -40,7 +40,7 @@
         /// Performs an async SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementOptions)
         {
             return (await connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
@@ -54,7 +54,7 @@
         /// Performs an INSERT operation
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Insert(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions)
+        public void Insert(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
             {
@@ -82,7 +82,7 @@
         /// Performs an INSERT operation
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task InsertAsync(IDbConnection connection, TEntity entity, IStandardSqlStatementOptionsGetter statementOptions)
+        public async Task InsertAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
             {
@@ -110,7 +110,7 @@
         /// Performs an UPDATE opration on an entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool UpdateById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        public bool UpdateById(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullSingleUpdateStatement(), 
@@ -127,7 +127,7 @@
         public async Task<bool> UpdateByIdAsync(
             IDbConnection connection,
             TEntity keyEntity,
-            IStandardSqlStatementOptionsGetter statementOptions)
+            ISqlStatementOptionsGetter statementOptions)
         {
             return (await connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullSingleUpdateStatement(), 
@@ -140,7 +140,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BatchUpdate(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions)
+        public int BatchUpdate(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -153,7 +153,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, IConditionalSqlStatementOptionsGetter statementOptions)
+        public Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -166,7 +166,7 @@
         /// Performs a DELETE operation on a single entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DeleteById(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementOptions)
+        public bool DeleteById(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullSingleDeleteStatement(),
@@ -179,7 +179,7 @@
         /// Performs a DELETE operation on a single entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, IStandardSqlStatementOptionsGetter statementoptions)
+        public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementoptions)
         {
             return await connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullSingleDeleteStatement(),
@@ -192,7 +192,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BatchDelete(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
+        public int BatchDelete(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
@@ -205,7 +205,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BatchDeleteAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
+        public Task<int> BatchDeleteAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
@@ -218,7 +218,7 @@
         /// Performs a COUNT on a range of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
+        public int Count(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteScalar<int>(
                 _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
@@ -231,7 +231,7 @@
         /// Performs a COUNT on a range of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> CountAsync(IDbConnection connection, IConditionalSqlStatementOptionsGetter statementOptions)
+        public Task<int> CountAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteScalarAsync<int>(
                 _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
@@ -244,7 +244,7 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions)
+        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, ISqlStatementOptionsGetter statementoptions)
         {
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
@@ -262,7 +262,7 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, IRangedConditionalResultsSqlStatementGetter statementoptions)
+        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, ISqlStatementOptionsGetter statementoptions)
         {
             return connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
