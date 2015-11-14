@@ -17,6 +17,8 @@
             }
         }
 
+
+
         public override string ConstructFullInsertStatement()
         {
             var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ";

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
@@ -30,7 +31,11 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SelectSingleEntityById(connection, entityKeys, transaction, commandTimeout);
+            return connection.Get(entityKeys, statement => SetupStandardStatementOptions(
+                statement, 
+                transaction, 
+                commandTimeout, 
+                entityMappingOverride));
         }
 
         /// <summary>
@@ -44,14 +49,18 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<TEntity> GetAsync<TEntity>(
+        public static Task<TEntity> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SelectSingleEntityByIdAsync(connection, entityKeys, transaction, commandTimeout);
+            return connection.GetAsync(entityKeys, statement => SetupStandardStatementOptions(
+                statement, 
+                transaction, 
+                commandTimeout, 
+                entityMappingOverride));
         }
 
         /// <summary>
@@ -72,11 +81,13 @@
             TimeSpan? commandTimeout = null, 
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelect(
-                connection,
-                streamResults: streamResult,
-                transaction: transaction,
-                commandTimeout: commandTimeout);
+            return connection.Find<TEntity>(
+                statement => SetupRangedStatementOptions(
+                    statement,
+                    transaction,
+                    commandTimeout,
+                    entityMappingOverride,
+                    streamResults: streamResult));
         }
 
         /// <summary>
@@ -89,16 +100,18 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<IEnumerable<TEntity>> GetAsync<TEntity>(
+        public static Task<IEnumerable<TEntity>> GetAsync<TEntity>(
             this IDbConnection connection,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelectAsync(
-                connection,
-                transaction: transaction,
-                commandTimeout: commandTimeout);
+            return connection.FindAsync<TEntity>(
+                statement => SetupRangedStatementOptions(
+                    statement,
+                    transaction,
+                    commandTimeout,
+                    entityMappingOverride));
         }
 
         /// <summary>
@@ -129,16 +142,18 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelect(
-                connection,
-                whereClause: whereClause,
-                orderClause: orderClause,
-                skipRowsCount: skipRowsCount,
-                limitRowsCount: limitRowsCount,
-                queryParameters: queryParameters,
-                streamResults: streamResult,
-                transaction: transaction,
-                commandTimeout: commandTimeout);
+            return connection.Find<TEntity>(
+                statement => SetupRangedStatementOptions(
+                    statement,
+                    transaction,
+                    commandTimeout,
+                    entityMappingOverride,
+                    whereClause,
+                    queryParameters,
+                    orderClause,
+                    skipRowsCount,
+                    limitRowsCount,
+                    streamResult));
         }
 
         /// <summary>
@@ -156,7 +171,7 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<IEnumerable<TEntity>> FindAsync<TEntity>(
+        public static Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
@@ -167,19 +182,21 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).BatchSelectAsync(
-                connection,
-                whereClause: whereClause,
-                orderClause: orderClause,
-                skipRowsCount: skipRowsCount,
-                limitRowsCount: limitRowsCount,
-                queryParameters: queryParameters,
-                transaction: transaction,
-                commandTimeout: commandTimeout);
+            return connection.FindAsync<TEntity>(
+                statement => SetupRangedStatementOptions(
+                    statement,
+                    transaction,
+                    commandTimeout,
+                    entityMappingOverride,
+                    whereClause,
+                    queryParameters,
+                    orderClause,
+                    skipRowsCount,
+                    limitRowsCount));
         }
 
         /// <summary>
-        /// Inserts an entity into the database.
+        /// Inserts a row into the database.
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="entityToInsert"></param>
@@ -194,7 +211,11 @@
             TimeSpan? commandTimeout = null, 
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleInsert(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+            connection.Insert(entityToInsert, statement => SetupStandardStatementOptions(
+                statement, 
+                transaction, 
+                commandTimeout, 
+                entityMappingOverride));
         }
 
         /// <summary>
@@ -206,16 +227,19 @@
         /// <param name="commandTimeout">The command timeout.</param>
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task InsertAsync<TEntity>(
+        public static Task InsertAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToInsert,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleInsertAsync(connection, entityToInsert, transaction: transaction, commandTimeout: commandTimeout);
+            return connection.InsertAsync(entityToInsert, statement => SetupStandardStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride));
         }
-
 
         /// <summary>
         /// Updates a record in the database.
@@ -234,7 +258,11 @@
             TimeSpan? commandTimeout = null, 
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdate(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+            return connection.Update(entityToUpdate, statement => SetupStandardStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride));
         }
 
         /// <summary>
@@ -247,18 +275,22 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>True if the item was updated.</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<bool> UpdateAsync<TEntity>(
+        public static Task<bool> UpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToUpdate,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleUpdateAsync(connection, entityToUpdate, transaction: transaction, commandTimeout: commandTimeout);
+            return connection.UpdateAsync(entityToUpdate, statement => SetupStandardStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride));
         }
 
         /// <summary>
-        /// Queries the database for a set of records.
+        /// Gets the count of a set of records.
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="connection"></param>
@@ -277,12 +309,13 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).Count(
-                connection,
-                whereClause: whereClause,
-                queryParameters: queryParameters,
-                transaction:transaction,
-                commandTimeout: commandTimeout);
+            return connection.Count<TEntity>(statement => SetupConditionalStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride,
+                whereClause,
+                queryParameters));
         }
 
         /// <summary>
@@ -297,7 +330,7 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>Gets a list of all entities</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<int> CountAsync<TEntity>(
+        public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
             FormattableString whereClause = null,
             object queryParameters = null,
@@ -305,16 +338,17 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).CountAsync(
-                connection,
-                whereClause: whereClause,
-                queryParameters: queryParameters,
-                transaction:transaction,
-                commandTimeout: commandTimeout);
+            return connection.CountAsync<TEntity>(statement => SetupConditionalStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride,
+                whereClause,
+                queryParameters));
         }
 
         /// <summary>
-        /// Deletes an entity by its primary keys.
+        /// Deletes a record by its primary keys.
         /// </summary>
         /// <typeparam name="TEntity">Entity Type</typeparam>
         /// <param name="connection">Database connection.</param>
@@ -331,11 +365,15 @@
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleDelete(connection, entityToDelete, transaction: transaction, commandTimeout: commandTimeout);
+            return connection.Delete(entityToDelete, statement => SetupStandardStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride));
         }
 
         /// <summary>
-        /// Deletes an entity by its primary keys.
+        /// Deletes a record by its primary keys.
         /// </summary>
         /// <typeparam name="TEntity">Entity Type</typeparam>
         /// <param name="connection">Database connection.</param>
@@ -345,14 +383,18 @@
         /// <param name="entityMappingOverride">Overrides the default entity mapping for this call.</param>
         /// <returns>True if the entity was found and successfully deleted.</returns>
         [Obsolete("Will be removed in a future version", false)]
-        public static async Task<bool> DeleteAsync<TEntity>(
+        public static Task<bool> DeleteAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToDelete,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return await OrmConfiguration.GetSqlStatements<TEntity>(entityMappingOverride).SingleDeleteAsync(connection, entityToDelete, transaction: transaction, commandTimeout: commandTimeout);
+            return connection.DeleteAsync(entityToDelete, statement => SetupStandardStatementOptions(
+                statement,
+                transaction,
+                commandTimeout,
+                entityMappingOverride));
         }
 
         /// <summary>
@@ -365,8 +407,76 @@
         [Obsolete("Please use OrmConfiguration.GetSqlBuilder<TEntity> instead",false)]
         public static ISqlBuilder GetSqlBuilder<TEntity>(this IDbConnection connection, EntityMapping<TEntity> entityMappingOverride = null)
         {
-            return OrmConfiguration.GetSqlBuilder<TEntity>(entityMappingOverride);
+            return OrmConfiguration.GetSqlBuilder(entityMappingOverride);
         }
 
+        private static void SetupRangedStatementOptions<TEntity>(
+            IRangedConditionalResultsSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null,
+            FormattableString whereClause = null,
+            object queryParameters = null,
+            FormattableString orderClause = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null,
+            bool streamResults = false
+            )
+        {
+            if (transaction != null)
+                optionsBuilder.AttachToTransaction(transaction);
+            if (commandTimeout != null)
+                optionsBuilder.WithTimeout(commandTimeout.Value);
+            if (entityMappingOverride != null)
+                optionsBuilder.WithEntityMappingOverride(entityMappingOverride);
+            if (whereClause != null)
+                optionsBuilder.Where(whereClause);
+            if (queryParameters != null)
+                optionsBuilder.WithParameters(queryParameters);
+            if (orderClause != null)
+                optionsBuilder.OrderBy(orderClause);
+            if (skipRowsCount.HasValue)
+                optionsBuilder.Skip(skipRowsCount.Value);
+            if (limitRowsCount.HasValue)
+                optionsBuilder.Top(limitRowsCount.Value);
+            if (streamResults)
+                optionsBuilder.StreamResults();
+        }
+
+        private static void SetupConditionalStatementOptions<TEntity>(
+            IConditionalSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null,
+            FormattableString whereClause = null,
+            object queryParameters = null
+            )
+        {
+            if (transaction != null)
+                optionsBuilder.AttachToTransaction(transaction);
+            if (commandTimeout != null)
+                optionsBuilder.WithTimeout(commandTimeout.Value);
+            if (entityMappingOverride != null)
+                optionsBuilder.WithEntityMappingOverride(entityMappingOverride);
+            if (whereClause != null)
+                optionsBuilder.Where(whereClause);
+            if (queryParameters != null)
+                optionsBuilder.WithParameters(queryParameters);
+        }
+
+        private static void SetupStandardStatementOptions<TEntity>(
+            IStandardSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IDbTransaction transaction = null,
+            TimeSpan? commandTimeout = null,
+            EntityMapping<TEntity> entityMappingOverride = null
+            )
+        {
+            if (transaction != null)
+                optionsBuilder.AttachToTransaction(transaction);
+            if (commandTimeout != null)
+                optionsBuilder.WithTimeout(commandTimeout.Value);
+            if (entityMappingOverride != null)
+                optionsBuilder.WithEntityMappingOverride(entityMappingOverride);
+        }
     }
 }

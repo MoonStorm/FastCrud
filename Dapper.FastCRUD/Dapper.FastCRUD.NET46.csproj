@@ -59,6 +59,16 @@
     <Compile Include="Configuration\OrmConfiguration.cs" />
     <Compile Include="Configuration\OrmConventions.cs" />
     <Compile Include="Configuration\SqlDatabaseOptions.cs" />
+    <Compile Include="Configuration\SqlStatementOptions.cs" />
+    <Compile Include="Configuration\StatementOptions\ConditionalSqlStatementOptionsBuilder.cs" />
+    <Compile Include="Configuration\StatementOptions\IConditionalSqlStatementOptionsSetter.cs" />
+    <Compile Include="Configuration\StatementOptions\InternalSqlStatementOptions.cs" />
+    <Compile Include="Configuration\StatementOptions\IRangedConditionalResultsSqlStatementOptionsSetter.cs" />
+    <Compile Include="Configuration\StatementOptions\ISqlStatementOptionsGetter.cs" />
+    <Compile Include="Configuration\StatementOptions\IStandardSqlStatementOptionsSetter.cs" />
+    <Compile Include="Configuration\StatementOptions\RangedConditionalResultsSqlStatementOptionsBuilder.cs" />
+    <Compile Include="Configuration\StatementOptions\StandardSqlStatementOptionsBuilder.cs" />
+    <Compile Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="Validations\Requires.cs" />
     <None Include="Configuration\PropertyChangedNotifier.cs" />
     <Compile Include="Configuration\SqlDialect.cs" />
