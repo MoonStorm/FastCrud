@@ -8,3 +8,4 @@ obj
 *.suo
 /.nunit/gui
 /TestResult.xml
+/Thumbs.db
