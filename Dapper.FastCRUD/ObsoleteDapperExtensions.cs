@@ -27,7 +27,7 @@
         public static TEntity Get<TEntity>(
             this IDbConnection connection, 
             TEntity entityKeys, 
-            IDbTransaction transaction = null, 
+            IDbTransaction transaction, 
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -52,7 +52,7 @@
         public static Task<TEntity> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            IDbTransaction transaction = null,
+            IDbTransaction transaction,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -132,7 +132,7 @@
         [Obsolete("Will be removed in a future version", false)]
         public static IEnumerable<TEntity> Find<TEntity>(
             this IDbConnection connection,
-            FormattableString whereClause = null,
+            FormattableString whereClause,
             FormattableString orderClause = null,
             int? skipRowsCount = null,
             int? limitRowsCount = null,
@@ -173,7 +173,7 @@
         [Obsolete("Will be removed in a future version", false)]
         public static Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
-            FormattableString whereClause = null,
+            FormattableString whereClause,
             FormattableString orderClause = null,
             int? skipRowsCount = null,
             int? limitRowsCount = null,
@@ -207,7 +207,7 @@
         public static void Insert<TEntity>(
             this IDbConnection connection, 
             TEntity entityToInsert, 
-            IDbTransaction transaction = null, 
+            IDbTransaction transaction, 
             TimeSpan? commandTimeout = null, 
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -230,7 +230,7 @@
         public static Task InsertAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToInsert,
-            IDbTransaction transaction = null,
+            IDbTransaction transaction,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -254,7 +254,7 @@
         public static bool Update<TEntity>(
             this IDbConnection connection, 
             TEntity entityToUpdate, 
-            IDbTransaction transaction = null, 
+            IDbTransaction transaction, 
             TimeSpan? commandTimeout = null, 
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -278,7 +278,7 @@
         public static Task<bool> UpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToUpdate,
-            IDbTransaction transaction = null,
+            IDbTransaction transaction,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -303,7 +303,7 @@
         [Obsolete("Will be removed in a future version", false)]
         public static int Count<TEntity>(
             this IDbConnection connection,
-            FormattableString whereClause = null,
+            FormattableString whereClause,
             object queryParameters = null,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
@@ -332,7 +332,7 @@
         [Obsolete("Will be removed in a future version", false)]
         public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
-            FormattableString whereClause = null,
+            FormattableString whereClause,
             object queryParameters = null,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
@@ -361,7 +361,7 @@
         public static bool Delete<TEntity>(
             this IDbConnection connection, 
             TEntity entityToDelete, 
-            IDbTransaction transaction = null, 
+            IDbTransaction transaction, 
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -386,7 +386,7 @@
         public static Task<bool> DeleteAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToDelete,
-            IDbTransaction transaction = null,
+            IDbTransaction transaction,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null)
         {

@@ -29,11 +29,11 @@
 
                 if (makeAsyncCalls)
                 {
-                    dbConnection.InsertAsync(generatedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    dbConnection.InsertAsync(generatedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    dbConnection.Insert(generatedEntity, commandTimeout: (TimeSpan?)null);
+                    dbConnection.Insert(generatedEntity);
                 }
 
                 // the entity already has the associated id set
@@ -53,11 +53,11 @@
 
                 if (makeAsyncCalls)
                 {
-                    dbConnection.InsertAsync(generatedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    dbConnection.InsertAsync(generatedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    dbConnection.Insert(generatedEntity, commandTimeout: (TimeSpan?)null);
+                    dbConnection.Insert(generatedEntity);
                 }
                 // the entity already has the associated id set
 
@@ -79,11 +79,11 @@
 
                 if (makeAsyncCalls)
                 {
-                    dbConnection.InsertAsync(generatedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    dbConnection.InsertAsync(generatedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    dbConnection.Insert(generatedEntity, commandTimeout: (TimeSpan?)null);
+                    dbConnection.Insert(generatedEntity);
                 }
                 // the entity already has the associated id set
 
@@ -249,7 +249,7 @@
                     // all of the above should be excluded with the difference of this one
                     LastName = "Updated " + insertedEntity.LastName
                 });
-                _testContext.DatabaseConnection.Update(partialUpdatedEntity, entityMappingOverride: customMapping);
+                _testContext.DatabaseConnection.Update(partialUpdatedEntity, null, entityMappingOverride: customMapping);
             }
 
         }
@@ -333,11 +333,11 @@
             {
                 if (useAsyncMethods)
                 {
-                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    _testContext.DatabaseConnection.Delete(insertedEntity, commandTimeout: (TimeSpan?)null);
+                    _testContext.DatabaseConnection.Delete(insertedEntity);
                 }
             }
         }
@@ -349,11 +349,11 @@
             {
                 if (useAsyncMethods)
                 {
-                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    _testContext.DatabaseConnection.Delete(insertedEntity, commandTimeout: (TimeSpan?)null);
+                    _testContext.DatabaseConnection.Delete(insertedEntity);
                 }
             }
         }
@@ -365,11 +365,11 @@
             {
                 if (useAsyncMethods)
                 {
-                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity, commandTimeout: (TimeSpan?)null).GetAwaiter().GetResult();
+                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity).GetAwaiter().GetResult();
                 }
                 else
                 {
-                    _testContext.DatabaseConnection.Delete(insertedEntity, commandTimeout: (TimeSpan?)null);
+                    _testContext.DatabaseConnection.Delete(insertedEntity);
                 }
             }
         }

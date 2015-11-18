@@ -38,7 +38,7 @@
         public void ThenIShouldHaveSingleIntKeyEntitiesInTheDatabase(int entitiesCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var entities =  FastCrud.Get<SimpleBenchmarkEntity>(dbConnection);
+            var entities =  FastCrud.Find<SimpleBenchmarkEntity>(dbConnection);
             Assert.AreEqual(entities.Count(), entitiesCount);
         }
 
@@ -46,7 +46,7 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingFastCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            _testContext.QueriedEntities.AddRange(FastCrud.Get<SimpleBenchmarkEntity>(dbConnection));
+            _testContext.QueriedEntities.AddRange(FastCrud.Find<SimpleBenchmarkEntity>(dbConnection));
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Fast Crud")]
