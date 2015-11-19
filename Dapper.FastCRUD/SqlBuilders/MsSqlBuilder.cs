@@ -18,18 +18,34 @@
         /// </summary>
         protected override string ConstructFullInsertStatementInternal()
         {
-            string outputQuery;
-            if (InsertDatabaseGeneratedProperties.Length > 0)
+            if (InsertDatabaseGeneratedProperties.Length == 0)
             {
-                var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-                outputQuery = $"OUTPUT {outputColumns}";
-            }
-            else
-            {
-                outputQuery = string.Empty;
+                return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);
+                
             }
 
-            return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) {outputQuery} VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);
+            if (InsertDatabaseGeneratedProperties.Length == 1)
+            {
+                return $@"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+                       VALUES ({this.ConstructParamEnumerationForInsert()});
+                       SELECT SCOPE_IDENTITY() AS {InsertDatabaseGeneratedProperties.Single().PropertyName}".ToString(CultureInfo.InvariantCulture);
+
+            }
+
+            var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
+            var selectOutputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
+
+            return $@"
+            SELECT {selectOutputColumns} 
+            INTO #temp 
+            FROM (SELECT {selectOutputColumns} FROM {this.GetTableName()} WHERE 1=0 
+                  UNION SELECT {selectOutputColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
+            
+            INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+            OUTPUT {outputColumns} INTO #temp 
+            VALUES ({this.ConstructParamEnumerationForInsert()});
+
+            SELECT * FROM #temp".ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
