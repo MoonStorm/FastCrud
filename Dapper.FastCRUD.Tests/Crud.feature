@@ -10,10 +10,12 @@ Scenario Outline: Insert and select all (in-memory database)
 	Examples: 
 	| database type | entity type | entity count | method type  |
 	| LocalDb       | employee    | 1            | asynchronous |
+	| LocalDb       | workstation | 1            | asynchronous |
 	| SqLite        | workstation | 1            | asynchronous |
 	| LocalDb       | building    | 1            | asynchronous |
 	| SqLite        | building    | 1            | asynchronous |
 	| LocalDb       | employee    | 1            | synchronous |
+	| LocalDb       | workstation | 1            | synchronous |
 	| SqLite        | workstation | 1            | synchronous |
 	| LocalDb       | building    | 1            | synchronous |
 	| SqLite        | building    | 1            | synchronous |
@@ -44,11 +46,19 @@ Scenario Outline: Find (in-memory database)
 	And I query for a maximum of <max> <entity type> entities reverse ordered skipping <skip> records
 	Then the queried entities should be the same as the ones I inserted, in reverse order, starting from <skip> counting <max>
 	Examples: 
-	| database type | entity type | entity count | max | skip | method type  |
-	| LocalDb       | workstation | 100          | 10  | 20   | asynchronous |
-	| SqLite        | workstation | 100          | 10  | 20   | asynchronous |
-	| LocalDb       | workstation | 100          | 10  | 20   | synchronous |
-	| SqLite        | workstation | 100          | 10  | 20   | synchronous |
+	| database type | entity type | entity count | max  | skip | method type  |
+	| LocalDb       | workstation | 10           | 1    | 2    | asynchronous |
+	| SqLite        | workstation | 10           | 1    | 2    | asynchronous |
+	| LocalDb       | workstation | 10           | 1    | 2    | synchronous  |
+	| SqLite        | workstation | 10           | 1    | 2    | synchronous  |
+	| LocalDb       | workstation | 10           | 1    | NULL | synchronous  |
+	| SqLite        | workstation | 10           | 1    | NULL | synchronous  |
+	| LocalDb       | workstation | 10           | NULL | 2    | synchronous  |
+	| SqLite        | workstation | 10           | NULL | 2    | synchronous  |
+	| LocalDb       | workstation | 10           | NULL | NULL | synchronous  |
+	| SqLite        | workstation | 10           | NULL | NULL | synchronous  |
+	| LocalDb       | workstation | 10           | 1    | 0    | synchronous  |
+	| SqLite        | workstation | 10           | 1    | 0    | synchronous  |
 
 @ExternalDatabase
 Scenario Outline: Find (external database)
@@ -57,11 +67,19 @@ Scenario Outline: Find (external database)
 	And I query for a maximum of <max> <entity type> entities reverse ordered skipping <skip> records
 	Then the queried entities should be the same as the ones I inserted, in reverse order, starting from <skip> counting <max>
 	Examples:
-	| database type | entity type | entity count | max | skip | method type  |
-	| MySql         | workstation | 100          | 10  | 20   | asynchronous |
-	| PostgreSql    | workstation | 100          | 10  | 20   | asynchronous |
-	| MySql         | workstation | 100          | 10  | 20   | synchronous |
-	| PostgreSql    | workstation | 100          | 10  | 20   | synchronous |
+	| database type | entity type | entity count | max  | skip | method type  |
+	| MySql         | workstation | 10           | 1    | 2    | asynchronous |
+	| PostgreSql    | workstation | 10           | 1    | 2    | asynchronous |
+	| MySql         | workstation | 10           | 1    | 2    | synchronous  |
+	| PostgreSql    | workstation | 10           | 1    | 2    | synchronous  |
+	| MySql         | workstation | 10           | 1    | NULL | synchronous  |
+	| PostgreSql    | workstation | 10           | 1    | NULL | synchronous  |
+	| MySql         | workstation | 10           | NULL | 2    | synchronous  |
+	| PostgreSql    | workstation | 10           | NULL | 2    | synchronous  |
+	| MySql         | workstation | 10           | NULL | NULL | synchronous  |
+	| PostgreSql    | workstation | 10           | NULL | NULL | synchronous  |
+	| MySql         | workstation | 10           | 1    | 0    | synchronous  |
+	| PostgreSql    | workstation | 10           | 1    | 0    | synchronous  |
 
 
 Scenario Outline: Insert and select by primary key (in-memory database)

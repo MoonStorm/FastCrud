@@ -1,7 +1,18 @@
 ﻿namespace Dapper.FastCrud.Tests.Models
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+
+    [MetadataType(typeof(EmployeeMetadata))]
     public partial class Employee
     {
+
+        private class EmployeeMetadata
+        {
+            [Column("Id")]
+            public object UserId { get; } // just a marker
+        }
+
         protected bool Equals(Employee other)
         {
             return this.UserId == other.UserId && this.EmployeeId.Equals(other.EmployeeId) && this.KeyPass.Equals(other.KeyPass)

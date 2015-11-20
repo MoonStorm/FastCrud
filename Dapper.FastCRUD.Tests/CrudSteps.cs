@@ -146,7 +146,7 @@
         }
 
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
-        public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int max, int skip)
+        public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int? max, int? skip)
         {
             var sqlBuilder = OrmConfiguration.GetSqlBuilder<Workstation>();
             _testContext.QueriedEntities.AddRange(
@@ -412,5 +412,12 @@
             }
         }
 
+        [StepArgumentTransformation()]
+        public int? RowCountTransform(string rowCount)
+        {
+            if (rowCount == "NULL")
+                return null;
+            return int.Parse(rowCount);
+        }
     }
 }

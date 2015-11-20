@@ -86,7 +86,7 @@
         /// </summary>
         public TStatementOptionsBuilder Skip(long skipRecordsCount)
         {
-            Requires.Argument(skipRecordsCount > 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
+            Requires.Argument(skipRecordsCount >= 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
 
             this.SkipResults = skipRecordsCount;
             return this.Builder;

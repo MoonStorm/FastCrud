@@ -8,6 +8,7 @@
     using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
+    using Dapper.FastCrud.Validations;
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
@@ -244,18 +245,22 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, ISqlStatementOptionsGetter statementoptions)
+        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
+            Requires.Argument(
+                (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
+                ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an Order clause.");
+
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause: statementoptions.WhereClause,
-                    orderClause: statementoptions.OrderClause,
-                    skipRowsCount: statementoptions.SkipResults,
-                    limitRowsCount: statementoptions.LimitResults),
-                statementoptions.Parameters,
-                buffered: !statementoptions.ForceStreamResults,
-                transaction: statementoptions.Transaction,
-                commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds);
+                    whereClause: statementOptions.WhereClause,
+                    orderClause: statementOptions.OrderClause,
+                    skipRowsCount: statementOptions.SkipResults,
+                    limitRowsCount: statementOptions.LimitResults),
+                statementOptions.Parameters,
+                buffered: !statementOptions.ForceStreamResults,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
         /// <summary>

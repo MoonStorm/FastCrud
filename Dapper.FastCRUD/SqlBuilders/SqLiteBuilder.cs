@@ -71,9 +71,9 @@
                 sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
 
-            if (limitRowsCount.HasValue)
+            if (limitRowsCount.HasValue || skipRowsCount.HasValue)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " LIMIT {0}", limitRowsCount);
+                sql += string.Format(CultureInfo.InvariantCulture, " LIMIT {0}", limitRowsCount??-1);
             }
             if (skipRowsCount.HasValue)
             {

@@ -145,9 +145,9 @@
         {
             // set the Id property to be the primary database generated key in case we don't find any orm attributes on the entity or on the properties
             if(string.Equals(propertyMapping.PropertyName, "id", StringComparison.InvariantCultureIgnoreCase)
-                && !TypeDescriptor.GetAttributes(propertyMapping.EntityMapping.EntityType).OfType<TableAttribute>().Any()
+                && this.GetEntityAttributes(propertyMapping.EntityMapping.EntityType).Length == 0
                 && !this.GetEntityProperties(propertyMapping.EntityMapping.EntityType).Any(
-                    propDesc => propDesc.Attributes.OfType<Attribute>().Any(
+                    propDesc => this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propDesc).Any(
                         propAttr => propAttr is ColumnAttribute || propAttr is KeyAttribute || propAttr is DatabaseGeneratedAttribute)))
             {
                 propertyMapping.SetPrimaryKey();
@@ -155,7 +155,7 @@
                 return;
             }
 
-            var propertyAttributes = propertyMapping.Descriptor.Attributes;
+            var propertyAttributes = this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propertyMapping.Descriptor);
 
             var columnAttribute = propertyAttributes.OfType<ColumnAttribute>().FirstOrDefault();
 
@@ -232,6 +232,30 @@
                 new Tuple<Regex, string>(
                     new Regex(classNameRegex, RegexOptions.Compiled),
                     sqlTableNameMatchReplacement));
+        }
+
+        private Attribute[] GetEntityAttributes(Type entityType)
+        {
+            var entityAttributes = TypeDescriptor.GetAttributes(entityType).OfType<Attribute>().ToArray();
+            var entityMetadataAttribute = entityAttributes.OfType<MetadataTypeAttribute>().FirstOrDefault();
+            var entityMetadataAttributes = entityMetadataAttribute == null
+                                               ? new Attribute[0]
+                                               : TypeDescriptor.GetAttributes(entityMetadataAttribute.MetadataClassType).OfType<Attribute>();
+            return entityMetadataAttributes.Concat(entityAttributes).ToArray();
+        }
+
+        private Attribute[] GetEntityPropertyAttributes(Type entityType, PropertyDescriptor property)
+        {
+            var entityMetadataAttribute = TypeDescriptor.GetAttributes(entityType).OfType<MetadataTypeAttribute>().FirstOrDefault();
+            var entityMetadataProperty = entityMetadataAttribute == null
+                                               ? null
+                                               : (TypeDescriptor
+                                                    .GetProperties(entityMetadataAttribute.MetadataClassType).OfType<PropertyDescriptor>()
+                                                ).FirstOrDefault(propDescriptor => propDescriptor.Name==property.Name);
+            var entityPropertyAttributes = property.Attributes.OfType<Attribute>();
+            var entityMetadataPropertyAttributes = entityMetadataProperty?.Attributes.OfType<Attribute>() ?? new Attribute[0];
+
+            return entityMetadataPropertyAttributes.Concat(entityPropertyAttributes).ToArray();
         }
     }
 }

@@ -18,34 +18,39 @@
         /// </summary>
         protected override string ConstructFullInsertStatementInternal()
         {
-            if (InsertDatabaseGeneratedProperties.Length == 0)
+            if (this.InsertDatabaseGeneratedProperties.Length == 0)
             {
-                return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);
-                
+                return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);                
             }
 
-            if (InsertDatabaseGeneratedProperties.Length == 1)
+            // one database generated field to be inserted, and that alone is a the primary key
+            if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
             {
-                return $@"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
-                       VALUES ({this.ConstructParamEnumerationForInsert()});
-                       SELECT SCOPE_IDENTITY() AS {InsertDatabaseGeneratedProperties.Single().PropertyName}".ToString(CultureInfo.InvariantCulture);
+                var keyProperty = this.InsertKeyDatabaseGeneratedProperties[0];
+                var keyPropertyType = keyProperty.Descriptor.PropertyType;
 
+                if (keyPropertyType == typeof(int) || keyPropertyType == typeof(long))
+                {
+                    return
+                        $@"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()});
+                           SELECT SCOPE_IDENTITY() AS {this.GetDelimitedIdentifier(keyProperty.PropertyName)}".ToString(CultureInfo.InvariantCulture);
+                }
             }
 
-            var outputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var selectOutputColumns = string.Join(",", InsertDatabaseGeneratedProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
+            var dbInsertedOutputColumns = string.Join(",", this.InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
+            var dbGeneratedColumns = string.Join(",", this.InsertDatabaseGeneratedProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
 
             return $@"
-            SELECT {selectOutputColumns} 
-            INTO #temp 
-            FROM (SELECT {selectOutputColumns} FROM {this.GetTableName()} WHERE 1=0 
-                  UNION SELECT {selectOutputColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
+                SELECT *
+                    INTO #temp 
+                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
+                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
             
-            INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
-            OUTPUT {outputColumns} INTO #temp 
-            VALUES ({this.ConstructParamEnumerationForInsert()});
+                INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+                    OUTPUT {dbInsertedOutputColumns} INTO #temp 
+                    VALUES ({this.ConstructParamEnumerationForInsert()});
 
-            SELECT * FROM #temp".ToString(CultureInfo.InvariantCulture);
+                SELECT * FROM #temp".ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -67,9 +72,9 @@
             {
                 sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
             }
-            if (skipRowsCount.HasValue)
+            if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount);
+                sql += string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount??0);
             }
             if (limitRowsCount.HasValue)
             {

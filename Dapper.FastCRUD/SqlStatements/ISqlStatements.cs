@@ -87,7 +87,7 @@
         /// <summary>
         /// Performs a common SELECT 
         /// </summary>
-        IEnumerable<TEntity> BatchSelect(IDbConnection connection, ISqlStatementOptionsGetter statementoptions);
+        IEnumerable<TEntity> BatchSelect(IDbConnection connection, ISqlStatementOptionsGetter statementOptions);
 
         /// <summary>
         /// Performs a common SELECT 

@@ -157,9 +157,9 @@
         }
 
         [Then(@"the queried entities should be the same as the ones I inserted, in reverse order, starting from (.*) counting (.*)")]
-        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInsertedReverseStartingFromCounting(int skip, int max)
+        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInsertedReverseStartingFromCounting(int? skip, int? max)
         {
-            var expectedEntities = ((IEnumerable<object>)_testContext.InsertedEntities).Reverse().Skip(skip).Take(max);
+            var expectedEntities = ((IEnumerable<object>)_testContext.InsertedEntities).Reverse().Skip(skip??0).Take(max??int.MaxValue);
             CollectionAssert.AreEqual(expectedEntities, _testContext.QueriedEntities);
         }
 
@@ -311,14 +311,14 @@
                 {
                     command.CommandText =$@"
                         CREATE TABLE ""Employee"" (
-	                        ""UserId"" SERIAL,
+	                        ""Id"" SERIAL,
                             ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""LastName"" varchar(50) NOT NULL,
 	                        ""FirstName"" varchar(50) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
                             ""WorkstationId"" int NULL,
-	                        PRIMARY KEY (""UserId"", ""EmployeeId"")
+	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
 
                         CREATE TABLE ""Workstations"" (
@@ -377,14 +377,14 @@
                     command.CommandText = $@"USE {DatabaseName};
 
                         CREATE TABLE `Employee` (
-	                        UserId int NOT NULL AUTO_INCREMENT,
+	                        Id int NOT NULL AUTO_INCREMENT,
                             EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        LastName nvarchar(50) NOT NULL,
 	                        FirstName nvarchar(50) NOT NULL,
 	                        BirthDate datetime NOT NULL,
                             WorkstationId int NULL,
-	                        PRIMARY KEY (UserId, EmployeeId)
+	                        PRIMARY KEY (Id, EmployeeId)
                         );
 
                         ALTER TABLE `Employee` auto_increment=2;
@@ -472,7 +472,7 @@
                         ))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
-	                    [UserId] [int] IDENTITY(2,1) NOT NULL,
+	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [LastName] [nvarchar](50) NOT NULL,
@@ -481,7 +481,7 @@
 	                    [WorkstationId] [bigint] NULL,
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
                         (
-	                        [UserId] ASC,
+	                        [Id] ASC,
 	                        [EmployeeId] ASC
                         ),
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
