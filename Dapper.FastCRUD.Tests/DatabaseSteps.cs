@@ -455,7 +455,39 @@
 
                 var server = new Server(new ServerConnection(dataConnection));
                 var database = new Database(server, DatabaseName);
-                database.Create();
+                try
+                {
+                    database.Create();
+                }
+                catch (FailedOperationException ex)
+                {
+                    // sometimes db test files are left behind
+
+                    var fileInUseErrorMatch =
+                        new Regex("Cannot create file '(.*?)' because it already exists.").Match(
+                            ((ex.InnerException as ExecutionFailureException)?.InnerException as SqlException)?.Message ?? string.Empty);
+                    if (fileInUseErrorMatch.Success)
+                    {
+                        var dbFilePath = fileInUseErrorMatch.Groups[1].Value;
+                        var dbLogFilePath = Path.Combine(Path.GetDirectoryName(dbFilePath), $"{Path.GetFileNameWithoutExtension(dbFilePath)}_log.ldf");
+
+                        if (File.Exists(dbFilePath))
+                        {
+                            File.Delete(dbFilePath);
+                        }
+                        if (File.Exists(dbLogFilePath))
+                        {
+                            File.Delete(dbLogFilePath);
+                        }
+
+                        database.Create();
+                    }
+                    else
+                    {
+                        throw;
+                    }                    
+                }
+
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET SINGLE_USER"); // for benchmarking purposes                                
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET COMPATIBILITY_LEVEL = 110"); // for benchmarking purposes                
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY BULK_LOGGED"); // for benchmarking purposes                
@@ -584,11 +616,6 @@
                     //serverManagement.DetachDatabase(MsSqlDatabaseName, false, true);
                 }
             }
-
-            ////if (Directory.Exists(FinalDatabaseFolder))
-            ////{
-            ////    Directory.Delete(FinalDatabaseFolder, true);
-            ////}
         }
 
         private void SetupOrmConfiguration(SqlDialect dialect)
