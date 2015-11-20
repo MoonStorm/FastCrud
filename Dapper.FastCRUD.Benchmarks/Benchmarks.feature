@@ -9,11 +9,11 @@ Scenario Outline: Insert Benchmark
 	Then I should have <entity count> <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 30000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 30000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 30000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 30000        | Dapper            |
+	| database type     | entity type        | entity count | micro orm         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 
 #Scenario Outline: Batch Select No Filter No Warmup Benchmark
 #	Given I have initialized a <database type> database
@@ -49,11 +49,11 @@ Scenario Outline: Batch Select No Filter
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 30000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 30000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 30000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 30000        | Dapper            |
+	| database type     | entity type        | entity count | micro orm         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 
 Scenario Outline: Single Delete Benchmark
 	Given I have initialized a <database type> database
@@ -66,11 +66,11 @@ Scenario Outline: Single Delete Benchmark
 	Then I should have 0 <entity type> in the database
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 30000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 30000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 30000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 30000        | Dapper            |
+	| database type     | entity type        | entity count | micro orm         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 
 Scenario Outline: Single Select Id Filter Benchmark
 	Given I have initialized a <database type> database
@@ -84,11 +84,11 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And the queried entities should be the same as the ones I inserted
 	And I cleanup the <database type> database
 	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 30000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 30000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 30000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 30000        | Dapper            |
+	| database type     | entity type        | entity count | micro orm         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
@@ -102,8 +102,8 @@ Scenario Outline: Single Update Benchmark
 	Then the queried entities should be the same as the ones I updated
 	Then I cleanup the <database type> database
 	Examples: 
-	| database type | entity type        | entity count | micro orm         |
-	| LocalDb       | benchmark entities | 30000        | Simple Crud       |
-	| LocalDb       | benchmark entities | 30000        | Dapper Extensions |
-	| LocalDb       | benchmark entities | 30000        | Fast Crud         |
-	| LocalDb       | benchmark entities | 30000        | Dapper            |
+	| database type     | entity type        | entity count | micro orm         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |

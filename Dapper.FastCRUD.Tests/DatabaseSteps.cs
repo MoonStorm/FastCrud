@@ -48,11 +48,18 @@
             this.SetupPostgreSqlDatabase(ConfigurationManager.ConnectionStrings["PostgreSql"].ConnectionString);
         }
 
-        [Given(@"I have initialized a LocalDb database")]
-        public void GivenIHaveInitializedLocalDbDatabase()
+        [Given(@"I have initialized a Benchmark LocalDb database")]
+        public void GivenIHaveInitializedBenchmarkLocalDbDatabase()
         {
             this.CleanupLocalDbDatabase();
             this.SetupLocalDbDatabase();
+        }
+
+        [Given(@"I have initialized a LocalDb database")]
+        public void GivenIHaveInitializedLocalDbDatabase()
+        {
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
         }
 
         [Given(@"I have initialized a SqLite database")]
@@ -81,10 +88,16 @@
             this.CleanupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
         }
 
+        [Then(@"I cleanup the Benchmark LocalDb database")]
+        public void ThenICleanupTheBenchmarkLocalDbDatabase()
+        {
+            this.CleanupLocalDbDatabase();
+        }
+
         [Then(@"I cleanup the LocalDb database")]
         public void ThenICleanupTheLocalDbDatabase()
         {
-            this.CleanupLocalDbDatabase();
+            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
         }
 
         [Given(@"I have initialized a MsSqlServer database")]

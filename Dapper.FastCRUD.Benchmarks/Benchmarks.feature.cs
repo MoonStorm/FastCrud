@@ -66,10 +66,10 @@ namespace Dapper.FastCrud.Benchmarks
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Insert Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper", null)]
         public virtual void InsertBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert Benchmark", exampleTags);
@@ -96,10 +96,10 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Batch Select No Filter")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper", null)]
         public virtual void BatchSelectNoFilter(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch Select No Filter", exampleTags);
@@ -140,10 +140,10 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Delete Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper", null)]
         public virtual void SingleDeleteBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Delete Benchmark", exampleTags);
@@ -174,10 +174,10 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Select Id Filter Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper", null)]
         public virtual void SingleSelectIdFilterBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Select Id Filter Benchmark", exampleTags);
@@ -210,10 +210,10 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single Update Benchmark")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "benchmark entities", "30000", "Dapper", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Simple Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper Extensions", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Fast Crud", null)]
+        [NUnit.Framework.TestCaseAttribute("Benchmark LocalDb", "benchmark entities", "30000", "Dapper", null)]
         public virtual void SingleUpdateBenchmark(string databaseType, string entityType, string entityCount, string microOrm, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single Update Benchmark", exampleTags);
