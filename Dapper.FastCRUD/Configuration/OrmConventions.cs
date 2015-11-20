@@ -80,7 +80,7 @@
         public virtual string GetTableName(Type entityType)
         {
             TableAttribute tableNameAttribute;
-            if ((tableNameAttribute = TypeDescriptor.GetAttributes(entityType).OfType<TableAttribute>().SingleOrDefault()) != null)
+            if ((tableNameAttribute = this.GetEntityAttributes(entityType).OfType<TableAttribute>().FirstOrDefault()) != null)
             {
                 return tableNameAttribute.Name;
             }
@@ -104,7 +104,7 @@
         /// </summary>
         public virtual string GetSchemaName(Type entityType)
         {
-            return TypeDescriptor.GetAttributes(entityType).OfType<TableAttribute>().SingleOrDefault()?.Schema;
+            return this.GetEntityAttributes(entityType).OfType<TableAttribute>().FirstOrDefault()?.Schema;
         }
 
         /// <summary>

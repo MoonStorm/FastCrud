@@ -37,9 +37,10 @@
 - identifier delimiters used throughout
 - PostgreSql delimiters enforced
 - easy to override library conventions
-- enhanced sql builder with an SQL formatter provider, with support for formatting specifiers for table (T), column (C) or table and column (TC)
+- enhanced SQL builder with a SQL formatter provider, with support for formatting specifiers for table (T), column (C) or table and column (TC)
+- support for the MetadataType attribute
 - fixed the INSERT statement in an MsSql table with triggers
-- fixed SKIP and TOP clauses for MsSql and SqlLite
+- fixed SKIP and TOP clauses for MsSql and SqLite
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
