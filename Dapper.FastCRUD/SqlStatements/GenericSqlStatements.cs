@@ -249,7 +249,7 @@
         {
             Requires.Argument(
                 (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
-                ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an Order clause.");
+                ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(

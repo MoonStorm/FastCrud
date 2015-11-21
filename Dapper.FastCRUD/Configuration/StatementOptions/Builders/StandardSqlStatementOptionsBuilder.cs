@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions
+﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
     /// <summary>
     /// Standard sql options builder for a statement.

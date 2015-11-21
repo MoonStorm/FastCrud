@@ -8,12 +8,11 @@
     /// Standard sql options setter for a statement.
     /// </summary>
     public interface IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
-        where TStatementOptionsSetter : IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
     {
         /// <summary>
         /// Enforces a maximum time span on the current command.
         /// </summary>
-        TStatementOptionsSetter WithTimeout(TimeSpan commandTimeout);
+        TStatementOptionsSetter WithTimeout(TimeSpan? commandTimeout);
 
         /// <summary>
         /// Attaches the current command to an existing transaction.

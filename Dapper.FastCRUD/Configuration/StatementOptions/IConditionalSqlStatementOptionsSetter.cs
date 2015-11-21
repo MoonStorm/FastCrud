@@ -6,18 +6,12 @@
     /// <summary>
     /// Conditional sql statement options setter. 
     /// </summary>
-    public interface IConditionalSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
-        : IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
-        where TStatementOptionsSetter : IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
+    public interface IConditionalSqlStatementOptionsOptionsSetter<TEntity, TStatementOptionsSetter>
+        :IParameterizedSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
     {
         /// <summary>
         /// Limits the result set with a where clause.
         /// </summary>
         TStatementOptionsSetter Where(FormattableString whereClause);
-
-        /// <summary>
-        /// Sets the parameters to be used by the statement.
-        /// </summary>
-        TStatementOptionsSetter WithParameters(object parameters);
     }
 }

@@ -5,6 +5,7 @@
     using System.Data;
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions;
+    using Dapper.FastCrud.Configuration.StatementOptions.Builders;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
@@ -411,7 +412,7 @@
         }
 
         private static void SetupRangedStatementOptions<TEntity>(
-            IRangedConditionalResultsSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity> optionsOptionsBuilder,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null,
@@ -424,27 +425,27 @@
             )
         {
             if (transaction != null)
-                optionsBuilder.AttachToTransaction(transaction);
+                optionsOptionsBuilder.AttachToTransaction(transaction);
             if (commandTimeout != null)
-                optionsBuilder.WithTimeout(commandTimeout.Value);
+                optionsOptionsBuilder.WithTimeout(commandTimeout.Value);
             if (entityMappingOverride != null)
-                optionsBuilder.WithEntityMappingOverride(entityMappingOverride);
+                optionsOptionsBuilder.WithEntityMappingOverride(entityMappingOverride);
             if (whereClause != null)
-                optionsBuilder.Where(whereClause);
+                optionsOptionsBuilder.Where(whereClause);
             if (queryParameters != null)
-                optionsBuilder.WithParameters(queryParameters);
+                optionsOptionsBuilder.WithParameters(queryParameters);
             if (orderClause != null)
-                optionsBuilder.OrderBy(orderClause);
+                optionsOptionsBuilder.OrderBy(orderClause);
             if (skipRowsCount.HasValue)
-                optionsBuilder.Skip(skipRowsCount.Value);
+                optionsOptionsBuilder.Skip(skipRowsCount.Value);
             if (limitRowsCount.HasValue)
-                optionsBuilder.Top(limitRowsCount.Value);
+                optionsOptionsBuilder.Top(limitRowsCount.Value);
             if (streamResults)
-                optionsBuilder.StreamResults();
+                optionsOptionsBuilder.StreamResults();
         }
 
         private static void SetupConditionalStatementOptions<TEntity>(
-            IConditionalSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IConditionalBatchSqlStatementOptionsBuilder<TEntity> optionsBuilder,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null,

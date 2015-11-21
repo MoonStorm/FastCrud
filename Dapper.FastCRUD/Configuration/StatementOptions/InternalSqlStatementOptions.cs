@@ -7,7 +7,6 @@
 
     internal abstract class InternalSqlStatementOptions<TEntity,TStatementOptionsBuilder>
         :ISqlStatementOptionsGetter
-        where TStatementOptionsBuilder: class, IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         protected InternalSqlStatementOptions()
         {
@@ -62,9 +61,9 @@
         /// <summary>
         /// Limits the results set by the top number of records returned.
         /// </summary>
-        public TStatementOptionsBuilder Top(long topRecords)
+        public TStatementOptionsBuilder Top(long? topRecords)
         {
-            Requires.Argument(topRecords > 0, nameof(topRecords), "The top record count must be a positive value");
+            Requires.Argument(topRecords == null || topRecords > 0, nameof(topRecords), "The top record count must be a positive value");
 
             this.LimitResults = topRecords;
             return this.Builder;
@@ -75,8 +74,6 @@
         /// </summary>
         public TStatementOptionsBuilder OrderBy(FormattableString orderByClause)
         {
-            Requires.NotNull(orderByClause, nameof(orderByClause));
-
             this.OrderClause = orderByClause;
             return this.Builder;
         }
@@ -84,9 +81,9 @@
         /// <summary>
         /// Skips the initial set of results.
         /// </summary>
-        public TStatementOptionsBuilder Skip(long skipRecordsCount)
+        public TStatementOptionsBuilder Skip(long? skipRecordsCount)
         {
-            Requires.Argument(skipRecordsCount >= 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
+            Requires.Argument(skipRecordsCount == null || skipRecordsCount >= 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
 
             this.SkipResults = skipRecordsCount;
             return this.Builder;
@@ -106,8 +103,6 @@
         /// </summary>
         public TStatementOptionsBuilder Where(FormattableString whereClause)
         {
-            Requires.NotNull(whereClause, nameof(whereClause));
-
             this.WhereClause = whereClause;
             return this.Builder;
         }
@@ -117,8 +112,6 @@
         /// </summary>
         public TStatementOptionsBuilder WithParameters(object parameters)
         {
-            Requires.NotNull(parameters, nameof(parameters));
-
             this.Parameters = parameters;
             return this.Builder;
         }
@@ -126,10 +119,8 @@
         /// <summary>
         /// Enforces a maximum time span on the current command.
         /// </summary>
-        public TStatementOptionsBuilder WithTimeout(TimeSpan commandTimeout)
+        public TStatementOptionsBuilder WithTimeout(TimeSpan? commandTimeout)
         {
-            Requires.NotDefault(commandTimeout, nameof(commandTimeout));
-
             this.CommandTimeout = commandTimeout;
             return this.Builder;
         }
@@ -139,8 +130,6 @@
         /// </summary>
         public TStatementOptionsBuilder AttachToTransaction(IDbTransaction transaction)
         {
-            Requires.NotNull(transaction, nameof(transaction));
-
             this.Transaction = transaction;
             return this.Builder;
         }
@@ -150,8 +139,6 @@
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity> entityMapping)
         {
-            Requires.NotNull(entityMapping, nameof(entityMapping));
-
             this.EntityMappingOverride = entityMapping;
             return this.Builder;
         }

@@ -5,14 +5,13 @@
     /// <summary>
     /// Ranged conditional sql statement options setter. 
     /// </summary>
-    public interface IRangedConditionalResultsSqlStatementSetter<TEntity, TStatementOptionsSetter>
-        : IConditionalSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
-        where TStatementOptionsSetter : IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
+    public interface IRangedConditionalSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
+        :IConditionalSqlStatementOptionsOptionsSetter<TEntity, TStatementOptionsSetter>
     {
         /// <summary>
         /// Limits the results set by the top number of records returned.
         /// </summary>
-        TStatementOptionsSetter Top(long topRecordsCount);
+        TStatementOptionsSetter Top(long? topRecordsCount);
 
         /// <summary>
         /// Adds an ORDER BY clause to the statement.
@@ -27,6 +26,8 @@
         /// <summary>
         /// Skips the initial set of results.
         /// </summary>
-        TStatementOptionsSetter Skip(long skipRecordsCount);
+        TStatementOptionsSetter Skip(long? skipRecordsCount);
+
+        
     }
 }

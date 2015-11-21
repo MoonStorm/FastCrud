@@ -53,7 +53,7 @@
 
                 if (makeAsyncCalls)
                 {
-                    dbConnection.InsertAsync(generatedEntity).GetAwaiter().GetResult();
+                    dbConnection.InsertAsync(generatedEntity, statement => statement.WithTimeout(TimeSpan.FromMinutes(5.0))).GetAwaiter().GetResult();
                 }
                 else
                 {
@@ -98,8 +98,8 @@
         public void WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
         {
             var entities = useAsyncMethods 
-                ? _testContext.DatabaseConnection.GetAsync<Workstation>(commandTimeout: (TimeSpan?)null).Result
-                : _testContext.DatabaseConnection.Get<Workstation>(commandTimeout: (TimeSpan?)null);
+                ? _testContext.DatabaseConnection.FindAsync<Workstation>().Result
+                : _testContext.DatabaseConnection.Find<Workstation>();
             _testContext.QueriedEntities.AddRange(entities);
         }
 
@@ -151,10 +151,11 @@
             var sqlBuilder = OrmConfiguration.GetSqlBuilder<Workstation>();
             _testContext.QueriedEntities.AddRange(
                 _testContext.DatabaseConnection.Find<Workstation>(
-                    whereClause: $"{nameof(Workstation.WorkstationId):C} IS NOT NULL",
-                    orderClause: $"{nameof(Workstation.InventoryIndex):C} DESC",
-                    skipRowsCount: skip,
-                    limitRowsCount: max));
+                    statementOptions =>
+                    statementOptions.Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
+                                    .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
+                                    .Skip(skip)
+                                    .Top(max)));
         }
 
         //[When(@"I query for a maximum of (.*) employee entities ordered by workstation id skipping (.*) records")]

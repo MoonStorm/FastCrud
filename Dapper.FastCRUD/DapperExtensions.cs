@@ -5,6 +5,7 @@
     using System.Data;
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions;
+    using Dapper.FastCrud.Configuration.StatementOptions.Builders;
 
     /// <summary>
     /// Class for Dapper extensions
@@ -138,9 +139,9 @@
         public static int BatchUpdate<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
-            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
                                    .BatchUpdate(connection, updateData, options);
@@ -160,9 +161,9 @@
         public static Task<int> BatchUpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
-            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -254,9 +255,9 @@
         /// <returns>The record count</returns>
         public static int Count<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -272,9 +273,9 @@
         /// <returns>The record count</returns>
         public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -290,9 +291,9 @@
         /// <returns>The record count</returns>
         public static IEnumerable<TEntity> Find<TEntity>(
             this IDbConnection connection,
-            Action<IRangedConditionalResultsSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new RangedConditionalResultsSqlStatementOptionsBuilder<TEntity>();
+            var options = new RangedBatchSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -308,9 +309,9 @@
         /// <returns>The record count</returns>
         public static Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
-            Action<IRangedConditionalResultsSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new RangedConditionalResultsSqlStatementOptionsBuilder<TEntity>();
+            var options = new RangedBatchSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
