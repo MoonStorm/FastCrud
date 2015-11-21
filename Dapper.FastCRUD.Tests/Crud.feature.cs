@@ -79,19 +79,19 @@ namespace Dapper.FastCrud.Tests
         public virtual void InsertAndSelectAllIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (in-memory database)", exampleTags);
-#line 3
+#line 12
 this.ScenarioSetup(scenarioInfo);
-#line 4
+#line 13
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 5
+#line 14
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 6
+#line 15
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 7
+#line 16
  testRunner.And(string.Format("I query for the count of all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 8
- testRunner.Then("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 9
+#line 17
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 18
  testRunner.And(string.Format("the database count of the queried entities should be {0}", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             this.ScenarioCleanup();
@@ -117,19 +117,19 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (external database)", @__tags);
-#line 24
+#line 33
 this.ScenarioSetup(scenarioInfo);
-#line 25
+#line 34
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 26
+#line 35
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 27
+#line 36
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 28
+#line 37
  testRunner.And(string.Format("I query for the count of all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 29
- testRunner.Then("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
-#line 30
+#line 38
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 39
  testRunner.And(string.Format("the database count of the queried entities should be {0}", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             this.ScenarioCleanup();
@@ -152,15 +152,15 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void FindIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string max, string skip, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find (in-memory database)", exampleTags);
-#line 43
+#line 52
 this.ScenarioSetup(scenarioInfo);
-#line 44
+#line 53
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 45
+#line 54
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 46
+#line 55
  testRunner.And(string.Format("I query for a maximum of {0} {1} entities reverse ordered skipping {2} records", max, entityType, skip), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 47
+#line 56
  testRunner.Then(string.Format("the queried entities should be the same as the ones I inserted, in reverse order," +
                         " starting from {0} counting {1}", skip, max), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
@@ -191,15 +191,15 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find (external database)", @__tags);
-#line 64
+#line 73
 this.ScenarioSetup(scenarioInfo);
-#line 65
+#line 74
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 66
+#line 75
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 67
+#line 76
  testRunner.And(string.Format("I query for a maximum of {0} {1} entities reverse ordered skipping {2} records", max, entityType, skip), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 68
+#line 77
  testRunner.Then(string.Format("the queried entities should be the same as the ones I inserted, in reverse order," +
                         " starting from {0} counting {1}", skip, max), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
@@ -219,16 +219,16 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void InsertAndSelectByPrimaryKeyIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (in-memory database)", exampleTags);
-#line 85
+#line 94
 this.ScenarioSetup(scenarioInfo);
-#line 86
+#line 95
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 87
+#line 96
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 88
+#line 97
  testRunner.And(string.Format("I query for the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 89
- testRunner.Then("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 98
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
@@ -257,16 +257,16 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (external database)", @__tags);
-#line 102
+#line 111
 this.ScenarioSetup(scenarioInfo);
-#line 103
+#line 112
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 104
+#line 113
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 105
+#line 114
  testRunner.And(string.Format("I query for the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 106
- testRunner.Then("the queried entities should be the same as the ones I inserted", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 115
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
@@ -284,18 +284,18 @@ this.ScenarioSetup(scenarioInfo);
         public virtual void UpdateByPrimaryKeysIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (in-memory database)", exampleTags);
-#line 123
+#line 132
 this.ScenarioSetup(scenarioInfo);
-#line 124
+#line 133
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 125
+#line 134
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 126
+#line 135
  testRunner.And(string.Format("I update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 127
+#line 136
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 128
- testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 137
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
@@ -324,41 +324,41 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (external database)", @__tags);
-#line 141
+#line 150
 this.ScenarioSetup(scenarioInfo);
-#line 142
+#line 151
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 143
+#line 152
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 144
+#line 153
  testRunner.And(string.Format("I update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 145
+#line 154
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 146
- testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 155
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Partial update (in-memory database)")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "synchronous", null)]
         public virtual void PartialUpdateIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (in-memory database)", exampleTags);
-#line 163
+#line 172
 this.ScenarioSetup(scenarioInfo);
-#line 164
+#line 173
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 165
+#line 174
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 166
+#line 175
  testRunner.And(string.Format("I partially update all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 167
+#line 176
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 168
- testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 177
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
@@ -366,10 +366,10 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Partial update (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
-        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "1", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "synchronous", null)]
         public virtual void PartialUpdateExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
@@ -379,51 +379,47 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (external database)", @__tags);
-#line 175
+#line 184
 this.ScenarioSetup(scenarioInfo);
-#line 176
+#line 185
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 177
+#line 186
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 178
+#line 187
  testRunner.And(string.Format("I partially update all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 179
+#line 188
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 180
- testRunner.Then("the queried entities should be the same as the ones I updated", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 189
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Delete by primary keys (in-memory database)")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("SqLite", "building", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("SqLite", "building", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "1", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqLite", "building", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqLite", "building", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "3", "synchronous", null)]
         public virtual void DeleteByPrimaryKeysIn_MemoryDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (in-memory database)", exampleTags);
-#line 189
+#line 198
 this.ScenarioSetup(scenarioInfo);
-#line 190
+#line 199
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 191
+#line 200
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 192
- testRunner.And("I clear all the inserted entities", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 193
- testRunner.And(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 194
+#line 201
  testRunner.And(string.Format("I delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 195
+#line 202
  testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 196
- testRunner.Then(string.Format("I should have {0} {1} entities in the database", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 203
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }
@@ -431,18 +427,18 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Delete by primary keys (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
-        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "building", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "building", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "1", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "1", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "1", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "building", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "building", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "3", "synchronous", null)]
         public virtual void DeleteByPrimaryKeysExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
@@ -452,22 +448,18 @@ this.ScenarioSetup(scenarioInfo);
                 @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
             }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (external database)", @__tags);
-#line 209
-this.ScenarioSetup(scenarioInfo);
-#line 210
- testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 211
- testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 212
- testRunner.And("I clear all the inserted entities", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 213
- testRunner.And(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 214
- testRunner.And(string.Format("I delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 215
- testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 216
- testRunner.Then(string.Format("I should have {0} {1} entities in the database", entityCount, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+this.ScenarioSetup(scenarioInfo);
+#line 217
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 218
+ testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 219
+ testRunner.And(string.Format("I delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 220
+ testRunner.And(string.Format("I query for all the {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line 221
+ testRunner.Then("the queried entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
         }

@@ -150,7 +150,6 @@
     <Compile Include="CrudSteps.cs" />
     <Compile Include="DatabaseSteps.cs" />
     <Compile Include="DatabaseTestContext.cs" />
-    <Compile Include="EntityGenerationSteps.cs" />
     <Compile Include="Models\BuildingEntity.cs" />
     <Compile Include="Models\EmployeeEntity.cs" />
     <Compile Include="Models\ModelGeneratorConfig1.cs">
