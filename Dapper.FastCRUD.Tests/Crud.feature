@@ -13,6 +13,7 @@ Scenario Outline:  Batch update (in-memory database)
 	| SqLite        | workstation | 10           | 3    | 2   | synchronous  |
 	| SqLite        | workstation | 10           | 3    | 2   | asynchronous |
 
+@ExternalDatabase
 Scenario Outline:  Batch update (external database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -39,6 +40,7 @@ Scenario Outline:  Batch delete (in-memory database)
 	| SqLite        | workstation | 10           | 3    | 2   | synchronous  |
 	| SqLite        | workstation | 10           | 3    | 2   | asynchronous |
 
+@ExternalDatabase
 Scenario Outline:  Batch delete (external database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
