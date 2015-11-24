@@ -219,9 +219,9 @@
         /// <returns>The number of records deleted.</returns>
         public static int BatchDelete<TEntity>(
             this IDbConnection connection,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -237,9 +237,9 @@
         /// <returns>The number of records deleted.</returns>
         public static Task<int> BatchDeleteAsync<TEntity>(
             this IDbConnection connection,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)

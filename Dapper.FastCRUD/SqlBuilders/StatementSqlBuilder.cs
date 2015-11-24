@@ -248,7 +248,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructFullBatchUpdateStatement(FormattableString whereClause = null)
         {
-            return whereClause == null ? _noConditionFullBatchUpdateStatement.Value : this.ConstructFullBatchUpdateStatement(whereClause);
+            return whereClause == null ? _noConditionFullBatchUpdateStatement.Value : this.ConstructFullBatchUpdateStatementInternal(whereClause);
         }
 
         /// <summary>
@@ -376,10 +376,17 @@
                 ? string.Empty
                 : $" AS {this.GetDelimitedIdentifier(tableAlias)}";
 
-            var fullTableName = ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
-                                ? $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}"
-                                : $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
-            return $"{fullTableName}{sqlAlias}".ToString(CultureInfo.InvariantCulture);
+            FormattableString fullTableName;
+            if ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+            {
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
+            }                                
+            else
+            {
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
+            }
+
+            return this.ResolveWithCultureInvariantFormatter($"{fullTableName}{sqlAlias}");
         }
 
         /// <summary>
@@ -444,7 +451,8 @@
         /// </summary>
         protected virtual string ConstructFullSingleUpdateStatementInternal()
         {
-            return $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}".ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter(
+                    $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
         /// <summary>
@@ -452,13 +460,13 @@
         /// </summary>
         protected virtual string ConstructFullBatchUpdateStatementInternal(FormattableString whereClause = null)
         {
-            var updateStatement = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()}";
+            FormattableString updateStatement = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()}";
             if (whereClause != null)
             {
-                return $"{updateStatement} WHERE {whereClause}".ToString(this.StatementFormatter);
+                return this.ResolveWithSqlFormatter($"{updateStatement} WHERE {whereClause}");
             }
 
-            return updateStatement.ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter(updateStatement);
         }
 
         /// <summary>
@@ -466,7 +474,8 @@
         /// </summary>
         protected virtual string ConstructFullSingleDeleteStatementInternal()
         {
-            return $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}".ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter(
+                $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
         /// <summary>
@@ -474,13 +483,13 @@
         /// </summary>
         protected virtual string ConstructFullBatchDeleteStatementInternal(FormattableString whereClause = null)
         {
-            var deleteStatement = $"DELETE FROM {this.GetTableName()}";
+            FormattableString deleteStatement = $"DELETE FROM {this.GetTableName()}";
             if (whereClause != null)
             {
-                return $"{deleteStatement} WHERE {whereClause}".ToString(this.StatementFormatter);
+                return this.ResolveWithSqlFormatter($"{deleteStatement} WHERE {whereClause}");
             }
 
-            return deleteStatement.ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter(deleteStatement);
         }
 
         /// <summary>
@@ -490,8 +499,8 @@
         {
             //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
             return (whereClause == null)
-                       ? $"SELECT COUNT(*) FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture)
-                       : $"SELECT COUNT(*) FROM {this.GetTableName()} WHERE {whereClause}".ToString(this.StatementFormatter);
+                       ? this.ResolveWithCultureInvariantFormatter($"SELECT COUNT(*) FROM {this.GetTableName()}")
+                       : this.ResolveWithSqlFormatter($"SELECT COUNT(*) FROM {this.GetTableName()} WHERE {whereClause}");
         }
 
         /// <summary>
@@ -499,9 +508,8 @@
         /// </summary>
         protected virtual string ConstructFullSingleSelectStatementInternal()
         {
-            return
-                $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}"
-                    .ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter(
+                    $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
         /// <summary>
@@ -513,5 +521,17 @@
             long? skipRowsCount = null,
             long? limitRowsCount = null,
             object queryParameters = null);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected string ResolveWithCultureInvariantFormatter(FormattableString formattableString)
+        {
+            return formattableString.ToString(CultureInfo.InvariantCulture);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected string ResolveWithSqlFormatter(FormattableString formattableString)
+        {
+            return formattableString.ToString(this.StatementFormatter);
+        }
     }
 }

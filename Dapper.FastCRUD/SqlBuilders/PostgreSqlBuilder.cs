@@ -28,9 +28,7 @@
                          propInfo => this.GetColumnName(propInfo, null, true))))
              : string.Empty;
 
-            var sql = $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}";
-
-            return sql.ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}");
         }
 
         /// <summary>
@@ -43,7 +41,7 @@
             long? limitRowsCount = null,
             object queryParameters = null)
         {
-            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture);
+            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}");
 
             if (whereClause != null)
             {

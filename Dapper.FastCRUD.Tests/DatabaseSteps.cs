@@ -172,14 +172,14 @@
         [Then(@"the queried entities should be the same as the ones I inserted, in reverse order, starting from (.*) counting (.*)")]
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInsertedReverseStartingFromCounting(int? skip, int? max)
         {
-            var expectedEntities = ((IEnumerable<object>)_testContext.InsertedEntities).Reverse().Skip(skip??0).Take(max??int.MaxValue);
+            var expectedEntities = ((IEnumerable<object>)_testContext.LocalEntities).Reverse().Skip(skip??0).Take(max??int.MaxValue);
             CollectionAssert.AreEqual(expectedEntities, _testContext.QueriedEntities);
         }
 
-        [Then(@"the queried entities should be the same as the ones I inserted")]
+        [Then(@"the queried entities should be the same as the local ones")]
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInserted()
         {
-            CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.InsertedEntities);
+            CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.LocalEntities);
         }
 
         [When(@"I clear all the queried entities")]
@@ -188,16 +188,10 @@
             _testContext.QueriedEntities.Clear();
         }
 
-        [When(@"I clear all the inserted entities")]
+        [When(@"I clear all the local entities")]
         public void WhenIClearAllTheInsertedEntities()
         {
-            _testContext.InsertedEntities.Clear();
-        }
-
-        [Then(@"the queried entities should be the same as the ones I updated")]
-        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIUpdated()
-        {
-            CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.UpdatedEntities);
+            _testContext.LocalEntities.Clear();
         }
 
         private void SetupSqlCeDatabase(string connectionString)
@@ -243,7 +237,7 @@
                     $@"CREATE TABLE Workstations (
 	                        WorkstationId integer primary key AUTOINCREMENT,
                             InventoryIndex int NOT NULL,
-	                        Name nvarchar(50) NULL,
+	                        Name nvarchar(100) NULL,
                             AccessLevel int NOT NULL DEFAULT(1),
                             BuildingId int NULL
                         )";
@@ -268,7 +262,7 @@
             {
                 command.CommandText = $@"CREATE TABLE Buildings (
 	                        Id integer primary key AUTOINCREMENT,
-	                        BuildingName nvarchar(50) NULL
+	                        BuildingName nvarchar(100) NULL
                         )";
 
                 command.ExecuteNonQuery();
@@ -327,8 +321,8 @@
 	                        ""Id"" SERIAL,
                             ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
-	                        ""LastName"" varchar(50) NOT NULL,
-	                        ""FirstName"" varchar(50) NOT NULL,
+	                        ""LastName"" varchar(100) NOT NULL,
+	                        ""FirstName"" varchar(100) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
                             ""WorkstationId"" int NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
@@ -336,7 +330,7 @@
 
                         CREATE TABLE ""Workstations"" (
 	                        ""WorkstationId"" BIGSERIAL,
-	                        ""Name"" varchar(50) NOT NULL,
+	                        ""Name"" varchar(100) NOT NULL,
                             ""InventoryIndex"" int NOT NULL,
                             ""AccessLevel"" int NOT NULL DEFAULT 1,
                             ""BuildingId"" int NULL,
@@ -345,7 +339,7 @@
 
                         CREATE TABLE ""Buildings"" (
 	                        ""Id"" SERIAL,
-	                        ""BuildingName"" varchar(50) NULL,
+	                        ""BuildingName"" varchar(100) NULL,
 	                        PRIMARY KEY (""Id"")
                         );
                     ";
@@ -393,8 +387,8 @@
 	                        Id int NOT NULL AUTO_INCREMENT,
                             EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-	                        LastName nvarchar(50) NOT NULL,
-	                        FirstName nvarchar(50) NOT NULL,
+	                        LastName nvarchar(100) NOT NULL,
+	                        FirstName nvarchar(100) NOT NULL,
 	                        BirthDate datetime NOT NULL,
                             WorkstationId int NULL,
 	                        PRIMARY KEY (Id, EmployeeId)
@@ -410,7 +404,7 @@
 
                         CREATE TABLE `Workstations` (
 	                        WorkstationId bigint NOT NULL AUTO_INCREMENT,
-	                        Name nvarchar(50) NOT NULL,
+	                        Name nvarchar(100) NOT NULL,
                             InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
                             BuildingId int NULL,
@@ -421,7 +415,7 @@
 
                         CREATE TABLE `Buildings` (
 	                        Id int NOT NULL AUTO_INCREMENT,
-	                        BuildingName nvarchar(50) NULL,
+	                        BuildingName nvarchar(100) NULL,
 	                        PRIMARY KEY (Id)
                         );
 
@@ -507,7 +501,7 @@
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Workstations](
 	                    [WorkstationId] [bigint] IDENTITY(2,1) NOT NULL,
-	                    [Name] [nvarchar](50) NULL,
+	                    [Name] [nvarchar](100) NULL,
                         [InventoryIndex] [int] NOT NULL,
                         [AccessLevel] [int] NOT NULL DEFAULT(1),
                         [BuildingId] [int] NULL,
@@ -520,8 +514,8 @@
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
-	                    [LastName] [nvarchar](50) NOT NULL,
-	                    [FirstName] [nvarchar](50) NULL,
+	                    [LastName] [nvarchar](100) NOT NULL,
+	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
@@ -533,7 +527,7 @@
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
-	                    [BuildingName] [nvarchar](50) NULL,
+	                    [BuildingName] [nvarchar](100) NULL,
                         CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED 
                         (
 	                        [Id] ASC
