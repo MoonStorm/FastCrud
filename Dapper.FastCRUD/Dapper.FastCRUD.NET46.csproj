@@ -60,7 +60,7 @@
     <Compile Include="Configuration\OrmConventions.cs" />
     <Compile Include="Configuration\SqlDatabaseOptions.cs" />
     <Compile Include="Configuration\SqlStatementOptions.cs" />
-    <Compile Include="Configuration\StatementOptions\Builders\ConditionalBatchSqlStatementOptionsBuilder.cs" />
+    <Compile Include="Configuration\StatementOptions\Builders\ConditionalBulkSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\RangedBatchSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\StandardSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\IConditionalSqlStatementOptionsSetter.cs" />

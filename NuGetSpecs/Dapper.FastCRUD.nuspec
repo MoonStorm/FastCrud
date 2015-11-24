@@ -41,7 +41,7 @@
 - support for the MetadataType attribute
 - fixed the INSERT statement in an MsSql table with triggers
 - fixed SKIP and TOP clauses for MsSql and SqLite
-- added batch update and delete
+- added bulk update and delete
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>

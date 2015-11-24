@@ -155,11 +155,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement=>statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement=>statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -189,11 +189,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement => statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement => statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -214,11 +214,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchDelete<Workstation>(statement => statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToDelete.Count()));

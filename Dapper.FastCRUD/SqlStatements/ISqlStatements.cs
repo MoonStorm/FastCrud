@@ -1,6 +1,5 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
-    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
@@ -47,12 +46,12 @@
         /// <summary>
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
-        int BatchUpdate(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions);
+        int BulkUpdate(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions);
 
         /// <summary>
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
-        Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions);
+        Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions);
 
         /// <summary>
         /// Performs a DELETE operation on a single entity identified by its keys.
@@ -67,12 +66,12 @@
         /// <summary>
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
-        int BatchDelete(IDbConnection connection, ISqlStatementOptionsGetter statementOptions);
+        int BulkDelete(IDbConnection connection, ISqlStatementOptionsGetter statementOptions);
 
         /// <summary>
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
-        Task<int> BatchDeleteAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions);
+        Task<int> BulkDeleteAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions);
 
         /// <summary>
         /// Performs a COUNT on a range of items.

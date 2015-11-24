@@ -445,7 +445,7 @@
         }
 
         private static void SetupConditionalStatementOptions<TEntity>(
-            IConditionalBatchSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IConditionalBulkSqlStatementOptionsBuilder<TEntity> optionsBuilder,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null,
