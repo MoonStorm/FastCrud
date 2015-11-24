@@ -15,9 +15,7 @@
     public abstract class EntityMapping
     {
         private volatile bool _isFrozen;
-        private IDictionary<string, PropertyMapping> _propertyMappings;
-        //private static long _currentGlobalId = long.MinValue;
-        //private readonly long _id;
+        private readonly IDictionary<string, PropertyMapping> _propertyMappings;
 
         /// <summary>
         /// Default constructor.
