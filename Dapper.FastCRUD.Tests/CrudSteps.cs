@@ -23,21 +23,36 @@
         [When(@"I insert (.*) building entities using (.*) methods")]
         public void WhenIInsertBuildingEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Building>(makeAsyncCalls, entitiesCount);
+            this.InsertEntity<Building>(makeAsyncCalls,
+                                        () => new Building()
+                                                  {
+                                                      Name = $"Building {Guid.NewGuid().ToString("N")}"
+                                                  }, entitiesCount);
         }
 
         [When(@"I insert (.*) workstation entities using (.*) methods")]
         public void WhenIInsertWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Workstation>(makeAsyncCalls, entitiesCount);
+            this.InsertEntity<Workstation>(makeAsyncCalls, () => new Workstation()
+            {
+                InventoryIndex = (_testContext.LocalEntities.OfType<Workstation>().LastOrDefault()?.InventoryIndex ?? 0) + 1,
+                Name = $"Workstation {Guid.NewGuid().ToString("N")}"
+            },
+            entitiesCount);
         }
 
         [When(@"I insert (.*) employee entities using (.*) methods")]
         public void WhenIInsertEmployeeEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Employee>(makeAsyncCalls, entitiesCount);
+            this.InsertEntity<Employee>(makeAsyncCalls,
+                                        () => new Employee()
+                                                  {
+                                                      FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
+                                                      LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
+                                                      BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59))
+                                                  }, entitiesCount);
         }
-
+    
         [When(@"I query for all the workstation entities using (.*) methods")]
         public void WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
         {
@@ -96,19 +111,139 @@
         [When(@"I update all the inserted employee entities using (.*) methods")]
         public void WhenIUpdateAllTheInsertedEmployeeEntities(bool useAsyncMethods)
         {
-            this.UpdateInsertedEntities<Employee>(useAsyncMethods);
+            this.UpdateInsertedEntities<Employee>(useAsyncMethods,
+                                                  (originalEmployeeEntity) => new Employee()
+                                                                                  {
+                                                                                      // all the properties linked to the composite primary key must be used
+                                                                                      UserId = originalEmployeeEntity.UserId,
+                                                                                      EmployeeId = originalEmployeeEntity.EmployeeId,
+                                                                                      BirthDate = new DateTime(2020, 03, 01),
+                                                                                      WorkstationId = 10 + originalEmployeeEntity.WorkstationId,
+                                                                                      FirstName = "Updated " + originalEmployeeEntity.FirstName,
+                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName
+                                                                                  });
+        }
+
+        [When(@"I batch update a maximum of (.*) employee entities skipping (.*) and using (.*) methods")]
+        public void WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        {
+            var updateData = new Employee()
+            {
+                KeyPass = Guid.NewGuid(),
+                BirthDate = new DateTime(1951, 09, 30),
+                FirstName = "Rest",
+                LastName = "In Peace",
+            };
+
+            // mimic the behavior on our side
+            var entitiesToUpdate = _testContext.LocalEntities.OfType<Employee>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            foreach (var originalEntity in entitiesToUpdate)
+            {
+                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = new Employee()
+                                                                                                     {
+                                                                                                         UserId = originalEntity.UserId,
+                                                                                                         EmployeeId =  originalEntity.EmployeeId,
+                                                                                                         KeyPass = updateData.KeyPass,
+                                                                                                         BirthDate = updateData.BirthDate,
+                                                                                                         FirstName = updateData.FirstName,
+                                                                                                         LastName = updateData.LastName
+                                                                                                     };
+            }
+
+            // update the db
+            FormattableString whereCondition = $"{nameof(Employee.UserId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.UserId))})";
+            int recordsUpdated;
+            if (useAsyncMethods)
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+            }
+            else
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement=>statement.Where(whereCondition));
+            }
+
+            Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
+        }
+
+        [When(@"I batch update a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
+        public void WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        {
+            var updateData = new Workstation()
+            {
+                Name = "Batch updated workstation"
+            };
+
+            // mimic the behavior on our side
+            var entitiesToUpdate = _testContext.LocalEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            foreach (var originalEntity in entitiesToUpdate)
+            {
+                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = new Workstation()
+                {
+                    WorkstationId =  originalEntity.WorkstationId,
+                    Name = updateData.Name
+                };
+            }
+
+            // update the db
+            FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.WorkstationId))})";
+            int recordsUpdated;
+            if (useAsyncMethods)
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+            }
+            else
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement => statement.Where(whereCondition));
+            }
+
+            Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
+        }
+
+        [When(@"I batch delete a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
+        public void WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        {
+            // mimic the behavior on our side
+            var entitiesToDelete = _testContext.LocalEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            foreach (var entityToDelete in entitiesToDelete)
+            {
+                _testContext.LocalEntities.Remove(entityToDelete);
+            }
+
+            // update the db
+            FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToDelete.Select(originalEntity => originalEntity.WorkstationId))})";
+            int recordsUpdated;
+            if (useAsyncMethods)
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+            }
+            else
+            {
+                recordsUpdated = _testContext.DatabaseConnection.BatchDelete<Workstation>(statement => statement.Where(whereCondition));
+            }
+
+            Assert.That(recordsUpdated, Is.EqualTo(entitiesToDelete.Count()));
         }
 
         [When(@"I update all the inserted building entities using (.*) methods")]
         public void WhenIUpdateAllTheInsertedBuildingEntities(bool useAsyncMethods)
         {
-            this.UpdateInsertedEntities<Building>(useAsyncMethods);
+            this.UpdateInsertedEntities<Building>(useAsyncMethods,
+                                                  (originalBuildingEntity) => new Building()
+                                                                                  {
+                                                                                      BuildingId = originalBuildingEntity.BuildingId,
+                                                                                      Name = "Updated " + originalBuildingEntity.Name
+                                                                                  });
         }
 
         [When(@"I update all the inserted workstation entities using (.*) methods")]
         public void WhenIUpdateAllTheInsertedWorkstationEntities(bool useAsyncMethods)
         {
-            this.UpdateInsertedEntities<Workstation>(useAsyncMethods);
+            this.UpdateInsertedEntities<Workstation>(useAsyncMethods,
+                                                     (originalWorkstationEntity) => new Workstation()
+                                                                                        {
+                                                                                            WorkstationId = originalWorkstationEntity.WorkstationId,
+                                                                                            Name = "Updated " + originalWorkstationEntity.Name
+                                                                                        });
         }
 
         [When(@"I delete all the inserted employee entities using (.*) methods")]
@@ -261,46 +396,12 @@
             _testContext.LocalEntities = new List<object>(_testContext.LocalEntities.Except(entitiesToBeDeleted));
         }
 
-        public void UpdateInsertedEntities<TEntity>(bool useAsyncMethods, int? skipCount = null, int? maxCount = null)
+        private void UpdateInsertedEntities<TEntity>(bool useAsyncMethods, Func<TEntity, TEntity> updateFunc,  int? skipCount = null, int? maxCount = null)
         {
             var entitiesToUpdate = _testContext.LocalEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToUpdate)
             {
-                object updatedEntity = null;
-
-                Employee originalEmployeeEntity;
-                Workstation originalWorkstationEntity;
-                Building originalBuildingEntity;
-
-                if ((originalEmployeeEntity = originalEntity as Employee)!= null)
-                {
-                    updatedEntity = new Employee()
-                    {
-                        // all the properties linked to the composite primary key must be used
-                        UserId = originalEmployeeEntity.UserId,
-                        EmployeeId = originalEmployeeEntity.EmployeeId,
-                        BirthDate = new DateTime(2020, 03, 01),
-                        WorkstationId = 10 + originalEmployeeEntity.WorkstationId,
-                        FirstName = "Updated " + originalEmployeeEntity.FirstName,
-                        LastName = "Updated " + originalEmployeeEntity.LastName
-                    };
-                }
-                else if ((originalWorkstationEntity = originalEntity as Workstation) != null)
-                {
-                    updatedEntity = new Workstation()
-                    {
-                        WorkstationId = originalWorkstationEntity.WorkstationId,
-                        Name = "Updated " + originalWorkstationEntity.Name
-                    };
-                }
-                else if ((originalBuildingEntity = originalEntity as Building) != null)
-                {
-                    updatedEntity = new Building()
-                        {
-                            BuildingId = originalBuildingEntity.BuildingId,
-                            Name = "Updated " + originalBuildingEntity.Name
-                        };
-                }
+                object updatedEntity = updateFunc(originalEntity);
 
                 _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
                 if (useAsyncMethods)
@@ -349,37 +450,12 @@
             }
         }
 
-        private void InsertEntity<TEntity>(bool useAsyncMethods, int entityCount = 1)
+        private void InsertEntity<TEntity>(bool useAsyncMethods, Func<TEntity> insertFunc,  int entityCount = 1)
         {
             var dbConnection = _testContext.DatabaseConnection;
             while (entityCount > 0)
             {
-                object entityToInsert = null;
-                if (typeof(TEntity) == typeof(Employee))
-                {
-                    entityToInsert = new Employee()
-                    {
-                        FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
-                        LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
-                        BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59))
-                    };
-                }
-                else if (typeof(TEntity) == typeof(Workstation))
-                {
-                    entityToInsert = new Workstation()
-                        {
-                            InventoryIndex = (_testContext.LocalEntities.OfType<Workstation>().LastOrDefault()?.InventoryIndex??0) + 1,
-                            Name = $"Workstation {Guid.NewGuid().ToString("N")}"
-                        };
-                }
-                else if (typeof(TEntity) == typeof(Building))
-                {
-                    entityToInsert = new Building()
-                    {
-                        Name = $"Building {Guid.NewGuid().ToString("N")}"
-                    };
-                }
-
+                object entityToInsert = insertFunc();
                 if (useAsyncMethods)
                     dbConnection.InsertAsync<TEntity>((TEntity)entityToInsert).GetAwaiter().GetResult();
                 else

@@ -1,13 +1,56 @@
 ﻿Feature: CRUD tests
 
-#Scenario Outline:  Batch update (in-memory database)
-#	Given I have initialized a <database type> database
-#	When I insert <entity count> <entity type> entities using <method type> methods
-#	#And I batch update a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
-#	Then the queried entities should be the same as the local ones
-#	Examples: 
-#	| database type | entity type | entity count | skip | max | method type |
-#	| LocalDb       | employee    | 10           | 3    | 2   | synchronous |
+Scenario Outline:  Batch update (in-memory database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> <entity type> entities using <method type> methods
+	And I batch update a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
+	And I query for all the <entity type> entities using <method type> methods
+	Then the queried entities should be the same as the local ones
+	Examples: 
+	| database type | entity type | entity count | skip | max | method type  |
+	| LocalDb       | employee    | 10           | 3    | 2   | synchronous  |
+	| LocalDb       | employee    | 10           | 3    | 2   | asynchronous |
+	| SqLite        | workstation | 10           | 3    | 2   | synchronous  |
+	| SqLite        | workstation | 10           | 3    | 2   | asynchronous |
+
+Scenario Outline:  Batch update (external database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> <entity type> entities using <method type> methods
+	And I batch update a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
+	And I query for all the <entity type> entities using <method type> methods
+	Then the queried entities should be the same as the local ones
+	Examples: 
+	| database type | entity type | entity count | skip | max | method type  |
+	| PostgreSql    | employee    | 10           | 3    | 2   | synchronous  |
+	| PostgreSql    | employee    | 10           | 3    | 2   | asynchronous |
+	| MySql         | employee    | 10           | 3    | 2   | synchronous  |
+	| MySql         | employee    | 10           | 3    | 2   | asynchronous |
+
+Scenario Outline:  Batch delete (in-memory database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> <entity type> entities using <method type> methods
+	And I batch delete a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
+	And I query for all the <entity type> entities using <method type> methods
+	Then the queried entities should be the same as the local ones
+	Examples: 
+	| database type | entity type | entity count | skip | max | method type  |
+	| LocalDb       | workstation    | 10           | 3    | 2   | synchronous  |
+	| LocalDb       | workstation    | 10           | 3    | 2   | asynchronous |
+	| SqLite        | workstation | 10           | 3    | 2   | synchronous  |
+	| SqLite        | workstation | 10           | 3    | 2   | asynchronous |
+
+Scenario Outline:  Batch delete (external database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> <entity type> entities using <method type> methods
+	And I batch delete a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
+	And I query for all the <entity type> entities using <method type> methods
+	Then the queried entities should be the same as the local ones
+	Examples: 
+	| database type | entity type | entity count | skip | max | method type  |
+	| PostgreSql    | workstation    | 10           | 3    | 2   | synchronous  |
+	| PostgreSql    | workstation    | 10           | 3    | 2   | asynchronous |
+	| MySql         | workstation    | 10           | 3    | 2   | synchronous  |
+	| MySql         | workstation    | 10           | 3    | 2   | asynchronous |
 
 Scenario Outline: Insert and select all (in-memory database)
 	Given I have initialized a <database type> database
