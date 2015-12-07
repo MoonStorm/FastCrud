@@ -61,6 +61,7 @@
     <Compile Include="Configuration\DialectOptions\PostreSqlDatabaseOptions.cs" />
     <Compile Include="Configuration\DialectOptions\MsSqlDatabaseOptions.cs" />
     <Compile Include="Configuration\OrmConventions.cs" />
+    <Compile Include="Configuration\StatementOptions\Builders\ConditionalSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\RangedBatchSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\IConditionalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IParameterizedSqlStatementOptionsSetter.cs" />

@@ -8,7 +8,6 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using Dapper.FastCrud.Configuration.DialectOptions;
-    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>

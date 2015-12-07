@@ -254,9 +254,9 @@
         /// <returns>The record count</returns>
         public static int Count<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -272,9 +272,9 @@
         /// <returns>The record count</returns>
         public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)

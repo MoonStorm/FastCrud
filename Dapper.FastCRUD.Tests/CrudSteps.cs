@@ -89,6 +89,28 @@
             this.QueryEntityCount<Workstation>(useAsyncMethods);
         }
 
+        [When(@"I query for the count of all the inserted building entities using (.*) methods")]
+        public void WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
+        {
+            FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
+            var buildingIds = string.Join(",", _testContext.LocalEntities.OfType<Building>().Select(building => building.BuildingId)); 
+
+            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+                                          ? _testContext
+                                                .DatabaseConnection
+                                                .CountAsync<Building>(statement => statement
+                                                    .Where(whereClause)
+                                                    .WithParameters(new {BuildingIds = buildingIds}))
+                                                .GetAwaiter()
+                                                .GetResult()
+                                          : _testContext
+                                                .DatabaseConnection
+                                                .Count<Building>(statement => statement
+                                                    .Where(whereClause)
+                                                    .WithParameters(new {BuildingIds = buildingIds}));
+
+        }
+
         [When(@"I query for the inserted building entities using (.*) methods")]
         public void WhenIQueryForTheInsertedBuildingEntities(bool useAsyncMethods)
         {
@@ -469,9 +491,9 @@
 
         private void QueryEntityCount<TEntity>(bool useAsyncMethods)
         {
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                                                      ? _testContext.DatabaseConnection.CountAsync<TEntity>().GetAwaiter().GetResult()
-                                                      : _testContext.DatabaseConnection.Count<TEntity>();
+                _testContext.QueriedEntitiesDbCount = useAsyncMethods
+                                                          ? _testContext.DatabaseConnection.CountAsync<TEntity>().GetAwaiter().GetResult()
+                                                          : _testContext.DatabaseConnection.Count<TEntity>();
         }
     }
 }

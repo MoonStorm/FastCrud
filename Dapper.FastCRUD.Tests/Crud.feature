@@ -74,6 +74,16 @@ Scenario Outline: Insert and select all (in-memory database)
 	| LocalDb       | building    | 1            | synchronous |
 	| SqLite        | building    | 1            | synchronous |
 
+Scenario Outline: Conditional count (in-memory database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> building entities using <method type> methods
+	And I query for the count of all the inserted building entities using <method type> methods
+	Then the database count of the queried entities should be <entity count>
+	Examples: 
+	| database type | entity count | method type  |
+	| LocalDb       | 6            | asynchronous |
+	| LocalDb       | 6            | synchronous  |
+
 @ExternalDatabase
 Scenario Outline: Insert and select all (external database)
 	Given I have initialized a <database type> database
