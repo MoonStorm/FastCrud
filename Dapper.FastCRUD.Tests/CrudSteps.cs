@@ -142,7 +142,8 @@
                                                                                       BirthDate = new DateTime(2020, 03, 01),
                                                                                       WorkstationId = 10 + originalEmployeeEntity.WorkstationId,
                                                                                       FirstName = "Updated " + originalEmployeeEntity.FirstName,
-                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName
+                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName,
+                                                                                      KeyPass = originalEmployeeEntity.KeyPass
                                                                                   });
         }
 
@@ -334,7 +335,7 @@
             try
             {
                 // updates are not possible when the mapping is frozen
-                defaultMapping.SetProperty(nameof(Employee.LastName), PropertyMappingOptions.ExcludedFromUpdates);
+                defaultMapping.SetProperty(employee => employee.LastName, propMapping => propMapping.ExcludeFromUpdates());
                 Assert.Fail();
             }
             catch (InvalidOperationException)

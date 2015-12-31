@@ -208,23 +208,23 @@
             return this;
         }
 
-        /// <summary>
-        /// Sets the mapping options for a property.
-        /// </summary>
-        /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
-        /// <param name="options">Column options</param>
-        /// <param name="databaseColumnName">Optional database column name override.</param>
-        [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
-        public EntityMapping<TEntity> SetProperty<TProperty>(
-            Expression<Func<TEntity, TProperty>> property,
-            PropertyMappingOptions options,
-            string databaseColumnName = null)
-        {
-            Requires.NotNull(property, nameof(property));
+        ///// <summary>
+        ///// Sets the mapping options for a property.
+        ///// </summary>
+        ///// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
+        ///// <param name="options">Column options</param>
+        ///// <param name="databaseColumnName">Optional database column name override.</param>
+        //[Obsolete("This method is marked as obsolete and will be removed in future versions.")]
+        //public EntityMapping<TEntity> SetProperty<TProperty>(
+        //    Expression<Func<TEntity, TProperty>> property,
+        //    PropertyMappingOptions options,
+        //    string databaseColumnName = null)
+        //{
+        //    Requires.NotNull(property, nameof(property));
 
-            var propName = ((MemberExpression)property.Body).Member.Name;
-            return this.SetProperty(propName, options, databaseColumnName);
-        }
+        //    var propName = ((MemberExpression)property.Body).Member.Name;
+        //    return this.SetProperty(propName, options, databaseColumnName);
+        //}
 
         /// <summary>
         /// Returns all the property mappings, optionally filtered by their options.
@@ -356,45 +356,45 @@
             return this;
         }
 
-        /// <summary>
-        /// Sets the mapping options for a property.
-        /// </summary>
-        /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
-        /// <param name="options">Column options</param>
-        /// <param name="databaseColumnName">Optional database column name override.</param>
-        [Obsolete("This method is marked as obsolete and will be removed in future versions.")]
-        public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
-        {
-            this.ValidateState();
-            Requires.NotNull(propertyName, nameof(propertyName));
+        ///// <summary>
+        ///// Sets the mapping options for a property.
+        ///// </summary>
+        ///// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
+        ///// <param name="options">Column options</param>
+        ///// <param name="databaseColumnName">Optional database column name override.</param>
+        //[Obsolete("This method is marked as obsolete and will be removed in future versions.")]
+        //public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
+        //{
+        //    this.ValidateState();
+        //    Requires.NotNull(propertyName, nameof(propertyName));
 
-            var propMapping = this.SetPropertyInternal(propertyName);
-            if (!string.IsNullOrEmpty(databaseColumnName))
-            {
-                propMapping.DatabaseColumnName = databaseColumnName;
-            }
-            if ((options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty)
-            {
-                propMapping.IsDatabaseGenerated = true;
-            }
-            if ((options & PropertyMappingOptions.KeyProperty) == PropertyMappingOptions.KeyProperty)
-            {
-                propMapping.IsPrimaryKey = true;
-            }
-            if ((options & PropertyMappingOptions.ExcludedFromInserts) == PropertyMappingOptions.ExcludedFromInserts)
-            {
-                propMapping.IsExcludedFromInserts = true;
-            }
-            if ((options & PropertyMappingOptions.ExcludedFromUpdates) == PropertyMappingOptions.ExcludedFromUpdates)
-            {
-                propMapping.IsExcludedFromUpdates = true;
-            }
-            if ((options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity)
-            {
-                throw new NotSupportedException("It is not possible to set up foreign keys via this method.");
-            }
-            return this;
-        }
+        //    var propMapping = this.SetPropertyInternal(propertyName);
+        //    if (!string.IsNullOrEmpty(databaseColumnName))
+        //    {
+        //        propMapping.DatabaseColumnName = databaseColumnName;
+        //    }
+        //    if ((options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty)
+        //    {
+        //        propMapping.IsDatabaseGenerated = true;
+        //    }
+        //    if ((options & PropertyMappingOptions.KeyProperty) == PropertyMappingOptions.KeyProperty)
+        //    {
+        //        propMapping.IsPrimaryKey = true;
+        //    }
+        //    if ((options & PropertyMappingOptions.ExcludedFromInserts) == PropertyMappingOptions.ExcludedFromInserts)
+        //    {
+        //        propMapping.IsExcludedFromInserts = true;
+        //    }
+        //    if ((options & PropertyMappingOptions.ExcludedFromUpdates) == PropertyMappingOptions.ExcludedFromUpdates)
+        //    {
+        //        propMapping.IsExcludedFromUpdates = true;
+        //    }
+        //    if ((options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity)
+        //    {
+        //        throw new NotSupportedException("It is not possible to set up foreign keys via this method.");
+        //    }
+        //    return this;
+        //}
 
         /// <summary>
         /// Clones the current mapping set, allowing for further modifications.

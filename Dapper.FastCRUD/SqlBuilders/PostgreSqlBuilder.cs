@@ -18,13 +18,13 @@
         /// </summary>
         protected override string ConstructFullInsertStatementInternal()
         {
-            string outputQuery = this.InsertDatabaseGeneratedProperties.Length > 0
+            string outputQuery = this.RefreshOnInsertProperties.Length > 0
              ? string.Format(
                  CultureInfo.InvariantCulture,
                  "RETURNING {0}",
                  string.Join(
                      ",",
-                     this.InsertDatabaseGeneratedProperties.Select(
+                     this.RefreshOnInsertProperties.Select(
                          propInfo => this.GetColumnName(propInfo, null, true))))
              : string.Empty;
 

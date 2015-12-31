@@ -129,6 +129,54 @@
         }
 
         /// <summary>
+        /// Gets or sets a flag indicating the property is refreshed after an INSERT.
+        /// </summary>
+        public bool IsRefreshedOnInsert
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.RefreshPropertyOnInsert) == PropertyMappingOptions.RefreshPropertyOnInsert;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.RefreshPropertyOnInsert;
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.RefreshPropertyOnInsert;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a flag indicating the property is refreshed after an UPDATE.
+        /// </summary>
+        public bool IsRefreshedOnUpdate
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.RefreshPropertyOnUpdate) == PropertyMappingOptions.RefreshPropertyOnUpdate;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.RefreshPropertyOnUpdate;
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.RefreshPropertyOnUpdate;
+                }
+            }
+        }
+
+        /// <summary>
         /// Marks the property as primary key.
         /// </summary>
         public PropertyMapping SetPrimaryKey(bool isPrimaryKey = true)
@@ -137,37 +185,46 @@
             return this;
         }
 
-        /// <summary>
-        /// Gets or sets a flag indicating the property is mapped to a database generated field.
-        /// </summary>
-        public bool IsDatabaseGenerated
-        {
-            get
-            {
-                return (_options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty;
-            }
-            set
-            {
-                this.ValidateState();
+        /////// <summary>
+        /////// Gets or sets a flag indicating the property is mapped to a database generated field.
+        /////// </summary>
+        ////public bool IsDatabaseGenerated
+        ////{
+        ////    get
+        ////    {
+        ////        return (_options & PropertyMappingOptions.DatabaseGeneratedProperty) == PropertyMappingOptions.DatabaseGeneratedProperty;
+        ////    }
+        ////    set
+        ////    {
+        ////        this.ValidateState();
 
-                if (value)
-                {
-                    _options |= PropertyMappingOptions.DatabaseGeneratedProperty;
-                    this.IsExcludedFromInserts = true;
-                }
-                else
-                {
-                    _options &= ~PropertyMappingOptions.DatabaseGeneratedProperty;
-                }
-            }
+        ////        if (value)
+        ////        {
+        ////            _options |= PropertyMappingOptions.DatabaseGeneratedProperty;
+        ////            this.IsExcludedFromInserts = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            _options &= ~PropertyMappingOptions.DatabaseGeneratedProperty;
+        ////        }
+        ////    }
+        ////}
+
+        /// <summary>
+        /// Indicates that the property gets refreshed on INSERTs.
+        /// </summary>
+        public PropertyMapping RefreshOnInsert(bool refreshOnInsert = true)
+        {
+            this.IsRefreshedOnInsert = refreshOnInsert;
+            return this;
         }
 
         /// <summary>
-        /// Indicates that the property is mapped to a database generated field.
+        /// Indicates that the property gets refreshed on UPDATEs.
         /// </summary>
-        public PropertyMapping SetDatabaseGenerated(bool isDatabaseGenerated = true)
+        public PropertyMapping RefreshOnUpdate(bool refreshOnUpdate = true)
         {
-            this.IsDatabaseGenerated = isDatabaseGenerated;
+            this.IsRefreshedOnUpdate = refreshOnUpdate;
             return this;
         }
 

@@ -52,10 +52,10 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	<# if (col.IsPK) { #>
 	[Key]
 	<#}
-	if(col.HasDefaultValue) { #>
+	if(col.IsComputed) { #>
 	[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 	<#}
-	if(col.IsAutoIncrement) { #>
+	if(!col.IsComputed && (col.HasDefaultValue || col.IsAutoIncrement)) { #>
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	<#}#>
 	public virtual <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }

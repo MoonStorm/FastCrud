@@ -518,6 +518,7 @@
 	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
+                        [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
                         (
 	                        [Id] ASC,
@@ -618,7 +619,7 @@
 
             OrmConfiguration.RegisterEntity<Building>()
                 .SetTableName("Buildings")
-                .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseColumnName("Id").SetDatabaseGenerated())
+                .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseColumnName("Id"))
                 .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"));
         }
     }

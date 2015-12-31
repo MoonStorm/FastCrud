@@ -150,7 +150,8 @@
                         propAttr => propAttr is ColumnAttribute || propAttr is KeyAttribute || propAttr is DatabaseGeneratedAttribute)))
             {
                 propertyMapping.SetPrimaryKey();
-                propertyMapping.SetDatabaseGenerated();
+                propertyMapping.ExcludeFromInserts();
+                propertyMapping.RefreshOnInsert();
                 return;
             }
 
@@ -171,15 +172,22 @@
 
             var databaseGeneratedAttributes = propertyAttributes.OfType<DatabaseGeneratedAttribute>();
 
+            // https://msdn.microsoft.com/en-us/library/system.componentmodel.dataannotations.schema.databasegeneratedoption(v=vs.110).aspx
             if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
             {
-                propertyMapping.SetDatabaseGenerated();
+                propertyMapping.ExcludeFromInserts();
+                propertyMapping.ExcludeFromUpdates();
+
+                propertyMapping.RefreshOnInsert();
+                propertyMapping.RefreshOnUpdate();
             }
 
             if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
             {
-                propertyMapping.SetDatabaseGenerated();
-                propertyMapping.ExcludeFromInserts().ExcludeFromUpdates();
+                propertyMapping.ExcludeFromInserts();
+                propertyMapping.ExcludeFromUpdates();
+
+                propertyMapping.RefreshOnInsert();
             }
 
             //ForeignKeyAttribute foreignKey = null;

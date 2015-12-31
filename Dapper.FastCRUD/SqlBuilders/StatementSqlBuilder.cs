@@ -1,12 +1,10 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
-    using System.Text;
     using System.Threading;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
@@ -54,11 +52,14 @@
                 .Where(propMapping => propMapping.Value.IsPrimaryKey)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
-            this.InsertDatabaseGeneratedProperties = this.SelectProperties
-                .Where(propInfo => propInfo.IsDatabaseGenerated && propInfo.IsExcludedFromInserts)
+            this.RefreshOnInsertProperties = this.SelectProperties
+                .Where(propInfo => propInfo.IsRefreshedOnInsert)
+                .ToArray();
+            this.RefreshOnUpdateProperties = this.SelectProperties
+                .Where(propInfo => propInfo.IsRefreshedOnUpdate)
                 .ToArray();
             this.InsertKeyDatabaseGeneratedProperties = this.KeyProperties
-                .Intersect(this.InsertDatabaseGeneratedProperties)
+                .Intersect(this.RefreshOnInsertProperties)
                 .ToArray();
             this.UpdateProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromUpdates)
@@ -96,7 +97,8 @@
         public PropertyMapping[] InsertProperties { get; }
         public PropertyMapping[] UpdateProperties { get; }
         public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
-        public PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
+        public PropertyMapping[] RefreshOnInsertProperties { get; }
+        public PropertyMapping[] RefreshOnUpdateProperties { get; }
         protected string IdentifierStartDelimiter { get; }
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
