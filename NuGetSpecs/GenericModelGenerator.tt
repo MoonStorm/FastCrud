@@ -52,14 +52,17 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	<# if (col.IsPK) { #>
 	[Key]
 	<#}
-	if(col.IsAutoIncrement) { #>
-	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-	<#}
 	if(col.IsComputed) { #>
 	[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 	<#}
+	else if(col.IsAutoIncrement) { #>
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+	<#}
 	else if(col.HasDefaultValue && !IgnoreColumnDefaultValues) { #>
 	[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
+	<#}
+	else if(col.IsPK && col.HasDefaultValue && col.IsGeneratedUniqueIdentifier) { #>
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	<#}#>
 	public virtual <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
 <#}#>
@@ -131,6 +134,7 @@ public class Column
 	public bool IsAutoIncrement;
 	public bool IsComputed;
 	public bool Ignore;
+	public bool IsGeneratedUniqueIdentifier;
 }
 
 public class Key
@@ -574,6 +578,7 @@ class SqlServerSchemaReader : SchemaReader
 					col.PropertyType=GetPropertyType(rdr["DataType"].ToString());
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
+					col.IsGeneratedUniqueIdentifier = rdr["DefaultSetting"].ToString().ToLower().Trim(' ','(',')')=="newid";
 					result.Add(col);
 				}
 			}

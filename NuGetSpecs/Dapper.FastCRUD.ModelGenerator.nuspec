@@ -21,6 +21,7 @@ More details are available on the project site.
     <releaseNotes>
 - BREAKING CHANGE: the logic for marking properties with DatabaseGeneratedAttribute has changed. Please check the docs.
 - BREAKING CHANGE: a proprietary DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the template. Note that this is a Dapper.FastCrud library feature only.
+- BREAKING CHANGE: primary keys having their values generated via newid() are marked with DatabaseGenerated(DatabaseGeneratedOption.Identity) in case the generation of the proprietary attribute is turned off. 
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper fastcrud entity generator orm</tags>
