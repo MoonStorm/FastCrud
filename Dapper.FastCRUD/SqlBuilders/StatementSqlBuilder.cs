@@ -53,10 +53,10 @@
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
             this.RefreshOnInsertProperties = this.SelectProperties
-                .Where(propInfo => propInfo.IsRefreshedOnInsert)
+                .Where(propInfo => propInfo.IsRefreshedOnInserts)
                 .ToArray();
             this.RefreshOnUpdateProperties = this.SelectProperties
-                .Where(propInfo => propInfo.IsRefreshedOnUpdate)
+                .Where(propInfo => propInfo.IsRefreshedOnUpdates)
                 .ToArray();
             this.InsertKeyDatabaseGeneratedProperties = this.KeyProperties
                 .Intersect(this.RefreshOnInsertProperties)
@@ -453,8 +453,23 @@
         /// </summary>
         protected virtual string ConstructFullSingleUpdateStatementInternal()
         {
-            return this.ResolveWithCultureInvariantFormatter(
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. UPDATE is not possible.");
+            }
+
+            var sql = this.ResolveWithCultureInvariantFormatter(
                     $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}");
+            if (this.RefreshOnUpdateProperties.Length > 0)
+            {
+                var databaseGeneratedColumnSelection = string.Join(
+                    ",",
+                    this.RefreshOnUpdateProperties.Select(
+                        propInfo => this.GetColumnName(propInfo, null, true)));
+                sql += this.ResolveWithCultureInvariantFormatter($";SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};");
+            }
+
+            return sql;
         }
 
         /// <summary>
@@ -476,6 +491,11 @@
         /// </summary>
         protected virtual string ConstructFullSingleDeleteStatementInternal()
         {
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. DELETE is not possible.");
+            }
+
             return this.ResolveWithCultureInvariantFormatter(
                 $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
@@ -510,6 +530,11 @@
         /// </summary>
         protected virtual string ConstructFullSingleSelectStatementInternal()
         {
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. SELECT is not possible.");
+            }
+
             return this.ResolveWithCultureInvariantFormatter(
                     $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }

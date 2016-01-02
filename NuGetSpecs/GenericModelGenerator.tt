@@ -52,11 +52,14 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	<# if (col.IsPK) { #>
 	[Key]
 	<#}
+	if(col.IsAutoIncrement) { #>
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+	<#}
 	if(col.IsComputed) { #>
 	[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 	<#}
-	if(!col.IsComputed && (col.HasDefaultValue || col.IsAutoIncrement)) { #>
-	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+	else if(col.HasDefaultValue && !IgnoreColumnDefaultValues) { #>
+	[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
 	<#}#>
 	public virtual <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
 <#}#>
@@ -85,7 +88,8 @@ string ClassPrefix = "";
 string ClassSuffix = "";
 string SchemaName = null;
 bool IncludeViews;
-bool IncludeRelationships;
+bool IncludeRelationships = false;
+bool IgnoreColumnDefaultValues = true;
 string[] ExcludeTablePrefixes = new string[]{};
 
 public class Table

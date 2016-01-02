@@ -5,13 +5,13 @@
 This is the configuration file for GenericModelGenerator.tt
 */
 	// Settings
-    ConnectionStringName = ""; // Uses last connection string in config if not specified
 	ConfigPath = @""; //Looks in current project for web.config or app.config by default. You can override it to point to a different config file.
+    ConnectionStringName = ""; // Uses the last connection string in the config if not specified
     Namespace = "Dapper.FastCrud.Tests.Models";
 	ClassPrefix = "";
 	ClassSuffix = "";
     IncludeViews = true;
-    IncludeRelationships = false;
+	IgnoreColumnDefaultValues = true; // when set to false, the generated properties mapped to columns having default values will be refreshed with the database assigned value on insert.
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire."};
 #>
 <#@ include file="GenericModelGenerator.tt" #>

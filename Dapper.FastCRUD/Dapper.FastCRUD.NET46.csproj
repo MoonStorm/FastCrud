@@ -70,6 +70,7 @@
     <Compile Include="Configuration\StatementOptions\IRangedConditionalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\ISqlStatementOptionsGetter.cs" />
     <Compile Include="Configuration\StatementOptions\IStandardSqlStatementOptionsSetter.cs" />
+    <Compile Include="Mappings\DatabaseGeneratedDefaultValueAttribute.cs" />
     <Compile Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="Validations\Requires.cs" />
     <None Include="Configuration\PropertyChangedNotifier.cs" />

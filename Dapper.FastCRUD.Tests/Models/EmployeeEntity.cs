@@ -18,7 +18,7 @@
             return this.UserId == other.UserId && this.EmployeeId.Equals(other.EmployeeId) && this.KeyPass.Equals(other.KeyPass)
                    && string.Equals(this.LastName, other.LastName) && string.Equals(this.FirstName, other.FirstName)
                    && this.BirthDate.Equals(other.BirthDate) && this.WorkstationId == other.WorkstationId
-                   && this.FullName.Equals(other.FullName);
+                   && string.Equals(this.FullName,other.FullName);
         }
 
         /// <summary>

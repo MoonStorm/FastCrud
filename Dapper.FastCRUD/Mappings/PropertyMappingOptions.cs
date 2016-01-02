@@ -35,12 +35,12 @@
         /// <summary>
         /// The value is not going to be re-read from the database on INSERTs.
         /// </summary>
-        RefreshPropertyOnInsert = 0x10,
+        RefreshPropertyOnInserts = 0x10,
 
         /// <summary>
         /// The value is not going to be re-read from the database on UPDATEs.
         /// </summary>
-        RefreshPropertyOnUpdate = 0x20,
+        RefreshPropertyOnUpdates = 0x20,
 
         /// <summary>
         /// Denotes a property generated through foreign key constraints.

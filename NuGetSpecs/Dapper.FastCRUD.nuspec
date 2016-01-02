@@ -12,36 +12,32 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>The fastest micro-orm type extension for Dapper.</summary>
     <description>
-      The fastest micro-orm type extension for Dapper is built around essential features of the C# 6 /VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. 
-      These features leave no chance to mistypings or problems arising from db entity refactorings.
+The fastest micro-orm type extension for Dapper is built around essential features of the C# 6 /VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. 
+These features leave no chance to mistypings or problems arising from db entity refactorings.
 
-      The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project.
-      There is no need to target .NET 4.6, but it is mandatory to use VS2015 or an equivalent build environment.
-      For .NET 4.5, the package will also install the dependency 'StringInterpolationBridge', which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015.
+The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project.
+There is no need to target .NET 4.6, but it is mandatory to use VS2015 or an equivalent build environment.
+For .NET 4.5, the package will also install the dependency 'StringInterpolationBridge', which contains the polyfills required when using string interpolation with the C# 6 compiler in VS 2015.
 
-      Features:
-      ----------
-      - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
-      - Composite primary keys are supported
-      - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
-      - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
-      - Fast pre-computed entity queries
-      - A useful SQL builder and statement formatter which can be used even if you don't need the CRUD features of this library.
-      - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
-      Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
+Features:
+----------
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
+- Composite primary keys are supported
+- Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
+- All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
+- Fast pre-computed entity queries
+- A useful SQL builder and statement formatter which can be used even if you don't need the CRUD features of this library.
+- A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
+Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
 
-      Please  check the project site for usage and benchmarks.
+Please  check the project site for usage and benchmarks.
     </description>
     <releaseNotes>
-- full support for table and column overrides
-- identifier delimiters used throughout
-- PostgreSql delimiters enforced
-- easy to override library conventions
-- enhanced SQL builder with a SQL formatter provider, with support for formatting specifiers for table (T), column (C) or table and column (TC)
-- support for the MetadataType attribute
-- fixed the INSERT statement in an MsSql table with triggers
-- fixed SKIP and TOP clauses for MsSql and SqLite
-- added bulk update and delete
+- BREAKING CHANGE: the logic for properties marked with DatabaseGeneratedAttribute has changed. Please check the docs.
+- BREAKING CHANGE: the fluent way of specifying database generated values for the columns, including default values, has changed. Please check the docs.
+- BREAKING CHANGE: entities are being updated with the computed values on return from an UPDATE
+- NotMappedAttribute is now supported
+- DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the T4 template, obviously if our template is being used.
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>

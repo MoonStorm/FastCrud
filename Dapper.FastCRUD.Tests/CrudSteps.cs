@@ -169,7 +169,8 @@
                                                                                                          KeyPass = updateData.KeyPass,
                                                                                                          BirthDate = updateData.BirthDate,
                                                                                                          FirstName = updateData.FirstName,
-                                                                                                         LastName = updateData.LastName
+                                                                                                         LastName = updateData.LastName,
+                                                                                                         FullName = updateData.FirstName+updateData.LastName,
                                                                                                      };
             }
 
@@ -342,7 +343,7 @@
             {
             }
 
-            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName));
+            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName), nameof(Employee.FullName));
 
             for (var entityIndex = 0; entityIndex < _testContext.LocalEntities.Count; entityIndex++)
             {
@@ -358,7 +359,7 @@
                     WorkstationId = 10 + insertedEntity.WorkstationId,
                     FirstName = "Updated " + insertedEntity.FirstName,
 
-                    // all of the above should be excluded with the exception of this one
+                    // all of the above will be ignored with the exception of the next ones
                     LastName = "Updated " + insertedEntity.LastName
                 };
 
@@ -373,8 +374,9 @@
                     WorkstationId = insertedEntity.WorkstationId,
                     FirstName = insertedEntity.FirstName,
 
-                    // all of the above should be excluded with the difference of this one
-                    LastName = "Updated " + insertedEntity.LastName
+                    // all of the above were ignored with the exception of the next ones
+                    LastName = partialUpdatedEntity.LastName,
+                    FullName = partialUpdatedEntity.FullName
                 };
             }
         }
@@ -426,7 +428,6 @@
             {
                 object updatedEntity = updateFunc(originalEntity);
 
-                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
                 if (useAsyncMethods)
                 {
                     _testContext.DatabaseConnection.UpdateAsync((TEntity)updatedEntity).GetAwaiter().GetResult();
@@ -435,7 +436,7 @@
                 {
                     _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
                 }
-
+                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
             }
         }
 

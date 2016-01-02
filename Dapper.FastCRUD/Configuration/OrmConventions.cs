@@ -132,7 +132,8 @@
             return TypeDescriptor.GetProperties(entityType)
                 .OfType<PropertyDescriptor>()
                 .Where(propDesc => 
-                    !propDesc.IsReadOnly 
+                    !propDesc.Attributes.OfType<NotMappedAttribute>().Any()
+                    && !propDesc.IsReadOnly 
                     && propDesc.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit)
                     && this.IsSimpleSqlType(propDesc.PropertyType));
         }
@@ -151,7 +152,7 @@
             {
                 propertyMapping.SetPrimaryKey();
                 propertyMapping.ExcludeFromInserts();
-                propertyMapping.RefreshOnInsert();
+                propertyMapping.RefreshOnInserts();
                 return;
             }
 
@@ -170,24 +171,22 @@
                 propertyMapping.SetPrimaryKey();
             }
 
-            var databaseGeneratedAttributes = propertyAttributes.OfType<DatabaseGeneratedAttribute>();
-
-            // https://msdn.microsoft.com/en-us/library/system.componentmodel.dataannotations.schema.databasegeneratedoption(v=vs.110).aspx
-            if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
+            if (propertyAttributes.OfType<DatabaseGeneratedDefaultValueAttribute>().Any())
             {
                 propertyMapping.ExcludeFromInserts();
-                propertyMapping.ExcludeFromUpdates();
-
-                propertyMapping.RefreshOnInsert();
-                propertyMapping.RefreshOnUpdate();
+                propertyMapping.RefreshOnInserts();
             }
 
+            var databaseGeneratedAttributes = propertyAttributes.OfType<DatabaseGeneratedAttribute>();
+            // https://msdn.microsoft.com/en-us/library/system.componentmodel.dataannotations.schema.databasegeneratedoption(v=vs.110).aspx
             if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity))
             {
-                propertyMapping.ExcludeFromInserts();
-                propertyMapping.ExcludeFromUpdates();
+                propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Identity);
+            }
 
-                propertyMapping.RefreshOnInsert();
+            if (databaseGeneratedAttributes.Any(dbGenerated => dbGenerated.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed))
+            {
+                propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
             }
 
             //ForeignKeyAttribute foreignKey = null;
