@@ -76,6 +76,5 @@
                 SimpleCrud.Delete(dbConnection, entity);
             }
         }
-
     }
 }

@@ -14,7 +14,7 @@
         private DatabaseTestContext _testContext;
 
         private const string _tableName = "SimpleBenchmarkEntities";
-        private string _insertSql = $"INSERT INTO {_tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) OUTPUT inserted.{nameof(SimpleBenchmarkEntity.Id)} VALUES (@FirstName, @LastName, @DateOfBirth)";
+        private string _insertSql = $"INSERT INTO {_tableName} ({nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}) VALUES (@FirstName, @LastName, @DateOfBirth); SELECT SCOPE_IDENTITY() AS {nameof(SimpleBenchmarkEntity.Id)} ";
         private string _selectAllSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName}";
         private string _selectByIdSql = $"SELECT {nameof(SimpleBenchmarkEntity.Id)}, {nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)} FROM {_tableName} where {nameof(SimpleBenchmarkEntity.Id)}=@Id";
         private string _updateSql = $"UPDATE {_tableName} SET {nameof(SimpleBenchmarkEntity.FirstName)}=@{nameof(SimpleBenchmarkEntity.FirstName)}, {nameof(SimpleBenchmarkEntity.LastName)}=@{nameof(SimpleBenchmarkEntity.LastName)}, {nameof(SimpleBenchmarkEntity.DateOfBirth)}=@{nameof(SimpleBenchmarkEntity.DateOfBirth)}  WHERE {nameof(SimpleBenchmarkEntity.Id)}=@Id";
