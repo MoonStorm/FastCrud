@@ -61,7 +61,7 @@ In an attempt to keep it on the same playing field, its proxy generation was tur
 | Simple Crud | select all | 3 | 814.65 | 271,549.57 |
 | Entity Framework | select all | 3 | 5,431.27 | 1,810,423.27 |
 
-Dapper is used as reference only, for the purpose of observing the overhead of the automatic CRUD features compared to a verbatim SQL construct. The database is re-created at every run, data file is pre-allocated, and the statistics are turned off.
+Dapper is used as reference only, for the purpose of observing the overhead of the automatic SQL generation compared to verbatim  constructs. The database is re-created at every run, data file is pre-allocated, and the statistics are turned off.
 External factors could influence the results, but they should be fairly consistent as the tests are following the same steps and are running on the same number and size of records.  
 
 Environment details: Windows 7, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD  
