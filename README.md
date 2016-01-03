@@ -25,7 +25,7 @@ Let's have a look at how ``Fast Crud`` performs against other similar libraries 
 - ``Dapper.SimpleCRUD v1.9.1``
 - ``DapperExtensions v1.4.4 ``
 - ``Entity Framework v6.1.3`` was included as well, even though it's in a different class of ORMs.
-In an attempt to keep it on the same playing field, its proxy generation is turned off and the model is built, compiled once and re-used for every operation.
+In an attempt to keep it on the same playing field, its proxy generation was turned off.
 
 ##### Automatic Benchmark Report (Last Run: Sunday, January 03, 2016)
 |  Library   |  Operation | Op Count |Time (ms) | Time/op (μs) |
