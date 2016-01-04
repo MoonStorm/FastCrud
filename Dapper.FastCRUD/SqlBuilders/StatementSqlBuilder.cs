@@ -9,6 +9,7 @@
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Validations;
 
     internal abstract class GenericStatementSqlBuilder:IStatementSqlBuilder
     {
@@ -306,16 +307,21 @@
         /// <summary>
         /// Returns a delimited SQL identifier.
         /// </summary>
-        /// <param name="sqlIdentifier">Non-delimited SQL identifier</param>
+        /// <param name="sqlIdentifier">Delimited or non-delimited SQL identifier</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetDelimitedIdentifier(string sqlIdentifier)
         {
+            Requires.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
+
+            var startsWithIdentifier = sqlIdentifier.StartsWith(this.IdentifierStartDelimiter);
+            var endsWithIdentifier = sqlIdentifier.EndsWith(this.IdentifierEndDelimiter);
+
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0}{1}{2}",
-                this.IdentifierStartDelimiter,
+                startsWithIdentifier ? string.Empty : this.IdentifierStartDelimiter,
                 sqlIdentifier,
-                this.IdentifierEndDelimiter);
+                endsWithIdentifier ? string.Empty : this.IdentifierEndDelimiter);
         }
 
         //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)

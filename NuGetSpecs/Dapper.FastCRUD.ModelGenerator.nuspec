@@ -19,10 +19,15 @@ Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail t
 More details are available on the project site.
     </description>
     <releaseNotes>
-- BREAKING CHANGE: the logic for marking properties with DatabaseGeneratedAttribute has changed. Please check the docs.
-- BREAKING CHANGE: a proprietary DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the template. Note that this is a Dapper.FastCrud library feature only.
+2.3.1:
+- BREAKING CHANGE: the logic for marking properties with DatabaseGeneratedAttribute has changed. Please check the docs. 
+- BREAKING CHANGE: a proprietary DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the template. Note that this is a Dapper.FastCrud library feature only. 
 - BREAKING CHANGE: primary keys having their values generated via newid() are marked with DatabaseGenerated(DatabaseGeneratedOption.Identity) in case the generation of the proprietary attribute is turned off. 
-    </releaseNotes>
+- compatible with any 2.3.x version of Dapper.FastCrud.
+
+2.1.0:
+- compatible with any 2.0.x, 2.1.x or 2.2.x version of Dapper.FastCrud.
+  </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>dapper fastcrud entity generator orm</tags>
     <dependencies>
