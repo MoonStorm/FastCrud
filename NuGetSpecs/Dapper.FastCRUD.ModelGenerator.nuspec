@@ -19,6 +19,9 @@ Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail t
 More details are available on the project site.
     </description>
     <releaseNotes>
+2.3.2:
+- CRLF fixed in the model generator
+
 2.3.1:
 - BREAKING CHANGE: the logic for marking properties with DatabaseGeneratedAttribute has changed. Please check the docs. 
 - BREAKING CHANGE: a proprietary DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the template. Note that this is a Dapper.FastCrud library feature only. 
