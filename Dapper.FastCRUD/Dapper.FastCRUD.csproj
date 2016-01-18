@@ -64,6 +64,7 @@
     <Compile Include="Configuration\StatementOptions\Builders\RangedBatchSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\IConditionalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IParameterizedSqlStatementOptionsSetter.cs" />
+    <Compile Include="Configuration\StatementOptions\IRelationalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\ISqlStatementOptionsGetter.cs" />
     <Compile Include="Configuration\StatementOptions\InternalSqlStatementOptions.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\ConditionalBatchSqlStatementOptionsBuilder.cs" />
