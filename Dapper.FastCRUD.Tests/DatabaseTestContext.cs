@@ -13,17 +13,14 @@
             this.Stopwatch = new Stopwatch();
 
             // ensure the capacity can hold all the processed entities
-
-            this.InsertedEntities = new List<object>(MaxEntityTestingCapacity); 
             this.QueriedEntities = new List<object>(MaxEntityTestingCapacity);
-            this.UpdatedEntities = new List<object>(MaxEntityTestingCapacity);
+            this.LocalEntities = new List<object>(MaxEntityTestingCapacity);
         }
 
         public IDbConnection DatabaseConnection { get; set; }
         public Stopwatch Stopwatch { get; private set; }
-        public List<object> InsertedEntities { get; private set; }
         public List<object> QueriedEntities { get; set; }
-        public List<object> UpdatedEntities { get; set; }
+        public List<object> LocalEntities { get; set; }
         public int QueriedEntitiesDbCount { get; set; }
     }
 }

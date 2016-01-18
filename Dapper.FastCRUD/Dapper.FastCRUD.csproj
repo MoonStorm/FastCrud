@@ -73,6 +73,8 @@
     <Compile Include="Configuration\StatementOptions\IRangedConditionalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\SqlStatementOptions.cs" />
     <Compile Include="Configuration\SqlDatabaseOptions.cs" />
+    <Compile Include="Mappings\EntityRelationship.cs" />
+    <Compile Include="Mappings\EntityRelationshipType.cs" />
     <Compile Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />

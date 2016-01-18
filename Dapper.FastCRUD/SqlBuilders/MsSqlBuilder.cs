@@ -20,7 +20,7 @@
         {
             if (this.InsertDatabaseGeneratedProperties.Length == 0)
             {
-                return $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})".ToString(CultureInfo.InvariantCulture);                
+                return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})");
             }
 
             // one database generated field to be inserted, and that alone is a the primary key
@@ -32,15 +32,18 @@
                 if (keyPropertyType == typeof(int) || keyPropertyType == typeof(long))
                 {
                     return
-                        $@"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()});
-                           SELECT SCOPE_IDENTITY() AS {this.GetDelimitedIdentifier(keyProperty.PropertyName)}".ToString(CultureInfo.InvariantCulture);
+                        this.ResolveWithCultureInvariantFormatter(
+                            $@"INSERT 
+                                    INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+                                    VALUES ({this.ConstructParamEnumerationForInsert()});
+                           SELECT SCOPE_IDENTITY() AS {this.GetDelimitedIdentifier(keyProperty.PropertyName)}");
                 }
             }
 
             var dbInsertedOutputColumns = string.Join(",", this.InsertDatabaseGeneratedProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
             var dbGeneratedColumns = string.Join(",", this.InsertDatabaseGeneratedProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
 
-            return $@"
+            return this.ResolveWithCultureInvariantFormatter($@"
                 SELECT *
                     INTO #temp 
                     FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
@@ -50,7 +53,7 @@
                     OUTPUT {dbInsertedOutputColumns} INTO #temp 
                     VALUES ({this.ConstructParamEnumerationForInsert()});
 
-                SELECT * FROM #temp".ToString(CultureInfo.InvariantCulture);
+                SELECT * FROM #temp");
         }
 
         /// <summary>
@@ -63,7 +66,7 @@
             long? limitRowsCount = null,
             object queryParameters = null)
         {
-            var sql = $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}".ToString(CultureInfo.InvariantCulture);
+            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}");
             if (whereClause != null)
             {
                 sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
