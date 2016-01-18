@@ -20,7 +20,7 @@
         /// <summary>
         /// This is a database generated property. Database generated key properties will be excluded from <c>Insert</c>, and their values will be updated on the entity once the insertion has completed. 
         /// </summary>
-        DatabaseGeneratedProperty = 0x02,
+        //DatabaseGeneratedProperty = 0x02,
 
         /// <summary>
         /// Useful for partial updates, a property marked with this option will be excluded from any <c>Update</c> operations.
@@ -33,8 +33,18 @@
         ExcludedFromInserts = 0x08,
 
         /// <summary>
+        /// The value is not going to be re-read from the database on INSERTs.
+        /// </summary>
+        RefreshPropertyOnInserts = 0x10,
+
+        /// <summary>
+        /// The value is not going to be re-read from the database on UPDATEs.
+        /// </summary>
+        RefreshPropertyOnUpdates = 0x20,
+
+        /// <summary>
         /// Denotes a property generated through foreign key constraints.
         /// </summary>
-        ReferencingForeignEntity = 0x10
+        ReferencingForeignEntity = 0x40,
     }
 }

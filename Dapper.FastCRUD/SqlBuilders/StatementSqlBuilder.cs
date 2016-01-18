@@ -1,16 +1,15 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
-    using System.Text;
     using System.Threading;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Validations;
 
     internal abstract class GenericStatementSqlBuilder:IStatementSqlBuilder
     {
@@ -54,11 +53,14 @@
                 .Where(propMapping => propMapping.Value.IsPrimaryKey)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
-            this.InsertDatabaseGeneratedProperties = this.SelectProperties
-                .Where(propInfo => propInfo.IsDatabaseGenerated && propInfo.IsExcludedFromInserts)
+            this.RefreshOnInsertProperties = this.SelectProperties
+                .Where(propInfo => propInfo.IsRefreshedOnInserts)
+                .ToArray();
+            this.RefreshOnUpdateProperties = this.SelectProperties
+                .Where(propInfo => propInfo.IsRefreshedOnUpdates)
                 .ToArray();
             this.InsertKeyDatabaseGeneratedProperties = this.KeyProperties
-                .Intersect(this.InsertDatabaseGeneratedProperties)
+                .Intersect(this.RefreshOnInsertProperties)
                 .ToArray();
             this.UpdateProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromUpdates)
@@ -96,7 +98,8 @@
         public PropertyMapping[] InsertProperties { get; }
         public PropertyMapping[] UpdateProperties { get; }
         public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
-        public PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
+        public PropertyMapping[] RefreshOnInsertProperties { get; }
+        public PropertyMapping[] RefreshOnUpdateProperties { get; }
         protected string IdentifierStartDelimiter { get; }
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
@@ -304,16 +307,21 @@
         /// <summary>
         /// Returns a delimited SQL identifier.
         /// </summary>
-        /// <param name="sqlIdentifier">Non-delimited SQL identifier</param>
+        /// <param name="sqlIdentifier">Delimited or non-delimited SQL identifier</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetDelimitedIdentifier(string sqlIdentifier)
         {
+            Requires.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
+
+            var startsWithIdentifier = sqlIdentifier.StartsWith(this.IdentifierStartDelimiter);
+            var endsWithIdentifier = sqlIdentifier.EndsWith(this.IdentifierEndDelimiter);
+
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0}{1}{2}",
-                this.IdentifierStartDelimiter,
+                startsWithIdentifier ? string.Empty : this.IdentifierStartDelimiter,
                 sqlIdentifier,
-                this.IdentifierEndDelimiter);
+                endsWithIdentifier ? string.Empty : this.IdentifierEndDelimiter);
         }
 
         //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)
@@ -451,8 +459,23 @@
         /// </summary>
         protected virtual string ConstructFullSingleUpdateStatementInternal()
         {
-            return this.ResolveWithCultureInvariantFormatter(
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. UPDATE is not possible.");
+            }
+
+            var sql = this.ResolveWithCultureInvariantFormatter(
                     $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}");
+            if (this.RefreshOnUpdateProperties.Length > 0)
+            {
+                var databaseGeneratedColumnSelection = string.Join(
+                    ",",
+                    this.RefreshOnUpdateProperties.Select(
+                        propInfo => this.GetColumnName(propInfo, null, true)));
+                sql += this.ResolveWithCultureInvariantFormatter($";SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};");
+            }
+
+            return sql;
         }
 
         /// <summary>
@@ -474,6 +497,11 @@
         /// </summary>
         protected virtual string ConstructFullSingleDeleteStatementInternal()
         {
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. DELETE is not possible.");
+            }
+
             return this.ResolveWithCultureInvariantFormatter(
                 $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
@@ -508,6 +536,11 @@
         /// </summary>
         protected virtual string ConstructFullSingleSelectStatementInternal()
         {
+            if (this.KeyProperties.Length == 0)
+            {
+                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. SELECT is not possible.");
+            }
+
             return this.ResolveWithCultureInvariantFormatter(
                     $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }

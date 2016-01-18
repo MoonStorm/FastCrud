@@ -10,7 +10,8 @@
         PropertyMapping[] InsertProperties { get; }
         PropertyMapping[] UpdateProperties { get; }
         PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
-        PropertyMapping[] InsertDatabaseGeneratedProperties { get; }
+        PropertyMapping[] RefreshOnInsertProperties { get; }
+        PropertyMapping[] RefreshOnUpdateProperties { get; }
         PropertyMapping[] ForeignEntityProperties { get; }
         EntityMapping EntityMapping { get; }
 

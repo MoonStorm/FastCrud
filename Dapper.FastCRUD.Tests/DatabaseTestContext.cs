@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Diagnostics;
 
     public class DatabaseTestContext
@@ -17,7 +18,7 @@
             this.LocalEntities = new List<object>(MaxEntityTestingCapacity);
         }
 
-        public IDbConnection DatabaseConnection { get; set; }
+        public DbConnection DatabaseConnection { get; set; }
         public Stopwatch Stopwatch { get; private set; }
         public List<object> QueriedEntities { get; set; }
         public List<object> LocalEntities { get; set; }

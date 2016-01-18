@@ -61,13 +61,14 @@
     <Compile Include="Configuration\DialectOptions\PostreSqlDatabaseOptions.cs" />
     <Compile Include="Configuration\DialectOptions\MsSqlDatabaseOptions.cs" />
     <Compile Include="Configuration\OrmConventions.cs" />
+    <Compile Include="Configuration\StatementOptions\Builders\ConditionalSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\RangedBatchSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\IConditionalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IParameterizedSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IRelationalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\ISqlStatementOptionsGetter.cs" />
     <Compile Include="Configuration\StatementOptions\InternalSqlStatementOptions.cs" />
-    <Compile Include="Configuration\StatementOptions\Builders\ConditionalBatchSqlStatementOptionsBuilder.cs" />
+    <Compile Include="Configuration\StatementOptions\Builders\ConditionalBulkSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\StandardSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\IStandardSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IRangedConditionalSqlStatementOptionsSetter.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Configuration\SqlDatabaseOptions.cs" />
     <Compile Include="Mappings\EntityRelationship.cs" />
     <Compile Include="Mappings\EntityRelationshipType.cs" />
+    <Compile Include="Mappings\DatabaseGeneratedDefaultValueAttribute.cs" />
     <Compile Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />

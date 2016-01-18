@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Configuration.StatementOptions.Builders;
 
     /// <summary>
@@ -136,15 +135,15 @@
         /// </param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>The number of records updated.</returns>
-        public static int BatchUpdate<TEntity>(
+        public static int BulkUpdate<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                                   .BatchUpdate(connection, updateData, options);
+                                   .BulkUpdate(connection, updateData, options);
         }
 
         /// <summary>
@@ -158,16 +157,16 @@
         /// </param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>The number of records updated.</returns>
-        public static Task<int> BatchUpdateAsync<TEntity>(
+        public static Task<int> BulkUpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BatchUpdateAsync(connection, updateData, options);
+                .BulkUpdateAsync(connection, updateData, options);
         }
 
         /// <summary>
@@ -217,15 +216,15 @@
         /// <param name="connection">Database connection.</param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>The number of records deleted.</returns>
-        public static int BatchDelete<TEntity>(
+        public static int BulkDelete<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BatchDelete(connection, options);
+                .BulkDelete(connection, options);
         }
 
         /// <summary>
@@ -235,15 +234,15 @@
         /// <param name="connection">Database connection.</param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>The number of records deleted.</returns>
-        public static Task<int> BatchDeleteAsync<TEntity>(
+        public static Task<int> BulkDeleteAsync<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BatchDeleteAsync(connection, options);
+                .BulkDeleteAsync(connection, options);
         }
 
         /// <summary>
@@ -255,9 +254,9 @@
         /// <returns>The record count</returns>
         public static int Count<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -273,9 +272,9 @@
         /// <returns>The record count</returns>
         public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
-            Action<IConditionalBatchSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new ConditionalBatchBatchSqlStatementOptionsBuilder<TEntity>();
+            var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)

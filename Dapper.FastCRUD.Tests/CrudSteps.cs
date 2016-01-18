@@ -89,6 +89,28 @@
             this.QueryEntityCount<Workstation>(useAsyncMethods);
         }
 
+        [When(@"I query for the count of all the inserted building entities using (.*) methods")]
+        public void WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
+        {
+            FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
+            var buildingIds = string.Join(",", _testContext.LocalEntities.OfType<Building>().Select(building => building.BuildingId)); 
+
+            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+                                          ? _testContext
+                                                .DatabaseConnection
+                                                .CountAsync<Building>(statement => statement
+                                                    .Where(whereClause)
+                                                    .WithParameters(new {BuildingIds = buildingIds}))
+                                                .GetAwaiter()
+                                                .GetResult()
+                                          : _testContext
+                                                .DatabaseConnection
+                                                .Count<Building>(statement => statement
+                                                    .Where(whereClause)
+                                                    .WithParameters(new {BuildingIds = buildingIds}));
+
+        }
+
         [When(@"I query for the inserted building entities using (.*) methods")]
         public void WhenIQueryForTheInsertedBuildingEntities(bool useAsyncMethods)
         {
@@ -120,7 +142,8 @@
                                                                                       BirthDate = new DateTime(2020, 03, 01),
                                                                                       WorkstationId = 10 + originalEmployeeEntity.WorkstationId,
                                                                                       FirstName = "Updated " + originalEmployeeEntity.FirstName,
-                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName
+                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName,
+                                                                                      KeyPass = originalEmployeeEntity.KeyPass
                                                                                   });
         }
 
@@ -146,7 +169,8 @@
                                                                                                          KeyPass = updateData.KeyPass,
                                                                                                          BirthDate = updateData.BirthDate,
                                                                                                          FirstName = updateData.FirstName,
-                                                                                                         LastName = updateData.LastName
+                                                                                                         LastName = updateData.LastName,
+                                                                                                         FullName = updateData.FirstName+updateData.LastName,
                                                                                                      };
             }
 
@@ -155,11 +179,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement=>statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement=>statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -189,11 +213,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchUpdate(updateData, statement => statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement => statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -214,11 +238,11 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BatchDelete<Workstation>(statement => statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement.Where(whereCondition));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToDelete.Count()));
@@ -312,14 +336,14 @@
             try
             {
                 // updates are not possible when the mapping is frozen
-                defaultMapping.SetProperty(nameof(Employee.LastName), PropertyMappingOptions.ExcludedFromUpdates);
+                defaultMapping.SetProperty(employee => employee.LastName, propMapping => propMapping.ExcludeFromUpdates());
                 Assert.Fail();
             }
             catch (InvalidOperationException)
             {
             }
 
-            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName));
+            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName), nameof(Employee.FullName));
 
             for (var entityIndex = 0; entityIndex < _testContext.LocalEntities.Count; entityIndex++)
             {
@@ -335,7 +359,7 @@
                     WorkstationId = 10 + insertedEntity.WorkstationId,
                     FirstName = "Updated " + insertedEntity.FirstName,
 
-                    // all of the above should be excluded with the exception of this one
+                    // all of the above will be ignored with the exception of the next ones
                     LastName = "Updated " + insertedEntity.LastName
                 };
 
@@ -350,8 +374,9 @@
                     WorkstationId = insertedEntity.WorkstationId,
                     FirstName = insertedEntity.FirstName,
 
-                    // all of the above should be excluded with the difference of this one
-                    LastName = "Updated " + insertedEntity.LastName
+                    // all of the above were ignored with the exception of the next ones
+                    LastName = partialUpdatedEntity.LastName,
+                    FullName = partialUpdatedEntity.FullName
                 };
             }
         }
@@ -403,7 +428,6 @@
             {
                 object updatedEntity = updateFunc(originalEntity);
 
-                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
                 if (useAsyncMethods)
                 {
                     _testContext.DatabaseConnection.UpdateAsync((TEntity)updatedEntity).GetAwaiter().GetResult();
@@ -412,7 +436,7 @@
                 {
                     _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
                 }
-
+                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
             }
         }
 
@@ -469,9 +493,9 @@
 
         private void QueryEntityCount<TEntity>(bool useAsyncMethods)
         {
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                                                      ? _testContext.DatabaseConnection.CountAsync<TEntity>().GetAwaiter().GetResult()
-                                                      : _testContext.DatabaseConnection.Count<TEntity>();
+                _testContext.QueriedEntitiesDbCount = useAsyncMethods
+                                                          ? _testContext.DatabaseConnection.CountAsync<TEntity>().GetAwaiter().GetResult()
+                                                          : _testContext.DatabaseConnection.Count<TEntity>();
         }
     }
 }

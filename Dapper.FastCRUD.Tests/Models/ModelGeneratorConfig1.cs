@@ -26,14 +26,16 @@ namespace Dapper.FastCrud.Tests.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public virtual int UserId { get; set; }
 		[Key]
-		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
 		public virtual Guid EmployeeId { get; set; }
-		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
 		public virtual Guid KeyPass { get; set; }
 		public virtual string LastName { get; set; }
 		public virtual string FirstName { get; set; }
 		public virtual DateTime BirthDate { get; set; }
 		public virtual long? WorkstationId { get; set; }
+		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+		public virtual string FullName { get; set; }
 		[ForeignKey("WorkstationId")]
 		public virtual Workstation Workstation { get; set; }
 	}
@@ -48,7 +50,7 @@ namespace Dapper.FastCrud.Tests.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public virtual long WorkstationId { get; set; }
 		public virtual string Name { get; set; }
-		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
 		public virtual int AccessLevel { get; set; }
 		public virtual int InventoryIndex { get; set; }
 		public virtual int? BuildingId { get; set; }

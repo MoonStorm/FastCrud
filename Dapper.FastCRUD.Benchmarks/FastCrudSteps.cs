@@ -39,7 +39,7 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
             var entities =  FastCrud.Find<SimpleBenchmarkEntity>(dbConnection);
-            Assert.AreEqual(entities.Count(), entitiesCount);
+            Assert.That(entities.Count(), Is.EqualTo(entitiesCount));
         }
 
         [When(@"I select all the benchmark entities using Fast Crud")]

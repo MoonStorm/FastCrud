@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Configuration;
     using System.Data.SqlClient;
     using System.Data.SqlLocalDb;
@@ -180,6 +181,10 @@
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInserted()
         {
             CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.LocalEntities);
+            //for (var entityIndex = 0; entityIndex < _testContext.QueriedEntities.Count; entityIndex++)
+            //{
+            //    Assert.That(_testContext.QueriedEntities[entityIndex], Is.EqualTo(_testContext.LocalEntities[entityIndex]));
+            //}
         }
 
         [When(@"I clear all the queried entities")]
@@ -323,10 +328,31 @@
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""LastName"" varchar(100) NOT NULL,
 	                        ""FirstName"" varchar(100) NOT NULL,
+                            ""FullName"" varchar(200) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
                             ""WorkstationId"" int NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
+
+                        CREATE OR REPLACE FUNCTION computed_full_name()
+                        RETURNS trigger
+                        LANGUAGE plpgsql
+                        SECURITY DEFINER
+                        AS $BODY$
+                        DECLARE
+                            payload text;
+                        BEGIN
+                            NEW.""FullName"" = NEW.""FirstName"" || NEW.""LastName"";
+
+                            RETURN NEW;
+                        END
+                        $BODY$;
+
+                        CREATE TRIGGER ""computed_full_name_trigger""
+                        BEFORE INSERT OR UPDATE
+                        ON ""Employee""
+                        FOR EACH ROW
+                        EXECUTE PROCEDURE computed_full_name();
 
                         CREATE TABLE ""Workstations"" (
 	                        ""WorkstationId"" BIGSERIAL,
@@ -389,6 +415,7 @@
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        LastName nvarchar(100) NOT NULL,
 	                        FirstName nvarchar(100) NOT NULL,
+                            FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
                             WorkstationId int NULL,
 	                        PRIMARY KEY (Id, EmployeeId)
@@ -518,6 +545,7 @@
 	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
+                        [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
                         (
 	                        [Id] ASC,
@@ -618,7 +646,7 @@
 
             OrmConfiguration.RegisterEntity<Building>()
                 .SetTableName("Buildings")
-                .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseColumnName("Id").SetDatabaseGenerated())
+                .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity).SetDatabaseColumnName("Id"))
                 .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"));
         }
     }

@@ -21,10 +21,16 @@
             var sql = this.ResolveWithCultureInvariantFormatter(
                     $"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}); ");
 
-            if (this.InsertKeyDatabaseGeneratedProperties.Length > 0)
+            if (this.RefreshOnInsertProperties.Length > 0)
             {
+                // we have to bring some column values back
+                if (this.InsertKeyDatabaseGeneratedProperties.Length == 0)
+                {
+                    throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has database generated fields that don't contain a primary key.");
+                }
+
                 // we have an identity column, so we can fetch the rest of them
-                if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.InsertDatabaseGeneratedProperties.Length == 1)
+                if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.RefreshOnInsertProperties.Length == 1)
                 {
                     // just one, this is going to be easy
                     sql += this.ResolveWithCultureInvariantFormatter($"SELECT LAST_INSERT_ID() as {this.GetDelimitedIdentifier(this.InsertKeyDatabaseGeneratedProperties[0].PropertyName)}");
@@ -33,15 +39,11 @@
                 {
                     var databaseGeneratedColumnSelection = string.Join(
                         ",",
-                        this.InsertDatabaseGeneratedProperties.Select(
+                        this.RefreshOnInsertProperties.Select(
                             propInfo =>
                             $"{this.GetColumnName(propInfo, null, true)}"));
                     sql += this.ResolveWithCultureInvariantFormatter($"SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.GetColumnName(this.InsertKeyDatabaseGeneratedProperties[0], null, false)} = LAST_INSERT_ID()");
                 }
-            }
-            else if (this.InsertDatabaseGeneratedProperties.Length > 0)
-            {
-                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has database generated fields that don't contain a primary key. Either mark the primary key as database generated or remove the database generated flag from all the fields or mark all these fields as included in the insert operation.");
             }
             return sql;
         }

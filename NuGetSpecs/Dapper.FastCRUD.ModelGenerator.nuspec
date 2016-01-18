@@ -1,35 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
-    <metadata>
-        <id>Dapper.FastCrud.ModelGenerator</id>
-		    <version>2.1.0</version>
-        <title>Dapper.FastCrud.ModelGenerator</title>
-        <authors>MoonStorm</authors>
-        <owners>MoonStorm</owners>
-        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
-        <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
-        <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</iconUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>
+  <metadata>
+    <id>Dapper.FastCrud.ModelGenerator</id>
+    <version>$version$</version>
+    <title>Dapper.FastCrud.ModelGenerator</title>
+    <authors>MoonStorm</authors>
+    <owners>MoonStorm</owners>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Entity generation for Dapper.FastCrud</summary>
+    <description>
 Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
 Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
 Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
 
 More details are available on the project site.
-</description>
-        <summary>Entity generation for Dapper.FastCrud</summary>
-        <releaseNotes></releaseNotes>
-        <copyright>Copyright 2015</copyright>
-        <tags>dapper fastcrud entity generator orm</tags>
-        <dependencies>
-        </dependencies>
-        <frameworkAssemblies>
-            <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework="" />
-        </frameworkAssemblies>
-    </metadata>
-    <files>
-        <file src="GenericModelGenerator.tt" target="Content\Models\GenericModelGenerator.tt" />
-        <file src="SampleModelGeneratorConfig.tt" target="Content\Models\SampleModelGeneratorConfig.tt" />
-        <file src="Install.ps1" target="Tools\Install.ps1" />
-    </files>
+    </description>
+    <releaseNotes>
+2.3.2:
+- CRLF fixed in the model generator
+
+2.3.1:
+- BREAKING CHANGE: the logic for marking properties with DatabaseGeneratedAttribute has changed. Please check the docs. 
+- BREAKING CHANGE: a proprietary DatabaseGeneratedDefaultValueAttribute was introduced, however this must be enabled in the template. Note that this is a Dapper.FastCrud library feature only. 
+- BREAKING CHANGE: primary keys having their values generated via newid() are marked with DatabaseGenerated(DatabaseGeneratedOption.Identity) in case the generation of the proprietary attribute is turned off. 
+- compatible with any 2.3.x version of Dapper.FastCrud.
+
+2.1.0:
+- compatible with any 2.0.x, 2.1.x or 2.2.x version of Dapper.FastCrud.
+  </releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>dapper fastcrud entity generator orm</tags>
+    <dependencies>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework="" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="GenericModelGenerator.tt" target="Content\Models\GenericModelGenerator.tt" />
+    <file src="SampleModelGeneratorConfig.tt" target="Content\Models\SampleModelGeneratorConfig.tt" />
+    <file src="Install.ps1" target="Tools\Install.ps1" />
+  </files>
 </package>

@@ -1,7 +1,6 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions
 {
     using System;
-    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Conditional sql statement options setter. 

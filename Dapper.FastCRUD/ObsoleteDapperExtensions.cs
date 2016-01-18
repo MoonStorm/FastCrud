@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Configuration.StatementOptions.Builders;
     using Dapper.FastCrud.Mappings;
 
@@ -445,7 +444,7 @@
         }
 
         private static void SetupConditionalStatementOptions<TEntity>(
-            IConditionalBatchSqlStatementOptionsBuilder<TEntity> optionsBuilder,
+            IConditionalSqlStatementOptionsBuilder<TEntity> optionsBuilder,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null,

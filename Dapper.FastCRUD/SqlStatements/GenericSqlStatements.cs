@@ -57,7 +57,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
-            if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
+            if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
                 var insertedEntity =
                     connection.Query<TEntity>(
@@ -67,7 +67,7 @@
                         commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
 
                 // copy all the database generated props back onto our entity
-                this.CopyEntity(insertedEntity, entity, _sqlBuilder.InsertDatabaseGeneratedProperties);
+                this.CopyEntity(insertedEntity, entity, _sqlBuilder.RefreshOnInsertProperties);
             }
             else
             {
@@ -85,7 +85,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task InsertAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
-            if (_sqlBuilder.InsertDatabaseGeneratedProperties.Length > 0)
+            if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
                 var insertedEntity =
                     (await
@@ -95,7 +95,7 @@
                          transaction: statementOptions.Transaction,
                          commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).FirstOrDefault();
                 // copy all the database generated props back onto our entity
-                this.CopyEntity(insertedEntity, entity, _sqlBuilder.InsertDatabaseGeneratedProperties);
+                this.CopyEntity(insertedEntity, entity, _sqlBuilder.RefreshOnInsertProperties);
             }
             else
             {
@@ -113,6 +113,24 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool UpdateById(IDbConnection connection, TEntity keyEntity, ISqlStatementOptionsGetter statementOptions)
         {
+            if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
+            {
+                var updatedEntity = connection.Query<TEntity>(
+                    _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                    keyEntity,
+                    transaction:
+                        statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
+
+                if (updatedEntity != null)
+                {
+                    // copy all the database generated props back onto our entity
+                    this.CopyEntity(updatedEntity, keyEntity, _sqlBuilder.RefreshOnUpdateProperties);
+                }
+
+                return updatedEntity != null;
+            }
+
             return connection.Execute(
                 _sqlBuilder.ConstructFullSingleUpdateStatement(), 
                 keyEntity, 
@@ -130,6 +148,23 @@
             TEntity keyEntity,
             ISqlStatementOptionsGetter statementOptions)
         {
+            if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
+            {
+                var updatedEntity = (await connection.QueryAsync<TEntity>(
+                    _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                    keyEntity,
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).FirstOrDefault();
+
+                if (updatedEntity != null)
+                {
+                    // copy all the database generated props back onto our entity
+                    this.CopyEntity(updatedEntity, keyEntity, _sqlBuilder.RefreshOnUpdateProperties);
+                }
+
+                return updatedEntity != null;
+            }
+
             return (await connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullSingleUpdateStatement(), 
                 keyEntity, 
@@ -141,7 +176,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BatchUpdate(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
+        public int BulkUpdate(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -154,7 +189,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BatchUpdateAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
+        public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -193,7 +228,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BatchDelete(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
+        public int BulkDelete(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
@@ -206,7 +241,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BatchDeleteAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
+        public Task<int> BulkDeleteAsync(IDbConnection connection, ISqlStatementOptionsGetter statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
