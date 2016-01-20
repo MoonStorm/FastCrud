@@ -1,23 +1,41 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using System.ComponentModel;
+    using Dapper.FastCrud.Validations;
+
     /// <summary>
     /// Gives information about a relationship between two entities.
     /// </summary>
-    public abstract class EntityRelationship
+    internal class EntityRelationship
     {
         /// <summary>
-        /// The main entity's property through which the relationship is established.
+        /// Initializes a new instance of the <see cref="T:System.Object"/> class.
         /// </summary>
-        internal PropertyMapping[] SourceRelationshipProperties { get; private set; }
+        public EntityRelationship(
+            EntityRelationshipType relationshipType, 
+            PropertyDescriptor optionalReferedEntityProperty, 
+            params PropertyMapping[] referencingProperties)
+        {
+            Requires.NotNullOrEmptyOrNullElements(referencingProperties, nameof(referencingProperties));
+
+            this.ReferencingProperties = referencingProperties;
+            this.ReferedEntityProperty = optionalReferedEntityProperty;
+            this.RelationshipType = relationshipType;
+        }
 
         /// <summary>
-        /// The related entity's property through which the relationship is established.
+        /// The main entity properties through which the relationship is established.
         /// </summary>
-        internal PropertyMapping[] TargetRelationshipProperties { get; private set; }
+        public PropertyMapping[] ReferencingProperties { get; private set; }
+
+        /// <summary>
+        /// The property representing the entity the relationship reffers to.
+        /// </summary>
+        public PropertyDescriptor ReferedEntityProperty { get; private set; } 
 
         /// <summary>
         /// The type of the relationship.
         /// </summary>
-        internal EntityRelationshipType RelationshipType { get; private set; }
+        public EntityRelationshipType RelationshipType { get; private set; }
     }
 }

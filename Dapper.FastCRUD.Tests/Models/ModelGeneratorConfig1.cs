@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=D:\Projects\Dapper.FastCRUD\master\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=C:\_Projects\Dapper.FastCRUD\experimental\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models
@@ -24,19 +24,19 @@ namespace Dapper.FastCrud.Tests.Models
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual int UserId { get; set; }
+	    public virtual int UserId { get; set; }
 		[Key]
 		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
-		public virtual Guid EmployeeId { get; set; }
+	    public virtual Guid EmployeeId { get; set; }
 		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
-		public virtual Guid KeyPass { get; set; }
-		public virtual string LastName { get; set; }
-		public virtual string FirstName { get; set; }
-		public virtual DateTime BirthDate { get; set; }
-		public virtual long? WorkstationId { get; set; }
+	    public virtual Guid KeyPass { get; set; }
+	    public virtual string LastName { get; set; }
+	    public virtual string FirstName { get; set; }
+	    public virtual DateTime BirthDate { get; set; }
+	    [ForeignKey("Workstation")]
+        public virtual long? WorkstationId { get; set; }
 		[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-		public virtual string FullName { get; set; }
-		[ForeignKey("WorkstationId")]
+	    public virtual string FullName { get; set; }
 		public virtual Workstation Workstation { get; set; }
 	}
 
@@ -48,13 +48,12 @@ namespace Dapper.FastCrud.Tests.Models
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public virtual long WorkstationId { get; set; }
-		public virtual string Name { get; set; }
+	    public virtual long WorkstationId { get; set; }
+	    public virtual string Name { get; set; }
 		[Dapper.FastCrud.DatabaseGeneratedDefaultValue]
-		public virtual int AccessLevel { get; set; }
-		public virtual int InventoryIndex { get; set; }
-		public virtual int? BuildingId { get; set; }
-		[ForeignKey("WorkstationId")]
+	    public virtual int AccessLevel { get; set; }
+	    public virtual int InventoryIndex { get; set; }
+	    public virtual int? BuildingId { get; set; }
 		public virtual IEnumerable<Employee> Employees { get; set; }
 	}
 
