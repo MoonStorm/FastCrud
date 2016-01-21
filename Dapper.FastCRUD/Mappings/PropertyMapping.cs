@@ -13,7 +13,7 @@
         private PropertyMappingOptions _options;
         private string _databaseColumnName;
         private readonly int _order;
-        private string[] _relationshipPropertyNames;
+
 
         /// <summary>
         /// Default constructor.
@@ -28,10 +28,9 @@
         }
 
         /// <summary>
-        /// Gets or sets the property names that are used in the primary - foreign entity relationships. 
-        /// This can only be set on properties that have an entity type (in case of children-parent relationships) or are of type IEnumerable (in case of parent-children relationships).
+        /// Gets or sets the property representing the entity referenced by the relationship.
         /// </summary>
-        public string[] RelationshipPropertyNames
+        public PropertyDescriptor RelationshipPropertyNames
         {
             get
             {

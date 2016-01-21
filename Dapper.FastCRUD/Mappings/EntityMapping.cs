@@ -16,6 +16,7 @@
     {
         private volatile bool _isFrozen;
         private readonly IDictionary<string, PropertyMapping> _propertyMappings;
+        private readonly IDictionary<Type, EntityMappingForeignKeyRelationship> _relationships; 
 
         /// <summary>
         /// Default constructor.
@@ -25,6 +26,7 @@
             //this._id = Interlocked.Increment(ref _currentGlobalId);
             this.EntityType = entityType;
             this._propertyMappings = new Dictionary<string, PropertyMapping>();
+            this._relationships = new Dictionary<Type, EntityMappingForeignKeyRelationship>();
             this.TableName = entityType.Name;
             this.Dialect = OrmConfiguration.DefaultDialect;
         }
@@ -72,8 +74,7 @@
         }
 
         internal void FreezeMapping()
-        {
-            
+        {            
             _isFrozen = true;
         }
 
@@ -138,11 +139,7 @@
         /// <param name="tableName">Table name</param>
         public EntityMapping<TEntity> SetTableName(string tableName)
         {
-            if (string.IsNullOrEmpty(tableName))
-            {
-                throw new ArgumentNullException(nameof(tableName));
-            }
-
+            Requires.NotNullOrWhiteSpace(tableName, nameof(tableName));
             this.ValidateState();
 
             this.TableName = tableName;

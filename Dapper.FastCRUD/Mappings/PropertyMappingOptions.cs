@@ -41,10 +41,5 @@
         /// The value is not going to be re-read from the database on UPDATEs.
         /// </summary>
         RefreshPropertyOnUpdates = 0x20,
-
-        /// <summary>
-        /// Denotes a property generated through foreign key constraints.
-        /// </summary>
-        ReferencingForeignEntity = 0x40,
     }
 }
