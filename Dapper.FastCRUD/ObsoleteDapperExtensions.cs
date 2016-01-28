@@ -411,7 +411,7 @@
         }
 
         private static void SetupRangedStatementOptions<TEntity>(
-            IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity> optionsOptionsBuilder,
+            IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity> optionsOptionsBuilder,
             IDbTransaction transaction = null,
             TimeSpan? commandTimeout = null,
             EntityMapping<TEntity> entityMappingOverride = null,

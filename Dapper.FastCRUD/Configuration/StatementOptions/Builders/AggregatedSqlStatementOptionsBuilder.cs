@@ -1,63 +1,13 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions
+﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
     using System;
     using System.Data;
+    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
 
-    internal abstract class InternalSqlStatementOptions<TEntity,TStatementOptionsBuilder>
-        :ISqlStatementOptionsGetter
+    internal abstract class AggregatedSqlStatementOptionsBuilder<TEntity, TStatementOptionsBuilder>:AggregatedSqlStatementOptions
     {
-        protected InternalSqlStatementOptions()
-        {
-            this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
-        }
-
-        /// <summary>
-        /// The transaction to be used by the statement.
-        /// </summary>
-        public IDbTransaction Transaction { get; private set; }
-
-        /// <summary>
-        /// The entity mapping override to be used for the main entity.
-        /// </summary>
-        public EntityMapping EntityMappingOverride { get; private set; }
-
-        /// <summary>
-        /// Gets a timeout for the command being executed.
-        /// </summary>
-        public TimeSpan? CommandTimeout { get; private set; }
-
-        /// <summary>
-        /// Parameters used by the statement.
-        /// </summary>
-        public object Parameters { get; private set; }
-
-        /// <summary>
-        /// Gets or sets a where clause.
-        /// </summary>
-        public FormattableString WhereClause { get; private set; }
-
-        /// <summary>
-        /// Gets or sets a where clause.
-        /// </summary>
-        public FormattableString OrderClause { get; set; }
-
-        /// <summary>
-        /// Gets or sets a limit on the number of rows returned.
-        /// </summary>
-        public long? LimitResults { get; set; }
-
-        /// <summary>
-        /// Gets or sets a number of rows to be skipped.
-        /// </summary>
-        public long? SkipResults { get; set; }
-
-        /// <summary>
-        /// Gets or sets a flag indicating the results should be streamed.
-        /// </summary>
-        public bool ForceStreamResults { get; set; }
-
         /// <summary>
         /// Limits the results set by the top number of records returned.
         /// </summary>
@@ -143,6 +93,15 @@
             return this.Builder;
         }
 
+        /// <summary>
+        /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.
+        /// </summary>
+        public TStatementOptionsBuilder Include<TReferredEntity>(Func<ISqlRelationOptionsSetter<TEntity, TReferredEntity>, ISqlRelationOptionsSetter<TEntity, TReferredEntity>> options = null)
+        {
+            throw new NotImplementedException();
+        }
+
         protected abstract TStatementOptionsBuilder Builder { get; }
+
     }
 }

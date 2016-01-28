@@ -1,5 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
+    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
@@ -12,7 +14,7 @@
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
     internal class ConditionalSqlStatementOptionsBuilder<TEntity>
-        : InternalSqlStatementOptions<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>
+        : AggregatedSqlStatementOptionsBuilder<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>
         , IConditionalSqlStatementOptionsBuilder<TEntity>
     {
         protected override IConditionalSqlStatementOptionsBuilder<TEntity> Builder => this;

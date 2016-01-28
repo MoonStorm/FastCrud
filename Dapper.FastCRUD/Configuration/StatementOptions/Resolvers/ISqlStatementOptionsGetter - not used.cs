@@ -7,7 +7,7 @@
     /// <summary>
     /// SQL statement options.
     /// </summary>
-    internal interface ISqlStatementOptionsGetter
+    internal interface AggregatedSqlStatementOptions
     {
         /// <summary>
         /// The transaction to be used by the statement.

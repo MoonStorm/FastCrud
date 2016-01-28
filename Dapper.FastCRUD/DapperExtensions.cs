@@ -21,9 +21,9 @@
         public static TEntity Get<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<ISelectSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -41,9 +41,9 @@
         public static Task<TEntity> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<ISelectSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new StandardSqlStatementOptionsBuilder<TEntity>();
+            var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -290,9 +290,9 @@
         /// <returns>The record count</returns>
         public static IEnumerable<TEntity> Find<TEntity>(
             this IDbConnection connection,
-            Action<IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new RangedBatchSqlStatementOptionsOptionsBuilder<TEntity>();
+            var options = new RangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)
@@ -308,9 +308,9 @@
         /// <returns>The record count</returns>
         public static Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
-            Action<IRangedBatchSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
+            Action<IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new RangedBatchSqlStatementOptionsOptionsBuilder<TEntity>();
+            var options = new RangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return OrmConfiguration
                 .GetSqlStatements<TEntity>(options.EntityMappingOverride)

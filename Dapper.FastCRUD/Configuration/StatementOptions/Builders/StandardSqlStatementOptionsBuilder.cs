@@ -1,5 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
+    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+
     /// <summary>
     /// Standard sql options builder for a statement.
     /// </summary>
@@ -12,7 +14,7 @@
     /// Standard sql options builder for a statement.
     /// </summary>
     internal class StandardSqlStatementOptionsBuilder<TEntity>
-        : InternalSqlStatementOptions<TEntity, IStandardSqlStatementOptionsBuilder<TEntity>>
+        : AggregatedSqlStatementOptionsBuilder<TEntity, IStandardSqlStatementOptionsBuilder<TEntity>>
         , IStandardSqlStatementOptionsBuilder<TEntity>
     {
         protected override IStandardSqlStatementOptionsBuilder<TEntity> Builder => this;
