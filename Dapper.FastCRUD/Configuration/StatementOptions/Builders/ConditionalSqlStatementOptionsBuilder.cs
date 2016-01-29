@@ -1,7 +1,5 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
-
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
