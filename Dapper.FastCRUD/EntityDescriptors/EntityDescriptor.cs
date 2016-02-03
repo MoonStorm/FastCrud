@@ -38,10 +38,5 @@
         /// Gets the associated entity type.
         /// </summary>
         public Type EntityType { get; }
-
-        /// <summary>
-        /// Gets the registered entity mappings.
-        /// </summary>
-        public abstract IDictionary<EntityMapping, ISqlStatements> RegisteredEntityMappings { get; }
     }
 }
