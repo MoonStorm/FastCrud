@@ -12,11 +12,10 @@
     /// Holds information about table mapped properties for a particular entity type.
     /// Multiple instances of such mappings can be active for a single entity type.
     /// </summary>
-    public abstract class EntityMapping : IEquatable<EntityMapping>
+    public abstract class EntityMapping
     {
         private volatile bool _isFrozen;
         private readonly IDictionary<string, PropertyMapping> _propertyMappings;
-        private readonly Guid _id;
 
         /// <summary>
         /// Default constructor.
@@ -24,7 +23,6 @@
         protected EntityMapping(Type entityType)
         {
             _propertyMappings = new Dictionary<string, PropertyMapping>();
-            _id = Guid.NewGuid();
             this.EntityType = entityType;
             this.TableName = entityType.Name;
             this.Dialect = OrmConfiguration.DefaultDialect;
@@ -72,11 +70,6 @@
             }
         }
 
-        /// <summary>
-        /// Gets the id associated with the current instance.
-        /// </summary>
-        internal Guid Id => _id;
-
         internal void FreezeMapping()
         {
             
@@ -121,68 +114,6 @@
         protected PropertyMapping SetPropertyInternal(PropertyMapping propertyMapping)
         {
             return this.PropertyMappings[propertyMapping.PropertyName] = propertyMapping;
-        }
-
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
-        /// <returns>
-        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
-        /// </returns>
-        /// <param name="other">An object to compare with this object.</param>
-        public bool Equals(EntityMapping other)
-        {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-            return _id.Equals(other._id);
-        }
-
-        /// <summary>
-        /// Determines whether the specified object is equal to the current object.
-        /// </summary>
-        /// <returns>
-        /// true if the specified object  is equal to the current object; otherwise, false.
-        /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param>
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            var other = obj as EntityMapping;
-            return other != null && Equals(other);
-        }
-
-        /// <summary>
-        /// Serves as the default hash function. 
-        /// </summary>
-        /// <returns>
-        /// A hash code for the current object.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            return _id.GetHashCode();
-        }
-
-        public static bool operator ==(EntityMapping left, EntityMapping right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(EntityMapping left, EntityMapping right)
-        {
-            return !Equals(left, right);
         }
     }
 

@@ -21,20 +21,22 @@ For .NET 4.5, the package will also install the dependency 'StringInterpolationB
 
 Features:
 ----------
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
-- Composite primary keys are supported
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+- Composite primary keys are supported.
+- Compatible with most EF data annotations.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
-- Fast pre-computed entity queries
+- Fast pre-computed entity queries.
 - A useful SQL builder and statement formatter which can be used even if you don't need the CRUD features of this library.
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
 
-Please  check the project site for usage and benchmarks.
+Check out the package on nuget.org for release notes. Usage and benchmarks can be found on the project site.
     </description>
     <releaseNotes>
-2.3.1:
+2.3.2:
  - Duplicate delimiters avoided if an already delimited identifier was passed as an alias.
+ - Fixed a memory leak caused by holding references to custom entity mapping overrides.
  
 2.3.0:
 - BREAKING CHANGE: the logic for properties marked with DatabaseGeneratedAttribute has changed. 
@@ -42,7 +44,7 @@ Please  check the project site for usage and benchmarks.
 - BREAKING CHANGE: entities are being updated with the computed values on return from an UPDATE. 
 - NotMappedAttribute is now supported. 
 - DatabaseGeneratedDefaultValueAttribute was introduced to mark the properties bound to columns having default values that should be retrieved from the database. 
-- More information about these breaking changes can be found on the project site.
+- More information about the breaking changes can be found on the project site.
 
 2.2.x:
 - BREAKING CHANGE: due to the large number of arguments, in some cases, a new definition was added for all the extension methods and the existing methods were marked as obsolete with some of them losing argument optionality.
