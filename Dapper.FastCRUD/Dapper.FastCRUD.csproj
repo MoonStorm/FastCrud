@@ -51,6 +51,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Caching" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\PropertyChangedNotifier.cs" />

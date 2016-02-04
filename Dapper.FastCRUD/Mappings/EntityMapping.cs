@@ -23,9 +23,8 @@
         /// </summary>
         protected EntityMapping(Type entityType)
         {
-            //this._id = Interlocked.Increment(ref _currentGlobalId);
+            _propertyMappings = new Dictionary<string, PropertyMapping>();
             this.EntityType = entityType;
-            this._propertyMappings = new Dictionary<string, PropertyMapping>();
             this._relationships = new Dictionary<Type, EntityMappingForeignKeyRelationship>();
             this.TableName = entityType.Name;
             this.Dialect = OrmConfiguration.DefaultDialect;
