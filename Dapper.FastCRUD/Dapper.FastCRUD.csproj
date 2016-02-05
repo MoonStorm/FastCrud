@@ -78,10 +78,10 @@
     <Compile Include="Configuration\SqlStatementOptions.cs" />
     <Compile Include="Configuration\SqlDatabaseOptions.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\AggregatedSqlStatementOptionsBuilder.cs" />
-    <Compile Include="Mappings\EntityMappingForeignKeyRelationship.cs" />
+    <Compile Include="Mappings\EntityMappingRelationship.cs" />
     <Compile Include="Mappings\DatabaseGeneratedDefaultValueAttribute.cs" />
-    <Compile Include="Mappings\PropertyMappingForeignKeyRelationship.cs" />
-    <Compile Include="ObsoleteDapperExtensions.cs" />
+    <Compile Include="Mappings\PropertyMappingRelationship.cs" />
+    <None Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />
     <Compile Include="EntityDescriptors\TypedEntityDescriptor.cs" />
@@ -95,6 +95,7 @@
     <Compile Include="Formatters\SqlEntityFormattableParameter.cs" />
     <Compile Include="Formatters\SqlStatementFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilder.cs" />
     <Compile Include="Validations\Requires.cs" />
     <Compile Include="Formatters\SqlParameterFormatter.cs" />
     <Compile Include="Sql.cs" />

@@ -15,19 +15,22 @@
     public abstract class EntityMapping
     {
         private volatile bool _isFrozen;
-        private readonly IDictionary<string, PropertyMapping> _propertyMappings;
-        private readonly IDictionary<Type, EntityMappingForeignKeyRelationship> _relationships; 
+        private readonly Dictionary<string, PropertyMapping> _propertyNameMappingsMap;
+        private readonly List<PropertyMapping> _propertyMappings;
+        private Dictionary<Type, EntityMappingRelationship> _childParentRelationships;
+        private Dictionary<Type, EntityMappingRelationship> _parentChildRelationships;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         protected EntityMapping(Type entityType)
         {
-            _propertyMappings = new Dictionary<string, PropertyMapping>();
             this.EntityType = entityType;
-            this._relationships = new Dictionary<Type, EntityMappingForeignKeyRelationship>();
             this.TableName = entityType.Name;
             this.Dialect = OrmConfiguration.DefaultDialect;
+
+            _propertyMappings = new List<PropertyMapping>();
+            _propertyNameMappingsMap = new Dictionary<string, PropertyMapping>();
         }
 
         /// <summary>
@@ -43,13 +46,7 @@
         /// <summary>
         /// If the entity mapping was already registered, this flag will return true. You can have multiple mappings which can be obtained by cloning this instance.
         /// </summary>
-        public bool IsFrozen
-        {
-            get
-            {
-                return _isFrozen;
-            }
-        }
+        public bool IsFrozen => _isFrozen;
 
         /// <summary>
         /// Current Sql dialect in use for the current entity.
@@ -64,19 +61,41 @@
         /// <summary>
         /// Gets the property mapping asscoiated with the entity.
         /// </summary>
-        internal IDictionary<string, PropertyMapping> PropertyMappings
+        internal IReadOnlyDictionary<string, PropertyMapping> PropertyMappings => _propertyNameMappingsMap;
+
+        /// <summary>
+        /// Gets all the child-parent relationships.
+        /// </summary>
+        internal IReadOnlyDictionary<Type, EntityMappingRelationship> ChildParentRelationships => _childParentRelationships;
+
+        /// <summary>
+        /// Gets all the parent-child relationships.
+        /// </summary>
+        internal IReadOnlyDictionary<Type, EntityMappingRelationship> ParentChildRelationships => _parentChildRelationships;
+
+        /// <summary>
+        /// Freezes changes to the property mappings.
+        /// </summary>
+        internal void FreezeMapping()
         {
-            get
+            var requiresFreezing = !_isFrozen;
+            _isFrozen = true;
+
+            if (requiresFreezing)
             {
-                return _propertyMappings;
+                for (var propMappingIndex = 0; propMappingIndex < _propertyMappings.Count; propMappingIndex++)
+                {
+                    _propertyMappings[propMappingIndex].ColumnOrder = propMappingIndex + 1;
+                }
+
+                _childParentRelationships = this.ConstructEntityRelationships(propMapping => propMapping.ChildParentRelationship);
+                _parentChildRelationships = this.ConstructEntityRelationships(propMapping => propMapping.ParentChildRelationship);
             }
         }
 
-        internal void FreezeMapping()
-        {            
-            _isFrozen = true;
-        }
-
+        /// <summary>
+        /// Throws an exception if entity mappings cannot be changed.
+        /// </summary>
         protected void ValidateState()
         {
             if (this.IsFrozen)
@@ -85,9 +104,12 @@
             }
         }
 
+        /// <summary>
+        /// Removes a set of property mappings.
+        /// </summary>
         protected void RemoveProperties(IEnumerable<string> paramNames, bool exclude)
         {
-            var propNamesMappingsToRemove = new List<string>(PropertyMappings.Count);
+            var propNamesMappingsToRemove = new List<string>(_propertyMappings.Count);
             propNamesMappingsToRemove.AddRange(from propMapping in this.PropertyMappings where (exclude && !paramNames.Contains(propMapping.Value.PropertyName)) || (!exclude && paramNames.Contains(propMapping.Value.PropertyName)) select propMapping.Key);
 
             foreach (var propName in propNamesMappingsToRemove)
@@ -96,25 +118,90 @@
             }
         }
 
+        /// <summary>
+        /// Removes a property mapping.
+        /// </summary>
         internal void RemoveProperty(string propertyName)
         {
-            PropertyMappings.Remove(propertyName);
+            PropertyMapping propertyMapping;
+            if (_propertyNameMappingsMap.TryGetValue(propertyName, out propertyMapping))
+            {
+                if (!_propertyNameMappingsMap.Remove(propertyName) || !_propertyMappings.Remove(propertyMapping))
+                {
+                    throw new InvalidOperationException($"Failure removing property '{propertyName}'");
+                }
+            } 
         }
 
+        /// <summary>
+        /// Prepares a new property mapping. 
+        /// </summary>
         protected PropertyMapping SetPropertyInternal(string propertyName)
         {
             var propDescriptor = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().Single(propInfo => propInfo.Name == propertyName);
             return this.SetPropertyInternal(propDescriptor);
         }
 
+        /// <summary>
+        /// Registers a property mapping. 
+        /// </summary>
         protected PropertyMapping SetPropertyInternal(PropertyDescriptor property)
         {
-            return this.SetPropertyInternal(new PropertyMapping(this, this.PropertyMappings.Count, property));
+            return this.SetPropertyInternal(new PropertyMapping(this, property));
         }
 
+        /// <summary>
+        /// Registers a property mapping.
+        /// </summary>
         protected PropertyMapping SetPropertyInternal(PropertyMapping propertyMapping)
         {
-            return this.PropertyMappings[propertyMapping.PropertyName] = propertyMapping;
+            Requires.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
+            _propertyMappings.Remove(propertyMapping);
+            _propertyMappings.Add(propertyMapping);
+            _propertyNameMappingsMap[propertyMapping.PropertyName] = propertyMapping;
+
+            return propertyMapping;
+        }
+
+        private Dictionary<Type, EntityMappingRelationship> ConstructEntityRelationships(Func<PropertyMapping, PropertyMappingRelationship> relationshipExtractor)
+        {
+            return _propertyMappings
+                .Select(propMapping => new
+                    {
+                        Mapping = propMapping,
+                        Relationship = relationshipExtractor(propMapping)
+                    })
+                .Where(relMapping => relMapping.Relationship != null)
+                .GroupBy(relMapping => relMapping.Relationship.ReferencedEntityType)
+                .ToDictionary(
+                    groupedRelMappings => groupedRelMappings.Key,
+                    groupedRelMappings =>
+                    {
+                        var referencingEntityPropertyNames = groupedRelMappings
+                            .Select(relMapping => relMapping.Relationship.ReferencingPropertyName)
+                            .Where(propName => !string.IsNullOrEmpty(propName))
+                            .Distinct()
+                            .ToArray();
+
+                        if (referencingEntityPropertyNames.Length > 1)
+                        {
+                            throw new InvalidOperationException($"Multiple entity referencing properties were registered for the '{this.EntityType}' - '{groupedRelMappings.Key}' relationship");
+                        }
+
+                        var referencingEntityPropertyName = referencingEntityPropertyNames.Length == 0
+                                                                ? null
+                                                                : referencingEntityPropertyNames[0];
+                        var referencingEntityPropertyDescriptor = referencingEntityPropertyName == null
+                                                                      ? null
+                                                                      : TypeDescriptor.GetProperties(this.EntityType)
+                                                                                      .OfType<PropertyDescriptor>()
+                                                                                      .SingleOrDefault(propDescriptor => propDescriptor.Name == referencingEntityPropertyName);
+
+
+                        var referencingKeyProperties = groupedRelMappings.Select(relMapping => relMapping.Mapping).ToArray();
+
+                        return new EntityMappingRelationship(groupedRelMappings.Key,referencingKeyProperties, referencingEntityPropertyDescriptor);
+                    });
         }
     }
 
@@ -227,7 +314,7 @@
         {
             return this.PropertyMappings.Values
                 .Where(propInfo => (includeFilter.Length == 0 || includeFilter.Any(options => (options & propInfo.Options) == options)))
-                .OrderBy(propInfo => propInfo.Order)
+                //.OrderBy(propInfo => propInfo.Order)
                 .ToArray();
         }
 
@@ -251,7 +338,7 @@
         {
             return this.PropertyMappings.Values
                 .Where(propInfo => (excludeFilter.Length==0 || excludeFilter.All(options => (options & propInfo.Options) != options)))
-                .OrderBy(propInfo => propInfo.Order)
+                //.OrderBy(propInfo => propInfo.Order)
                 .ToArray();
         }
 
@@ -275,7 +362,7 @@
         {
             return this.PropertyMappings.Values
                 .Where(propInfo => (propNames.Length == 0 || !propNames.Contains(propInfo.PropertyName)))
-                .OrderBy(propInfo => propInfo.Order)
+                //.OrderBy(propInfo => propInfo.Order)
                 .ToArray();
         }
 

@@ -12,15 +12,16 @@
     {
         private PropertyMappingOptions _options;
         private string _databaseColumnName;
-        private readonly int _order;
+        private volatile int _columnOrder;
+        private PropertyMappingRelationship _childParentRelationship;
+        private PropertyMappingRelationship _parentChildRelationship;
 
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal PropertyMapping(EntityMapping entityMapping, int order, PropertyDescriptor descriptor)
+        internal PropertyMapping(EntityMapping entityMapping, PropertyDescriptor descriptor)
         {
-            _order = order;
             _options = PropertyMappingOptions.None;
             _databaseColumnName = descriptor.Name;
             this.EntityMapping = entityMapping;
@@ -28,74 +29,99 @@
         }
 
         /// <summary>
-        /// Gets or sets the property representing the entity referenced by the relationship.
+        /// Gets or sets a child-parent relationship.
         /// </summary>
-        public PropertyDescriptor RelationshipPropertyNames
+        public PropertyMappingRelationship ChildParentRelationship
         {
             get
             {
-                return _relationshipPropertyNames;
+                return _childParentRelationship;
             }
             set
             {
                 this.ValidateState();
-
-                this._relationshipPropertyNames = value;
-                if (value != null)
-                {
-                    _options |= PropertyMappingOptions.ReferencingForeignEntity;
-                    this.IsExcludedFromUpdates = true;
-                    this.IsExcludedFromInserts = true;
-                }
-                else
-                {
-                    _options &= ~PropertyMappingOptions.ReferencingForeignEntity;
-                }
+                _childParentRelationship = value;
             }
         }
 
         /// <summary>
-        /// Sets the property names that are used in the primary - foreign entity relationships. 
-        /// This can only be set on properties that have an entity type (in case of children-parent relationships) or are of type IEnumerable (in case of parent-children relationships).
+        /// Gets or sets a parent-child relationship.
         /// </summary>
-        public PropertyMapping SetRelationship(params string[] propertyNames)
-        {
-            this.RelationshipPropertyNames = propertyNames;
-            return this;
-        }
-
-        /// <summary>
-        /// Removes any relationships with foreign entities, in either parent-children or children-parent relationships. 
-        /// </summary>
-        public PropertyMapping RemoveRelationship()
-        {
-            this.RelationshipPropertyNames = null;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets a flag indicating the property is referencing a foreign entity.
-        /// One can be set via <see cref="SetRelationship"/>.
-        /// </summary>
-        public bool IsReferencingForeignEntity
+        public PropertyMappingRelationship ParentChildRelationship
         {
             get
             {
-                return (_options & PropertyMappingOptions.ReferencingForeignEntity) == PropertyMappingOptions.ReferencingForeignEntity;
-            }
-        }
-
-        [Obsolete("Please use IsPrimaryKey or SetPrimaryKey instead.")]
-        public bool IsKey
-        {
-            get
-            {
-                return this.IsPrimaryKey;
+                return _parentChildRelationship;
             }
             set
             {
-                this.IsPrimaryKey = value;
+                this.ValidateState();
+                _parentChildRelationship = value;
             }
+        }
+
+        /// <summary>
+        /// Sets up a foreign key relationship with another entity.
+        /// </summary>
+        /// <typeparam name="TRelatedEntityType">Foreign entity type.</typeparam>
+        /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the referenced entity when instructed to do so in a JOIN statement.</param>
+        /// <param name="order">Used for refering entities with composite keys, specifies an order that must match the order on its primary keys.</param>
+        public PropertyMapping SetChildParentRelationship<TRelatedEntityType>(string referencingEntityPropertyName)
+        {
+            this.ChildParentRelationship = new PropertyMappingRelationship(typeof(TRelatedEntityType), referencingEntityPropertyName);
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the property as a primary key used in foreign key relationship.
+        /// </summary>
+        /// <typeparam name="TRelatedEntityType">Child entity type.</typeparam>
+        /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the collection of child entities when instructed to do so in a JOIN statement.</param>
+        /// <param name="order">An order used in case of composite keys that would match a foreign key order.</param>
+        public PropertyMapping SetParentChildRelationship<TRelatedEntityType>(string referencingEntityPropertyName)
+        {
+            this.ParentChildRelationship = new PropertyMappingRelationship(typeof(TRelatedEntityType), referencingEntityPropertyName);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets up a foreign key relationship with another entity.
+        /// </summary>
+        /// <typeparam name="TRelatedEntityType">Foreign entity type.</typeparam>
+        /// <param name="order">Used for refering entities with composite keys, specifies an order that must match the order on its primary keys.</param>
+        public PropertyMapping SetChildParentRelationship<TRelatedEntityType>()
+        {
+            this.ChildParentRelationship = new PropertyMappingRelationship(typeof(TRelatedEntityType));
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the property as a primary key used in foreign key relationship.
+        /// </summary>
+        /// <typeparam name="TRelatedEntityType">Child entity type.</typeparam>
+        /// <param name="order">An order used in case of composite keys that would match a foreign key order.</param>
+        public PropertyMapping SetParentChildRelationship<TRelatedEntityType>()
+        {
+            this.ParentChildRelationship = new PropertyMappingRelationship(typeof(TRelatedEntityType));
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a parent-child relationship. 
+        /// </summary>
+        public PropertyMapping RemoveParentChildRelationship()
+        {
+            this.ParentChildRelationship = null;
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a parent-child relationship. 
+        /// </summary>
+        public PropertyMapping RemoveChildParentRelationship()
+        {
+            this.ChildParentRelationship = null;
+            return this;
         }
 
         /// <summary>
@@ -344,17 +370,6 @@
         }
 
         /// <summary>
-        /// Gets the currently assigned order.
-        /// </summary>
-        public int Order
-        {
-            get
-            {
-                return _order;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the database column name.
         /// </summary>
         public string DatabaseColumnName
@@ -369,7 +384,6 @@
 
                 Requires.NotNullOrEmpty(value, nameof(this.DatabaseColumnName));
                 _databaseColumnName = value;
-                _relationshipPropertyNames = new string[0];
             }
         }
 
@@ -403,6 +417,18 @@
             }
         }
 
+        internal int ColumnOrder
+        {
+            get
+            {
+                return _columnOrder;
+            }
+            set
+            {
+                _columnOrder = value;
+            }
+        }
+
         /// <summary>
         /// Removes the current property mapping.
         /// </summary>
@@ -415,17 +441,13 @@
 
         internal PropertyMapping Clone(EntityMapping newEntityMapping)
         {
-            var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this._order, this.Descriptor);
-            clonedPropertyMapping._options = this._options;
-            clonedPropertyMapping._databaseColumnName = this._databaseColumnName;
-            if (this._relationshipPropertyNames != null)
-            {
-                clonedPropertyMapping._relationshipPropertyNames = new string[this._relationshipPropertyNames.Length];
-                Array.Copy(
-                    this._relationshipPropertyNames,
-                    clonedPropertyMapping._relationshipPropertyNames,
-                    this._relationshipPropertyNames.Length);
-            }
+            var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
+                {
+                    _parentChildRelationship = _parentChildRelationship,
+                    _options = _options,
+                    _childParentRelationship =  _childParentRelationship,
+                    _databaseColumnName = this._databaseColumnName
+                };
             return clonedPropertyMapping;
         }
 

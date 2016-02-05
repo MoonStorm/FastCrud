@@ -12,7 +12,6 @@
         PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
         PropertyMapping[] RefreshOnInsertProperties { get; }
         PropertyMapping[] RefreshOnUpdateProperties { get; }
-        PropertyMapping[] ForeignEntityProperties { get; }
         EntityMapping EntityMapping { get; }
 
         /// <summary>

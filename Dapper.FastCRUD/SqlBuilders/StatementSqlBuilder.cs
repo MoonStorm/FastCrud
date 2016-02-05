@@ -46,7 +46,6 @@
             this.EntityMapping = entityMapping;
 
             this.SelectProperties = this.EntityMapping.PropertyMappings
-                .Where(propMapping => !propMapping.Value.IsReferencingForeignEntity)
                 .Select(propMapping => propMapping.Value)
                 .ToArray();
             this.KeyProperties = this.EntityMapping.PropertyMappings
@@ -68,11 +67,6 @@
             this.InsertProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromInserts)
                 .ToArray();
-            this.ForeignEntityProperties =
-                this.EntityMapping.PropertyMappings
-                .Where(propMapping => propMapping.Value.IsReferencingForeignEntity)
-                .Select(propMapping => propMapping.Value)
-                .ToArray();
 
             _noAliasTableName = new Lazy<string>(()=>this.GetTableNameInternal(),LazyThreadSafetyMode.PublicationOnly);
             _noAliasKeysWhereClause = new Lazy<string>(()=>this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
@@ -92,7 +86,6 @@
 
         public EntityDescriptor EntityDescriptor { get; }
         public EntityMapping EntityMapping { get; }
-        public PropertyMapping[] ForeignEntityProperties { get; }
         public PropertyMapping[] SelectProperties { get; }
         public PropertyMapping[] KeyProperties { get; }
         public PropertyMapping[] InsertProperties { get; }

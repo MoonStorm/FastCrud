@@ -6,13 +6,13 @@
     /// <summary>
     /// Holds details about a relationship
     /// </summary>
-    public class PropertyMappingForeignKeyRelationship
+    public class PropertyMappingRelationship
     {
         /// <summary>
         /// Constructor. 
         /// </summary>
         /// <param name="referencedEntityType">The entity type referenced in the foreign key relationship.</param>
-        public PropertyMappingForeignKeyRelationship(Type referencedEntityType)
+        public PropertyMappingRelationship(Type referencedEntityType)
         {
             Requires.NotNull(referencedEntityType, nameof(referencedEntityType));
 
@@ -27,7 +27,7 @@
         ///  that would hold the foreign entity on SELECTs, when the statement was instructed to.
         /// </param>
         /// <param name="referencedEntityType">The entity type referenced in the foreign key relationship.</param>
-        public PropertyMappingForeignKeyRelationship(string referencingPropertyName, Type referencedEntityType)
+        public PropertyMappingRelationship(Type referencedEntityType, string referencingPropertyName)
             :this(referencedEntityType)
         {
             Requires.NotNullOrWhiteSpace(referencingPropertyName, nameof(referencingPropertyName));
@@ -44,5 +44,10 @@
         /// Gets the referencing property name. It might return null if not provided.
         /// </summary>
         public string ReferencingPropertyName { get; }
+
+        /// <summary>
+        /// An optional order used for matching primary keys with foreign keys in entity relationships.
+        /// </summary>
+        public int? Order { get; }
     }
 }
