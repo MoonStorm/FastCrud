@@ -11,7 +11,7 @@
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
 
-    internal abstract class GenericStatementSqlBuilder:IStatementSqlBuilder
+    internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
         //private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
         private readonly Lazy<string> _noAliasKeysWhereClause;

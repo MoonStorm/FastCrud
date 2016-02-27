@@ -11,7 +11,7 @@
     [Binding]
     public sealed class SqlBuilderSteps
     {
-        private IStatementSqlBuilder _currentSqlBuilder;
+        private GenericStatementSqlBuilder _currentSqlBuilder;
         private string _rawSqlStatement;
         private string[] _selectColumnNames;
         private SqlDialect _currentDialect;
@@ -93,7 +93,7 @@
             OrmConfiguration.DefaultDialect = dialect;
 
             // in real library usage, people will use the ISqlBuilder, but for our tests we're gonna need more than that
-            _currentSqlBuilder = OrmConfiguration.GetSqlBuilder<TEntity>() as IStatementSqlBuilder;
+            _currentSqlBuilder = OrmConfiguration.GetSqlBuilder<TEntity>() as GenericStatementSqlBuilder;
             _currentDialect = dialect;
             _selectColumnNames = _currentSqlBuilder.SelectProperties.Select(propInfo => propInfo.DatabaseColumnName).ToArray();
         }

@@ -8,7 +8,10 @@
 
     internal interface ISqlStatements
     {
-        IStatementSqlBuilder SqlBuilder { get; }
+        /// <summary>
+        /// Gets the publicly accessible SQL builder.
+        /// </summary>
+        GenericStatementSqlBuilder SqlBuilder { get; }
     }
 
     internal interface ISqlStatements<TEntity>: ISqlStatements

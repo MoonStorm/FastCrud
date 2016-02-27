@@ -14,7 +14,7 @@
     {
         // entity mappings should have a very long timespan if used correctly, however we can't make that assumption
         // hence we'll have to keep them for the duration of their lifespan and attach precomputed sql statements
-        private readonly ConditionalWeakTable<EntityMapping,  ISqlStatements> _registeredEntityMappings;
+        private readonly ConditionalWeakTable<EntityMapping, ISqlStatements> _registeredEntityMappings;
         private readonly Lazy<ISqlStatements> _defaultEntityMappingSqlStatements;
 
         /// <summary>
@@ -52,7 +52,7 @@
             entityMapping.FreezeMapping();
 
             ISqlStatements sqlStatements;
-            IStatementSqlBuilder statementSqlBuilder;
+            GenericStatementSqlBuilder statementSqlBuilder;
 
             switch (entityMapping.Dialect)
             {

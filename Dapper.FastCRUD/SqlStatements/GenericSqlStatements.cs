@@ -12,17 +12,20 @@
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
-        private readonly IStatementSqlBuilder _sqlBuilder;
+        private readonly GenericStatementSqlBuilder _sqlBuilder;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public GenericSqlStatements(IStatementSqlBuilder sqlBuilder)
+        public GenericSqlStatements(GenericStatementSqlBuilder sqlBuilder)
         {
             _sqlBuilder = sqlBuilder;
         }
 
-        public IStatementSqlBuilder SqlBuilder => this._sqlBuilder;
+        /// <summary>
+        /// Gets the publicly accessible SQL builder.
+        /// </summary>
+        public GenericStatementSqlBuilder SqlBuilder => _sqlBuilder;
 
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys

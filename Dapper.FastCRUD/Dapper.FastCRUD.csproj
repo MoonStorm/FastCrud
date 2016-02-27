@@ -69,7 +69,6 @@
     <Compile Include="Configuration\StatementOptions\IParameterizedSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\IRelationalSqlStatementOptionsSetter.cs" />
     <Compile Include="Configuration\StatementOptions\ISqlRelationOptionsSetter.cs" />
-    <None Include="Configuration\StatementOptions\Resolvers\ISqlStatementOptionsGetter - not used.cs" />
     <Compile Include="Configuration\StatementOptions\Resolvers\AggregatedSqlStatementOptions.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\ConditionalBulkSqlStatementOptionsBuilder.cs" />
     <Compile Include="Configuration\StatementOptions\Builders\StandardSqlStatementOptionsBuilder.cs" />
@@ -96,16 +95,15 @@
     <Compile Include="Formatters\SqlStatementFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilder.cs" />
+    <Compile Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilderNode.cs" />
     <Compile Include="Validations\Requires.cs" />
     <Compile Include="Formatters\SqlParameterFormatter.cs" />
     <Compile Include="Sql.cs" />
     <Compile Include="SqlBuilders\StatementSqlBuilder.cs" />
-    <Compile Include="SqlBuilders\IStatementSqlBuilder.cs" />
     <Compile Include="SqlBuilders\MsSqlBuilder.cs" />
     <Compile Include="SqlBuilders\MySqlBuilder.cs" />
     <Compile Include="SqlBuilders\PostgreSqlBuilder.cs" />
     <Compile Include="SqlBuilders\SqLiteBuilder.cs" />
-    <None Include="SqlBuilders\EntityRelationship - not used.cs" />
     <Compile Include="Configuration\SqlDialect.cs" />
     <Compile Include="SqlStatements\GenericSqlStatements.cs" />
     <Compile Include="SqlStatements\ISqlStatements.cs" />
