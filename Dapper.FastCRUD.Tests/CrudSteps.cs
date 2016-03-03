@@ -255,7 +255,8 @@
                                                   (originalBuildingEntity) => new Building()
                                                                                   {
                                                                                       BuildingId = originalBuildingEntity.BuildingId,
-                                                                                      Name = "Updated " + originalBuildingEntity.Name
+                                                                                      Name = "Updated " + originalBuildingEntity.Name,
+                                                                                      Description = "Long text"
                                                                                   });
         }
 
