@@ -38,6 +38,7 @@
             this.UsesSchemaForTableNames = databaseOptions.IsUsingSchemas;
             this.IdentifierStartDelimiter = databaseOptions.StartDelimiter;
             this.IdentifierEndDelimiter = databaseOptions.EndDelimiter;
+            this.ParameterPrefix = databaseOptions.ParameterPrefix;
 
 
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
@@ -90,6 +91,7 @@
             _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
         }
 
+
         public EntityDescriptor EntityDescriptor { get; }
         public EntityMapping EntityMapping { get; }
         public PropertyMapping[] ForeignEntityProperties { get; }
@@ -103,6 +105,7 @@
         protected string IdentifierStartDelimiter { get; }
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
+        protected string ParameterPrefix { get; }
 
         /// <summary>
         /// Gets the statement formatter to be used for parameter resolution.
@@ -402,7 +405,7 @@
         /// </summary>
         protected virtual string ConstructKeysWhereClauseInternal(string tableAlias = null)
         {
-            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
         }
 
         /// <summary>
@@ -437,7 +440,7 @@
         /// </summary>
         protected virtual string ConstructParamEnumerationForInsertInternal()
         {
-            return string.Join(",", this.InsertProperties.Select(propInfo => $"@{propInfo.PropertyName}"));
+            return string.Join(",", this.InsertProperties.Select(propInfo => $"{this.ParameterPrefix + propInfo.PropertyName}"));
         }
 
         /// <summary>
@@ -446,7 +449,7 @@
         /// <param name="tableAlias">Optional table alias.</param>
         protected virtual string ConstructUpdateClauseInternal(string tableAlias = null)
         {
-            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}=@{propInfo.PropertyName}"));
+            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
         }
 
         /// <summary>
