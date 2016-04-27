@@ -267,7 +267,8 @@
             {
                 command.CommandText = $@"CREATE TABLE Buildings (
 	                        Id integer primary key AUTOINCREMENT,
-	                        BuildingName nvarchar(100) NULL
+	                        BuildingName nvarchar(100) NULL,
+	                        Description nvarchar(100) NULL
                         )";
 
                 command.ExecuteNonQuery();
@@ -366,6 +367,7 @@
                         CREATE TABLE ""Buildings"" (
 	                        ""Id"" SERIAL,
 	                        ""BuildingName"" varchar(100) NULL,
+	                        ""Description"" varchar(100) NULL,
 	                        PRIMARY KEY (""Id"")
                         );
                     ";
@@ -443,6 +445,7 @@
                         CREATE TABLE `Buildings` (
 	                        Id int NOT NULL AUTO_INCREMENT,
 	                        BuildingName nvarchar(100) NULL,
+                            Description nvarchar(100) NULL,
 	                        PRIMARY KEY (Id)
                         );
 
@@ -556,6 +559,7 @@
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [BuildingName] [nvarchar](100) NULL,
+                        [Description] [nvarchar](100) NULL,
                         CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED 
                         (
 	                        [Id] ASC
@@ -647,7 +651,8 @@
             OrmConfiguration.RegisterEntity<Building>()
                 .SetTableName("Buildings")
                 .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity).SetDatabaseColumnName("Id"))
-                .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"));
+                .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"))
+                .SetProperty(building => building.Description); // test mapping w/o name
         }
     }
 }
