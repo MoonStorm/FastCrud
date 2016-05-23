@@ -9,3 +9,4 @@ obj
 /.nunit/gui
 /TestResult.xml
 /Thumbs.db
+/Dapper.FastCRUD/project.lock.json
