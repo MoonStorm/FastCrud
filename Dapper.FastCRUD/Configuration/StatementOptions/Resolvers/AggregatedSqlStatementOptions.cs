@@ -55,6 +55,5 @@
         /// Gets or sets a flag indicating the results should be streamed.
         /// </summary>
         public bool ForceStreamResults { get; protected set; }
-
     }
 }

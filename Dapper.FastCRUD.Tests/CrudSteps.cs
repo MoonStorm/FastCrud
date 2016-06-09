@@ -315,11 +315,11 @@
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
         public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int? max, int? skip)
         {
-            var sqlBuilder = OrmConfiguration.GetSqlBuilder<Workstation>();
             _testContext.QueriedEntities.AddRange(
                 _testContext.DatabaseConnection.Find<Workstation>(
                     statementOptions =>
-                    statementOptions.Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
+                    statementOptions.Include<Employee>()
+                                    .Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
                                     .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
                                     .Skip(skip)
                                     .Top(max)));

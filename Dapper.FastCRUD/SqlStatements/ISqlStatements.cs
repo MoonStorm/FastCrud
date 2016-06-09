@@ -14,6 +14,10 @@
         GenericStatementSqlBuilder SqlBuilder { get; }
     }
 
+    /// <summary>
+    /// SQL statement factory.
+    /// </summary>
+    /// <typeparam name="TEntity">Target entity type</typeparam>
     internal interface ISqlStatements<TEntity>: ISqlStatements
     {
         /// <summary>

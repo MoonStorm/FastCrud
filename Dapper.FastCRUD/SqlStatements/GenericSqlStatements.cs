@@ -21,7 +21,7 @@
         {
             _sqlBuilder = sqlBuilder;
         }
-
+        
         /// <summary>
         /// Gets the publicly accessible SQL builder.
         /// </summary>
@@ -52,7 +52,6 @@
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).SingleOrDefault();
         }
-
 
         /// <summary>
         /// Performs an INSERT operation
@@ -146,10 +145,7 @@
         /// Performs an UPDATE opration on an entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<bool> UpdateByIdAsync(
-            IDbConnection connection,
-            TEntity keyEntity,
-            AggregatedSqlStatementOptions statementOptions)
+        public async Task<bool> UpdateByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
         {
             if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
             {

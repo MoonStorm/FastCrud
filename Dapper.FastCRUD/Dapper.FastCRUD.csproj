@@ -94,8 +94,11 @@
     <Compile Include="Formatters\SqlEntityFormattableParameter.cs" />
     <Compile Include="Formatters\SqlStatementFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlBuilders\RelationshipOrderComparer.cs" />
     <Compile Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilder.cs" />
     <Compile Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilderNode.cs" />
+    <Compile Include="SqlStatements\RelationshipSqlStatements.cs" />
+    <Compile Include="SqlStatements\TwoEntitiesRelationshipSqlStatements.cs" />
     <Compile Include="Validations\Requires.cs" />
     <Compile Include="Formatters\SqlParameterFormatter.cs" />
     <Compile Include="Sql.cs" />

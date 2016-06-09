@@ -1,18 +1,23 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
+    using System.Text;
     using System.Threading;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.SqlStatements;
     using Dapper.FastCrud.Validations;
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
+        private static readonly RelationshipOrderComparer _relationshipOrderComparer = new RelationshipOrderComparer();
+
         //private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
         private readonly Lazy<string> _noAliasKeysWhereClause;
         private readonly Lazy<string> _noAliasTableName;
@@ -38,7 +43,6 @@
             this.UsesSchemaForTableNames = databaseOptions.IsUsingSchemas;
             this.IdentifierStartDelimiter = databaseOptions.StartDelimiter;
             this.IdentifierEndDelimiter = databaseOptions.EndDelimiter;
-
 
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
             this.StatementFormatter = new SqlStatementFormatter(entityDescriptor,entityMapping,this);
@@ -67,6 +71,22 @@
             this.InsertProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromInserts)
                 .ToArray();
+            this.ParentChildRelationshipProperties = this.EntityMapping.PropertyMappings
+                .Where(propMapping => propMapping.Value.ParentChildRelationship != null)
+                .Select(propMapping => propMapping.Value)
+                .GroupBy(propInfo => propInfo.ParentChildRelationship.ReferencedEntityType)
+                .ToDictionary(
+                    groupedTypePropInfo => groupedTypePropInfo.Key, 
+                    groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ParentChildRelationship.Order, 
+                    _relationshipOrderComparer).ToArray());
+            this.ChildParentRelationshipProperties = this.EntityMapping.PropertyMappings
+                .Where(propMapping => propMapping.Value.ChildParentRelationship != null)
+                .Select(propMapping => propMapping.Value)
+                .GroupBy(propInfo => propInfo.ChildParentRelationship.ReferencedEntityType)
+                .ToDictionary(
+                    groupedTypePropInfo => groupedTypePropInfo.Key,
+                    groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ChildParentRelationship.Order,
+                    _relationshipOrderComparer).ToArray());
 
             _noAliasTableName = new Lazy<string>(()=>this.GetTableNameInternal(),LazyThreadSafetyMode.PublicationOnly);
             _noAliasKeysWhereClause = new Lazy<string>(()=>this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
@@ -87,6 +107,8 @@
         public EntityDescriptor EntityDescriptor { get; }
         public EntityMapping EntityMapping { get; }
         public PropertyMapping[] SelectProperties { get; }
+        public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
+        public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
         public PropertyMapping[] KeyProperties { get; }
         public PropertyMapping[] InsertProperties { get; }
         public PropertyMapping[] UpdateProperties { get; }
@@ -315,6 +337,42 @@
                 startsWithIdentifier ? string.Empty : this.IdentifierStartDelimiter,
                 sqlIdentifier,
                 endsWithIdentifier ? string.Empty : this.IdentifierEndDelimiter);
+        }
+
+        /// <summary>
+        /// Constructs a select statement containing joined entities.
+        /// </summary>
+        public void ConstructFullJoinSelectStatement(out string statement, out string splitOnExpression, FormattableString additionalWhereClause, params GenericStatementSqlBuilder[] joinedSqlBuilders)
+        {
+            Requires.Argument(joinedSqlBuilders.Length > 0, nameof(joinedSqlBuilders), "Unable to create a full JOIN statement when no extra SQL builders were provided");
+
+            var allSqlBuilders = new[] { this }.Concat(joinedSqlBuilders).ToArray();
+            var selectClauseBuilder = new StringBuilder();
+            var fromClauseBuilder = new StringBuilder();
+
+            GenericStatementSqlBuilder previousSqlBuilder = null;
+            foreach (var currentSqlBuilder in allSqlBuilders)
+            {
+                if (previousSqlBuilder != null)
+                {
+                    selectClauseBuilder.Append(',');
+                }
+
+                selectClauseBuilder.Append(currentSqlBuilder.ConstructColumnEnumerationForSelect(currentSqlBuilder.GetTableName()));
+
+                if (previousSqlBuilder != null)
+                {
+                    fromClauseBuilder.Append(" LEFT OUTER JOIN ");
+                }
+
+                fromClauseBuilder.Append(currentSqlBuilder.GetTableName());
+
+            }
+            
+
+
+            return string.Join("," , new[] {this}.Concat(additionalSqlBuilders).Select(sqlBuilder => sqlBuilder.ConstructColumnEnumerationForSelect(sqlBuilder.GetTableName())));
+            return string.Join(",", new[] { this }.Concat(additionalSqlBuilders).Select(sqlBuilder => sqlBuilder.SelectProperties.First()));
         }
 
         //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)
