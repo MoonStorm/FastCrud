@@ -85,17 +85,15 @@
                 SELECT * FROM #temp");
         }
 
-        /// <summary>
-        /// Constructs a full batch select statement
-        /// </summary>
-        protected override string ConstructFullBatchSelectStatementInternal(
+        protected override string ConstructFullSelectStatementInternal(
+            string selectColumns,
+            string fromClause,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            object queryParameters = null)
+            long? limitRowsCount = null)
         {
-            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()}");
+            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectColumns} FROM {fromClause}");
             if (whereClause != null)
             {
                 sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
@@ -106,7 +104,7 @@
             }
             if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount??0);
+                sql += string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount ?? 0);
             }
             if (limitRowsCount.HasValue)
             {

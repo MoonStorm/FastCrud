@@ -170,8 +170,7 @@
         /// </summary>
         /// <param name="propMapping">Property mapping</param>
         /// <param name="tableAlias">Table alias</param>
-        /// <param name="performColumnAliasNormalization"></param>
-        /// <returns>If true and the database column name differs from the property name, an AS clause will be added</returns>
+        /// <param name="performColumnAliasNormalization">If true and the database column name differs from the property name, an AS clause will be added</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization)
         {
@@ -316,7 +315,13 @@
             long? limitRowsCount = null,
             object queryParameters = null)
         {
-            return this.ConstructFullBatchSelectStatementInternal(whereClause, orderClause, skipRowsCount, limitRowsCount, queryParameters);
+            return this.ConstructFullSelectStatementInternal(
+                this.ConstructColumnEnumerationForSelect(),
+                this.GetTableName(),
+                whereClause,
+                orderClause,
+                skipRowsCount,
+                limitRowsCount);
         }
 
         /// <summary>
@@ -342,37 +347,115 @@
         /// <summary>
         /// Constructs a select statement containing joined entities.
         /// </summary>
-        public void ConstructFullJoinSelectStatement(out string statement, out string splitOnExpression, FormattableString additionalWhereClause, params GenericStatementSqlBuilder[] joinedSqlBuilders)
+        public void ConstructFullJoinSelectStatement(
+            GenericStatementSqlBuilder[] joinedSqlBuilders,
+            out string fullStatement,
+            out string splitOnExpression,
+            FormattableString whereClause = null,
+            FormattableString orderClause = null,
+            long? skipRowsCount = null,
+            long? limitRowsCount = null)
         {
             Requires.Argument(joinedSqlBuilders.Length > 0, nameof(joinedSqlBuilders), "Unable to create a full JOIN statement when no extra SQL builders were provided");
 
             var allSqlBuilders = new[] { this }.Concat(joinedSqlBuilders).ToArray();
             var selectClauseBuilder = new StringBuilder();
             var fromClauseBuilder = new StringBuilder();
+            var splitOnExpressionBuilder = new StringBuilder();
 
-            GenericStatementSqlBuilder previousSqlBuilder = null;
-            foreach (var currentSqlBuilder in allSqlBuilders)
+            for(var leftJoinSqlBuilderIndex = 0; leftJoinSqlBuilderIndex < allSqlBuilders.Length; leftJoinSqlBuilderIndex++)
             {
-                if (previousSqlBuilder != null)
+                var leftJoinSqlBuilder = allSqlBuilders[leftJoinSqlBuilderIndex];
+                if (leftJoinSqlBuilderIndex > 0)
                 {
                     selectClauseBuilder.Append(',');
                 }
 
-                selectClauseBuilder.Append(currentSqlBuilder.ConstructColumnEnumerationForSelect(currentSqlBuilder.GetTableName()));
+                // add the select columns
+                selectClauseBuilder.Append(leftJoinSqlBuilder.ConstructColumnEnumerationForSelect(leftJoinSqlBuilder.GetTableName()));
 
-                if (previousSqlBuilder != null)
+                // add the split on expression
+                if (leftJoinSqlBuilderIndex > 0)
+                {
+                    if (leftJoinSqlBuilderIndex > 1)
+                    {
+                        splitOnExpressionBuilder.Append(',');
+                    }
+
+                    splitOnExpressionBuilder.Append(leftJoinSqlBuilder.SelectProperties.First().PropertyName);
+                }
+
+                // build the join expression
+                if (leftJoinSqlBuilderIndex > 0)
                 {
                     fromClauseBuilder.Append(" LEFT OUTER JOIN ");
                 }
 
-                fromClauseBuilder.Append(currentSqlBuilder.GetTableName());
+                fromClauseBuilder.Append(leftJoinSqlBuilder.GetTableName());
 
+                // append the join condition
+                if (leftJoinSqlBuilderIndex > 0)
+                {
+                    fromClauseBuilder.Append(" ON ");
+
+                    // discover and append all the join conditions for the current table
+                    for (var rightJoinSqlBuilderIndex = 0; rightJoinSqlBuilderIndex < leftJoinSqlBuilderIndex; rightJoinSqlBuilderIndex++)
+                    {
+                        var rightJoinSqlBuilder = allSqlBuilders[rightJoinSqlBuilderIndex];
+
+                        // get the column on the left side of the join - current SQL builder
+                        PropertyMapping[] leftJoinColumns;
+                        bool leftJoinParentChildRelationship;
+                        if (leftJoinSqlBuilder.ChildParentRelationshipProperties.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinColumns))
+                        {
+                            leftJoinParentChildRelationship = false;
+                        }
+                        else if (leftJoinSqlBuilder.ParentChildRelationshipProperties.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinColumns))
+                        {
+                            leftJoinParentChildRelationship = true;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Could not find a relationship defined on '{leftJoinSqlBuilder.EntityMapping.EntityType}' involving '{rightJoinSqlBuilder.EntityMapping.EntityType}'");
+                        }
+
+                        // do the same for the right side
+                        PropertyMapping[] rightJoinColumns;
+                        if (!(leftJoinParentChildRelationship ? rightJoinSqlBuilder.ChildParentRelationshipProperties : rightJoinSqlBuilder.ParentChildRelationshipProperties).TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinColumns))
+                        {
+                            throw new InvalidOperationException($"Could not find a matching relationship defined on '{rightJoinSqlBuilder.EntityMapping.EntityType}' involving '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
+                        }
+
+                        fromClauseBuilder.Append('(');
+                        for (var leftJoinColumnIndex = 0; leftJoinColumnIndex<leftJoinColumns.Length; leftJoinColumnIndex++)
+                        {
+                            if (leftJoinColumnIndex > 0)
+                            {
+                                fromClauseBuilder.Append(" AND ");
+                            }
+
+                            var leftJoinColumn = leftJoinColumns[leftJoinColumnIndex];
+                            fromClauseBuilder.Append(leftJoinSqlBuilder.GetColumnName(leftJoinColumn, leftJoinSqlBuilder.GetTableName(), false));
+                            fromClauseBuilder.Append('=');
+
+                            // search for the corresponding column in the current entity
+                            // we're doing this by index, since both sides had the relationship columns already ordered
+                            if (leftJoinColumnIndex >= rightJoinColumns.Length)
+                            {
+                                throw new InvalidOperationException($"Property '{leftJoinColumn.PropertyName}' on the entity '{leftJoinSqlBuilder.EntityMapping.EntityType}' has no matching relationship on the entity '{rightJoinSqlBuilder.EntityMapping.EntityType}'");
+                            }
+
+                            var rightJoinColumn = rightJoinColumns[leftJoinColumnIndex];
+                            fromClauseBuilder.Append(rightJoinSqlBuilder.GetColumnName(rightJoinColumn, rightJoinSqlBuilder.GetTableName(), false));
+
+                        }
+                        fromClauseBuilder.Append(')');
+                    }
+                }
             }
-            
 
-
-            return string.Join("," , new[] {this}.Concat(additionalSqlBuilders).Select(sqlBuilder => sqlBuilder.ConstructColumnEnumerationForSelect(sqlBuilder.GetTableName())));
-            return string.Join(",", new[] { this }.Concat(additionalSqlBuilders).Select(sqlBuilder => sqlBuilder.SelectProperties.First()));
+            splitOnExpression = splitOnExpressionBuilder.ToString();
+            fullStatement = this.ConstructFullSelectStatementInternal(selectClauseBuilder.ToString(), fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount);
         }
 
         //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)
@@ -596,15 +679,13 @@
                     $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
-        /// <summary>
-        /// Constructs a full batch select statement
-        /// </summary>
-        protected abstract string ConstructFullBatchSelectStatementInternal(
+        protected abstract string ConstructFullSelectStatementInternal(
+            string selectColumns,
+            string fromClause,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            object queryParameters = null);
+            long? limitRowsCount = null);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected string ResolveWithCultureInvariantFormatter(FormattableString formattableString)
