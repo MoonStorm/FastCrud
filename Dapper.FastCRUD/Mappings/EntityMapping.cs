@@ -278,7 +278,7 @@
             this.ValidateState();
 
             Requires.NotNull(property, nameof(property));
-            Requires.NotNull(propertySetupFct, nameof(propertySetupFct));
+            //Requires.NotNull(propertySetupFct, nameof(propertySetupFct));   // it can be null
 
             var propName = ((MemberExpression)property.Body).Member.Name;
             var propMapping = this.SetPropertyInternal(propName);

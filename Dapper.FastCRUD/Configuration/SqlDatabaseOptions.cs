@@ -11,6 +11,7 @@
         public SqlDatabaseOptions()
         {
             this.StartDelimiter = this.EndDelimiter = string.Empty;
+            this.ParameterPrefix = "@";
         }
 
         /// <summary>
@@ -27,5 +28,10 @@
         /// Gets a flag indicating the database is using schemas.
         /// </summary>
         public bool IsUsingSchemas { get; protected set; }
+
+        /// <summary>
+        /// Gets the prefix used for named parameters
+        /// </summary>
+        public string ParameterPrefix { get; protected set; }
     }
 }
