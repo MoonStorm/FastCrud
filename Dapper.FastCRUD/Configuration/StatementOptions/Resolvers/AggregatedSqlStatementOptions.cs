@@ -1,15 +1,31 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Resolvers
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.SqlStatements;
 
-    internal abstract class AggregatedSqlStatementOptions
+    /// <summary>
+    /// Aggregates all the options passed on through the exposed extension methods.
+    /// </summary>
+    internal abstract class AggregatedSqlStatementOptions<TEntity>
     {
         protected AggregatedSqlStatementOptions()
         {
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
+            this.RelationshipOptions = new Dictionary<Type, AggregatedRelationalSqlStatementOptions>();
         }
+
+        /// <summary>
+        /// Gets the map of related entity types and their relationships.
+        /// </summary>
+        public Dictionary<Type, AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
+
+        /// <summary>
+        /// The factory used to create the sql statement factories.
+        /// </summary>
+        public Func<ISqlStatements<TEntity>> SqlStatementsFactoryChain { get; protected set; }
 
         /// <summary>
         /// The transaction to be used by the statement.

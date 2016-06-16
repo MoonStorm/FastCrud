@@ -7,21 +7,21 @@
     /// <summary>
     /// Standard sql options setter for a statement.
     /// </summary>
-    public interface IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
+    public interface IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Enforces a maximum time span on the current command.
         /// </summary>
-        TStatementOptionsSetter WithTimeout(TimeSpan? commandTimeout);
+        TStatementOptionsBuilder WithTimeout(TimeSpan? commandTimeout);
 
         /// <summary>
         /// Attaches the current command to an existing transaction.
         /// </summary>
-        TStatementOptionsSetter AttachToTransaction(IDbTransaction transaction);
+        TStatementOptionsBuilder AttachToTransaction(IDbTransaction transaction);
 
         /// <summary>
         /// Overrides the entity mapping for the current statement.
         /// </summary>
-        TStatementOptionsSetter WithEntityMappingOverride(EntityMapping<TEntity> entityMapping);
+        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity> entityMapping);
     }
 }

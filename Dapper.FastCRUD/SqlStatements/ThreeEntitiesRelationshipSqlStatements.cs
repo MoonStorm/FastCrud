@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
@@ -12,27 +13,34 @@
     /// </summary>
     /// <typeparam name="TMainEntity">Main entity type</typeparam>
     /// <typeparam name="TFirstJoinedEntity">Joined entity type</typeparam>
-    internal class TwoEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity> :RelationshipSqlStatements<TMainEntity>
+    /// <typeparam name="TSecondJoinedEntity">Joined entity type</typeparam>
+    internal class ThreeEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity>:RelationshipSqlStatements<TMainEntity>
     {
-        private readonly ISqlStatements<TFirstJoinedEntity> _joinedEntitySqlStatements;
+        private readonly ISqlStatements<TFirstJoinedEntity> _firstJoinedEntitySqlStatements;
+        private readonly ISqlStatements<TSecondJoinedEntity> _secondJoinedEntitySqlStatements;
 
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="mainEntitySqlStatements">Main entity SQL statement builder</param>
-        /// <param name="joinedEntitySqlStatements">Joined entity SQL statement builder</param>
-        public TwoEntitiesRelationshipSqlStatements(ISqlStatements<TMainEntity> mainEntitySqlStatements, ISqlStatements<TFirstJoinedEntity> joinedEntitySqlStatements)
+        /// <param name="firstJoinedEntitySqlStatements">Joined entity SQL statement builder</param>
+        /// <param name="secondJoinedEntitySqlStatements">Joined entity SQL statement builder</param>
+        public ThreeEntitiesRelationshipSqlStatements(
+            ISqlStatements<TMainEntity> mainEntitySqlStatements, 
+            ISqlStatements<TFirstJoinedEntity> firstJoinedEntitySqlStatements,
+            ISqlStatements<TSecondJoinedEntity> secondJoinedEntitySqlStatements)
             : base(mainEntitySqlStatements)
         {
-            _joinedEntitySqlStatements = joinedEntitySqlStatements;
+            _firstJoinedEntitySqlStatements = firstJoinedEntitySqlStatements;
+            _secondJoinedEntitySqlStatements = secondJoinedEntitySqlStatements;
         }
 
         /// <summary>
         /// Combines the current instance with a joined entity.
         /// </summary>
-        public override ISqlStatements<TMainEntity> CombineWith<TSecondJoinedEntity>(ISqlStatements<TSecondJoinedEntity> joinedEntitySqlStatements)
+        public override ISqlStatements<TMainEntity> CombineWith<TJoinedEntity1>(ISqlStatements<TJoinedEntity1> joinedEntitySqlStatements)
         {
-            return new ThreeEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity>(this, _joinedEntitySqlStatements, joinedEntitySqlStatements);
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -46,14 +54,15 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement, 
                 out splitOnCondition, 
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause:$"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, joinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
+                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
@@ -72,14 +81,15 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement,
                 out splitOnCondition,
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
-            var queriedEntities = await connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TMainEntity>(
+            var queriedEntities = await connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, joinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
+                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
@@ -100,7 +110,7 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement,
                 out splitOnCondition,
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 selectClause:this.SqlBuilder.ConstructCountSelectClause(),                
                 whereClause: statementOptions.WhereClause);
 
@@ -122,7 +132,7 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement,
                 out splitOnCondition,
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 selectClause: this.SqlBuilder.ConstructCountSelectClause(),
                 whereClause: statementOptions.WhereClause);
 
@@ -147,17 +157,18 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement,
                 out splitOnCondition,
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause: statementOptions.WhereClause,
                 orderClause: statementOptions.OrderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, joinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
+                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,
@@ -180,17 +191,18 @@
             this.SqlBuilder.ConstructFullJoinSelectStatement(
                 out statement,
                 out splitOnCondition,
-                this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
+                this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause: statementOptions.WhereClause,
                 orderClause: statementOptions.OrderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, joinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
+                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,

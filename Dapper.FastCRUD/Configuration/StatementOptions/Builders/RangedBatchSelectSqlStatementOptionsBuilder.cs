@@ -3,19 +3,19 @@
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
-    public interface IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>
-        :IRangedConditionalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>>,
-        IRelationalStatementOptionsSetter<TEntity, IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>>
+    public interface IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
+        :IRangedConditionalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IRelationalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>
     {
     }
 
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
-    internal class RangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>
-        : AggregatedSqlStatementOptionsBuilder<TEntity, IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>>, 
-        IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity>
+    internal class RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
+        : AggregatedSqlStatementOptionsBuilder<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>, 
+        IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
     {
-        protected override IRangedBatchSelectSqlStatementOptionsOptionsBuilder<TEntity> Builder => this;
+        protected override IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity> Builder => this;
     }
 }

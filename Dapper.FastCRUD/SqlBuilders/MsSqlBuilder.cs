@@ -1,7 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
@@ -86,29 +85,29 @@
         }
 
         protected override string ConstructFullSelectStatementInternal(
-            string selectColumns,
+            string selectClause,
             string fromClause,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
             long? limitRowsCount = null)
         {
-            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectColumns} FROM {fromClause}");
+            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectClause} FROM {fromClause}");
             if (whereClause != null)
             {
-                sql += string.Format(this.StatementFormatter, " WHERE {0}", whereClause);
+                sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause);
             }
             if (orderClause != null)
             {
-                sql += string.Format(this.StatementFormatter, " ORDER BY {0}", orderClause);
+                sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause);
             }
             if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " OFFSET {0} ROWS", skipRowsCount ?? 0);
+                sql += this.ResolveWithCultureInvariantFormatter($" OFFSET {skipRowsCount ?? 0} ROWS");
             }
             if (limitRowsCount.HasValue)
             {
-                sql += string.Format(CultureInfo.InvariantCulture, " FETCH NEXT {0} ROWS ONLY", limitRowsCount);
+                sql += this.ResolveWithCultureInvariantFormatter($" FETCH NEXT {limitRowsCount} ROWS ONLY");
             }
 
             return sql;

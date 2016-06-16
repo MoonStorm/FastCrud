@@ -28,10 +28,18 @@
         public GenericStatementSqlBuilder SqlBuilder => _sqlBuilder;
 
         /// <summary>
+        /// Combines the current instance with a joined entity.
+        /// </summary>
+        public ISqlStatements<TEntity> CombineWith<TJoinedEntity>(ISqlStatements<TJoinedEntity> joinedEntitySqlStatements)
+        {
+            return new TwoEntitiesRelationshipSqlStatements<TEntity,TJoinedEntity>(this, joinedEntitySqlStatements);
+        }
+
+        /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
@@ -44,7 +52,7 @@
         /// Performs an async SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return (await connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
@@ -57,7 +65,7 @@
         /// Performs an INSERT operation
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Insert(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
+        public void Insert(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
@@ -85,7 +93,7 @@
         /// Performs an INSERT operation
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task InsertAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
+        public async Task InsertAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
@@ -113,7 +121,7 @@
         /// Performs an UPDATE opration on an entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool UpdateById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public bool UpdateById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
             {
@@ -145,7 +153,7 @@
         /// Performs an UPDATE opration on an entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<bool> UpdateByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public async Task<bool> UpdateByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
             {
@@ -175,7 +183,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BulkUpdate(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
+        public int BulkUpdate(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -188,7 +196,7 @@
         /// Performs an UPDATE operation on multiple entities identified by an optional WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
+        public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
@@ -201,7 +209,7 @@
         /// Performs a DELETE operation on a single entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DeleteById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public bool DeleteById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullSingleDeleteStatement(),
@@ -214,7 +222,7 @@
         /// Performs a DELETE operation on a single entity identified by its keys.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementoptions)
+        public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementoptions)
         {
             return await connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullSingleDeleteStatement(),
@@ -227,7 +235,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BulkDelete(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public int BulkDelete(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.Execute(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
@@ -240,7 +248,7 @@
         /// Performs a DELETE operation using a WHERE clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> BulkDeleteAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public Task<int> BulkDeleteAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.ExecuteAsync(
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
@@ -253,7 +261,7 @@
         /// Performs a COUNT on a range of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Count(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public int Count(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.ExecuteScalar<int>(
                 _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
@@ -266,7 +274,7 @@
         /// Performs a COUNT on a range of items.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             return connection.ExecuteScalarAsync<int>(
                 _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
@@ -279,7 +287,7 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
             Requires.Argument(
                 (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
@@ -301,17 +309,21 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions statementoptions)
+        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            Requires.Argument(
+                (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
+                || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
+
             return connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause: statementoptions.WhereClause,
-                    orderClause: statementoptions.OrderClause,
-                    skipRowsCount: statementoptions.SkipResults,
-                    limitRowsCount: statementoptions.LimitResults),
-                statementoptions.Parameters,
-                transaction: statementoptions.Transaction,
-                commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds);
+                    whereClause: statementOptions.WhereClause,
+                    orderClause: statementOptions.OrderClause,
+                    skipRowsCount: statementOptions.SkipResults,
+                    limitRowsCount: statementOptions.LimitResults),
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

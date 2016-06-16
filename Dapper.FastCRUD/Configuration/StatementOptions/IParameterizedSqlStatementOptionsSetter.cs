@@ -3,12 +3,12 @@
     /// <summary>
     /// Parameterized SQL statement options setter.
     /// </summary>
-    public interface IParameterizedSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
-        :IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsSetter>
+    public interface IParameterizedSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
+        :IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Sets the parameters to be used by the statement.
         /// </summary>
-        TStatementOptionsSetter WithParameters(object parameters);
+        TStatementOptionsBuilder WithParameters(object parameters);
     }
 }

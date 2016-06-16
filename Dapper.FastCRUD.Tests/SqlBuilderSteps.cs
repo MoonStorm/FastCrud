@@ -61,7 +61,7 @@
         [When(@"I construct a complex join query for workstation using individual identifier resolvers")]
         public void WhenIConstructAComplexJoinQueryForWorkstationUsingIndividualIdentifierResolvers()
         {
-            _buildingRawJoinQueryStatement = _currentSqlBuilder.Format(
+            _buildingRawJoinQueryStatement = _currentSqlBuilder.Reso(
                 $@" SELECT {nameof(Workstation):T}.{nameof(Workstation.WorkstationId):C}, {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))}
                     FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
                     WHERE {nameof(Workstation):T}.{nameof(Workstation.BuildingId):C} = {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))}" );

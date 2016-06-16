@@ -1,12 +1,16 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
 
-    internal abstract class AggregatedSqlStatementOptionsBuilder<TEntity, TStatementOptionsBuilder>:AggregatedSqlStatementOptions
+    /// <summary>
+    /// Common options builder for all the non-JOIN type queries.
+    /// </summary>
+    internal abstract class AggregatedSqlStatementOptionsBuilder<TEntity, TStatementOptionsBuilder> : AggregatedSqlStatementOptions<TEntity>
     {
         /// <summary>
         /// Limits the results set by the top number of records returned.
@@ -94,14 +98,30 @@
         }
 
         /// <summary>
-        /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.
+        /// Includes a referred entity into the query. The relationship and the associated mappings must be set up prior to calling this method.
         /// </summary>
-        public TStatementOptionsBuilder Include<TReferredEntity>(Func<ISqlRelationOptionsSetter<TEntity, TReferredEntity>, ISqlRelationOptionsSetter<TEntity, TReferredEntity>> options = null)
+        public TStatementOptionsBuilder Include<TReferredEntity>(Action<ISqlRelationOptionsBuilder<TReferredEntity>> relationshipOptions = null)
         {
-            throw new NotImplementedException();
+            // set up the relationship options
+            var options = new SqlRelationOptionsBuilder<TReferredEntity>();
+            relationshipOptions?.Invoke(options);
+            this.RelationshipOptions[typeof(TReferredEntity)] = options;
+
+            // set up the factory chain
+            var priorSqlStatementsFactoryChain = this.SqlStatementsFactoryChain;
+
+            this.SqlStatementsFactoryChain = () =>
+            {
+                var currentSqlStatementsFactory = priorSqlStatementsFactoryChain != null
+                                                      ? priorSqlStatementsFactoryChain()
+                                                      : OrmConfiguration.GetSqlStatements<TEntity>(this.EntityMappingOverride);
+                var nextSqlStatementsFactory = currentSqlStatementsFactory.CombineWith<TReferredEntity>(OrmConfiguration.GetSqlStatements<TReferredEntity>(options.EntityMappingOverride));
+                return nextSqlStatementsFactory;
+            };
+
+            return this.Builder;
         }
 
         protected abstract TStatementOptionsBuilder Builder { get; }
-
     }
 }

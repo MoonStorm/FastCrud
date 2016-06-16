@@ -8,6 +8,7 @@
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
@@ -32,7 +33,14 @@
         private readonly Lazy<string> _fullSingleDeleteStatement;
         private readonly Lazy<string> _noConditionFullBatchDeleteStatement;
         private readonly Lazy<string> _noConditionFullCountStatement;
-        private readonly Lazy<string> _fullSingleSelectStatement; 
+        private readonly Lazy<string> _fullSingleSelectStatement;
+
+        // regular statement formatter to be used for parameter resolution.
+        private readonly SqlStatementFormatter _regularStatementFormatter;
+
+        // statement formatter that would treat the C identifier as TC
+        private readonly SqlStatementFormatter _forcedTableResolutionStatementFormatter;
+
 
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
@@ -46,7 +54,9 @@
             this.ParameterPrefix = databaseOptions.ParameterPrefix;
 
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
-            this.StatementFormatter = new SqlStatementFormatter(entityDescriptor,entityMapping,this);
+            _regularStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, false);
+            _forcedTableResolutionStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, true);
+
             this.EntityDescriptor = entityDescriptor;
             this.EntityMapping = entityMapping;
 
@@ -121,23 +131,6 @@
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
         protected string ParameterPrefix { get; }
-
-        /// <summary>
-        /// Gets the statement formatter to be used for parameter resolution.
-        /// </summary>
-        protected SqlStatementFormatter StatementFormatter { get; }
-
-        /// <summary>
-        /// Produces a formatted string from a formattable string.
-        /// Table and column names will be resolved, and identifier will be properly delimited.
-        /// </summary>
-        /// <param name="rawSql">The raw sql to format</param>
-        /// <returns>Properly formatted SQL statement</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string Format(FormattableString rawSql)
-        {
-            return rawSql.ToString(this.StatementFormatter);
-        }
 
         /// <summary>
         /// Returns the table name associated with the current entity.
@@ -290,6 +283,16 @@
         }
 
         /// <summary>
+        /// Constructs the count part of the select statement.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ConstructCountSelectClause()
+        {
+            //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
+            return "COUNT(*)";
+        }
+
+        /// <summary>
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -351,36 +354,71 @@
         /// Constructs a select statement containing joined entities.
         /// </summary>
         public void ConstructFullJoinSelectStatement(
-            GenericStatementSqlBuilder[] joinedSqlBuilders,
             out string fullStatement,
             out string splitOnExpression,
+            IEnumerable<StatementSqlBuilderJoinInstruction> joinInstructions,
+            string selectClause = null,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
             long? limitRowsCount = null)
         {
-            Requires.Argument(joinedSqlBuilders.Length > 0, nameof(joinedSqlBuilders), "Unable to create a full JOIN statement when no extra SQL builders were provided");
+            Requires.NotNull(joinInstructions, nameof(joinInstructions));
+            var allSqlJoinInstructions = new[] { new StatementSqlBuilderJoinInstruction(this, SqlJoinType.LeftOuterJoin,  whereClause, orderClause) }.Concat(joinInstructions).ToArray();
+            Requires.Argument(allSqlJoinInstructions.Length > 1, nameof(joinInstructions), "Unable to create a full JOIN statement when no extra SQL builders were provided");
 
-            var allSqlBuilders = new[] { this }.Concat(joinedSqlBuilders).ToArray();
-            var selectClauseBuilder = new StringBuilder();
+            var selectClauseBuilder = selectClause == null ? new StringBuilder() : null;
             var fromClauseBuilder = new StringBuilder();
             var splitOnExpressionBuilder = new StringBuilder();
+            var additionalWhereClauseBuilder = new StringBuilder();
+            var additionalOrderClauseBuilder = new StringBuilder();
 
-            for(var leftJoinSqlBuilderIndex = 0; leftJoinSqlBuilderIndex < allSqlBuilders.Length; leftJoinSqlBuilderIndex++)
+            for(var leftJoinInstructionIndex = 0; leftJoinInstructionIndex < allSqlJoinInstructions.Length; leftJoinInstructionIndex++)
             {
-                var leftJoinSqlBuilder = allSqlBuilders[leftJoinSqlBuilderIndex];
-                if (leftJoinSqlBuilderIndex > 0)
+                var leftJoinSqlInstruction = allSqlJoinInstructions[leftJoinInstructionIndex];
+                var leftJoinSqlBuilder = leftJoinSqlInstruction.SqlBuilder;
+
+                // prepare the aditional where clause
+                var leftJoinAdditionalWhereClause = leftJoinSqlInstruction.WhereClause;
+                if (leftJoinAdditionalWhereClause != null)
                 {
-                    selectClauseBuilder.Append(',');
+                    if (additionalWhereClauseBuilder.Length > 0)
+                    {
+                        additionalWhereClauseBuilder.Append(" AND ");
+                    }
+
+                    additionalWhereClauseBuilder.Append('(');
+                    additionalWhereClauseBuilder.Append(leftJoinSqlBuilder.ResolveWithSqlFormatter(leftJoinAdditionalWhereClause, forceTableColumnResolution: true));
+                    additionalWhereClauseBuilder.Append(')');
+                }
+
+                // prepare the additional order clause
+                var leftJoinAdditionalOrderClause = leftJoinSqlInstruction.OrderClause;
+                if (leftJoinAdditionalOrderClause != null)
+                {
+                    if (additionalOrderClauseBuilder.Length > 0)
+                    {
+                        additionalOrderClauseBuilder.Append(',');
+                    }
+
+                    additionalOrderClauseBuilder.Append(leftJoinSqlBuilder.ResolveWithSqlFormatter(leftJoinAdditionalOrderClause, forceTableColumnResolution: true));
                 }
 
                 // add the select columns
-                selectClauseBuilder.Append(leftJoinSqlBuilder.ConstructColumnEnumerationForSelect(leftJoinSqlBuilder.GetTableName()));
+                if (selectClauseBuilder != null)
+                {
+                    if (leftJoinInstructionIndex > 0)
+                    {
+                        selectClauseBuilder.Append(',');
+                    }
+
+                    selectClauseBuilder.Append(leftJoinSqlBuilder.ConstructColumnEnumerationForSelect(leftJoinSqlBuilder.GetTableName()));
+                }
 
                 // add the split on expression
-                if (leftJoinSqlBuilderIndex > 0)
+                if (leftJoinInstructionIndex > 0)
                 {
-                    if (leftJoinSqlBuilderIndex > 1)
+                    if (leftJoinInstructionIndex > 1)
                     {
                         splitOnExpressionBuilder.Append(',');
                     }
@@ -389,22 +427,33 @@
                 }
 
                 // build the join expression
-                if (leftJoinSqlBuilderIndex > 0)
+                if (leftJoinInstructionIndex > 0)
                 {
-                    fromClauseBuilder.Append(" LEFT OUTER JOIN ");
+                    switch (leftJoinSqlInstruction.JoinType)
+                    {
+                        case SqlJoinType.LeftOuterJoin:
+                            fromClauseBuilder.Append(" LEFT OUTER JOIN ");
+                            break;
+                        case SqlJoinType.InnerJoin:
+                            fromClauseBuilder.Append(" JOIN ");
+                            break;
+                        default:
+                            throw new NotSupportedException($"Join '{leftJoinSqlInstruction.JoinType}' is not supported");
+                    }
                 }
 
                 fromClauseBuilder.Append(leftJoinSqlBuilder.GetTableName());
 
                 // append the join condition
-                if (leftJoinSqlBuilderIndex > 0)
+                if (leftJoinInstructionIndex > 0)
                 {
                     fromClauseBuilder.Append(" ON ");
 
                     // discover and append all the join conditions for the current table
-                    for (var rightJoinSqlBuilderIndex = 0; rightJoinSqlBuilderIndex < leftJoinSqlBuilderIndex; rightJoinSqlBuilderIndex++)
+                    for (var rightJoinSqlBuilderIndex = 0; rightJoinSqlBuilderIndex < leftJoinInstructionIndex; rightJoinSqlBuilderIndex++)
                     {
-                        var rightJoinSqlBuilder = allSqlBuilders[rightJoinSqlBuilderIndex];
+                        var rightJoinSqlInstruction = allSqlJoinInstructions[rightJoinSqlBuilderIndex];
+                        var rightJoinSqlBuilder = rightJoinSqlInstruction.SqlBuilder;
 
                         // get the column on the left side of the join - current SQL builder
                         PropertyMapping[] leftJoinColumns;
@@ -458,59 +507,35 @@
             }
 
             splitOnExpression = splitOnExpressionBuilder.ToString();
-            fullStatement = this.ConstructFullSelectStatementInternal(selectClauseBuilder.ToString(), fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount);
+
+            // deal with the additional where and order clauses
+            if (additionalWhereClauseBuilder.Length > 0)
+            {
+                if (whereClause == null)
+                {
+                    whereClause = $"{additionalWhereClauseBuilder}";
+                }
+                else
+                {
+                    whereClause = $"{whereClause} AND {additionalWhereClauseBuilder}";
+                }
+            }
+
+            if (additionalOrderClauseBuilder.Length > 0)
+            {
+                if (orderClause == null)
+                {
+                    orderClause = $"{additionalOrderClauseBuilder}";
+                }
+                else
+                {
+                    orderClause = $"{orderClause}, {additionalOrderClauseBuilder}";
+                }
+            }
+
+            selectClause = selectClauseBuilder.ToString();
+            fullStatement = this.ConstructFullSelectStatementInternal(selectClause, fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount);
         }
-
-        //public EntityRelationship GetRelationship(IStatementSqlBuilder destination)
-        //{
-        //    return _entityRelationships.GetOrAdd(
-        //        destination,
-        //        destinationSqlBuilder => new EntityRelationship(this, destinationSqlBuilder));
-        //}
-
-        //public string ConstructMultiSelectStatement(IStatementSqlBuilder[] additionalIncludes)
-        //{
-        //    var queryBuilder = new StringBuilder();
-        //    //queryBuilder.Append($"SELECT {this.ConstructColumnEnumerationForSelect(this.GetTableName())}");
-        //    //foreach (var additionalInclude in additionalIncludes)
-        //    //{
-        //    //    queryBuilder.Append($",{additionalInclude.ConstructColumnEnumerationForSelect(additionalInclude.GetTableName())}");
-        //    //}
-        //    //queryBuilder.Append($" FROM {this.GetTableName()}");
-
-        //    //IStatementSqlBuilder leftSqlBuilder = this;
-
-        //    //foreach (var rightSqlBuilder in additionalIncludes)
-        //    //{
-        //    //    // find the property linked to this entity
-        //    //    var atLeastOneLinkProp = false;
-        //    //    var joinLeftProps = joinLeftSqlBuilder.ForeignEntityProperties
-        //    //        .Where(propInfo => propInfo.Descriptor.PropertyType == additionalInclude.EntityMapping.EntityType)
-        //    //        .Select(propInfo => joinLeftSqlBuilder.EntityMapping.PropertyMappings[propInfo.PropertyName]);
-
-        //    //    foreach (var joinLeftProp in joinLeftProps)
-        //    //    {
-        //    //        if (!atLeastOneLinkProp)
-        //    //        {
-        //    //            atLeastOneLinkProp = true;
-        //    //            queryBuilder.Append($" LEFT OUTER JOIN {additionalInclude.GetTableName()} ON ");
-        //    //        }
-        //    //        else
-        //    //        {
-        //    //            queryBuilder.Append(" AND ");
-        //    //        }
-        //    //        queryBuilder.Append( $"{joinLeftSqlBuilder.GetColumnName(joinLeftProp, joinLeftSqlBuilder.GetTableName())}={additionalInclude.GetColumnName(joinLeftProp, additionalInclude.GetTableName())}");
-        //    //    }
-
-        //    //    if (!atLeastOneLinkProp)
-        //    //    {
-        //    //        throw new InvalidOperationException($"No foreign key constraint was found between the primary entity {joinLeftSqlBuilder.EntityMapping.EntityType} and the foreign entity {additionalInclude.EntityMapping.EntityType}");
-        //    //    }
-        //    //    joinLeftSqlBuilder = additionalInclude;
-        //    //}
-
-        //    return queryBuilder.ToString();
-        //}
 
         /// <summary>
         /// Returns the table name associated with the current entity.
@@ -662,10 +687,9 @@
         /// </summary>
         protected virtual string ConstructFullCountStatementInternal(FormattableString whereClause = null)
         {
-            //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
             return (whereClause == null)
-                       ? this.ResolveWithCultureInvariantFormatter($"SELECT COUNT(*) FROM {this.GetTableName()}")
-                       : this.ResolveWithSqlFormatter($"SELECT COUNT(*) FROM {this.GetTableName()} WHERE {whereClause}");
+                       ? this.ResolveWithCultureInvariantFormatter($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()}")
+                       : this.ResolveWithSqlFormatter($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()} WHERE {whereClause}");
         }
 
         /// <summary>
@@ -683,23 +707,44 @@
         }
 
         protected abstract string ConstructFullSelectStatementInternal(
-            string selectColumns,
+            string selectClause,
             string fromClause,
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
             long? limitRowsCount = null);
 
+        /// <summary>
+        /// Resolves a formattable string using the invariant culture, ignoring any special identifiers.
+        /// </summary>
+        /// <param name="formattableString">Raw formattable string</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected string ResolveWithCultureInvariantFormatter(FormattableString formattableString)
         {
             return formattableString.ToString(CultureInfo.InvariantCulture);
         }
 
+        /// <summary>
+        /// Resolves a formattable string using the SQL formatter
+        /// </summary>
+        /// <param name="formattableString">Raw formattable string</param>
+        /// <param name="forceTableColumnResolution">If true, the table is always going to be used as alias for column identifiers</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected string ResolveWithSqlFormatter(FormattableString formattableString)
+        protected string ResolveWithSqlFormatter(FormattableString formattableString, bool forceTableColumnResolution = false)
         {
-            return formattableString.ToString(this.StatementFormatter);
+            return formattableString.ToString(forceTableColumnResolution ? _forcedTableResolutionStatementFormatter : _regularStatementFormatter);
+        }
+
+        /// <summary>
+        /// Produces a formatted string from a formattable string.
+        /// Table and column names will be resolved, and identifier will be properly delimited.
+        /// </summary>
+        /// <param name="rawSql">The raw sql to format</param>
+        /// <returns>Properly formatted SQL statement</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        string ISqlBuilder.Format(FormattableString rawSql)
+        {
+            return this.ResolveWithSqlFormatter(rawSql);
         }
     }
 }

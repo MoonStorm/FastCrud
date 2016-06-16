@@ -12,13 +12,22 @@
     public sealed class SqlStatementFormatter:IFormatProvider, ICustomFormatter
     {
         private static readonly Type _customFormatterType = typeof(ICustomFormatter);
+        private readonly bool _forceColumnAsTableColumnResolution;
 
-        internal SqlStatementFormatter(EntityDescriptor mainEntityDescriptor, EntityMapping mainEntityMapping, ISqlBuilder mainEntitySqlBuilder)
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="mainEntityDescriptor">Main entity descriptor</param>
+        /// <param name="mainEntityMapping">Main entity mappings</param>
+        /// <param name="mainEntitySqlBuilder">SQL mapper for the main entity</param>
+        /// <param name="forceColumnAsTableColumnResolution">If true, the format identifier 'C' will be treated as 'TC' </param>
+        internal SqlStatementFormatter(EntityDescriptor mainEntityDescriptor, EntityMapping mainEntityMapping, ISqlBuilder mainEntitySqlBuilder, bool forceColumnAsTableColumnResolution)
         {
+            _forceColumnAsTableColumnResolution = forceColumnAsTableColumnResolution;
             this.MainEntityType = mainEntityDescriptor.EntityType;
             this.MainEntityDescriptor = mainEntityDescriptor;
             this.MainEntitySqlBuilder = mainEntitySqlBuilder;
-            this.MainEntityMapping = mainEntityMapping;
+            this.MainEntityMapping = mainEntityMapping;            
         }
 
         /// <summary>
@@ -78,17 +87,25 @@
             string stringArg;
             if ((stringArg = arg as string) != null)
             {
-                    switch (format)
-                    {
-                        case "TC":
-                            return string.Format(CultureInfo.InvariantCulture,"{0}.{1}",this.MainEntitySqlBuilder.GetTableName(), this.MainEntitySqlBuilder.GetColumnName(stringArg));
-                        case "T":
-                            return this.MainEntitySqlBuilder.GetTableName();
-                        case "C":
-                            return this.MainEntitySqlBuilder.GetColumnName(stringArg);
-                        case "I":
-                            return this.MainEntitySqlBuilder.GetDelimitedIdentifier(stringArg);
-                    }
+                if (_forceColumnAsTableColumnResolution && format == "C")
+                {
+                    format = "TC";
+                }
+                switch (format)
+                {
+                    case "TC":
+                        return string.Format(
+                            CultureInfo.InvariantCulture,
+                            "{0}.{1}",
+                            this.MainEntitySqlBuilder.GetTableName(),
+                            this.MainEntitySqlBuilder.GetColumnName(stringArg));
+                    case "T":
+                        return this.MainEntitySqlBuilder.GetTableName();
+                    case "C":
+                        return this.MainEntitySqlBuilder.GetColumnName(stringArg);
+                    case "I":
+                        return this.MainEntitySqlBuilder.GetDelimitedIdentifier(stringArg);
+                }
             }
 
             IFormattable formattableArg;

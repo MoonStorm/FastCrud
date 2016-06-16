@@ -3,18 +3,18 @@
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
-    public interface ISelectSqlStatementOptionsBuilder<TEntity>
-        : IRelationalStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
+    public interface ISelectSqlSqlStatementOptionsBuilder<TEntity>
+        : IRelationalSqlStatementOptionsSetter<TEntity, ISelectSqlSqlStatementOptionsBuilder<TEntity>>
     {
     }
 
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
-    internal class SelectSqlStatementOptionsBuilder<TEntity>
-        : AggregatedSqlStatementOptionsBuilder<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
-        , ISelectSqlStatementOptionsBuilder<TEntity>
+    internal class SelectSqlSqlStatementOptionsBuilder<TEntity>
+        : AggregatedSqlStatementOptionsBuilder<TEntity, ISelectSqlSqlStatementOptionsBuilder<TEntity>>
+        , ISelectSqlSqlStatementOptionsBuilder<TEntity>
     {
-        protected override ISelectSqlStatementOptionsBuilder<TEntity> Builder => this;
+        protected override ISelectSqlSqlStatementOptionsBuilder<TEntity> Builder => this;
     }
 }
