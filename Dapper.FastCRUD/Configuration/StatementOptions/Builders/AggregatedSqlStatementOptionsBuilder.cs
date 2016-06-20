@@ -112,9 +112,7 @@
 
             this.SqlStatementsFactoryChain = () =>
             {
-                var currentSqlStatementsFactory = priorSqlStatementsFactoryChain != null
-                                                      ? priorSqlStatementsFactoryChain()
-                                                      : OrmConfiguration.GetSqlStatements<TEntity>(this.EntityMappingOverride);
+                var currentSqlStatementsFactory = priorSqlStatementsFactoryChain();
                 var nextSqlStatementsFactory = currentSqlStatementsFactory.CombineWith<TReferredEntity>(OrmConfiguration.GetSqlStatements<TReferredEntity>(options.EntityMappingOverride));
                 return nextSqlStatementsFactory;
             };

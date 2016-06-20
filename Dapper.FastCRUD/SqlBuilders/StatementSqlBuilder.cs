@@ -17,7 +17,7 @@
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
-        private static readonly RelationshipOrderComparer _relationshipOrderComparer = new RelationshipOrderComparer();
+        //private static readonly RelationshipOrderComparer _relationshipOrderComparer = new RelationshipOrderComparer();
 
         //private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
         private readonly Lazy<string> _noAliasKeysWhereClause;
@@ -82,22 +82,22 @@
             this.InsertProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromInserts)
                 .ToArray();
-            this.ParentChildRelationshipProperties = this.EntityMapping.PropertyMappings
-                .Where(propMapping => propMapping.Value.ParentChildRelationship != null)
-                .Select(propMapping => propMapping.Value)
-                .GroupBy(propInfo => propInfo.ParentChildRelationship.ReferencedEntityType)
-                .ToDictionary(
-                    groupedTypePropInfo => groupedTypePropInfo.Key, 
-                    groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ParentChildRelationship.Order, 
-                    _relationshipOrderComparer).ToArray());
-            this.ChildParentRelationshipProperties = this.EntityMapping.PropertyMappings
-                .Where(propMapping => propMapping.Value.ChildParentRelationship != null)
-                .Select(propMapping => propMapping.Value)
-                .GroupBy(propInfo => propInfo.ChildParentRelationship.ReferencedEntityType)
-                .ToDictionary(
-                    groupedTypePropInfo => groupedTypePropInfo.Key,
-                    groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ChildParentRelationship.Order,
-                    _relationshipOrderComparer).ToArray());
+            //this.ParentChildRelationshipProperties = this.EntityMapping.PropertyMappings
+            //    .Where(propMapping => propMapping.Value.ParentChildRelationship != null)
+            //    .Select(propMapping => propMapping.Value)
+            //    .GroupBy(propInfo => propInfo.ParentChildRelationship.ReferencedEntityType)
+            //    .ToDictionary(
+            //        groupedTypePropInfo => groupedTypePropInfo.Key, 
+            //        groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ParentChildRelationship.Order, 
+            //        _relationshipOrderComparer).ToArray());
+            //this.ChildParentRelationshipProperties = this.EntityMapping.PropertyMappings
+            //    .Where(propMapping => propMapping.Value.ChildParentRelationship != null)
+            //    .Select(propMapping => propMapping.Value)
+            //    .GroupBy(propInfo => propInfo.ChildParentRelationship.ReferencedEntityType)
+            //    .ToDictionary(
+            //        groupedTypePropInfo => groupedTypePropInfo.Key,
+            //        groupedTypePropInfo => groupedTypePropInfo.OrderBy(propInfo => propInfo.ChildParentRelationship.Order,
+            //        _relationshipOrderComparer).ToArray());
 
             _noAliasTableName = new Lazy<string>(()=>this.GetTableNameInternal(),LazyThreadSafetyMode.PublicationOnly);
             _noAliasKeysWhereClause = new Lazy<string>(()=>this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
@@ -119,8 +119,8 @@
         public EntityDescriptor EntityDescriptor { get; }
         public EntityMapping EntityMapping { get; }
         public PropertyMapping[] SelectProperties { get; }
-        public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
-        public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
+        //public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
+        //public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
         public PropertyMapping[] KeyProperties { get; }
         public PropertyMapping[] InsertProperties { get; }
         public PropertyMapping[] UpdateProperties { get; }
@@ -331,6 +331,18 @@
         }
 
         /// <summary>
+        /// Produces a formatted string from a formattable string.
+        /// Table and column names will be resolved, and identifier will be properly delimited.
+        /// </summary>
+        /// <param name="rawSql">The raw sql to format</param>
+        /// <returns>Properly formatted SQL statement</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string Format(FormattableString rawSql)
+        {
+            return this.ResolveWithSqlFormatter(rawSql);
+        }
+
+        /// <summary>
         /// Returns a delimited SQL identifier.
         /// </summary>
         /// <param name="sqlIdentifier">Delimited or non-delimited SQL identifier</param>
@@ -455,14 +467,14 @@
                         var rightJoinSqlInstruction = allSqlJoinInstructions[rightJoinSqlBuilderIndex];
                         var rightJoinSqlBuilder = rightJoinSqlInstruction.SqlBuilder;
 
-                        // get the column on the left side of the join - current SQL builder
-                        PropertyMapping[] leftJoinColumns;
+                        // get the columns on the left side of the join - current SQL builder
+                        EntityMappingRelationship leftJoinEntityRelationship;
                         bool leftJoinParentChildRelationship;
-                        if (leftJoinSqlBuilder.ChildParentRelationshipProperties.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinColumns))
+                        if (leftJoinSqlBuilder.EntityMapping.ChildParentRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = false;
                         }
-                        else if (leftJoinSqlBuilder.ParentChildRelationshipProperties.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinColumns))
+                        else if (leftJoinSqlBuilder.EntityMapping.ParentChildRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = true;
                         }
@@ -471,12 +483,15 @@
                             throw new InvalidOperationException($"Could not find a relationship defined on '{leftJoinSqlBuilder.EntityMapping.EntityType}' involving '{rightJoinSqlBuilder.EntityMapping.EntityType}'");
                         }
 
+                        EntityMappingRelationship rightJoinEntityRelationship;
                         // do the same for the right side
-                        PropertyMapping[] rightJoinColumns;
-                        if (!(leftJoinParentChildRelationship ? rightJoinSqlBuilder.ChildParentRelationshipProperties : rightJoinSqlBuilder.ParentChildRelationshipProperties).TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinColumns))
+                        if (!(leftJoinParentChildRelationship ? rightJoinSqlBuilder.EntityMapping.ChildParentRelationships : rightJoinSqlBuilder.EntityMapping.ParentChildRelationships).TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinEntityRelationship))
                         {
                             throw new InvalidOperationException($"Could not find a matching relationship defined on '{rightJoinSqlBuilder.EntityMapping.EntityType}' involving '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
                         }
+
+                        PropertyMapping[] leftJoinColumns = leftJoinEntityRelationship.ReferencingKeyProperties;
+                        PropertyMapping[] rightJoinColumns = rightJoinEntityRelationship.ReferencingKeyProperties;
 
                         fromClauseBuilder.Append('(');
                         for (var leftJoinColumnIndex = 0; leftJoinColumnIndex<leftJoinColumns.Length; leftJoinColumnIndex++)
@@ -507,34 +522,10 @@
             }
 
             splitOnExpression = splitOnExpressionBuilder.ToString();
-
-            // deal with the additional where and order clauses
-            if (additionalWhereClauseBuilder.Length > 0)
-            {
-                if (whereClause == null)
-                {
-                    whereClause = $"{additionalWhereClauseBuilder}";
-                }
-                else
-                {
-                    whereClause = $"{whereClause} AND {additionalWhereClauseBuilder}";
-                }
-            }
-
-            if (additionalOrderClauseBuilder.Length > 0)
-            {
-                if (orderClause == null)
-                {
-                    orderClause = $"{additionalOrderClauseBuilder}";
-                }
-                else
-                {
-                    orderClause = $"{orderClause}, {additionalOrderClauseBuilder}";
-                }
-            }
-
+            whereClause = $"{additionalWhereClauseBuilder}";
+            orderClause = $"{additionalOrderClauseBuilder}";
             selectClause = selectClauseBuilder.ToString();
-            fullStatement = this.ConstructFullSelectStatementInternal(selectClause, fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount);
+            fullStatement = this.ConstructFullSelectStatementInternal(selectClause, fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount, true);
         }
 
         /// <summary>
@@ -712,7 +703,8 @@
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null);
+            long? limitRowsCount = null,
+            bool forceTableColumnResolution = false);
 
         /// <summary>
         /// Resolves a formattable string using the invariant culture, ignoring any special identifiers.
@@ -733,18 +725,6 @@
         protected string ResolveWithSqlFormatter(FormattableString formattableString, bool forceTableColumnResolution = false)
         {
             return formattableString.ToString(forceTableColumnResolution ? _forcedTableResolutionStatementFormatter : _regularStatementFormatter);
-        }
-
-        /// <summary>
-        /// Produces a formatted string from a formattable string.
-        /// Table and column names will be resolved, and identifier will be properly delimited.
-        /// </summary>
-        /// <param name="rawSql">The raw sql to format</param>
-        /// <returns>Properly formatted SQL statement</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        string ISqlBuilder.Format(FormattableString rawSql)
-        {
-            return this.ResolveWithSqlFormatter(rawSql);
         }
     }
 }

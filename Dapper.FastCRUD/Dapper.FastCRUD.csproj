@@ -84,7 +84,6 @@
     <Compile Include="Mappings\EntityMappingRelationship.cs" />
     <Compile Include="Mappings\DatabaseGeneratedDefaultValueAttribute.cs" />
     <Compile Include="Mappings\PropertyMappingRelationship.cs" />
-    <None Include="ObsoleteDapperExtensions.cs" />
     <Compile Include="DapperExtensions.cs" />
     <Compile Include="EntityDescriptors\EntityDescriptor.cs" />
     <Compile Include="EntityDescriptors\TypedEntityDescriptor.cs" />
@@ -98,10 +97,12 @@
     <Compile Include="Formatters\SqlEntityFormattableParameter.cs" />
     <Compile Include="Formatters\SqlStatementFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlBuilders\RelationshipOrderComparer.cs" />
+    <None Include="Mappings\RelationshipOrderComparer.cs" />
     <None Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilder_notused.cs" />
     <None Include="SqlBuilders\Relationships\EntityRelationshipSqlBuilderNode_notused.cs" />
     <Compile Include="SqlBuilders\StatementSqlBuilderJoinInstruction.cs" />
+    <Compile Include="SqlStatements\RelationshipEntityInstanceBuilder.cs" />
+    <Compile Include="SqlStatements\RelationshipEntityInstanceBuilderIdentity.cs" />
     <Compile Include="SqlStatements\RelationshipSqlStatements.cs" />
     <Compile Include="SqlStatements\ThreeEntitiesRelationshipSqlStatements.cs" />
     <Compile Include="SqlStatements\TwoEntitiesRelationshipSqlStatements.cs" />

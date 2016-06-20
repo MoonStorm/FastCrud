@@ -1,10 +1,15 @@
 ﻿namespace Dapper.FastCrud.Tests.Models
 {
+    using System.Linq;
+
     public partial class Workstation
     {
         protected bool Equals(Workstation other)
         {
-            return this.WorkstationId == other.WorkstationId && string.Equals(this.Name, other.Name) && this.AccessLevel == other.AccessLevel;
+            return this.WorkstationId == other.WorkstationId
+                   && string.Equals(this.Name, other.Name)
+                   && this.AccessLevel == other.AccessLevel
+                   && ((this.Employees == null && other.Employees == null) || (this.Employees!=null && other.Employees!=null && !this.Employees.Except(other.Employees).Any()));
         }
 
         /// <summary>

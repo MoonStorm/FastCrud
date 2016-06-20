@@ -25,9 +25,7 @@
         {
             var options = new SelectSqlSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .SelectById(connection, entityKeys, options);
+            return options.SqlStatementsFactoryChain().SelectById(connection, entityKeys, options);
         }
 
         /// <summary>
@@ -45,9 +43,7 @@
         {
             var options = new SelectSqlSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .SelectByIdAsync(connection, entityKeys, options);
+            return options.SqlStatementsFactoryChain().SelectByIdAsync(connection, entityKeys, options);
         }
 
         /// <summary>
@@ -63,9 +59,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .Insert(connection, entityToInsert, options);
+            options.SqlStatementsFactoryChain().Insert(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -81,8 +75,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                                   .InsertAsync(connection, entityToInsert, options);
+            return options.SqlStatementsFactoryChain().InsertAsync(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -99,8 +92,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                                   .UpdateById(connection, entityToUpdate, options);
+            return options.SqlStatementsFactoryChain().UpdateById(connection, entityToUpdate, options);
         }
 
         /// <summary>
@@ -120,8 +112,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                                   .UpdateByIdAsync(connection, entityToUpdate, options);
+            return options.SqlStatementsFactoryChain().UpdateByIdAsync(connection, entityToUpdate, options);
         }
 
         /// <summary>
@@ -142,8 +133,7 @@
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration.GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                                   .BulkUpdate(connection, updateData, options);
+            return options.SqlStatementsFactoryChain().BulkUpdate(connection, updateData, options);
         }
 
         /// <summary>
@@ -164,9 +154,7 @@
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BulkUpdateAsync(connection, updateData, options);
+            return options.SqlStatementsFactoryChain().BulkUpdateAsync(connection, updateData, options);
         }
 
         /// <summary>
@@ -184,9 +172,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .DeleteById(connection, entityToDelete, options);
+            return options.SqlStatementsFactoryChain().DeleteById(connection, entityToDelete, options);
         }
 
         /// <summary>
@@ -204,9 +190,7 @@
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .DeleteByIdAsync(connection, entityToDelete, options);
+            return options.SqlStatementsFactoryChain().DeleteByIdAsync(connection, entityToDelete, options);
         }
 
         /// <summary>
@@ -222,9 +206,7 @@
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BulkDelete(connection, options);
+            return options.SqlStatementsFactoryChain().BulkDelete(connection, options);
         }
 
         /// <summary>
@@ -240,9 +222,7 @@
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BulkDeleteAsync(connection, options);
+            return options.SqlStatementsFactoryChain().BulkDeleteAsync(connection, options);
         }
 
         /// <summary>
@@ -258,9 +238,7 @@
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .Count(connection, options);
+            return options.SqlStatementsFactoryChain().Count(connection, options);
         }
 
         /// <summary>
@@ -276,9 +254,7 @@
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .CountAsync(connection, options);
+            return options.SqlStatementsFactoryChain().CountAsync(connection, options);
         }
 
         /// <summary>
@@ -294,9 +270,7 @@
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BatchSelect(connection, options);
+            return options.SqlStatementsFactoryChain().BatchSelect(connection, options);
         }
 
         /// <summary>
@@ -312,9 +286,7 @@
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return OrmConfiguration
-                .GetSqlStatements<TEntity>(options.EntityMappingOverride)
-                .BatchSelectAsync(connection, options);
+            return options.SqlStatementsFactoryChain().BatchSelectAsync(connection, options);
         }
     }
 }

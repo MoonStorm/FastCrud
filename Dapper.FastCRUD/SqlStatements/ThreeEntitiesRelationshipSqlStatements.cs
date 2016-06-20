@@ -57,15 +57,20 @@
                 this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause:$"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(
+                this.SqlBuilder.EntityMapping, 
+                _firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping,
+                _secondJoinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
-                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref firstJoinedEntity, ref secondJoinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
+                splitOn: splitOnCondition,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).SingleOrDefault();
         }
@@ -84,15 +89,20 @@
                 this.ConstructJoinInstructions(statementOptions, _firstJoinedEntitySqlStatements.SqlBuilder, _secondJoinedEntitySqlStatements.SqlBuilder),
                 whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(
+                this.SqlBuilder.EntityMapping,
+                _firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping,
+                _secondJoinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             var queriedEntities = await connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
-                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref firstJoinedEntity, ref secondJoinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
+                splitOn: splitOnCondition,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
 
@@ -163,15 +173,20 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(
+                this.SqlBuilder.EntityMapping,
+                _firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping,
+                _secondJoinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
-                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref firstJoinedEntity, ref secondJoinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,
+                splitOn: splitOnCondition,
                 buffered: !statementOptions.ForceStreamResults,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -197,15 +212,20 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(
+                this.SqlBuilder.EntityMapping,
+                _firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping,
+                _secondJoinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, firstJoinedEntity);
-                    this.AttachEntity(_firstJoinedEntitySqlStatements.SqlBuilder.EntityMapping, firstJoinedEntity, secondJoinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref firstJoinedEntity, ref secondJoinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,
+                splitOn: splitOnCondition,
                 buffered: !statementOptions.ForceStreamResults,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);

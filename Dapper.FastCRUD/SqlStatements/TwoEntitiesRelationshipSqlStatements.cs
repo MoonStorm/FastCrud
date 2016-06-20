@@ -49,14 +49,17 @@
                 this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
                 whereClause:$"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(this.SqlBuilder.EntityMapping, _joinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.Query<TMainEntity, TFirstJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, joinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref joinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
+                splitOn:splitOnCondition,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).SingleOrDefault();
         }
@@ -75,14 +78,17 @@
                 this.ConstructJoinInstructions(statementOptions, _joinedEntitySqlStatements.SqlBuilder),
                 whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(this.SqlBuilder.EntityMapping, _joinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             var queriedEntities = await connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, joinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref joinedEntity);
                     return mainEntity;
                 },
                 keyEntity,
+                splitOn: splitOnCondition,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
 
@@ -153,14 +159,17 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(this.SqlBuilder.EntityMapping, _joinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.Query<TMainEntity, TFirstJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, joinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref joinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,
+                splitOn: splitOnCondition,
                 buffered: !statementOptions.ForceStreamResults,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -186,14 +195,17 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(this.SqlBuilder.EntityMapping, _joinedEntitySqlStatements.SqlBuilder.EntityMapping);
+
             return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TMainEntity>(
                 statement,
                 (mainEntity, joinedEntity) =>
                 {
-                    this.AttachEntity(this.SqlBuilder.EntityMapping, mainEntity, joinedEntity);
+                    relationshipInstanceBuilder.Add(ref mainEntity, ref joinedEntity);
                     return mainEntity;
                 },
                 statementOptions.Parameters,
+                splitOn: splitOnCondition,
                 buffered: !statementOptions.ForceStreamResults,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);

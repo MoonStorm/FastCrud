@@ -90,16 +90,17 @@
             FormattableString whereClause = null,
             FormattableString orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null)
+            long? limitRowsCount = null,
+            bool forceTableColumnResolution = false)
         {
             var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectClause} FROM {fromClause}");
             if (whereClause != null)
             {
-                sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause);
+                sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause, forceTableColumnResolution);
             }
             if (orderClause != null)
             {
-                sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause);
+                sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause, forceTableColumnResolution);
             }
             if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {

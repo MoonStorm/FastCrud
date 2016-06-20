@@ -18,7 +18,8 @@
             return this.UserId == other.UserId && this.EmployeeId.Equals(other.EmployeeId) && this.KeyPass.Equals(other.KeyPass)
                    && string.Equals(this.LastName, other.LastName) && string.Equals(this.FirstName, other.FirstName)
                    && this.BirthDate.Equals(other.BirthDate) && this.WorkstationId == other.WorkstationId
-                   && string.Equals(this.FullName,other.FullName);
+                   && string.Equals(this.FullName,other.FullName)
+                   && object.Equals(this.Workstation, other.Workstation);
         }
 
         /// <summary>
@@ -62,6 +63,7 @@
                 hashCode = (hashCode * 397) ^ (this.FirstName != null ? this.FirstName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ this.BirthDate.GetHashCode();
                 hashCode = (hashCode * 397) ^ this.WorkstationId.GetHashCode();
+                hashCode = (hashCode * 397) ^ (this.Workstation != null ? this.Workstation.GetHashCode() : 0);
                 return hashCode;
             }
         }

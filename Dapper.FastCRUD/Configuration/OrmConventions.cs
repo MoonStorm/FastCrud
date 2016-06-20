@@ -156,6 +156,17 @@
                 return;
             }
 
+             //|| (propDesc.PropertyType.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(propDesc.PropertyType.GetGenericTypeDefinition()))))
+
+            // solve the parent child relationships
+            //if (propertyMapping.Descriptor.PropertyType.IsGenericType
+            //    && typeof(IEnumerable<>).IsAssignableFrom(propertyMapping.Descriptor.PropertyType.GetGenericTypeDefinition()))
+            //{
+            //    var referencedType = propertyMapping.Descriptor.PropertyType.GetGenericArguments()[0];
+            //    propertyMapping.SetParentChildRelationship(referencedType);
+            //    return;
+            //}
+
             var propertyAttributes = this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propertyMapping.Descriptor);
 
             var columnAttribute = propertyAttributes.OfType<ColumnAttribute>().FirstOrDefault();
@@ -164,6 +175,13 @@
             if (!string.IsNullOrEmpty(databaseColumnName))
             {
                 propertyMapping.SetDatabaseColumnName(databaseColumnName);
+            }
+
+            // used for matching relationships
+            var databaseColumnOrder = columnAttribute?.Order;
+            if (databaseColumnOrder.HasValue)
+            {
+                propertyMapping.ColumnOrder = databaseColumnOrder.Value;
             }
 
             if (propertyAttributes.OfType<KeyAttribute>().Any())
@@ -189,22 +207,14 @@
                 propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
             }
 
-            //ForeignKeyAttribute foreignKey = null;
-            //if (IsSimpleSqlType(property.PropertyType) && allowSetter)
-            //{
-            //    var propMapping = this.SetPropertyInternal(property);
-
-            //}
-            //else if((foreignKey = propertyAttributes.OfType<ForeignKeyAttribute>().SingleOrDefault())!= null)
-            //{
-            //    ormAttributesDetected = true;
-            //    this.SetPropertyInternal(property).SetRelationship(
-            //        foreignKey.Name
-            //        .Split(',')
-            //        .Select(foreignKeyPropName => foreignKeyPropName.Trim())
-            //        .Where(foreignKeyPropName => !string.IsNullOrWhiteSpace(foreignKeyPropName))
-            //        .ToArray());
-            //}
+            var foreignKeyAttribute = propertyAttributes.OfType<ForeignKeyAttribute>().FirstOrDefault();
+            if (foreignKeyAttribute != null)
+            {
+                var referencingTypePropertyDescriptor = TypeDescriptor.GetProperties(propertyMapping.Descriptor.ComponentType)
+                                                                                      .OfType<PropertyDescriptor>()
+                                                                                      .Single(propDescriptor => propDescriptor.Name == foreignKeyAttribute.Name);
+                propertyMapping.SetChildParentRelationship(referencingTypePropertyDescriptor.PropertyType, referencingTypePropertyDescriptor.Name);
+            }
         }
 
         /// <summary>

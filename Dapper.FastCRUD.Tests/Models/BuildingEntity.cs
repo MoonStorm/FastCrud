@@ -13,7 +13,9 @@
 
         protected bool Equals(Building other)
         {
-            return this.BuildingId == other.BuildingId && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
+            return this.BuildingId == other.BuildingId
+                   && string.Equals(this.Name, other.Name)
+                   && string.Equals(this.Description, other.Description);
         }
 
         /// <summary>

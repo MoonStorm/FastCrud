@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -289,24 +288,6 @@
             this.DeleteInsertedEntities<Building>(useAsyncMethods);
         }
 
-        //[When(@"I batch update a maximum of (.*) employee entities skipping (.*) and using (*.) methods")]
-        //public void WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
-        //{
-        //    this.UpdateInsertedEntities<Employee>(useAsyncMethods, skipCount, maxCount);
-        //}
-
-        //[When(@"I batch update a maximum of (.*) workstation entities skipping (.*) and using (*.) methods")]
-        //public void WhenIBatchUpdateAMaximumOfWorksationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
-        //{
-        //    this.UpdateInsertedEntities<Workstation>(useAsyncMethods, skipCount, maxCount);
-        //}
-
-        //[When(@"I batch update a maximum of (.*) building entities skipping (.*) and using (*.) methods")]
-        //public void WhenIBatchUpdateAMaximumOfBuildingEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
-        //{
-        //    this.UpdateInsertedEntities<Building>(useAsyncMethods, skipCount, maxCount);
-        //}
-
         [Then(@"the database count of the queried entities should be (.*)")]
         public void ThenTheDatabaseCountOfTheQueriedEntitiesShouldBe(int expectedQueryCount)
         {
@@ -319,8 +300,7 @@
             _testContext.QueriedEntities.AddRange(
                 _testContext.DatabaseConnection.Find<Workstation>(
                     statementOptions =>
-                    statementOptions.Include<Employee>()
-                                    .Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
+                    statementOptions.Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
                                     .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
                                     .Skip(skip)
                                     .Top(max)));

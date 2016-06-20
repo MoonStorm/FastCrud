@@ -9,7 +9,7 @@
     public class PropertyMappingRelationship
     {
         /// <summary>
-        /// Constructor. 
+        /// Constructor. BLOCKED FOR THE TIME BEING
         /// </summary>
         /// <param name="referencedEntityType">The entity type referenced in the foreign key relationship.</param>
         public PropertyMappingRelationship(Type referencedEntityType)
@@ -44,10 +44,5 @@
         /// Gets the referencing property name. It might return null if not provided.
         /// </summary>
         public string ReferencingPropertyName { get; }
-
-        /// <summary>
-        /// An optional order used for matching primary keys with foreign keys in entity relationships.
-        /// </summary>
-        public int? Order { get; }
     }
 }

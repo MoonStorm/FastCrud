@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Globalization;
@@ -78,18 +79,28 @@
         /// </summary>
         internal void FreezeMapping()
         {
-            var requiresFreezing = !_isFrozen;
-            _isFrozen = true;
-
-            if (requiresFreezing)
+            if (!_isFrozen)
             {
-                for (var propMappingIndex = 0; propMappingIndex < _propertyMappings.Count; propMappingIndex++)
+                // check again, this time in a locked context
+                lock (this)
                 {
-                    _propertyMappings[propMappingIndex].ColumnOrder = propMappingIndex + 1;
-                }
+                    if (!_isFrozen)
+                    {
+                        var maxColumnOrder = _propertyMappings.Select(propMapping => propMapping.ColumnOrder).Max();
+                        foreach (var propMapping in _propertyMappings)
+                        {
+                            if (propMapping.ColumnOrder < 0)
+                            {
+                                propMapping.ColumnOrder = ++maxColumnOrder;
+                            }
+                        }
 
-                _childParentRelationships = this.ConstructEntityRelationships(propMapping => propMapping.ChildParentRelationship);
-                _parentChildRelationships = this.ConstructEntityRelationships(propMapping => propMapping.ParentChildRelationship);
+                        this.ConstructChildParentEntityRelationships();
+                        this.ConstructParentChildEntityRelationships();
+
+                        _isFrozen = true;
+                    }
+                }
             }
         }
 
@@ -163,22 +174,17 @@
             return propertyMapping;
         }
 
-        private Dictionary<Type, EntityMappingRelationship> ConstructEntityRelationships(Func<PropertyMapping, PropertyMappingRelationship> relationshipExtractor)
+        private void ConstructChildParentEntityRelationships()
         {
-            return _propertyMappings
-                .Select(propMapping => new
-                    {
-                        Mapping = propMapping,
-                        Relationship = relationshipExtractor(propMapping)
-                    })
-                .Where(relMapping => relMapping.Relationship != null)
-                .GroupBy(relMapping => relMapping.Relationship.ReferencedEntityType)
+            _childParentRelationships = _propertyMappings
+                .Where(propertyMapping => propertyMapping.ChildParentRelationship!=null)
+                .GroupBy(propertyMapping => propertyMapping.ChildParentRelationship.ReferencedEntityType)
                 .ToDictionary(
                     groupedRelMappings => groupedRelMappings.Key,
                     groupedRelMappings =>
                     {
                         var referencingEntityPropertyNames = groupedRelMappings
-                            .Select(relMapping => relMapping.Relationship.ReferencingPropertyName)
+                            .Select(propMapping => propMapping.ChildParentRelationship.ReferencingPropertyName)
                             .Where(propName => !string.IsNullOrEmpty(propName))
                             .Distinct()
                             .ToArray();
@@ -198,9 +204,22 @@
                                                                                       .SingleOrDefault(propDescriptor => propDescriptor.Name == referencingEntityPropertyName);
 
 
-                        var referencingKeyProperties = groupedRelMappings.Select(relMapping => relMapping.Mapping).ToArray();
+                        return new EntityMappingRelationship(groupedRelMappings.Key,groupedRelMappings.OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
+                    });
+        }
 
-                        return new EntityMappingRelationship(groupedRelMappings.Key,referencingKeyProperties, referencingEntityPropertyDescriptor);
+        private void ConstructParentChildEntityRelationships()
+        {
+            _parentChildRelationships = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>()
+                .Where(propDescriptor => propDescriptor.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType) && propDescriptor.PropertyType.GetGenericArguments().Length == 1 )
+                //.GroupBy(propDescriptor => propDescriptor.PropertyType)
+                .ToDictionary(
+                    propDescriptor => propDescriptor.PropertyType.GetGenericArguments()[0],
+                    propDescriptor =>
+                    {
+                        // get the keys and order them
+                        var keyPropMappings = _propertyMappings.Where(propMapping => propMapping.IsPrimaryKey).OrderBy(propMapping => propMapping.ColumnOrder).ToArray();
+                        return new EntityMappingRelationship(propDescriptor.PropertyType, keyPropMappings, propDescriptor);
                     });
         }
     }

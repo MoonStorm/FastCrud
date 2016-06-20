@@ -15,6 +15,7 @@
         {
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
             this.RelationshipOptions = new Dictionary<Type, AggregatedRelationalSqlStatementOptions>();
+            this.SqlStatementsFactoryChain = () => OrmConfiguration.GetSqlStatements<TEntity>(this.EntityMappingOverride);
         }
 
         /// <summary>

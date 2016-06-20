@@ -1,12 +1,10 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Data;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
 
     /// <summary>
@@ -162,30 +160,6 @@
             {
                 var joinedEntityOptions = statementOptions.RelationshipOptions[joinedEntitySqlBuilder.EntityMapping.EntityType];
                 yield return new StatementSqlBuilderJoinInstruction(joinedEntitySqlBuilder, joinedEntityOptions.JoinType, joinedEntityOptions.WhereClause, joinedEntityOptions.OrderClause);
-            }
-        }
-
-        protected void AttachEntity<TMainEntity, TJoinedEntity>(EntityMapping mainEntityMapping, TMainEntity mainEntity, TJoinedEntity joinedEntity)
-        {
-            var joinedEntityType = typeof(TJoinedEntity);
-
-            // find the property first
-            EntityMappingRelationship entityRelationship;
-            if (mainEntityMapping.ChildParentRelationships.TryGetValue(joinedEntityType, out entityRelationship))
-            {
-                entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, joinedEntity);
-            }
-            else if(mainEntityMapping.ParentChildRelationships.TryGetValue(joinedEntityType, out entityRelationship))
-            {
-                var childCollection = entityRelationship.ReferencingEntityProperty.GetValue(mainEntity);
-                var childCollectionList = childCollection as IList;
-                if (childCollectionList == null)
-                {
-                    childCollectionList = new List<TJoinedEntity>();
-                    entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, childCollectionList);
-                }
-
-                childCollectionList.Add(joinedEntity);
             }
         }
     }
