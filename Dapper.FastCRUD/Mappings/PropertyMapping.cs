@@ -392,7 +392,7 @@
             var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
                 {
                     _options = _options,
-                    _childParentRelationship =  new PropertyMappingRelationship(_childParentRelationship.ReferencedEntityType, _childParentRelationship.ReferencingPropertyName),
+                    _childParentRelationship = _childParentRelationship == null ? null : new PropertyMappingRelationship(_childParentRelationship.ReferencedEntityType, _childParentRelationship.ReferencingPropertyName),
                     _databaseColumnName = this._databaseColumnName,
                     _columnOrder =  _columnOrder
 

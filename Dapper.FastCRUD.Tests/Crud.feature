@@ -1,5 +1,6 @@
 ﻿Feature: CRUD tests
 
+@InMemoryDatabase
 Scenario Outline:  Batch update (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -27,6 +28,7 @@ Scenario Outline:  Batch update (external database)
 	| MySql         | employee    | 10           | 3    | 2   | synchronous  |
 	| MySql         | employee    | 10           | 3    | 2   | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline:  Batch delete (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -54,6 +56,7 @@ Scenario Outline:  Batch delete (external database)
 	| MySql         | workstation    | 10           | 3    | 2   | synchronous  |
 	| MySql         | workstation    | 10           | 3    | 2   | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Insert and select all (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -74,6 +77,7 @@ Scenario Outline: Insert and select all (in-memory database)
 	| LocalDb       | building    | 1            | synchronous |
 	| SqLite        | building    | 1            | synchronous |
 
+@InMemoryDatabase
 Scenario Outline: Conditional count (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> building entities using <method type> methods
@@ -103,7 +107,7 @@ Scenario Outline: Insert and select all (external database)
 	| MySql         | building    | 1            | synchronous |
 	| PostgreSql    | building    | 1            | synchronous |
 
-
+@InMemoryDatabase
 Scenario Outline: Find (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -145,7 +149,7 @@ Scenario Outline: Find (external database)
 	| MySql         | workstation | 10           | 1    | 0    | synchronous  |
 	| PostgreSql    | workstation | 10           | 1    | 0    | synchronous  |
 
-
+@InMemoryDatabase
 Scenario Outline: Insert and select by primary key (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -183,7 +187,7 @@ Scenario Outline: Insert and select by primary key (external database)
 	| MySql         | building    | 1            |synchronous |
 	| PostgreSql    | building    | 1            |synchronous |
 
-
+@InMemoryDatabase
 Scenario Outline: Update by primary keys (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -223,7 +227,7 @@ Scenario Outline: Update by primary keys (external database)
 	| MySql         | building    | 1            | synchronous  |
 	| PostgreSql    | building    | 1            | synchronous  |
 
-
+@InMemoryDatabase
 Scenario Outline: Partial update (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods
@@ -249,7 +253,7 @@ Scenario Outline: Partial update (external database)
 	| MySql         | employee    | 3            | synchronous  |
 	| PostgreSql    | employee    | 3            | synchronous  |
 
-
+@InMemoryDatabase
 Scenario Outline: Delete by primary keys (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods

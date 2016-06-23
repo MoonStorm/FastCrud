@@ -66,20 +66,27 @@ namespace Dapper.FastCrud.Tests
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Select all columns")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", null)]
         public virtual void SelectAllColumns(string databaseType, string entityType, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select all columns", exampleTags);
-#line 3
-this.ScenarioSetup(scenarioInfo);
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Select all columns", @__tags);
 #line 4
- testRunner.Given(string.Format("I extract the SQL builder for {0} and {1}", databaseType, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+this.ScenarioSetup(scenarioInfo);
 #line 5
- testRunner.When("I construct the select column enumeration", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.Given(string.Format("I extract the SQL builder for {0} and {1}", databaseType, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 6
+ testRunner.When("I construct the select column enumeration", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 7
  testRunner.Then("I should get a valid select column enumeration", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -87,6 +94,7 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Manual query")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "individual identifier resolvers", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "individual identifier resolvers", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "individual identifier resolvers", null)]
@@ -97,14 +105,20 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "combined table and column identifier resolvers", null)]
         public virtual void ManualQuery(string databaseType, string entityType, string sqlQueryBuilderMethod, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Manual query", exampleTags);
-#line 14
-this.ScenarioSetup(scenarioInfo);
-#line 15
- testRunner.Given(string.Format("I extract the SQL builder for {0} and {1}", databaseType, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Manual query", @__tags);
 #line 16
- testRunner.When(string.Format("I construct a complex join query for {0} using {1}", entityType, sqlQueryBuilderMethod), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+this.ScenarioSetup(scenarioInfo);
 #line 17
+ testRunner.Given(string.Format("I extract the SQL builder for {0} and {1}", databaseType, entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 18
+ testRunner.When(string.Format("I construct a complex join query for {0} using {1}", entityType, sqlQueryBuilderMethod), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 19
  testRunner.Then(string.Format("I should get a valid join query statement for {0}", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();

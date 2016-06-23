@@ -1,6 +1,7 @@
 ﻿Feature: Relationships
 	Tests for the relationship between the entities Workstation -> Employee (single relationship) and Building -> Workstation -> Employee (two level relationship)
 
+@InMemoryDatabase
 Scenario Outline: Single relationship parents with children (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
@@ -12,6 +13,7 @@ Scenario Outline: Single relationship parents with children (in-memory database)
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline:  Single relationship children with parents (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
@@ -23,6 +25,7 @@ Scenario Outline:  Single relationship children with parents (in-memory database
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Single relationship children with no parents (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
@@ -33,6 +36,7 @@ Scenario Outline: Single relationship children with no parents (in-memory databa
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Single relationship parents with no children (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
@@ -43,6 +47,7 @@ Scenario Outline: Single relationship parents with no children (in-memory databa
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Two level relationship grandparents with parents and children (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> building entities using <method type> methods
@@ -55,6 +60,7 @@ Scenario Outline: Two level relationship grandparents with parents and children 
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Two level relationship children with parents and grandparents (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> building entities using <method type> methods
@@ -67,6 +73,7 @@ Scenario Outline: Two level relationship children with parents and grandparents 
 	| LocalDb       | 10           | synchronous  |
 	| LocalDb       | 10           | asynchronous |
 
+@InMemoryDatabase
 Scenario Outline: Two level relationship children with no parents or grandparents (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods

@@ -67,24 +67,31 @@ namespace Dapper.FastCrud.Tests
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single relationship parents with children (in-memory database)")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void SingleRelationshipParentsWithChildrenIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship parents with children (in-memory database)", exampleTags);
-#line 4
-this.ScenarioSetup(scenarioInfo);
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship parents with children (in-memory database)", @__tags);
 #line 5
- testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+this.ScenarioSetup(scenarioInfo);
 #line 6
- testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 7
+ testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 8
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 8
+#line 9
  testRunner.And(string.Format("I query for all the workstation entities combined with the employee entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 9
+#line 10
  testRunner.Then("the queried workstation entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -92,24 +99,31 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single relationship children with parents (in-memory database)")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void SingleRelationshipChildrenWithParentsIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship children with parents (in-memory database)", exampleTags);
-#line 15
-this.ScenarioSetup(scenarioInfo);
-#line 16
- testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship children with parents (in-memory database)", @__tags);
 #line 17
- testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+this.ScenarioSetup(scenarioInfo);
 #line 18
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 19
+ testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 20
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 19
+#line 21
  testRunner.And(string.Format("I query for all the employee entities combined with the workstation entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 20
+#line 22
  testRunner.Then("the queried employee entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -117,21 +131,28 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single relationship children with no parents (in-memory database)")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void SingleRelationshipChildrenWithNoParentsIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship children with no parents (in-memory database)", exampleTags);
-#line 26
-this.ScenarioSetup(scenarioInfo);
-#line 27
- testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 28
- testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship children with no parents (in-memory database)", @__tags);
 #line 29
+this.ScenarioSetup(scenarioInfo);
+#line 30
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 31
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 32
  testRunner.And(string.Format("I query for all the employee entities combined with the workstation entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 30
+#line 33
  testRunner.Then("the queried employee entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -139,21 +160,28 @@ this.ScenarioSetup(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Single relationship parents with no children (in-memory database)")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void SingleRelationshipParentsWithNoChildrenIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship parents with no children (in-memory database)", exampleTags);
-#line 36
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Single relationship parents with no children (in-memory database)", @__tags);
+#line 40
 this.ScenarioSetup(scenarioInfo);
-#line 37
+#line 41
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 38
+#line 42
  testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 39
+#line 43
  testRunner.And(string.Format("I query for all the workstation entities combined with the employee entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 40
+#line 44
  testRunner.Then("the queried workstation entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -162,28 +190,35 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Two level relationship grandparents with parents and children (in-memory database" +
             ")")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void TwoLevelRelationshipGrandparentsWithParentsAndChildrenIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Two level relationship grandparents with parents and children (in-memory database" +
-                    ")", exampleTags);
-#line 46
+                    ")", @__tags);
+#line 51
 this.ScenarioSetup(scenarioInfo);
-#line 47
+#line 52
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 48
+#line 53
  testRunner.When(string.Format("I insert {0} building entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 49
+#line 54
  testRunner.And(string.Format("I insert {0} workstation entities parented to existing building entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 50
+#line 55
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 51
+#line 56
  testRunner.And(string.Format("I query for all the building entities combined with workstation and employee enti" +
                         "ties using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 52
+#line 57
  testRunner.Then("the queried building entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -192,28 +227,35 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Two level relationship children with parents and grandparents (in-memory database" +
             ")")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void TwoLevelRelationshipChildrenWithParentsAndGrandparentsIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Two level relationship children with parents and grandparents (in-memory database" +
-                    ")", exampleTags);
-#line 58
+                    ")", @__tags);
+#line 64
 this.ScenarioSetup(scenarioInfo);
-#line 59
+#line 65
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 60
+#line 66
  testRunner.When(string.Format("I insert {0} building entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 61
+#line 67
  testRunner.And(string.Format("I insert {0} workstation entities parented to existing building entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 62
+#line 68
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
                         "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 63
+#line 69
  testRunner.And(string.Format("I query for all the employee entities combined with workstation and building enti" +
                         "ties using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 64
+#line 70
  testRunner.Then("the queried employee entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();
@@ -222,22 +264,29 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Two level relationship children with no parents or grandparents (in-memory databa" +
             "se)")]
+        [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
         public virtual void TwoLevelRelationshipChildrenWithNoParentsOrGrandparentsIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
+            string[] @__tags = new string[] {
+                    "InMemoryDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Two level relationship children with no parents or grandparents (in-memory databa" +
-                    "se)", exampleTags);
-#line 70
+                    "se)", @__tags);
+#line 77
 this.ScenarioSetup(scenarioInfo);
-#line 71
+#line 78
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
-#line 72
+#line 79
  testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line 73
+#line 80
  testRunner.And(string.Format("I query for all the employee entities combined with workstation and building enti" +
                         "ties using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
-#line 74
+#line 81
  testRunner.Then("the queried employee entities should be the same as the local ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             this.ScenarioCleanup();

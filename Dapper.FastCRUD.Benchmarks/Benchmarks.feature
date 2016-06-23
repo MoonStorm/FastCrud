@@ -1,5 +1,6 @@
 ﻿Feature: Queries 
 
+@InMemoryBenchmark
 Scenario Outline: Insert Benchmark
 	Given I have initialized a <database type> database
 	When I start the stopwatch
@@ -34,6 +35,7 @@ Scenario Outline: Insert Benchmark
 #	| LocalDb   | benchmark entities | 20000        | Fast Crud         |
 #	| LocalDb   | benchmark entities | 20000        | Dapper            |
 
+@InMemoryBenchmark
 Scenario Outline: Batch Select No Filter
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> using ADO .NET
@@ -57,6 +59,7 @@ Scenario Outline: Batch Select No Filter
 	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 	| Benchmark LocalDb | benchmark entities | 30000        | Entity Framework  |
 
+@InMemoryBenchmark
 Scenario Outline: Single Delete Benchmark
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> using ADO .NET
@@ -75,6 +78,7 @@ Scenario Outline: Single Delete Benchmark
 	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 	| Benchmark LocalDb | benchmark entities | 30000        | Entity Framework  |
 
+@InMemoryBenchmark
 Scenario Outline: Single Select Id Filter Benchmark
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> using ADO .NET
@@ -94,6 +98,7 @@ Scenario Outline: Single Select Id Filter Benchmark
 	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
 	| Benchmark LocalDb | benchmark entities | 30000        | Entity Framework  |
 
+@InMemoryBenchmark
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> using ADO .NET

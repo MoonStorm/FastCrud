@@ -1,5 +1,6 @@
 ﻿Feature: SQL Builder
 
+@InMemoryDatabase
 Scenario Outline: Select all columns
 	Given I extract the SQL builder for <database type> and <entity type>
 	When I construct the select column enumeration
@@ -11,6 +12,7 @@ Scenario Outline: Select all columns
 	| MySql         | workstation    |
 	| SqLite        | workstation    |
 
+@InMemoryDatabase
 Scenario Outline: Manual query
 	Given I extract the SQL builder for <database type> and <entity type>
 	When I construct a complex join query for <entity type> using <sql query builder method>
