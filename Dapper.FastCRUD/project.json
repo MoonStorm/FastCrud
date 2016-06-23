@@ -1,0 +1,75 @@
+﻿{
+  "version": "1.0.0-*",
+  "title": "Dapper.FastCrud",
+  "authors": [ "MoonStorm" ],
+  "packOptions": {
+    "owners": [ "MoonStorm" ],
+    "licenseUrl": "http://www.opensource.org/licenses/MIT",
+    "iconUrl": "https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png",
+    "requireLicenseAcceptance": false,
+    "summary": "The fastest micro-orm extension for Dapper"
+  },
+
+  "configurations": {
+    "Debug": {
+      "buildOptions": {
+        "define": [ "DEBUG", "TRACE" ]
+      }
+    },
+    "Release": {
+      "buildOptions": {
+        "define": [ "RELEASE", "TRACE" ],
+        "optimize": true
+      }
+    }
+  },
+
+  "frameworks": {
+
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Data": "",
+        "System.Runtime.Caching": "",
+        "System.ComponentModel.DataAnnotations": ""
+      },
+      "dependencies": {
+        "StringInterpolationBridge": "0.9.1",
+        "Dapper": "1.38.0"
+      }
+    },
+
+    "net46": {
+      "frameworkAssemblies": {
+        "System.Data": "",
+        "System.Runtime.Caching": "",
+        "System.ComponentModel.DataAnnotations": ""
+      },
+      "dependencies": {
+        "Dapper": "1.38.0"
+      }
+    }
+
+    //"netstandard1.5": {
+    //  "buildOptions": {
+    //    "define": [ "COREFX" ]
+    //  },
+    //  "imports": "dnxcore50",
+    //  "dependencies": {
+    //    "NETStandard.Library": "1.5.0-rc2-24027",
+    //    "System.ComponentModel.Annotations": "4.1.0-rc2-24027",
+    //    "System.ComponentModel.TypeConverter": "4.0.1-rc2-24027",
+    //    "System.Data.Common": "4.0.1-rc2-24027",
+    //    "System.Reflection.Extensions": "4.0.1-rc2-24027",
+    //    "Dapper": "1.50.0-rc2"
+    //  }
+    //}
+  },
+
+  "scripts": {
+    "postcompile": [
+      "dotnet pack --no-build --output bin\\nupkgs"
+    ] /*  "\"%project:Directory%\\..\\..\\nuget.exe\" push \"%project:Directory%\\bin\\debug\\%project:Name%.%project:Version%.nupkg\" -source nugetserver -ApiKey key" */
+  },
+
+  "description": "The fastest micro-orm type extension for Dapper is built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings. The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project."
+}
