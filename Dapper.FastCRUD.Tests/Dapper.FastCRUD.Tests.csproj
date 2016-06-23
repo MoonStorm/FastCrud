@@ -151,15 +151,20 @@
     <Compile Include="DatabaseSteps.cs" />
     <Compile Include="DatabaseTestContext.cs" />
     <Compile Include="Models\BuildingEntity.cs" />
-    <Compile Include="Models\EmployeeEntity.cs" />
+    <Compile Include="Models\EmployeeEntityPartial.cs" />
     <Compile Include="Models\ModelGeneratorConfig1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelGeneratorConfig.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\SimpleBenchmarkEntity.cs" />
-    <Compile Include="Models\WorkstationEntity.cs" />
+    <Compile Include="Models\WorkstationEntityPartial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Relationships.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Relationships.feature</DependentUpon>
+    </Compile>
     <Compile Include="SqlBuilder.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -174,6 +179,10 @@
       <LastGenOutput>Crud.feature.cs</LastGenOutput>
     </None>
     <None Include="packages.config" />
+    <None Include="Relationships.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Relationships.feature.cs</LastGenOutput>
+    </None>
     <None Include="SqlBuilder.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>SqlBuilder.feature.cs</LastGenOutput>

@@ -178,13 +178,27 @@
         }
 
         [Then(@"the queried entities should be the same as the local ones")]
-        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInserted()
+        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheLocalOnes()
         {
-            CollectionAssert.AreEquivalent(_testContext.QueriedEntities, _testContext.LocalEntities);
-            //for (var entityIndex = 0; entityIndex < _testContext.QueriedEntities.Count; entityIndex++)
-            //{
-            //    Assert.That(_testContext.QueriedEntities[entityIndex], Is.EqualTo(_testContext.LocalEntities[entityIndex]));
-            //}
+            this.CompareQueriedEntitiesWithLocalEntities<object>();
+        }
+
+        [Then(@"the queried workstation entities should be the same as the local ones")]
+        public void ThenTheQueriedWorkstationEntitiesShouldBeTheSameAsTheLocalOnes()
+        {
+            this.CompareQueriedEntitiesWithLocalEntities<Workstation>();
+        }
+
+        [Then(@"the queried employee entities should be the same as the local ones")]
+        public void ThenTheQueriedEmployeeEntitiesShouldBeTheSameAsTheLocalOnes()
+        {
+            this.CompareQueriedEntitiesWithLocalEntities<Employee>();
+        }
+
+        [Then(@"the queried building entities should be the same as the local ones")]
+        public void ThenTheQueriedBuildingEntitiesShouldBeTheSameAsTheLocalOnes()
+        {
+            this.CompareQueriedEntitiesWithLocalEntities<Building>();
         }
 
         [When(@"I clear all the queried entities")]
@@ -201,7 +215,7 @@
 
         private void SetupSqlCeDatabase(string connectionString)
         {
-            SetupOrmConfiguration(SqlDialect.MsSql);
+            this.SetupOrmConfiguration(SqlDialect.MsSql);
 
             connectionString = string.Format(
                 CultureInfo.InvariantCulture,
@@ -231,7 +245,7 @@
 
         private void SetupSqLiteDatabase(string connectionString)
         {
-            SetupOrmConfiguration(SqlDialect.SqLite);
+            this.SetupOrmConfiguration(SqlDialect.SqLite);
 
             _testContext.DatabaseConnection = new SQLiteConnection(connectionString);
             _testContext.DatabaseConnection.Open();
@@ -303,7 +317,7 @@
 
         private void SetupPostgreSqlDatabase(string connectionString)
         {
-            SetupOrmConfiguration(SqlDialect.PostgreSql);
+            this.SetupOrmConfiguration(SqlDialect.PostgreSql);
 
             using (var dataConnection = new NpgsqlConnection(connectionString))
             {
@@ -395,7 +409,7 @@
 
         private void SetupMySqlDatabase(string connectionString)
         {
-            SetupOrmConfiguration(SqlDialect.MySql);
+            this.SetupOrmConfiguration(SqlDialect.MySql);
 
             using (var dataConnection = new MySqlConnection(connectionString))
             {
@@ -471,7 +485,7 @@
 
         private void SetupMsSqlDatabase(string connectionString)
         {
-            SetupOrmConfiguration(SqlDialect.MsSql);
+            this.SetupOrmConfiguration(SqlDialect.MsSql);
 
             using (var dataConnection = new SqlConnection(connectionString))
             {
@@ -653,6 +667,11 @@
                 .SetProperty(building => building.BuildingId,propMapping => propMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity).SetDatabaseColumnName("Id"))
                 .SetProperty(building => building.Name, propMapping=> propMapping.SetDatabaseColumnName("BuildingName"))
                 .SetProperty(building => building.Description); // test mapping w/o name
+        }
+
+        private void CompareQueriedEntitiesWithLocalEntities<TEntity>()
+        {
+            CollectionAssert.AreEquivalent(_testContext.QueriedEntities.OfType<TEntity>(), _testContext.LocalEntities.OfType<TEntity>());
         }
     }
 }

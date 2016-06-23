@@ -72,7 +72,7 @@
         /// Returns the instance container in case the entity could not be located
         /// The existing entity is also going to be updated.
         /// </summary>
-        /// <returns>True in case an entity with the same primary key fields was not found</returns>
+        /// <returns>True in case the entity instance has never been encountered</returns>
         private bool Add<TEntity>(ref TEntity entity, out EntityInstanceContainer instanceContainer)
         {
             if (!_entityInstanceContainers.TryGetValue(typeof(TEntity), out instanceContainer))
@@ -82,7 +82,8 @@
 
             if (entity == null)
             {
-                return false;
+                // we want to initialize the relationship, reason why for NULL values we'll pretend we haven't seen this instance
+                return true;
             }
 
             object existingEntityInstance;
@@ -99,7 +100,12 @@
 
         private static void Attach<TFirstEntity, TSecondEntity>(EntityMapping mainEntityMapping, TFirstEntity mainEntity, EntityMapping childEntityMapping, TSecondEntity childEntity)
         {
-            // find the property first
+            if (mainEntity == null)
+            {
+                return;
+            }
+
+            // find the property we're gonna use to attach the entity
             var secondEntityType = typeof(TSecondEntity);
 
             EntityMappingRelationship entityRelationship;
@@ -117,7 +123,10 @@
                     entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, childCollectionList);
                 }
 
-                childCollectionList.Add(childEntity);
+                if (childEntity != null)
+                {
+                    childCollectionList.Add(childEntity);
+                }
             }
         }
 

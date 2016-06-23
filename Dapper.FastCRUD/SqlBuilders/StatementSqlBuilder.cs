@@ -462,6 +462,8 @@
                     fromClauseBuilder.Append(" ON ");
 
                     // discover and append all the join conditions for the current table
+                    var atLeastOneRelationshipDiscovered = false;
+
                     for (var rightJoinSqlBuilderIndex = 0; rightJoinSqlBuilderIndex < leftJoinInstructionIndex; rightJoinSqlBuilderIndex++)
                     {
                         var rightJoinSqlInstruction = allSqlJoinInstructions[rightJoinSqlBuilderIndex];
@@ -473,14 +475,16 @@
                         if (leftJoinSqlBuilder.EntityMapping.ChildParentRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = false;
+                            atLeastOneRelationshipDiscovered = true;
                         }
                         else if (leftJoinSqlBuilder.EntityMapping.ParentChildRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = true;
+                            atLeastOneRelationshipDiscovered = true;
                         }
                         else
                         {
-                            throw new InvalidOperationException($"Could not find a relationship defined on '{leftJoinSqlBuilder.EntityMapping.EntityType}' involving '{rightJoinSqlBuilder.EntityMapping.EntityType}'");
+                            continue;
                         }
 
                         EntityMappingRelationship rightJoinEntityRelationship;
@@ -518,12 +522,33 @@
                         }
                         fromClauseBuilder.Append(')');
                     }
+
+                    if (!atLeastOneRelationshipDiscovered)
+                    {
+                        throw new InvalidOperationException($"Could not find a relationship defined on '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
+                    }
                 }
             }
 
             splitOnExpression = splitOnExpressionBuilder.ToString();
-            whereClause = $"{additionalWhereClauseBuilder}";
-            orderClause = $"{additionalOrderClauseBuilder}";
+            if (additionalWhereClauseBuilder.Length > 0)
+            {
+                whereClause = $"{additionalWhereClauseBuilder}";
+            }
+            else
+            {
+                whereClause = null;
+            }
+
+            if (additionalOrderClauseBuilder.Length > 0)
+            {
+                orderClause = $"{additionalOrderClauseBuilder}";
+            }
+            else
+            {
+                orderClause = null;
+            }
+
             selectClause = selectClauseBuilder.ToString();
             fullStatement = this.ConstructFullSelectStatementInternal(selectClause, fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount, true);
         }
