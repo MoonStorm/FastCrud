@@ -13,8 +13,14 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dapper.FastCrud", "Dapper.FastCrud\Dapper.FastCrud.xproj", "{A2B22949-0DB7-4130-B813-420B839774B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Tests", "Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj", "{C746BCF1-692B-4450-A864-D76681F3B37D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2B22949-0DB7-4130-B813-420B839774B2} = {A2B22949-0DB7-4130-B813-420B839774B2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Benchmarks", "Dapper.FastCrud.Benchmarks\Dapper.FastCrud.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2B22949-0DB7-4130-B813-420B839774B2} = {A2B22949-0DB7-4130-B813-420B839774B2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
