@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.0-*",
+  "version": "2.4.0-beta1",//"1.0.0-*",
   "title": "Dapper.FastCrud",
   "authors": [ "MoonStorm" ],
   "packOptions": {
@@ -25,7 +25,6 @@
   },
 
   "frameworks": {
-
     "net45": {
       "frameworkAssemblies": {
         "System.Data": "",

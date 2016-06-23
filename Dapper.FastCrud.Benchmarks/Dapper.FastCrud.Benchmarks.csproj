@@ -52,6 +52,9 @@
       <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Dapper.FastCrud">
+      <HintPath>..\Dapper.FastCrud\bin\$(Configuration)\net45\Dapper.FastCrud.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper.SimpleCRUD, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.SimpleCRUD.1.9.1\lib\net45\Dapper.SimpleCRUD.dll</HintPath>
       <Private>True</Private>
@@ -184,10 +187,6 @@
     <ProjectReference Include="..\Dapper.FastCRUD.Tests\Dapper.FastCRUD.Tests.csproj">
       <Project>{c746bcf1-692b-4450-a864-d76681f3b37d}</Project>
       <Name>Dapper.FastCRUD.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Dapper.FastCRUD\Dapper.FastCRUD.csproj">
-      <Project>{0044043b-c8ec-497c-8b58-abe028014d24}</Project>
-      <Name>Dapper.FastCRUD</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

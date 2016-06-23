@@ -1,28 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD", "Dapper.FastCRUD\Dapper.FastCRUD.csproj", "{0044043B-C8EC-497C-8B58-ABE028014D24}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{56071DBE-4F21-40DD-BCD1-A0CAD8247EB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.NET46", "Dapper.FastCRUD\Dapper.FastCRUD.NET46.csproj", "{C198D9B5-6ECC-4F86-8C08-B64FB025267B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{779A2AF3-1566-4AA9-BF0D-1CAAA439736A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54E575C2-7D28-48E1-91FD-694DEEB09CD0}"
 	ProjectSection(SolutionItems) = preProject
-		NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec = NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec
-		NuGetSpecs\Dapper.FastCRUD.nuspec = NuGetSpecs\Dapper.FastCRUD.nuspec
-		NuGetSpecs\GenericModelGenerator.tt = NuGetSpecs\GenericModelGenerator.tt
-		NuGetSpecs\Install.ps1 = NuGetSpecs\Install.ps1
-		logo.png = logo.png
-		README.md = README.md
-		NuGetSpecs\SampleModelGeneratorConfig.tt = NuGetSpecs\SampleModelGeneratorConfig.tt
+		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Benchmarks", "Dapper.FastCRUD.Benchmarks\Dapper.FastCRUD.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dapper.FastCrud", "Dapper.FastCrud\Dapper.FastCrud.xproj", "{A2B22949-0DB7-4130-B813-420B839774B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCRUD.Tests", "Dapper.FastCRUD.Tests\Dapper.FastCRUD.Tests.csproj", "{C746BCF1-692B-4450-A864-D76681F3B37D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Tests", "Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj", "{C746BCF1-692B-4450-A864-D76681F3B37D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{859E62C6-1EBE-4F0F-8C4D-916E4A252905}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Benchmarks", "Dapper.FastCrud.Benchmarks\Dapper.FastCrud.Benchmarks.csproj", "{A52E30BD-44B2-45EA-BE65-7D07D00A9692}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,28 +22,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0044043B-C8EC-497C-8B58-ABE028014D24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0044043B-C8EC-497C-8B58-ABE028014D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0044043B-C8EC-497C-8B58-ABE028014D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0044043B-C8EC-497C-8B58-ABE028014D24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C198D9B5-6ECC-4F86-8C08-B64FB025267B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B22949-0DB7-4130-B813-420B839774B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B22949-0DB7-4130-B813-420B839774B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B22949-0DB7-4130-B813-420B839774B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B22949-0DB7-4130-B813-420B839774B2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C746BCF1-692B-4450-A864-D76681F3B37D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C746BCF1-692B-4450-A864-D76681F3B37D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C746BCF1-692B-4450-A864-D76681F3B37D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C746BCF1-692B-4450-A864-D76681F3B37D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A52E30BD-44B2-45EA-BE65-7D07D00A9692} = {859E62C6-1EBE-4F0F-8C4D-916E4A252905}
-		{C746BCF1-692B-4450-A864-D76681F3B37D} = {859E62C6-1EBE-4F0F-8C4D-916E4A252905}
+		{A2B22949-0DB7-4130-B813-420B839774B2} = {56071DBE-4F21-40DD-BCD1-A0CAD8247EB2}
+		{C746BCF1-692B-4450-A864-D76681F3B37D} = {56071DBE-4F21-40DD-BCD1-A0CAD8247EB2}
+		{A52E30BD-44B2-45EA-BE65-7D07D00A9692} = {56071DBE-4F21-40DD-BCD1-A0CAD8247EB2}
 	EndGlobalSection
 EndGlobal
