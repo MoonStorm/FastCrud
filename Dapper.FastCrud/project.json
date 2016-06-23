@@ -1,5 +1,5 @@
 ﻿{
-  "version": "2.4.0-beta1",//"1.0.0-*",
+  /*"version": "1.0.0-*",*/
   "title": "Dapper.FastCrud",
   "authors": [ "MoonStorm" ],
   "packOptions": {
@@ -66,8 +66,8 @@
 
   "scripts": {
     "postcompile": [
-      "dotnet pack --no-build --output bin\\nupkgs"
-    ] /*  "\"%project:Directory%\\..\\..\\nuget.exe\" push \"%project:Directory%\\bin\\debug\\%project:Name%.%project:Version%.nupkg\" -source nugetserver -ApiKey key" */
+      "dotnet pack --no-build --output ..\\Releases"
+    ]
   },
 
   "description": "The fastest micro-orm type extension for Dapper is built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings. The package contains .NET 4.5 and 4.6 DLLs, one of which will be installed based on the target framework in your project."
