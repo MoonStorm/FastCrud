@@ -16,15 +16,15 @@ if ($LASTEXITCODE -ne 0){
     throw "nuget restore failed"
 }
 
-# upgrade the version
-& "$PSScriptRoot\.dnv\dnv.exe" --aivpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\Properties\AssemblyInfo.cs" --what aiv
-if ($LASTEXITCODE -ne 0){
-    throw "AssemblyInfo.cs version update failed"
-}
-& "$PSScriptRoot\.dnv\dnv.exe" --avpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\project.json" --what av
-if ($LASTEXITCODE -ne 0){
-    throw "project.json version update failed"
-}
+# upgrade the version (no need myget will do that)
+#& "$PSScriptRoot\.dnv\dnv.exe" --aivpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\Properties\AssemblyInfo.cs" --what aiv
+#if ($LASTEXITCODE -ne 0){
+#    throw "AssemblyInfo.cs version update failed"
+#}
+#& "$PSScriptRoot\.dnv\dnv.exe" --avpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\project.json" --what av
+#if ($LASTEXITCODE -ne 0){
+#    throw "project.json version update failed"
+#}
 
 # build the solution
 & "$msBuildExe" "$PSScriptRoot\Dapper.FastCRUD.sln" /t:"$msBuildTarget" /p:Configuration="$configuration"
