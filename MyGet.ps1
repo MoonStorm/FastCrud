@@ -11,17 +11,17 @@ $msBuildTarget = ($env:Targets)
 #$msBuildTarget = "Build"
 
 # restore dependencies
-& "$PSScriptRoot\.build-tools\nuget\nuget.exe" restore "$PSScriptRoot\Dapper.FastCRUD.sln"
+& "$PSScriptRoot\.nuget\nuget.exe" restore "$PSScriptRoot\Dapper.FastCRUD.sln"
 if ($LASTEXITCODE -ne 0){
     throw "nuget restore failed"
 }
 
 # upgrade the version
-& "$PSScriptRoot\.build-tools\dnv\dnv.exe" --aivpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\Properties\AssemblyInfo.cs" --what aiv
+& "$PSScriptRoot\.dnv\dnv.exe" --aivpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\Properties\AssemblyInfo.cs" --what aiv
 if ($LASTEXITCODE -ne 0){
     throw "AssemblyInfo.cs version update failed"
 }
-& "$PSScriptRoot\.build-tools\dnv\dnv.exe" --avpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\project.json" --what av
+& "$PSScriptRoot\.dnv\dnv.exe" --avpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\project.json" --what av
 if ($LASTEXITCODE -ne 0){
     throw "project.json version update failed"
 }
@@ -43,7 +43,7 @@ if ($LASTEXITCODE -ne 0){
 #}
 
 # create the additional packages
-& "$PSScriptRoot\.build-tools\nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec" -OutputDirectory "$PSScriptRoot\Releases" -Verbosity detailed  -Version "$packageVersion" -Properties configuration="$configuration"
+& "$PSScriptRoot\.nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec" -OutputDirectory "$PSScriptRoot\Releases" -Verbosity detailed  -Version "$packageVersion" -Properties configuration="$configuration"
 if ($LASTEXITCODE -ne 0){
     throw "symbol packing failed"
 }
