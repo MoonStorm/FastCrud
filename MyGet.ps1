@@ -37,13 +37,13 @@ if ($LASTEXITCODE -ne 0){
 #     throw "tests failed"
 # }
 
-#& "$PSScriptRoot\.nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.nuspec" -OutputDirectory Releases -Version "$packageVersion" -Properties configuration="$configuration" -Verbosity detailed
-#if ($LASTEXITCODE -ne 0){
-#    throw "packing failed"
-#}
+# create the NuGet packages
+& "$PSScriptRoot\.nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.nuspec" -OutputDirectory "$PSScriptRoot\Releases" -Version "$packageVersion" -Properties configuration="$configuration" -Verbosity detailed
+if ($LASTEXITCODE -ne 0){
+    throw "Nuget library packaging failed"
+}
 
-# create the additional packages
 & "$PSScriptRoot\.nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec" -OutputDirectory "$PSScriptRoot\Releases" -Verbosity detailed  -Version "$packageVersion" -Properties configuration="$configuration"
 if ($LASTEXITCODE -ne 0){
-    throw "symbol packing failed"
+    throw "Nuget model generator packaging failed"
 }
