@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "title": "Dapper.FastCrud",
   "authors": [ "MoonStorm" ],
@@ -33,18 +33,21 @@
       },
       "dependencies": {
         "StringInterpolationBridge": "0.9.1",
-        "Dapper": "1.38.0"
+        "Dapper": "1.42.0"
       }
     },
 
     "net46": {
+      "buildOptions": {
+        "define": [ "NET_46_OR_GREATER" ]
+      },
       "frameworkAssemblies": {
         "System.Data": "",
         "System.Runtime.Caching": "",
         "System.ComponentModel.DataAnnotations": ""
       },
       "dependencies": {
-        "Dapper": "1.38.0"
+        "Dapper": "1.42.0"
       }
     }
 

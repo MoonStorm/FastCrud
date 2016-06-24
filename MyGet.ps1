@@ -5,14 +5,31 @@ $configuration = ($env:Configuration)
 $msBuildExe = ($env:MsBuildExe)
 $msBuildTarget = ($env:Targets)
 
-& "$PSScriptRoot\.nuget\nuget.exe" restore "$PSScriptRoot\Dapper.FastCRUD.sln"
+#$packageVersion = "2.4.0-preview1"
+#$configuration = "Release"
+#$msBuildExe = "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+#$msBuildTarget = "Build"
+
+# restore dependencies
+& "$PSScriptRoot\.build-tools\nuget\nuget.exe" restore "$PSScriptRoot\Dapper.FastCRUD.sln"
 if ($LASTEXITCODE -ne 0){
     throw "nuget restore failed"
 }
 
+# upgrade the version
+& "$PSScriptRoot\.build-tools\dnv\dnv.exe" --aivpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\Properties\AssemblyInfo.cs" --what aiv
+if ($LASTEXITCODE -ne 0){
+    throw "AssemblyInfo.cs version update failed"
+}
+& "$PSScriptRoot\.build-tools\dnv\dnv.exe" --avpat "$packageVersion" --write "$PSScriptRoot\Dapper.FastCrud\project.json" --what av
+if ($LASTEXITCODE -ne 0){
+    throw "project.json version update failed"
+}
+
+# build the solution
 & "$msBuildExe" "$PSScriptRoot\Dapper.FastCRUD.sln" /t:"$msBuildTarget" /p:Configuration="$configuration"
 if ($LASTEXITCODE -ne 0){
-    throw "sbuild failed"
+    throw "build failed"
 }
 
 # & "$PSScriptRoot\.nunit\nunit-console.exe" "$PSScriptRoot\Dapper.FastCRUD.Tests\bin\$configuration\Dapper.FastCrud.Tests.dll" /exclude=ExternalDatabase /noshadow  /framework:v4.5
@@ -25,7 +42,8 @@ if ($LASTEXITCODE -ne 0){
 #    throw "packing failed"
 #}
 
-& "$PSScriptRoot\.nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec" -OutputDirectory Releases -Verbosity detailed  -Version "$packageVersion" -Properties configuration="$configuration"
+# create the additional packages
+& "$PSScriptRoot\.build-tools\nuget\nuget.exe" pack "$PSScriptRoot\NuGetSpecs\Dapper.FastCRUD.ModelGenerator.nuspec" -OutputDirectory "$PSScriptRoot\Releases" -Verbosity detailed  -Version "$packageVersion" -Properties configuration="$configuration"
 if ($LASTEXITCODE -ne 0){
     throw "symbol packing failed"
 }
