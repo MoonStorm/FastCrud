@@ -7,7 +7,6 @@
     /// Statement options for entity relationships
     /// </summary>
     public interface IRelationalSqlStatementOptionsSetter<TReferencingEntity, TStatementOptionsBuilder>
-        :IStandardSqlStatementOptionsSetter<TReferencingEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.

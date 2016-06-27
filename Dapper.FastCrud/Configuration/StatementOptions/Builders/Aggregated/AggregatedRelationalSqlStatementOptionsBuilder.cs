@@ -1,7 +1,7 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
+﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated
 {
     using System;
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+    using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
@@ -39,24 +39,19 @@
         /// <summary>
         /// A left outer join is desired.
         /// </summary>
-        public TStatementOptionsBuilder LeftOuterJoin {
-            get
-            {
+        public TStatementOptionsBuilder LeftOuterJoin()
+        { 
                 this.JoinType = SqlJoinType.LeftOuterJoin;
                 return this.Builder;
-            }
         }
 
         /// <summary>
         /// An inner join is desired.
         /// </summary>
-        public TStatementOptionsBuilder InnerJoin
+        public TStatementOptionsBuilder InnerJoin()
         {
-            get
-            {
-                this.JoinType = SqlJoinType.InnerJoin;
-                return this.Builder;
-            }
+            this.JoinType = SqlJoinType.InnerJoin;
+            return this.Builder;
         }
 
         protected abstract TStatementOptionsBuilder Builder { get; }

@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+    using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Validations;

@@ -1,9 +1,8 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
+﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated
 {
     using System;
-    using System.Collections.Generic;
     using System.Data;
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+    using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
 

@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+    using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.SqlBuilders;
 
     internal interface ISqlStatements

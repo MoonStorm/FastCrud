@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Resolvers
+﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
 {
     using System;
     using Dapper.FastCrud.Mappings;

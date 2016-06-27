@@ -47,6 +47,7 @@ namespace Dapper.FastCrud.Tests.Models
 	public partial class Workstation
 	{
 		[Key]
+        [Column(Order = 1)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	    public virtual long WorkstationId { get; set; }
 	    public virtual string Name { get; set; }

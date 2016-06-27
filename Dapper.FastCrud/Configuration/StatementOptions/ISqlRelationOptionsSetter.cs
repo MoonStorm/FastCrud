@@ -28,12 +28,12 @@
         /// <summary>
         /// A left outer join is desired.
         /// </summary>
-        TStatementOptionsBuilder LeftOuterJoin { get; }
+        TStatementOptionsBuilder LeftOuterJoin();
 
         /// <summary>
         /// An inner join is desired.
         /// </summary>
-        TStatementOptionsBuilder InnerJoin { get; }
+        TStatementOptionsBuilder InnerJoin();
 
         ///// <summary>
         ///// A right outer join is desired.

@@ -6,7 +6,6 @@
     /// Ranged conditional sql statement options setter. 
     /// </summary>
     public interface IRangedConditionalSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
-        :IConditionalSqlStatementOptionsOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Limits the results set by the top number of records returned.

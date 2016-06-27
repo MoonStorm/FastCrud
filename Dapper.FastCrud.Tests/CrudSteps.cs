@@ -204,7 +204,22 @@
                                                 .Count<Building>(statement => statement
                                                     .Where(whereClause)
                                                     .WithParameters(new {BuildingIds = buildingIds}));
+        }
 
+        [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]
+        public void WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        {
+            _testContext.QueriedEntitiesDbCount = useAsyncMethods 
+                ? _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement.Include<Employee>()).GetAwaiter().GetResult()
+                : _testContext.DatabaseConnection.Count<Workstation>(statement => statement.Include<Employee>());
+        }
+
+        [When(@"I query for the count of all the employee entities strictly linked to workstation and building entities using (.*) methods")]
+        public void WhenIQueryForTheCountOfAllTheEmployeeEntitiesStrictlyLinkedToWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
+        {
+            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+                ? _testContext.DatabaseConnection.CountAsync<Employee>(statement => statement.Include<Workstation>(join => join.InnerJoin()).Include<Building>()).GetAwaiter().GetResult()
+                : _testContext.DatabaseConnection.Count<Employee>(statement => statement.Include<Workstation>(join=> join.InnerJoin()).Include<Building>(join => join.InnerJoin()));
         }
 
         [When(@"I query for the inserted building entities using (.*) methods")]

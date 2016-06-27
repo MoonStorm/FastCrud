@@ -1,5 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
+    using Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated;
+
     /// <summary>
     /// Standard sql options builder for a statement.
     /// </summary>

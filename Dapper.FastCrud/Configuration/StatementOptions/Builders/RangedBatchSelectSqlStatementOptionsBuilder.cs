@@ -1,11 +1,16 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
+    using Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated;
+
     /// <summary>
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
     public interface IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
-        :IRangedConditionalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
-        IRelationalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>
+        : IStandardSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IConditionalSqlStatementOptionsOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IRangedConditionalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IRelationalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IParameterizedSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>
     {
     }
 

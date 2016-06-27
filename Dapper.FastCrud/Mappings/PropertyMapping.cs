@@ -216,6 +216,15 @@
         ////}
 
         /// <summary>
+        /// Sets the column order, normally used for matching foreign keys with the primary composite keys.
+        /// </summary>
+        public PropertyMapping SetColumnOrder(int columnOrder)
+        {
+            this.ColumnOrder = columnOrder;
+            return this;
+        }
+
+        /// <summary>
         /// Indicates that the property gets refreshed on INSERTs.
         /// </summary>
         public PropertyMapping RefreshOnInserts(bool refreshOnInsert = true)
@@ -365,7 +374,10 @@
             }
         }
 
-        internal int ColumnOrder
+        /// <summary>
+        /// Gets or sets the column order, normally used for matching foreign keys with the primary composite keys.
+        /// </summary>
+        public int ColumnOrder
         {
             get
             {
@@ -373,6 +385,8 @@
             }
             set
             {
+                this.ValidateState();
+
                 _columnOrder = value;
             }
         }

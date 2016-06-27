@@ -4,7 +4,7 @@
     using System.Data;
     using System.Linq;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions.Resolvers;
+    using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Validations;
 
     /// <summary>

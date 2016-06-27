@@ -549,7 +549,10 @@
                 orderClause = null;
             }
 
-            selectClause = selectClauseBuilder.ToString();
+            if (selectClauseBuilder != null)
+            {
+                selectClause = selectClauseBuilder.ToString();
+            }
             fullStatement = this.ConstructFullSelectStatementInternal(selectClause, fromClauseBuilder.ToString(), whereClause, orderClause, skipRowsCount, limitRowsCount, true);
         }
 

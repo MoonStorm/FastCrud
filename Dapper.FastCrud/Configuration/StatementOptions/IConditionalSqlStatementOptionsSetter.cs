@@ -6,7 +6,6 @@
     /// Conditional sql statement options setter. 
     /// </summary>
     public interface IConditionalSqlStatementOptionsOptionsSetter<TEntity, TStatementOptionsBuilder>
-        :IParameterizedSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Limits the result set with a where clause.

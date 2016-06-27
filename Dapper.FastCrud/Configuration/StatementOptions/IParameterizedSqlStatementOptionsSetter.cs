@@ -4,7 +4,6 @@
     /// Parameterized SQL statement options setter.
     /// </summary>
     public interface IParameterizedSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
-        :IStandardSqlStatementOptionsSetter<TEntity, TStatementOptionsBuilder>
     {
         /// <summary>
         /// Sets the parameters to be used by the statement.
