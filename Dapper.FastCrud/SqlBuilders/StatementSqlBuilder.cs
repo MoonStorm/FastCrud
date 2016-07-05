@@ -174,7 +174,7 @@
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
                                      ? $" AS {this.GetDelimitedIdentifier(propMapping.PropertyName)}"
                                      : string.Empty;
-            return $"{sqlTableAlias}{this.GetDelimitedIdentifier(propMapping.DatabaseColumnName)}{sqlColumnAlias}".ToString(CultureInfo.InvariantCulture);
+            return this.ResolveWithCultureInvariantFormatter($"{sqlTableAlias}{this.GetDelimitedIdentifier(propMapping.DatabaseColumnName)}{sqlColumnAlias}");
         }
 
         /// <summary>

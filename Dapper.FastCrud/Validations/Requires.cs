@@ -19,7 +19,6 @@
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <returns>The value of the parameter.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>default</c></exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T NotDefault<T>(T value, string parameterName)
         {
@@ -39,7 +38,6 @@
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <returns>The value of the parameter.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is <c>null</c></exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T NotNull<T>(T value, string parameterName)
             where T : class // ensures value-types aren't passed to a null checking method
@@ -77,7 +75,6 @@
         /// <param name="value">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is <c>null</c> or empty.</exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNullOrEmpty(string value, string parameterName)
         {
@@ -95,7 +92,6 @@
         /// <param name="value">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is <c>null</c> or empty.</exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNullOrWhiteSpace(string value, string parameterName)
         {
@@ -114,7 +110,6 @@
         /// <param name="values">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <exception cref="ArgumentException">Thrown if the tested condition is false.</exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNullOrEmpty(IEnumerable values, string parameterName)
         {
@@ -149,7 +144,6 @@
         /// <param name="values">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
         /// <exception cref="ArgumentException">Thrown if the tested condition is false.</exception>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void NotNullOrEmptyOrNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class // ensures value-types aren't passed to a null checking method
@@ -176,7 +170,6 @@
         /// <summary>
         /// Throws an <see cref="ArgumentOutOfRangeException"/> if a condition does not evaluate to true.
         /// </summary>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Range(bool condition, string parameterName, string message = null)
         {
@@ -189,7 +182,6 @@
         /// <summary>
         /// Throws an ArgumentException if a condition does not evaluate to true.
         /// </summary>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Argument(bool condition, string parameterName, string message)
         {
@@ -205,7 +197,6 @@
         /// <param name="condition">The expression that must evaluate to true to avoid an <see cref="InvalidOperationException"/>.</param>
         /// <param name="message">The message to include with the exception.</param>
         /// <param name="messageArgs">Message parameetrs</param>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidState(bool condition, string message)
         {
@@ -219,7 +210,6 @@
         /// Throws an <see cref="ArgumentOutOfRangeException"/> if a condition does not evaluate to true.
         /// </summary>
         /// <returns>Nothing.  This method always throws.</returns>
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void FailRange(string parameterName, string message = null)
         {

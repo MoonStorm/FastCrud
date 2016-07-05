@@ -23,7 +23,7 @@ Features:
 ----------
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
 - Composite primary keys are supported.
-- Compatible with EF data annotations.
+- Compatible with component model data annotations.
 - Opt-in relationships.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
@@ -32,7 +32,7 @@ Features:
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
 
-Check out the package on nuget.org for release notes. Usage and benchmarks can be found on the project site.
+Check out the project site for release notes, usage and benchmarks..
     </description>
     <copyright>Copyright 2015</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>

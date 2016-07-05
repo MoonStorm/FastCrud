@@ -7,6 +7,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using Dapper.FastCrud.Validations;
 
     /// <summary>
@@ -211,7 +212,17 @@
         private void ConstructParentChildEntityRelationships()
         {
             _parentChildRelationships = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>()
-                .Where(propDescriptor => propDescriptor.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType) && propDescriptor.PropertyType.GetGenericArguments().Length == 1 )
+                .Where(propDescriptor =>
+                       {
+                           var propInfo =
+#if COREFX
+                           propDescriptor.PropertyType.GetTypeInfo();
+#else
+                           propDescriptor.PropertyType;
+#endif
+                           return propInfo.IsGenericType && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
+                                  && propDescriptor.PropertyType.GetGenericArguments().Length == 1;
+                       } )
                 //.GroupBy(propDescriptor => propDescriptor.PropertyType)
                 .ToDictionary(
                     propDescriptor => propDescriptor.PropertyType.GetGenericArguments()[0],
@@ -415,7 +426,7 @@
         public PropertyMapping GetProperty(string propertyName)
         {
             PropertyMapping propertyMapping = null;
-            PropertyMappings.TryGetValue(propertyName.ToString(CultureInfo.InvariantCulture), out propertyMapping);
+            PropertyMappings.TryGetValue(propertyName, out propertyMapping);
             return propertyMapping;
         }
 

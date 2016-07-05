@@ -10,6 +10,8 @@ When using this library, a compiler equivalent to the one included inside Visual
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
 - Fast pre-computed entity queries
+- Compatible with component model data annotations.
+- Opt-in relationships.
 - A useful SQL builder and statement formatter which can be used even if you don't need the CRUD features of this library.
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
