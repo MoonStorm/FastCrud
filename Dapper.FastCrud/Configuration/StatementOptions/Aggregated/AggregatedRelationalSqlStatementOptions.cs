@@ -13,7 +13,7 @@
         /// </summary>
         public AggregatedRelationalSqlStatementOptions()
         {
-            this.JoinType = SqlJoinType.LeftOuterJoin;
+            this.JoinType = SqlJoinType.NotSpecified;
         }
 
         /// <summary>

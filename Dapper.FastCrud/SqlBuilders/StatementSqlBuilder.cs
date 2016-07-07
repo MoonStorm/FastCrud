@@ -5,6 +5,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
@@ -12,7 +13,6 @@
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
-    using Dapper.FastCrud.SqlStatements;
     using Dapper.FastCrud.Validations;
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
@@ -66,6 +66,7 @@
             this.KeyProperties = this.EntityMapping.PropertyMappings
                 .Where(propMapping => propMapping.Value.IsPrimaryKey)
                 .Select(propMapping => propMapping.Value)
+                .OrderBy(propMapping => propMapping.ColumnOrder)
                 .ToArray();
             this.RefreshOnInsertProperties = this.SelectProperties
                 .Where(propInfo => propInfo.IsRefreshedOnInserts)
@@ -384,6 +385,7 @@
             var splitOnExpressionBuilder = new StringBuilder();
             var additionalWhereClauseBuilder = new StringBuilder();
             var additionalOrderClauseBuilder = new StringBuilder();
+            var joinClauseBuilder = new StringBuilder();
 
             for(var leftJoinInstructionIndex = 0; leftJoinInstructionIndex < allSqlJoinInstructions.Length; leftJoinInstructionIndex++)
             {
@@ -439,27 +441,15 @@
                 }
 
                 // build the join expression
-                if (leftJoinInstructionIndex > 0)
+                if (leftJoinInstructionIndex == 0)
                 {
-                    switch (leftJoinSqlInstruction.JoinType)
-                    {
-                        case SqlJoinType.LeftOuterJoin:
-                            fromClauseBuilder.Append(" LEFT OUTER JOIN ");
-                            break;
-                        case SqlJoinType.InnerJoin:
-                            fromClauseBuilder.Append(" JOIN ");
-                            break;
-                        default:
-                            throw new NotSupportedException($"Join '{leftJoinSqlInstruction.JoinType}' is not supported");
-                    }
+                    fromClauseBuilder.Append(leftJoinSqlBuilder.GetTableName());
                 }
-
-                fromClauseBuilder.Append(leftJoinSqlBuilder.GetTableName());
-
-                // append the join condition
-                if (leftJoinInstructionIndex > 0)
+                else
                 {
-                    fromClauseBuilder.Append(" ON ");
+                    // construct the join condition
+                    joinClauseBuilder.Clear();
+                    var leftEntityFinalJoinType = leftJoinSqlInstruction.JoinType;
 
                     // discover and append all the join conditions for the current table
                     var atLeastOneRelationshipDiscovered = false;
@@ -469,45 +459,90 @@
                         var rightJoinSqlInstruction = allSqlJoinInstructions[rightJoinSqlBuilderIndex];
                         var rightJoinSqlBuilder = rightJoinSqlInstruction.SqlBuilder;
 
-                        // get the columns on the left side of the join - current SQL builder
+                        // get the columns involved in the relationship on the left entity - current SQL builder
                         EntityMappingRelationship leftJoinEntityRelationship;
                         bool leftJoinParentChildRelationship;
                         if (leftJoinSqlBuilder.EntityMapping.ChildParentRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = false;
                             atLeastOneRelationshipDiscovered = true;
+
+                            // in case the left entity is a child, one of its foreign key properties is not nullable and the join type wasn't specified, default to INNER JOIN
+                            if(leftEntityFinalJoinType==SqlJoinType.NotSpecified && leftJoinEntityRelationship.ReferencingKeyProperties.Any(propMapping =>
+                                                                                                                                            {
+                                                                                                                                                var propType = propMapping.Descriptor.PropertyType;
+                                                                                                                                                return
+#if COREFX
+                                                                                                                                                    propType.GetTypeInfo().IsValueType
+#else
+                                                                                                                                                    propType.IsValueType
+#endif
+                                                                                                                                                    && Nullable.GetUnderlyingType(propMapping.Descriptor.PropertyType) == null;
+                                                                                                                                            }))
+                            {
+                                leftEntityFinalJoinType = SqlJoinType.InnerJoin;
+                            }
+
                         }
                         else if (leftJoinSqlBuilder.EntityMapping.ParentChildRelationships.TryGetValue(rightJoinSqlBuilder.EntityMapping.EntityType, out leftJoinEntityRelationship))
                         {
                             leftJoinParentChildRelationship = true;
                             atLeastOneRelationshipDiscovered = true;
+
+                            // in case the left entity is a parent and the join type wasn't specified, default to LEFT OUTER JOIN
+                            // will be dealt with at the end
+                            //if (leftEntityFinalJoinType == SqlJoinType.NotSpecified)
+                            //{
+                            //    leftEntityFinalJoinType = SqlJoinType.LeftOuterJoin;
+                            //}
                         }
                         else
                         {
                             continue;
                         }
+                        PropertyMapping[] leftJoinColumns = leftJoinEntityRelationship.ReferencingKeyProperties;
 
-                        EntityMappingRelationship rightJoinEntityRelationship;
-                        // do the same for the right side
-                        if (!(leftJoinParentChildRelationship ? rightJoinSqlBuilder.EntityMapping.ChildParentRelationships : rightJoinSqlBuilder.EntityMapping.ParentChildRelationships).TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinEntityRelationship))
+                        // get the columns involved in the relationship on the right entity
+                        PropertyMapping[] rightJoinColumns;
+                        if (leftJoinParentChildRelationship)
                         {
-                            throw new InvalidOperationException($"Could not find a matching relationship defined on '{rightJoinSqlBuilder.EntityMapping.EntityType}' involving '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
+                            // we've found a parent-child relationship on the left entity, we'll be looking for a mandatory child-parent relationship on the right entity
+                            EntityMappingRelationship rightJoinEntityRelationship;
+                            if (rightJoinSqlBuilder.EntityMapping.ChildParentRelationships.TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinEntityRelationship))
+                            {
+                                rightJoinColumns = rightJoinEntityRelationship.ReferencingKeyProperties;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Could not find a matching child-to-parent relationship defined on '{rightJoinSqlBuilder.EntityMapping.EntityType}' involving '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
+                            }
+                        }
+                        else
+                        {
+                            // we've found a child-parent relationship on the left entity, we'll be looking for an optional parent-child relationship on the right entity
+                            EntityMappingRelationship rightJoinEntityRelationship;
+                            if (rightJoinSqlBuilder.EntityMapping.ParentChildRelationships.TryGetValue(leftJoinSqlBuilder.EntityMapping.EntityType, out rightJoinEntityRelationship))
+                            {
+                                rightJoinColumns = rightJoinEntityRelationship.ReferencingKeyProperties;
+                            }
+                            else
+                            {
+                                // the child collection could be missing, and that's ok, we'll assume the primary keys are the ones we need
+                                rightJoinColumns = rightJoinSqlBuilder.KeyProperties;
+                            }
                         }
 
-                        PropertyMapping[] leftJoinColumns = leftJoinEntityRelationship.ReferencingKeyProperties;
-                        PropertyMapping[] rightJoinColumns = rightJoinEntityRelationship.ReferencingKeyProperties;
-
-                        fromClauseBuilder.Append('(');
+                        joinClauseBuilder.Append('(');
                         for (var leftJoinColumnIndex = 0; leftJoinColumnIndex<leftJoinColumns.Length; leftJoinColumnIndex++)
                         {
                             if (leftJoinColumnIndex > 0)
                             {
-                                fromClauseBuilder.Append(" AND ");
+                                joinClauseBuilder.Append(" AND ");
                             }
 
                             var leftJoinColumn = leftJoinColumns[leftJoinColumnIndex];
-                            fromClauseBuilder.Append(leftJoinSqlBuilder.GetColumnName(leftJoinColumn, leftJoinSqlBuilder.GetTableName(), false));
-                            fromClauseBuilder.Append('=');
+                            joinClauseBuilder.Append(leftJoinSqlBuilder.GetColumnName(leftJoinColumn, leftJoinSqlBuilder.GetTableName(), false));
+                            joinClauseBuilder.Append('=');
 
                             // search for the corresponding column in the current entity
                             // we're doing this by index, since both sides had the relationship columns already ordered
@@ -517,16 +552,34 @@
                             }
 
                             var rightJoinColumn = rightJoinColumns[leftJoinColumnIndex];
-                            fromClauseBuilder.Append(rightJoinSqlBuilder.GetColumnName(rightJoinColumn, rightJoinSqlBuilder.GetTableName(), false));
+                            joinClauseBuilder.Append(rightJoinSqlBuilder.GetColumnName(rightJoinColumn, rightJoinSqlBuilder.GetTableName(), false));
 
                         }
-                        fromClauseBuilder.Append(')');
+                        joinClauseBuilder.Append(')');
                     }
 
                     if (!atLeastOneRelationshipDiscovered)
                     {
                         throw new InvalidOperationException($"Could not find a relationship defined on '{leftJoinSqlBuilder.EntityMapping.EntityType}'");
                     }
+
+                    // construct the final join condition for the entity
+                    switch (leftEntityFinalJoinType)
+                    {
+                        case SqlJoinType.LeftOuterJoin:
+                        case SqlJoinType.NotSpecified:
+                            fromClauseBuilder.Append(" LEFT OUTER JOIN ");
+                            break;
+                        case SqlJoinType.InnerJoin:
+                            fromClauseBuilder.Append(" JOIN ");
+                            break;
+                        default:
+                            throw new NotSupportedException($"Join '{leftEntityFinalJoinType}' is not supported");
+                    }
+
+                    fromClauseBuilder.Append(leftJoinSqlBuilder.GetTableName());
+                    fromClauseBuilder.Append(" ON ");
+                    fromClauseBuilder.Append(joinClauseBuilder.ToString());
                 }
             }
 
