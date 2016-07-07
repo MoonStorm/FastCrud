@@ -5,7 +5,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
@@ -14,6 +13,7 @@
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
+    using System.Reflection;
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
@@ -159,7 +159,13 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string tableAlias = null)
         {
-            return this.GetColumnName(this.EntityMapping.PropertyMappings[propertyName], tableAlias, false);
+            PropertyMapping targetPropertyMapping;
+            if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
+            {
+                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
+            }
+
+            return this.GetColumnName(targetPropertyMapping, tableAlias, false);
         }
 
         /// <summary>
