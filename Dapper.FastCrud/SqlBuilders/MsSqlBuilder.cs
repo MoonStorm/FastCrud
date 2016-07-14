@@ -40,14 +40,13 @@
             }
 
             var dbInsertedOutputColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
 
             // the union will make the constraints be ignored
             return this.ResolveWithCultureInvariantFormatter($@"
                 SELECT *
                     INTO #temp 
-                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
-                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
+                    FROM (SELECT {this.ConstructRefreshOnInsertColumnSelection()} FROM {this.GetTableName()} WHERE 1=0 
+                        UNION SELECT {this.ConstructRefreshOnInsertColumnSelection()} FROM {this.GetTableName()} WHERE 1=0) as u;
             
                 INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
                     OUTPUT {dbInsertedOutputColumns} INTO #temp 
