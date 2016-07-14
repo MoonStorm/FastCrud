@@ -31,7 +31,7 @@ Code first entities are also supported which can either be decorated with attrib
 
 Check out the project site for release notes, usage and benchmarks..
     </description>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2016</copyright>
     <tags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</tags>
     <frameworkAssemblies>
     </frameworkAssemblies>
