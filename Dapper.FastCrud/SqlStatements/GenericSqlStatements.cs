@@ -32,7 +32,7 @@
         /// </summary>
         public ISqlStatements<TEntity> CombineWith<TJoinedEntity>(ISqlStatements<TJoinedEntity> joinedEntitySqlStatements)
         {
-            return new TwoEntitiesRelationshipSqlStatements<TEntity,TJoinedEntity>(this, joinedEntitySqlStatements);
+            return new TwoEntitiesRelationshipSqlStatements<TEntity,TJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
         /// <summary>

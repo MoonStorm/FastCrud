@@ -19,10 +19,7 @@
         protected override string ConstructFullInsertStatementInternal()
         {
             string outputQuery = this.RefreshOnInsertProperties.Length > 0
-             ? string.Format(
-                 CultureInfo.InvariantCulture,
-                 "RETURNING {0}",
-                 this.ConstructRefreshOnInsertColumnSelection())
+             ? this.ResolveWithCultureInvariantFormatter($"RETURNING {this.ConstructRefreshOnInsertColumnSelection()}")
              : string.Empty;
 
             return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}");

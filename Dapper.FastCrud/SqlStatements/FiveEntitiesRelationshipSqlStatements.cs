@@ -8,15 +8,17 @@
     /// <summary>
     /// SQL statement factory targeting relationships.
     /// </summary>
-    internal class ThreeEntitiesRelationshipSqlStatements<TMainEntity,
-                                                          TFirstJoinedEntity,
-                                                          TSecondJoinedEntity>
+    internal class FiveEntitiesRelationshipSqlStatements<TMainEntity,
+                                                         TFirstJoinedEntity,
+                                                         TSecondJoinedEntity,
+                                                         TThirdJoinedEntity,
+                                                         TFourthJoinedEntity>
         : RelationshipSqlStatements<TMainEntity>
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ThreeEntitiesRelationshipSqlStatements(TwoEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity> relationshipSqlStatements, GenericStatementSqlBuilder joinedEntitySqlStatements)
+        public FiveEntitiesRelationshipSqlStatements(FourEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity> relationshipSqlStatements, GenericStatementSqlBuilder joinedEntitySqlStatements)
             : base(relationshipSqlStatements, joinedEntitySqlStatements)
         {
         }
@@ -24,9 +26,9 @@
         /// <summary>
         /// Combines the current instance with a joined entity.
         /// </summary>
-        public override ISqlStatements<TMainEntity> CombineWith<TThirdJoinedEntity>(ISqlStatements<TThirdJoinedEntity> joinedEntitySqlStatements)
+        public override ISqlStatements<TMainEntity> CombineWith<TFifthJoinedEntity>(ISqlStatements<TFifthJoinedEntity> joinedEntitySqlStatements)
         {
-            return new FourEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
+            return new SixEntitiesRelationshipSqlStatements<TMainEntity,TFirstJoinedEntity,TSecondJoinedEntity,TThirdJoinedEntity,TFourthJoinedEntity,TFifthJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
         protected override IEnumerable<TMainEntity> Query(
@@ -39,13 +41,15 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity) =>
                 {
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntity;
@@ -67,13 +71,15 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity) =>
                 {
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntity;

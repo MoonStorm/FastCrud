@@ -5,7 +5,10 @@
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
+    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
+    using System.Linq;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// SQL statement factory targeting relationships.
@@ -14,14 +17,42 @@
     internal abstract class RelationshipSqlStatements<TEntity> : ISqlStatements<TEntity>
     {
         private readonly ISqlStatements<TEntity> _mainEntitySqlStatements;
+        private readonly GenericStatementSqlBuilder[] _joinedEntitiesSqlBuilders;
+        private readonly EntityMapping[] _allEntityMappings;
 
         /// <summary>
-        /// Default constructor
+        /// Constructor that takes as arguments the statements for an existing relationship plus a newly joined entity sql builder.
         /// </summary>
-        /// <param name="mainEntitySqlStatements">Proxy for the main entity</param>
-        protected RelationshipSqlStatements(ISqlStatements<TEntity> mainEntitySqlStatements)
+        protected RelationshipSqlStatements(RelationshipSqlStatements<TEntity> relationshipStatements, GenericStatementSqlBuilder newlyJoinedEntitySqlBuilder)
+            :this(relationshipStatements._mainEntitySqlStatements, relationshipStatements._joinedEntitiesSqlBuilders,newlyJoinedEntitySqlBuilder)
+        {            
+        }
+
+        /// <summary>
+        /// Constructor that takes as arguments the sql statements for the main entity plus a newly joined entity sql builder.
+        /// </summary>
+        protected RelationshipSqlStatements(ISqlStatements<TEntity> mainEntitySqlStatements, GenericStatementSqlBuilder newlyJoinedEntitySqlBuilder)
+            :this(mainEntitySqlStatements, null, newlyJoinedEntitySqlBuilder)
+        {            
+        }
+
+        private RelationshipSqlStatements(ISqlStatements<TEntity> mainEntitySqlStatements, GenericStatementSqlBuilder[] joinedEntitiesSqlBuilders, GenericStatementSqlBuilder newlyJoinedEntitySqlBuilder)
         {
             _mainEntitySqlStatements = mainEntitySqlStatements;
+
+            var alreadyJoinedEntitiesCount = joinedEntitiesSqlBuilders?.Length??0;
+
+            _joinedEntitiesSqlBuilders = new GenericStatementSqlBuilder[alreadyJoinedEntitiesCount + 1];
+            _allEntityMappings = new EntityMapping[alreadyJoinedEntitiesCount + 2];
+            for (var joinedSqlBuilderIndex = 0; joinedSqlBuilderIndex < alreadyJoinedEntitiesCount; joinedSqlBuilderIndex++)
+            {
+                _allEntityMappings[joinedSqlBuilderIndex + 1] = _joinedEntitiesSqlBuilders[joinedSqlBuilderIndex].EntityMapping;
+                _joinedEntitiesSqlBuilders[joinedSqlBuilderIndex] = joinedEntitiesSqlBuilders[joinedSqlBuilderIndex];
+            }
+
+            _joinedEntitiesSqlBuilders[alreadyJoinedEntitiesCount] = newlyJoinedEntitySqlBuilder;
+            _allEntityMappings[0] = mainEntitySqlStatements.SqlBuilder.EntityMapping;
+            _allEntityMappings[alreadyJoinedEntitiesCount + 1] = newlyJoinedEntitySqlBuilder.EntityMapping;
         }
 
         /// <summary>
@@ -37,32 +68,158 @@
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
-        public abstract TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions);
+        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
+
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
+            return this.Query(connection,
+                statement, 
+                splitOnCondition,
+                keyEntity,
+                false,
+                statementOptions.Transaction, 
+                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder).SingleOrDefault();
+        }
 
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
-        public abstract Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions);
+        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
+
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
+            return (await this.QueryAsync(connection, 
+                statement, 
+                splitOnCondition, 
+                keyEntity,
+                false,
+                statementOptions.Transaction, 
+                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder)).SingleOrDefault();
+        }
 
         /// <summary>
         /// Performs a COUNT on a range of items.
         /// </summary>
-        public abstract int Count(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions);
+        public int Count(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                selectClause: this.SqlBuilder.ConstructCountSelectClause(),
+                whereClause: statementOptions.WhereClause);
+
+            return connection.ExecuteScalar<int>(
+                statement,
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+        }
 
         /// <summary>
         /// Performs a COUNT on a range of items.
         /// </summary>
-        public abstract Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions);
+        public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                selectClause: this.SqlBuilder.ConstructCountSelectClause(),
+                whereClause: statementOptions.WhereClause);
+
+            return connection.ExecuteScalarAsync<int>(
+                statement,
+                statementOptions.Parameters,
+                transaction: statementOptions.Transaction,
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+        }
 
         /// <summary>
         /// Performs a common SELECT 
         /// </summary>
-        public abstract IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions);
+        public IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
+                "When using Top or Skip, you must provide an OrderBy clause.");
+
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                whereClause: statementOptions.WhereClause,
+                orderClause: statementOptions.OrderClause,
+                skipRowsCount: statementOptions.SkipResults,
+                limitRowsCount: statementOptions.LimitResults);
+
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
+
+            return this.Query(connection,
+                              statement,
+                              splitOnCondition,
+                              statementOptions.Parameters,
+                              !statementOptions.ForceStreamResults,
+                              statementOptions.Transaction,
+                              (int?)statementOptions.CommandTimeout?.TotalSeconds,
+                              relationshipInstanceBuilder);
+        }
 
         /// <summary>
         /// Performs a common SELECT 
         /// </summary>
-        public abstract Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementoptions);
+        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        {
+            Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
+                "When using Top or Skip, you must provide an OrderBy clause.");
+
+            string statement;
+            string splitOnCondition;
+
+            this.SqlBuilder.ConstructFullJoinSelectStatement(
+                out statement,
+                out splitOnCondition,
+                this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
+                whereClause: statementOptions.WhereClause,
+                orderClause: statementOptions.OrderClause,
+                skipRowsCount: statementOptions.SkipResults,
+                limitRowsCount: statementOptions.LimitResults);
+
+            var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
+
+            return this.QueryAsync(connection,
+                              statement,
+                              splitOnCondition,
+                              statementOptions.Parameters,
+                              !statementOptions.ForceStreamResults,
+                              statementOptions.Transaction,
+                              (int?)statementOptions.CommandTimeout?.TotalSeconds,
+                              relationshipInstanceBuilder);
+        }
 
         /// <summary>
         /// Performs an INSERT operation
@@ -162,5 +319,25 @@
                 yield return new StatementSqlBuilderJoinInstruction(joinedEntitySqlBuilder, joinedEntityOptions.JoinType, joinedEntityOptions.WhereClause, joinedEntityOptions.OrderClause);
             }
         }
+
+        protected abstract IEnumerable<TEntity> Query(
+            IDbConnection connection, 
+            string statement, 
+            string splitOnCondition, 
+            object parameters,
+            bool buffered,
+            IDbTransaction transaction, 
+            int? commandTimeout, 
+            RelationshipEntityInstanceBuilder relationshipInstanceBuilder);
+
+        protected abstract Task<IEnumerable<TEntity>> QueryAsync(
+            IDbConnection connection,
+            string statement,
+            string splitOnCondition,
+            object parameters,
+            bool buffered,
+            IDbTransaction transaction,
+            int? commandTimeout,
+            RelationshipEntityInstanceBuilder relationshipInstanceBuilder);
     }
 }

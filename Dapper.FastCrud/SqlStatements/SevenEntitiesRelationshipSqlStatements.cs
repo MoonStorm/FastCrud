@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
@@ -8,15 +9,21 @@
     /// <summary>
     /// SQL statement factory targeting relationships.
     /// </summary>
-    internal class ThreeEntitiesRelationshipSqlStatements<TMainEntity,
+    internal class SevenEntitiesRelationshipSqlStatements<TMainEntity,
                                                           TFirstJoinedEntity,
-                                                          TSecondJoinedEntity>
+                                                          TSecondJoinedEntity,
+                                                          TThirdJoinedEntity,
+                                                          TFourthJoinedEntity,
+                                                          TFifthJoinedEntity,
+                                                          TSixthJoinedEntity>
         : RelationshipSqlStatements<TMainEntity>
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ThreeEntitiesRelationshipSqlStatements(TwoEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity> relationshipSqlStatements, GenericStatementSqlBuilder joinedEntitySqlStatements)
+        public SevenEntitiesRelationshipSqlStatements(
+            SixEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity> relationshipSqlStatements,
+            GenericStatementSqlBuilder joinedEntitySqlStatements)
             : base(relationshipSqlStatements, joinedEntitySqlStatements)
         {
         }
@@ -24,9 +31,9 @@
         /// <summary>
         /// Combines the current instance with a joined entity.
         /// </summary>
-        public override ISqlStatements<TMainEntity> CombineWith<TThirdJoinedEntity>(ISqlStatements<TThirdJoinedEntity> joinedEntitySqlStatements)
+        public override ISqlStatements<TMainEntity> CombineWith<TSeventhJoinedEntity>(ISqlStatements<TSeventhJoinedEntity> joinedEntitySqlStatements)
         {
-            return new FourEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
+            throw new NotSupportedException("Only 7 entities are allowed in a relationship");
         }
 
         protected override IEnumerable<TMainEntity> Query(
@@ -39,13 +46,17 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, TSixthJoinedEntity,  TMainEntity>(
                 statement,
-                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity, fifthJoinedEntity, sixthJoinedEntity) =>
                 {
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fifthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref sixthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntity;
@@ -67,13 +78,17 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, TSixthJoinedEntity, TMainEntity>(
                 statement,
-                (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
+                (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity, fifthJoinedEntity, sixthJoinedEntity) =>
                 {
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
                     relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fifthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref sixthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntity;

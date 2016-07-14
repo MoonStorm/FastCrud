@@ -10,71 +10,40 @@
     /// </summary>
     internal class RelationshipEntityInstanceBuilder
     {
-        private readonly Dictionary<Type, EntityInstanceContainer> _entityInstanceContainers = new Dictionary<Type, EntityInstanceContainer>();
+        private static readonly Type _entityListType = typeof(List<>);
+        private readonly Dictionary<Type, EntityInstanceContainer> _entityInstanceContainers;
+        private readonly ParticipatingEntityInstance[] _currentRowEntityInstances;
+        private int _currentRowParticipatingEntityCount;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public RelationshipEntityInstanceBuilder(params EntityMapping[] entityMappings)
         {
-            foreach (var entityMapping in entityMappings)
+            _entityInstanceContainers = new Dictionary<Type, EntityInstanceContainer>();
+            _currentRowEntityInstances = new ParticipatingEntityInstance[entityMappings.Length];
+            _currentRowParticipatingEntityCount = 0;
+
+            for(var entityMappingIndex = 0; entityMappingIndex<entityMappings.Length;entityMappingIndex++)
             {
+                var entityMapping = entityMappings[entityMappingIndex];
                 _entityInstanceContainers[entityMapping.EntityType] = new EntityInstanceContainer(entityMapping);
+
+                // the entity row instances act as a placeholders, to avoid constructing them for every single row
+                _currentRowEntityInstances[entityMappingIndex] = new ParticipatingEntityInstance();
             }
         }
 
         /// <summary>
-        /// Registers two related entity instances.
+        /// Registers a new entity instance for a row in the result set.
+        /// Signal the end of the row in the result set with a call to <see cref="EndResultSetRow"/>.
         /// </summary>
-        public void Add<TMainEntity, TFirstJoinedEntity>(ref TMainEntity mainEntity, ref TFirstJoinedEntity firstJoinedEntity)
+        public void RegisterResultSetRowInstance<TEntity>(ref TEntity entity)
         {
-            EntityInstanceContainer mainEntityInstanceContainer;
-            var isMainEntityNew = this.Add(ref mainEntity, out mainEntityInstanceContainer);
+            EntityInstanceContainer instanceContainer;
+            object genericEntityInstance;
+            bool requiresBinding;
 
-            EntityInstanceContainer firstJoinedEntityContainer;
-            var isFirstJoinedEntityNew = this.Add(ref firstJoinedEntity, out firstJoinedEntityContainer);
-
-            if (isMainEntityNew || isFirstJoinedEntityNew)
-            {
-                Attach(mainEntityInstanceContainer.EntityMapping, mainEntity, firstJoinedEntityContainer.EntityMapping, firstJoinedEntity);
-                Attach(firstJoinedEntityContainer.EntityMapping, firstJoinedEntity, mainEntityInstanceContainer.EntityMapping, mainEntity);
-            }
-        }
-
-        /// <summary>
-        /// Registers two related entity instances.
-        /// </summary>
-        public void Add<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity>(ref TMainEntity mainEntity, ref TFirstJoinedEntity firstJoinedEntity, ref TSecondJoinedEntity secondJoinedEntity)
-        {
-            EntityInstanceContainer mainEntityInstanceContainer;
-            var isMainEntityNew = this.Add(ref mainEntity, out mainEntityInstanceContainer);
-
-            EntityInstanceContainer firstJoinedEntityContainer;
-            var isFirstJoinedEntityNew = this.Add(ref firstJoinedEntity, out firstJoinedEntityContainer);
-
-            EntityInstanceContainer secondJoinedEntityContainer;
-            var isSecondJoinedEntityNew = this.Add(ref secondJoinedEntity, out secondJoinedEntityContainer);
-
-            if (isMainEntityNew || isFirstJoinedEntityNew)
-            {
-                Attach(mainEntityInstanceContainer.EntityMapping, mainEntity, firstJoinedEntityContainer.EntityMapping, firstJoinedEntity);
-                Attach(firstJoinedEntityContainer.EntityMapping, firstJoinedEntity, mainEntityInstanceContainer.EntityMapping, mainEntity);
-            }
-
-            if (isFirstJoinedEntityNew || isSecondJoinedEntityNew)
-            {
-                Attach(firstJoinedEntityContainer.EntityMapping, firstJoinedEntity, secondJoinedEntityContainer.EntityMapping, secondJoinedEntity);
-                Attach(secondJoinedEntityContainer.EntityMapping, secondJoinedEntity, firstJoinedEntityContainer.EntityMapping, firstJoinedEntity);
-            }
-        }
-
-        /// <summary>
-        /// Returns the instance container in case the entity could not be located
-        /// The existing entity is also going to be updated.
-        /// </summary>
-        /// <returns>True in case the entity instance has never been encountered</returns>
-        private bool Add<TEntity>(ref TEntity entity, out EntityInstanceContainer instanceContainer)
-        {
             if (!_entityInstanceContainers.TryGetValue(typeof(TEntity), out instanceContainer))
             {
                 throw new InvalidOperationException($"Type '{typeof(TEntity)}' could not be found in the list of registered instance containers.");
@@ -83,22 +52,61 @@
             if (entity == null)
             {
                 // we want to initialize the relationship, reason why for NULL values we'll pretend we haven't seen this instance
-                return true;
+                genericEntityInstance = entity;
+                requiresBinding = true;
             }
-
-            object existingEntityInstance;
-            var entityInstanceIdentity = new RelationshipEntityInstanceBuilderIdentity(instanceContainer.EntityMapping, entity);
-            if (instanceContainer.KnownInstances.TryGetValue(entityInstanceIdentity, out existingEntityInstance))
+            else
             {
-                entity = (TEntity)existingEntityInstance;
-                return false;
+                var entityInstanceIdentity = new RelationshipEntityInstanceBuilderIdentity(instanceContainer.EntityMapping, entity);
+                if (instanceContainer.KnownInstances.TryGetValue(entityInstanceIdentity, out genericEntityInstance))
+                {
+                    entity = (TEntity)genericEntityInstance;
+                    requiresBinding = false;
+                }
+                else
+                {
+                    genericEntityInstance = entity;
+                    instanceContainer.KnownInstances.Add(entityInstanceIdentity, genericEntityInstance);
+                    requiresBinding = true;
+                }
             }
 
-            instanceContainer.KnownInstances.Add(entityInstanceIdentity, entity);
-            return true;
+            var entityInstanceRowDetails = _currentRowEntityInstances[_currentRowParticipatingEntityCount++];
+            entityInstanceRowDetails.EntityMapping = instanceContainer.EntityMapping;
+            entityInstanceRowDetails.Instance = genericEntityInstance;
+            entityInstanceRowDetails.RequiresBinding = requiresBinding;
         }
 
-        private static void Attach<TFirstEntity, TSecondEntity>(EntityMapping mainEntityMapping, TFirstEntity mainEntity, EntityMapping childEntityMapping, TSecondEntity childEntity)
+        /// <summary>
+        /// Ends a result row which has the effect of applying the necessary bindings.
+        /// </summary>
+        public void EndResultSetRow()
+        {
+            if (_currentRowParticipatingEntityCount != _currentRowEntityInstances.Length)
+            {
+                throw new InvalidOperationException("Invalid number of registered entity instances detected for a particular row in the result set");
+            }
+
+            for (var rowMainEntityIndex = 0; rowMainEntityIndex < _currentRowParticipatingEntityCount; rowMainEntityIndex++)
+            {
+                var rowMainEntityInstance = _currentRowEntityInstances[rowMainEntityIndex];
+
+                for (var rowChildEntityIndex = rowMainEntityIndex + 1; rowChildEntityIndex < _currentRowParticipatingEntityCount; rowChildEntityIndex++)
+                {
+                    var rowChildEntityInstance = _currentRowEntityInstances[rowChildEntityIndex];
+
+                    if (rowMainEntityInstance.RequiresBinding || rowChildEntityInstance.RequiresBinding)
+                    {
+                        Bind(rowMainEntityInstance.EntityMapping, rowMainEntityInstance.Instance, rowChildEntityInstance.EntityMapping, rowChildEntityInstance.Instance);
+                        Bind(rowChildEntityInstance.EntityMapping, rowChildEntityInstance.Instance, rowMainEntityInstance.EntityMapping, rowMainEntityInstance.Instance);
+                    }
+                }
+            }
+
+            _currentRowParticipatingEntityCount = 0;
+        }
+
+        private static void Bind(EntityMapping mainEntityMapping, object mainEntity, EntityMapping childEntityMapping, object childEntity)
         {
             if (mainEntity == null)
             {
@@ -106,20 +114,19 @@
             }
 
             // find the property we're gonna use to attach the entity
-            var secondEntityType = typeof(TSecondEntity);
-
             EntityMappingRelationship entityRelationship;
-            if (mainEntityMapping.ChildParentRelationships.TryGetValue(secondEntityType, out entityRelationship))
+            var childEntityType = childEntityMapping.EntityType;
+            if (mainEntityMapping.ChildParentRelationships.TryGetValue(childEntityType, out entityRelationship))
             {
                 entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, childEntity);
             }
-            else if (mainEntityMapping.ParentChildRelationships.TryGetValue(secondEntityType, out entityRelationship))
+            else if (mainEntityMapping.ParentChildRelationships.TryGetValue(childEntityType, out entityRelationship))
             {
                 var childCollection = entityRelationship.ReferencingEntityProperty.GetValue(mainEntity);
                 var childCollectionList = childCollection as IList;
                 if (childCollectionList == null)
                 {
-                    childCollectionList = new List<TSecondEntity>();
+                    childCollectionList = (IList)Activator.CreateInstance(_entityListType.MakeGenericType(childEntityType));
                     entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, childCollectionList);
                 }
 
@@ -141,6 +148,13 @@
 
             public EntityMapping EntityMapping { get; }
             public Dictionary<RelationshipEntityInstanceBuilderIdentity, object> KnownInstances { get; }
+        }
+
+        private class ParticipatingEntityInstance
+        {
+            public object Instance { get; set;  }
+            public bool RequiresBinding { get; set; }
+            public EntityMapping EntityMapping { get; set; }
         }
     }
 }
