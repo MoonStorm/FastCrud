@@ -565,6 +565,24 @@
         }
 
         /// <summary>
+        /// Constructs a column selection of all columns to be refreshed on update of the form <code>@PropertyName1,@PropertyName2...</code>
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string ConstructRefreshOnUpdateColumnSelection()
+        {
+            return string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => this.GetColumnName(propInfo, null, true)));
+        }
+
+        /// <summary>
+        /// Constructs a column selection of all columns to be refreshed on insert of the form <code>@PropertyName1,@PropertyName2...</code>
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string ConstructRefreshOnInsertColumnSelection()
+        {
+            return string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => this.GetColumnName(propInfo, null, true)));
+        }
+
+        /// <summary>
         /// Constructs an enumeration of the key values.
         /// </summary>
         protected virtual string ConstructKeyColumnEnumerationInternal(string tableAlias = null)
@@ -627,11 +645,7 @@
                     $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}");
             if (this.RefreshOnUpdateProperties.Length > 0)
             {
-                var databaseGeneratedColumnSelection = string.Join(
-                    ",",
-                    this.RefreshOnUpdateProperties.Select(
-                        propInfo => this.GetColumnName(propInfo, null, true)));
-                sql += this.ResolveWithCultureInvariantFormatter($";SELECT {databaseGeneratedColumnSelection} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};");
+                sql += this.ResolveWithCultureInvariantFormatter($";SELECT {this.ConstructRefreshOnUpdateColumnSelection()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};");
             }
 
             return sql;
