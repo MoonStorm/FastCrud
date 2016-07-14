@@ -22,10 +22,7 @@
              ? string.Format(
                  CultureInfo.InvariantCulture,
                  "RETURNING {0}",
-                 string.Join(
-                     ",",
-                     this.RefreshOnInsertProperties.Select(
-                         propInfo => this.GetColumnName(propInfo, null, true))))
+                 this.ConstructRefreshOnInsertColumnSelection())
              : string.Empty;
 
             return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}");
