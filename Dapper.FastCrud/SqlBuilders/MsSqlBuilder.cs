@@ -40,7 +40,7 @@
             }
 
             var dbInsertedOutputColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
+            var dbGeneratedColumns = this.ConstructRefreshOnInsertColumnSelection();
 
             // the union will make the constraints be ignored
             return this.ResolveWithCultureInvariantFormatter($@"
