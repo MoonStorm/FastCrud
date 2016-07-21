@@ -31,6 +31,13 @@ namespace Dapper.FastCrud
 
         /// <summary>
         /// Returns the name of the database column attached to the specified property.
+        /// If the column name differs from the name of the property, this method will normalize the name (e.g. will return 'tableAlias.colName AS propName')
+        ///   so that the deserialization performed by Dapper would succeed.
+        /// </summary>
+        string GetColumnNameForSelect(string propertyName, string tableAlias = null);
+
+        /// <summary>
+        /// Returns the name of the database column attached to the specified property.
         /// Please use <code>nameof(entity.propname)</code> if available, alternatively use the other overload for this method.
         /// </summary>
         /// <param name="property">Property for which you want to get the column name.</param>

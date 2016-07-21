@@ -139,6 +139,23 @@
 
         /// <summary>
         /// Returns the name of the database column attached to the specified property.
+        /// If the column name differs from the name of the property, this method will normalize the name (e.g. will return 'tableAlias.colName AS propName')
+        ///   so that the deserialization performed by Dapper would succeed.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetColumnNameForSelect(string propertyName, string tableAlias = null)
+        {
+            PropertyMapping targetPropertyMapping;
+            if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
+            {
+                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
+            }
+
+            return this.GetColumnName(targetPropertyMapping, tableAlias, true);
+        }
+
+        /// <summary>
+        /// Returns the name of the database column attached to the specified property.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string tableAlias = null)
