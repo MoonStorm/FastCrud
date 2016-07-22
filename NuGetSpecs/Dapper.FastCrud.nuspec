@@ -37,14 +37,14 @@ Check out the project site for release notes, usage and benchmarks..
     </frameworkAssemblies>
     <dependencies>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="Dapper" version="[1.42, )" />
+        <dependency id="Dapper" version="[1.50.2, )" />
         <dependency id="StringInterpolationBridge" version="[0.9.1, )"/>
       </group>
       <group targetFramework=".NETFramework4.6">
-        <dependency id="Dapper" version="[1.42, )" />
+        <dependency id="Dapper" version="[1.50.2, )" />
       </group>
 	   <group targetFramework=".NETStandard1.6">
-        <dependency id="Dapper" version="[1.50.0-rc3, )" />
+        <dependency id="Dapper" version="[1.50.2, )" />
         <dependency id="System.ComponentModel.Annotations" version="[4.1.0, )" />
         <dependency id="System.ComponentModel.TypeConverter" version="[4.1.0, )" />
         <dependency id="System.Data.Common" version="[4.1.0, )" />

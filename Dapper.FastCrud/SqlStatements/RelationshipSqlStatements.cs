@@ -46,7 +46,7 @@
             _allEntityMappings = new EntityMapping[alreadyJoinedEntitiesCount + 2];
             for (var joinedSqlBuilderIndex = 0; joinedSqlBuilderIndex < alreadyJoinedEntitiesCount; joinedSqlBuilderIndex++)
             {
-                _allEntityMappings[joinedSqlBuilderIndex + 1] = _joinedEntitiesSqlBuilders[joinedSqlBuilderIndex].EntityMapping;
+                _allEntityMappings[joinedSqlBuilderIndex + 1] = joinedEntitiesSqlBuilders[joinedSqlBuilderIndex].EntityMapping;
                 _joinedEntitiesSqlBuilders[joinedSqlBuilderIndex] = joinedEntitiesSqlBuilders[joinedSqlBuilderIndex];
             }
 

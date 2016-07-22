@@ -31,7 +31,7 @@
       },
       "dependencies": {
         "StringInterpolationBridge": "0.9.1",
-        "Dapper": "1.42.0"
+        "Dapper": "1.50.2"
       }
     },
     "net46": {
@@ -44,7 +44,7 @@
         "System.ComponentModel.DataAnnotations": ""
       },
       "dependencies": {
-        "Dapper": "1.42.0"
+        "Dapper": "1.50.2"
       }
     },
     "netstandard1.6": {
@@ -57,7 +57,7 @@
         "System.ComponentModel.TypeConverter": "4.1.0",
         "System.Data.Common": "4.1.0",
         "System.Reflection.Extensions": "4.0.1",
-        "Dapper": "1.50.0-rc3"
+        "Dapper": "1.50.2"
       }
     }
   },
