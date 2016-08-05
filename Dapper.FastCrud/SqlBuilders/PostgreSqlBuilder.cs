@@ -1,8 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Globalization;
-    using System.Linq;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
 
