@@ -2,7 +2,7 @@
 
 When using this library, a compiler equivalent to the one included inside Visual Studio 2015 is required. 
 
-[![moonstorm MyGet Build Status](https://www.myget.org/BuildSource/Badge/moonstorm?identifier=669ece00-23a8-4f36-ad44-95822c66bee2)](https://www.myget.org/)
+[![moonstorm MyGet Build Status](https://www.myget.org/BuildSource/Badge/moonstorm?identifier=72ae5221-4023-477f-bfac-837f2e07e2bb)](https://www.myget.org/)
 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
