@@ -30,7 +30,7 @@
             return new FiveEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
-        protected override IEnumerable<TMainEntity> Query(
+        protected override IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>> Query(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -40,17 +40,17 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(thirdJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,
@@ -59,7 +59,7 @@
                 commandTimeout: commandTimeout);
         }
 
-        protected override Task<IEnumerable<TMainEntity>> QueryAsync(
+        protected override Task<IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>>> QueryAsync(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -69,17 +69,17 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(thirdJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,

@@ -15,13 +15,13 @@
 
             // ensure the capacity can hold all the processed entities
             this.QueriedEntities = new List<object>(MaxEntityTestingCapacity);
-            this.LocalEntities = new List<object>(MaxEntityTestingCapacity);
+            this.LocalInsertedEntities = new List<object>(MaxEntityTestingCapacity);
         }
 
         public DbConnection DatabaseConnection { get; set; }
         public Stopwatch Stopwatch { get; private set; }
         public List<object> QueriedEntities { get; set; }
-        public List<object> LocalEntities { get; set; }
+        public List<object> LocalInsertedEntities { get; set; }
         public int QueriedEntitiesDbCount { get; set; }
     }
 }

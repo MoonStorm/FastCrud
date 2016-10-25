@@ -29,7 +29,7 @@
             return new FourEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
-        protected override IEnumerable<TMainEntity> Query(
+        protected override IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>> Query(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -39,16 +39,16 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,
@@ -57,7 +57,7 @@
                 commandTimeout: commandTimeout);
         }
 
-        protected override Task<IEnumerable<TMainEntity>> QueryAsync(
+        protected override Task<IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>>> QueryAsync(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -67,16 +67,16 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,

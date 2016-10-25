@@ -34,7 +34,7 @@
             return new SevenEntitiesRelationshipSqlStatements<TMainEntity,TFirstJoinedEntity,TSecondJoinedEntity,TThirdJoinedEntity,TFourthJoinedEntity,TFifthJoinedEntity,TSixthJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
-        protected override IEnumerable<TMainEntity> Query(
+        protected override IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>> Query(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -44,19 +44,19 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, TMainEntity>(
+            return connection.Query<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity, fifthJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fifthJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(fourthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(fifthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,
@@ -65,7 +65,7 @@
                 commandTimeout: commandTimeout);
         }
 
-        protected override Task<IEnumerable<TMainEntity>> QueryAsync(
+        protected override Task<IEnumerable<RelationshipEntityInstanceIdentity<TMainEntity>>> QueryAsync(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -75,19 +75,19 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, TMainEntity>(
+            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, TSecondJoinedEntity, TThirdJoinedEntity, TFourthJoinedEntity, TFifthJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
                 statement,
                 (mainEntity, firstJoinedEntity, secondJoinedEntity, thirdJoinedEntity, fourthJoinedEntity, fifthJoinedEntity) =>
                 {
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref firstJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref secondJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref thirdJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fourthJoinedEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(ref fifthJoinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(firstJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(secondJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(thirdJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(fourthJoinedEntity);
+                    relationshipInstanceBuilder.RegisterResultSetRowInstance(fifthJoinedEntity);
                     relationshipInstanceBuilder.EndResultSetRow();
 
-                    return mainEntity;
+                    return mainEntityIdentity;
                 },
                 parameters,
                 buffered: buffered,

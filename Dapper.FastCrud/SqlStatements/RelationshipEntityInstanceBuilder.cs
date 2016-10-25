@@ -12,7 +12,7 @@
     {
         private static readonly Type _entityListType = typeof(List<>);
         private readonly Dictionary<Type, EntityInstanceContainer> _entityInstanceContainers;
-        private readonly ParticipatingEntityInstance[] _currentRowEntityInstances;
+        private readonly RelationshipEntityInstanceIdentity[] _currentRowEntityInstances;
         private int _currentRowParticipatingEntityCount;
 
         /// <summary>
@@ -21,16 +21,13 @@
         public RelationshipEntityInstanceBuilder(params EntityMapping[] entityMappings)
         {
             _entityInstanceContainers = new Dictionary<Type, EntityInstanceContainer>();
-            _currentRowEntityInstances = new ParticipatingEntityInstance[entityMappings.Length];
+            _currentRowEntityInstances = new RelationshipEntityInstanceIdentity[entityMappings.Length];
             _currentRowParticipatingEntityCount = 0;
 
             for(var entityMappingIndex = 0; entityMappingIndex<entityMappings.Length;entityMappingIndex++)
             {
                 var entityMapping = entityMappings[entityMappingIndex];
                 _entityInstanceContainers[entityMapping.EntityType] = new EntityInstanceContainer(entityMapping);
-
-                // the entity row instances act as a placeholders, to avoid constructing them for every single row
-                _currentRowEntityInstances[entityMappingIndex] = new ParticipatingEntityInstance();
             }
         }
 
@@ -38,43 +35,37 @@
         /// Registers a new entity instance for a row in the result set.
         /// Signal the end of the row in the result set with a call to <see cref="EndResultSetRow"/>.
         /// </summary>
-        public void RegisterResultSetRowInstance<TEntity>(ref TEntity entity)
+        public RelationshipEntityInstanceIdentity<TEntity> RegisterResultSetRowInstance<TEntity>(TEntity entity)
         {
             EntityInstanceContainer instanceContainer;
-            object genericEntityInstance;
-            bool requiresBinding;
 
             if (!_entityInstanceContainers.TryGetValue(typeof(TEntity), out instanceContainer))
             {
                 throw new InvalidOperationException($"Type '{typeof(TEntity)}' could not be found in the list of registered instance containers.");
             }
 
+            var instanceIdentity = new RelationshipEntityInstanceIdentity<TEntity>(instanceContainer.EntityMapping, entity);
             if (entity == null)
             {
-                // we want to initialize the relationship, reason why for NULL values we'll pretend we haven't seen this instance
-                genericEntityInstance = entity;
-                requiresBinding = true;
+                instanceIdentity.SetDuplicate(null);
             }
             else
             {
-                var entityInstanceIdentity = new RelationshipEntityInstanceBuilderIdentity(instanceContainer.EntityMapping, entity);
-                if (instanceContainer.KnownInstances.TryGetValue(entityInstanceIdentity, out genericEntityInstance))
+                object uniqueInstance;
+                if (instanceContainer.KnownInstances.TryGetValue(instanceIdentity, out uniqueInstance))
                 {
-                    entity = (TEntity)genericEntityInstance;
-                    requiresBinding = false;
+                    instanceIdentity.SetDuplicate(uniqueInstance);
                 }
                 else
                 {
-                    genericEntityInstance = entity;
-                    instanceContainer.KnownInstances.Add(entityInstanceIdentity, genericEntityInstance);
-                    requiresBinding = true;
+                    InitializeRelationships(instanceIdentity.EntityMapping, entity);
+                    instanceContainer.KnownInstances.Add(instanceIdentity, entity);
                 }
             }
 
-            var entityInstanceRowDetails = _currentRowEntityInstances[_currentRowParticipatingEntityCount++];
-            entityInstanceRowDetails.EntityMapping = instanceContainer.EntityMapping;
-            entityInstanceRowDetails.Instance = genericEntityInstance;
-            entityInstanceRowDetails.RequiresBinding = requiresBinding;
+            _currentRowEntityInstances[_currentRowParticipatingEntityCount++] = instanceIdentity;
+
+            return instanceIdentity;
         }
 
         /// <summary>
@@ -95,10 +86,10 @@
                 {
                     var rowChildEntityInstance = _currentRowEntityInstances[rowChildEntityIndex];
 
-                    if (rowMainEntityInstance.RequiresBinding || rowChildEntityInstance.RequiresBinding)
+                    if (!rowMainEntityInstance.IsDuplicate || !rowChildEntityInstance.IsDuplicate)
                     {
-                        Bind(rowMainEntityInstance.EntityMapping, rowMainEntityInstance.Instance, rowChildEntityInstance.EntityMapping, rowChildEntityInstance.Instance);
-                        Bind(rowChildEntityInstance.EntityMapping, rowChildEntityInstance.Instance, rowMainEntityInstance.EntityMapping, rowMainEntityInstance.Instance);
+                        Bind(rowMainEntityInstance.EntityMapping, rowMainEntityInstance.UniqueInstance, rowChildEntityInstance.EntityMapping, rowChildEntityInstance.UniqueInstance);
+                        Bind(rowChildEntityInstance.EntityMapping, rowChildEntityInstance.UniqueInstance, rowMainEntityInstance.EntityMapping, rowMainEntityInstance.UniqueInstance);
                     }
                 }
             }
@@ -108,7 +99,7 @@
 
         private static void Bind(EntityMapping mainEntityMapping, object mainEntity, EntityMapping childEntityMapping, object childEntity)
         {
-            if (mainEntity == null)
+            if (ReferenceEquals(mainEntity, null) || ReferenceEquals(childEntity, null))
             {
                 return;
             }
@@ -122,18 +113,17 @@
             }
             else if (mainEntityMapping.ParentChildRelationships.TryGetValue(childEntityType, out entityRelationship))
             {
-                var childCollection = entityRelationship.ReferencingEntityProperty.GetValue(mainEntity);
-                var childCollectionList = childCollection as IList;
-                if (childCollectionList == null)
-                {
-                    childCollectionList = (IList)Activator.CreateInstance(_entityListType.MakeGenericType(childEntityType));
-                    entityRelationship.ReferencingEntityProperty.SetValue(mainEntity, childCollectionList);
-                }
+                var childCollectionList = (IList)entityRelationship.ReferencingEntityProperty.GetValue(mainEntity);
+                childCollectionList.Add(childEntity);
+            }
+        }
 
-                if (childEntity != null)
-                {
-                    childCollectionList.Add(childEntity);
-                }
+        private static void InitializeRelationships(EntityMapping entityMapping, object entity)
+        {
+            foreach (var parentChildRelationship in entityMapping.ParentChildRelationships)
+            {
+                var childCollectionList = (IList)Activator.CreateInstance(_entityListType.MakeGenericType(parentChildRelationship.Key));
+                parentChildRelationship.Value.ReferencingEntityProperty.SetValue(entity, childCollectionList);
             }
         }
 
@@ -143,18 +133,11 @@
             public EntityInstanceContainer(EntityMapping entityMapping)
             {
                 this.EntityMapping = entityMapping;
-                this.KnownInstances = new Dictionary<RelationshipEntityInstanceBuilderIdentity, object>();
+                this.KnownInstances = new Dictionary<RelationshipEntityInstanceIdentity, object>();
             }
 
             public EntityMapping EntityMapping { get; }
-            public Dictionary<RelationshipEntityInstanceBuilderIdentity, object> KnownInstances { get; }
-        }
-
-        private class ParticipatingEntityInstance
-        {
-            public object Instance { get; set;  }
-            public bool RequiresBinding { get; set; }
-            public EntityMapping EntityMapping { get; set; }
+            public Dictionary<RelationshipEntityInstanceIdentity, object> KnownInstances { get; }
         }
     }
 }

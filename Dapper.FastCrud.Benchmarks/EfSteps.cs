@@ -37,7 +37,7 @@
                 }
 
                 Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
-                _testContext.LocalEntities.Add(generatedEntity);
+                _testContext.LocalInsertedEntities.Add(generatedEntity);
             }
         }
 
@@ -53,7 +53,7 @@
         [When(@"I delete all the inserted benchmark entities using Entity Framework")]
         public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingEntityFramework()
         {
-            foreach (var entity in _testContext.LocalEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
                 using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
                 {
@@ -67,7 +67,7 @@
         [When(@"I select all the benchmark entities that I previously inserted using Entity Framework")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
         {
-            foreach (var entity in _testContext.LocalEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
             {
                 using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
                 {
@@ -79,11 +79,11 @@
         [When(@"I update all the benchmark entities that I previously inserted using Entity Framework")]
         public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
         {
-            var entityCount = _testContext.LocalEntities.Count;
+            var entityCount = _testContext.LocalInsertedEntities.Count;
 
-            for (var entityIndex = 0; entityIndex < _testContext.LocalEntities.Count; entityIndex++)
+            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
             {
-                var oldEntity = _testContext.LocalEntities[entityIndex] as SimpleBenchmarkEntity;
+                var oldEntity = _testContext.LocalInsertedEntities[entityIndex] as SimpleBenchmarkEntity;
                 var newEntity = new SimpleBenchmarkEntity();
                 newEntity.Id = oldEntity.Id;
 
@@ -93,7 +93,7 @@
                     this.GenerateSimpleBenchmarkEntity(entityCount++, newEntity);
                     dbContext.SaveChanges();
                 }
-                _testContext.LocalEntities[entityIndex] = newEntity;
+                _testContext.LocalInsertedEntities[entityIndex] = newEntity;
             }
         }
     }

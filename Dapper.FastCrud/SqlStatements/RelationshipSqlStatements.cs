@@ -8,7 +8,6 @@
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
     using System.Linq;
-    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// SQL statement factory targeting relationships.
@@ -80,13 +79,14 @@
                 whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
-            return this.Query(connection,
+            var queriedEntityIdentities = this.Query(connection,
                 statement, 
                 splitOnCondition,
                 keyEntity,
                 false,
                 statementOptions.Transaction, 
-                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder).SingleOrDefault();
+                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder);
+            return this.FilterDuplicates(queriedEntityIdentities).SingleOrDefault();
         }
 
         /// <summary>
@@ -104,13 +104,14 @@
                 whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
-            return (await this.QueryAsync(connection, 
+            var queriedEntityIdentities  = await this.QueryAsync(connection, 
                 statement, 
                 splitOnCondition, 
                 keyEntity,
                 false,
                 statementOptions.Transaction, 
-                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder)).SingleOrDefault();
+                (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder);
+            return this.FilterDuplicates(queriedEntityIdentities).SingleOrDefault();
         }
 
         /// <summary>
@@ -162,8 +163,9 @@
         /// </summary>
         public IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
-            Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
-                "When using Top or Skip, you must provide an OrderBy clause.");
+            //validation removed, up to the engine to fail
+            //Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
+            //    "When using Top or Skip, you must provide an OrderBy clause.");
 
             string statement;
             string splitOnCondition;
@@ -179,7 +181,7 @@
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
 
-            return this.Query(connection,
+            var queriedEntityIdentities = this.Query(connection,
                               statement,
                               splitOnCondition,
                               statementOptions.Parameters,
@@ -187,15 +189,17 @@
                               statementOptions.Transaction,
                               (int?)statementOptions.CommandTimeout?.TotalSeconds,
                               relationshipInstanceBuilder);
+            return this.FilterDuplicates(queriedEntityIdentities);
         }
 
         /// <summary>
         /// Performs a common SELECT 
         /// </summary>
-        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
+        public async Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
-            Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
-                "When using Top or Skip, you must provide an OrderBy clause.");
+            //validation removed, up to the engine to fail
+            //Requires.Argument((statementOptions.LimitResults == null && statementOptions.SkipResults == null) || (statementOptions.OrderClause != null || statementOptions.RelationshipOptions.Values.Any(singleJoinOptions => singleJoinOptions.OrderClause != null)), nameof(statementOptions),
+            //    "When using Top or Skip, you must provide an OrderBy clause.");
 
             string statement;
             string splitOnCondition;
@@ -211,7 +215,7 @@
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
 
-            return this.QueryAsync(connection,
+            var queriedEntityIdentities = await this.QueryAsync(connection,
                               statement,
                               splitOnCondition,
                               statementOptions.Parameters,
@@ -219,6 +223,7 @@
                               statementOptions.Transaction,
                               (int?)statementOptions.CommandTimeout?.TotalSeconds,
                               relationshipInstanceBuilder);
+            return this.FilterDuplicates(queriedEntityIdentities);
         }
 
         /// <summary>
@@ -320,7 +325,7 @@
             }
         }
 
-        protected abstract IEnumerable<TEntity> Query(
+        protected abstract IEnumerable<RelationshipEntityInstanceIdentity<TEntity>> Query(
             IDbConnection connection, 
             string statement, 
             string splitOnCondition, 
@@ -330,7 +335,7 @@
             int? commandTimeout, 
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder);
 
-        protected abstract Task<IEnumerable<TEntity>> QueryAsync(
+        protected abstract Task<IEnumerable<RelationshipEntityInstanceIdentity<TEntity>>> QueryAsync(
             IDbConnection connection,
             string statement,
             string splitOnCondition,
@@ -339,5 +344,10 @@
             IDbTransaction transaction,
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder);
+
+        private IEnumerable<TEntity> FilterDuplicates(IEnumerable<RelationshipEntityInstanceIdentity<TEntity>> entityIdentities)
+        {
+            return entityIdentities.Where(entityIdentity => !entityIdentity.IsDuplicate).Select(entityIdentity => entityIdentity.TypedInstance);
+        }
     }
 }

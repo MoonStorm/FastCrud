@@ -55,7 +55,14 @@
         {
             this.InsertEntity<Employee>(makeAsyncCalls, index =>
             {
-                var workstation = _testContext.LocalEntities.OfType<Workstation>().Skip(index).First();
+                var workstation = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(index).FirstOrDefault();
+
+                // in case we link more employees tan workstations available, use the last one there
+                if (workstation == null)
+                {
+                    workstation = _testContext.LocalInsertedEntities.OfType<Workstation>().Last();
+                }
+
                 var employee = new Employee()
                 {
                     FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
@@ -85,7 +92,7 @@
         {
             this.InsertEntity<Workstation>(makeAsyncCalls, index =>
             {
-                var building = _testContext.LocalEntities.OfType<Building>().Skip(index).First();
+                var building = _testContext.LocalInsertedEntities.OfType<Building>().Skip(index).First();
                 var workstation = new Workstation()
                     {
                         InventoryIndex = index,
@@ -113,6 +120,19 @@
         public void WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
         {
             this.QueryForInsertedEntities<Workstation>(useAsyncMethods);
+        }
+
+        [When(@"I query for one workstation entity combined with the employee entities using (.*) methods")]
+        public void WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        {
+            var workstationId = _testContext.LocalInsertedEntities.OfType<Workstation>().Select(workStation => workStation.WorkstationId).Single();
+            var queriedEntity = useAsyncMethods
+                    ? _testContext.DatabaseConnection.GetAsync<Workstation>(
+                        new Workstation() {WorkstationId  = workstationId}, options => options.Include<Employee>()).GetAwaiter().GetResult()
+                    : _testContext.DatabaseConnection.Get<Workstation>(
+                        new Workstation() { WorkstationId = workstationId} ,options => options.Include<Employee>());
+
+            _testContext.QueriedEntities.Add(queriedEntity);
         }
 
         [When(@"I query for all the workstation entities combined with the employee entities using (.*) methods")]
@@ -189,7 +209,7 @@
         public void WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
         {
             FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
-            var buildingIds = string.Join(",", _testContext.LocalEntities.OfType<Building>().Select(building => building.BuildingId)); 
+            var buildingIds = string.Join(",", _testContext.LocalInsertedEntities.OfType<Building>().Select(building => building.BuildingId)); 
 
             _testContext.QueriedEntitiesDbCount = useAsyncMethods
                                           ? _testContext
@@ -270,10 +290,10 @@
             };
 
             // mimic the behavior on our side
-            var entitiesToUpdate = _testContext.LocalEntities.OfType<Employee>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<Employee>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToUpdate)
             {
-                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = new Employee()
+                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = new Employee()
                                                                                                      {
                                                                                                          UserId = originalEntity.UserId,
                                                                                                          EmployeeId =  originalEntity.EmployeeId,
@@ -309,10 +329,10 @@
             };
 
             // mimic the behavior on our side
-            var entitiesToUpdate = _testContext.LocalEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToUpdate)
             {
-                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = new Workstation()
+                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = new Workstation()
                 {
                     WorkstationId =  originalEntity.WorkstationId,
                     Name = updateData.Name
@@ -338,10 +358,10 @@
         public void WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
             // mimic the behavior on our side
-            var entitiesToDelete = _testContext.LocalEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToDelete = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var entityToDelete in entitiesToDelete)
             {
-                _testContext.LocalEntities.Remove(entityToDelete);
+                _testContext.LocalInsertedEntities.Remove(entityToDelete);
             }
 
             // update the db
@@ -438,9 +458,9 @@
 
             var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName), nameof(Employee.FullName));
 
-            for (var entityIndex = 0; entityIndex < _testContext.LocalEntities.Count; entityIndex++)
+            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
             {
-                var insertedEntity = _testContext.LocalEntities[entityIndex] as Employee;
+                var insertedEntity = _testContext.LocalInsertedEntities[entityIndex] as Employee;
                 if (insertedEntity == null)
                     continue;
 
@@ -458,7 +478,7 @@
 
                 _testContext.DatabaseConnection.Update(partialUpdatedEntity, statement => statement.WithEntityMappingOverride(customMapping));
 
-                _testContext.LocalEntities[entityIndex] = new Employee()
+                _testContext.LocalInsertedEntities[entityIndex] = new Employee()
                 {
                     UserId = insertedEntity.UserId,
                     KeyPass = insertedEntity.KeyPass,
@@ -499,7 +519,7 @@
         private void DeleteInsertedEntities<TEntity>(bool useAsyncMethods, int? skipCount = null, int? maxCount = null)
             where TEntity:class
         {
-            var entitiesToBeDeleted = _testContext.LocalEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue);
+            var entitiesToBeDeleted = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue);
             foreach (var insertedEntity in entitiesToBeDeleted)
             {
                 if (useAsyncMethods)
@@ -511,12 +531,12 @@
                     _testContext.DatabaseConnection.Delete(insertedEntity);
                 }
             }
-            _testContext.LocalEntities = new List<object>(_testContext.LocalEntities.Except(entitiesToBeDeleted));
+            _testContext.LocalInsertedEntities = new List<object>(_testContext.LocalInsertedEntities.Except(entitiesToBeDeleted));
         }
 
         private void UpdateInsertedEntities<TEntity>(bool useAsyncMethods, Func<TEntity, TEntity> updateFunc,  int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToUpdate = _testContext.LocalEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToUpdate)
             {
                 object updatedEntity = updateFunc(originalEntity);
@@ -529,13 +549,13 @@
                 {
                     _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
                 }
-                _testContext.LocalEntities[_testContext.LocalEntities.IndexOf(originalEntity)] = updatedEntity;
+                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = updatedEntity;
             }
         }
 
         private void QueryForInsertedEntities<TEntity>(bool useAsyncMethods, int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToQuery = _testContext.LocalEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToQuery = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToQuery)
             {
                 object queriedEntity = null;
@@ -578,7 +598,7 @@
                 else
                     dbConnection.Insert<TEntity>((TEntity)entityToInsert);
 
-                _testContext.LocalEntities.Add(entityToInsert);
+                _testContext.LocalInsertedEntities.Add(entityToInsert);
             }
         }
 

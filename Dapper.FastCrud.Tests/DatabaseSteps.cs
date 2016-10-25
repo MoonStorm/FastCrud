@@ -173,7 +173,7 @@
         [Then(@"the queried entities should be the same as the ones I inserted, in reverse order, starting from (.*) counting (.*)")]
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheOnesIInsertedReverseStartingFromCounting(int? skip, int? max)
         {
-            var expectedEntities = ((IEnumerable<object>)_testContext.LocalEntities).Reverse().Skip(skip??0).Take(max??int.MaxValue);
+            var expectedEntities = ((IEnumerable<object>)_testContext.LocalInsertedEntities).Reverse().Skip(skip??0).Take(max??int.MaxValue);
             CollectionAssert.AreEqual(expectedEntities, _testContext.QueriedEntities);
         }
 
@@ -210,7 +210,7 @@
         [When(@"I clear all the local entities")]
         public void WhenIClearAllTheInsertedEntities()
         {
-            _testContext.LocalEntities.Clear();
+            _testContext.LocalInsertedEntities.Clear();
         }
 
         private void SetupSqlCeDatabase(string connectionString)
@@ -589,7 +589,7 @@
                 //database.ExecuteNonQuery(@"DBCC FREEPROCCACHE WITH NO_INFOMSGS;");
             }
 
-            _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName};Max Pool Size=1; Pooling = False");
+            _testContext.DatabaseConnection = new SqlConnection(connectionString+$";Initial Catalog={DatabaseName};"); //Max Pool Size=1; Pooling = False
             _testContext.DatabaseConnection.Open();
         }
 
@@ -671,7 +671,7 @@
 
         private void CompareQueriedEntitiesWithLocalEntities<TEntity>()
         {
-            CollectionAssert.AreEquivalent(_testContext.QueriedEntities.OfType<TEntity>(), _testContext.LocalEntities.OfType<TEntity>());
+            CollectionAssert.AreEquivalent(_testContext.QueriedEntities.OfType<TEntity>(), _testContext.LocalInsertedEntities.OfType<TEntity>());
         }
     }
 }

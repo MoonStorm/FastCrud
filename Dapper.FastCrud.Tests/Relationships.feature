@@ -2,6 +2,32 @@
 	Tests for the relationship between the entities Workstation -> Employee (single relationship) and Building -> Workstation -> Employee (two level relationship)
 
 @InMemoryDatabase
+Scenario Outline: Query single relationship parent with children (in-memory database)
+	Given I have initialized a <database type> database
+	When I insert 1 workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I query for one workstation entity combined with the employee entities using <method type> methods
+	Then the queried workstation entities should be the same as the local ones
+	Examples: 
+	| database type | entity count | method type  |
+	| LocalDb       | 10           | synchronous  |
+	| LocalDb       | 10           | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: Query single relationship parent with children (external database)
+	Given I have initialized a <database type> database
+	When I insert 1 workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I query for one workstation entity combined with the employee entities using <method type> methods
+	Then the queried workstation entities should be the same as the local ones
+	Examples: 
+	| database type | entity count | method type  |
+	| PostgreSql    | 10           | synchronous  |
+	| PostgreSql    | 10           | asynchronous |
+	| MySql         | 10           | synchronous  |
+	| MySql         | 10           | asynchronous |
+
+@InMemoryDatabase
 Scenario Outline: Query single relationship parents with children (in-memory database)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods

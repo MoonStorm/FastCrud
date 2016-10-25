@@ -289,9 +289,10 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<TEntity> BatchSelect(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
-            Requires.Argument(
-                (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
-                ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
+            //validation removed, up to the engine to fail
+            //Requires.Argument(
+            //    (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
+            //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
@@ -311,9 +312,10 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
-            Requires.Argument(
-                (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
-                || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
+            //validation removed, let to the engine to fail
+            //Requires.Argument(
+            //    (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
+            //    || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
             return connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullBatchSelectStatement(
