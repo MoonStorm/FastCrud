@@ -111,6 +111,9 @@
                 false,
                 statementOptions.Transaction, 
                 (int?)statementOptions.CommandTimeout?.TotalSeconds, relationshipInstanceBuilder);
+
+            // a problem in the Dapper library would cause this function to fail
+            // see https://github.com/StackExchange/dapper-dot-net/issues/596 for more info
             return this.FilterDuplicates(queriedEntityIdentities).SingleOrDefault();
         }
 
@@ -223,6 +226,9 @@
                               statementOptions.Transaction,
                               (int?)statementOptions.CommandTimeout?.TotalSeconds,
                               relationshipInstanceBuilder);
+
+            // a problem in the Dapper library would cause this function to fail
+            // see https://github.com/StackExchange/dapper-dot-net/issues/596 for more info
             return this.FilterDuplicates(queriedEntityIdentities);
         }
 

@@ -30,28 +30,28 @@ Scenario Outline: Query single relationship parent with children (external datab
 @InMemoryDatabase
 Scenario Outline: Query single relationship parents with children (in-memory database)
 	Given I have initialized a <database type> database
-	When I insert <entity count> workstation entities using <method type> methods
-	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	When I insert <parent entity count> workstation entities using <method type> methods
+	And I insert <child entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
 	Then the queried workstation entities should be the same as the local ones
 	Examples: 
-	| database type | entity count | method type  |
-	| LocalDb       | 10           | synchronous  |
-	| LocalDb       | 10           | asynchronous |
+	| database type | parent entity count | child entity count | method type  |
+	| LocalDb       | 10                  | 20                 | synchronous  |
+	| LocalDb       | 10                  | 20                 | asynchronous |
 
 @ExternalDatabase
 Scenario Outline: Query single relationship parents with children (external database)
 	Given I have initialized a <database type> database
-	When I insert <entity count> workstation entities using <method type> methods
-	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	When I insert <parent entity count> workstation entities using <method type> methods
+	And I insert <child entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
 	Then the queried workstation entities should be the same as the local ones
 	Examples: 
-	| database type | entity count | method type  |
-	| PostgreSql    | 10           | synchronous  |
-	| PostgreSql    | 10           | asynchronous |
-	| MySql         | 10           | synchronous  |
-	| MySql         | 10           | asynchronous |
+	| database type | parent entity count | child entity count | method type  |
+	| PostgreSql    | 10                  | 20                 | synchronous  |
+	| PostgreSql    | 10                  | 20                 | asynchronous |
+	| MySql         | 10                  | 20                 | synchronous  |
+	| MySql         | 10                  | 20                 | asynchronous |
 
 @InMemoryDatabase
 Scenario Outline: Count single relationship parents with children (in-memory database)

@@ -134,9 +134,9 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Query single relationship parents with children (in-memory database)")]
         [NUnit.Framework.CategoryAttribute("InMemoryDatabase")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithChildrenIn_MemoryDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "20", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "20", "asynchronous", null)]
+        public virtual void QuerySingleRelationshipParentsWithChildrenIn_MemoryDatabase(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "InMemoryDatabase"};
@@ -150,10 +150,10 @@ this.ScenarioSetup(scenarioInfo);
 #line 32
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 33
- testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", parentEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line 34
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
-                        "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+                        "} methods", childEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 35
  testRunner.And(string.Format("I query for all the workstation entities combined with the employee entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
@@ -166,11 +166,11 @@ this.ScenarioSetup(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Query single relationship parents with children (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "20", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "20", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "10", "20", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "10", "20", "asynchronous", null)]
+        public virtual void QuerySingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -184,10 +184,10 @@ this.ScenarioSetup(scenarioInfo);
 #line 44
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line 45
- testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.When(string.Format("I insert {0} workstation entities using {1} methods", parentEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line 46
  testRunner.And(string.Format("I insert {0} employee entities parented to existing workstation entities using {1" +
-                        "} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+                        "} methods", childEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line 47
  testRunner.And(string.Format("I query for all the workstation entities combined with the employee entities usin" +
                         "g {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
