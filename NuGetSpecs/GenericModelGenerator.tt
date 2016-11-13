@@ -42,14 +42,18 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 		if(IsExcluded(tbl.Schema, tbl.Name, ExcludeTablePrefixes)) continue;
 #>
     /// <summary>
-    /// A class which represents the <#=tbl.Name#> <#=(tbl.IsView)?"view":"table"#>.
+    /// Represents the <#=tbl.Name#> <#=(tbl.IsView)?"view":"table"#><#=String.IsNullOrEmpty(tbl.Description)?"":" ("+tbl.Description+")"#>.
     /// </summary>
 	[Table("<#=tbl.Name#>")]
 	public partial class <#=tbl.ClassName#>
 	{
 <#foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {#>
-	<# if (col.IsPK) { #>
+		/// <summary>
+		/// <#=col.Description#>
+		/// </summary>
+	<#
+	if (col.IsPK) { #>
 	[Key]
 	<#}
 	if(col.IsComputed) { #>
@@ -109,6 +113,7 @@ public class Table
     public string ClassName;
 	public string SequenceName;
 	public bool Ignore;
+	public string Description;
 
 	public Column GetColumn(string columnName)
 	{
@@ -137,6 +142,7 @@ public class Column
 	public bool IsComputed;
 	public bool Ignore;
 	public bool IsGeneratedUniqueIdentifier;
+	public string Description;
 }
 
 public class Key
@@ -516,6 +522,7 @@ class SqlServerSchemaReader : SchemaReader
 					if(tbl.CleanName.StartsWith("tbl")) tbl.CleanName = tbl.CleanName.Replace("tbl",""); 
 					tbl.CleanName = tbl.CleanName.Replace("_","");
 					tbl.ClassName=Singularize(RemoveTablePrefixes(tbl.CleanName));
+					tbl.Description=rdr["TABLE_DESCRIPTION"] as string;
 
 					result.Add(tbl);
 				}
@@ -593,6 +600,7 @@ class SqlServerSchemaReader : SchemaReader
 					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
 					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
 					col.IsGeneratedUniqueIdentifier = rdr["DefaultSetting"].ToString().ToLower().Trim(' ','(',')')=="newid";
+					col.Description = rdr["Description"] as string ?? ((rdr["ColumnName"] as string) + " Column");
 					result.Add(col);
 				}
 			}
@@ -786,11 +794,13 @@ class SqlServerSchemaReader : SchemaReader
 		return sysType;
 	}
 
-
-
-	const string TABLE_SQL=@"SELECT *
+	const string TABLE_SQL=@"SELECT TABLES.*,
+		DescriptionExProps.value as TABLE_DESCRIPTION
 		FROM  INFORMATION_SCHEMA.TABLES
-		WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
+		OUTER APPLY fn_listextendedproperty('MS_Description', 'schema', TABLES.TABLE_SCHEMA, 'table', TABLES.TABLE_NAME, null, null) As DescriptionExProps
+		WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'
+		ORDER BY TABLE_SCHEMA, TABLE_NAME
+		";
 
 	const string COLUMN_SQL=@"SELECT 
 			TABLE_CATALOG AS [Database],
@@ -803,8 +813,10 @@ class SqlServerSchemaReader : SchemaReader
 			CHARACTER_MAXIMUM_LENGTH AS MaxLength, 
 			DATETIME_PRECISION AS DatePrecision,
 			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsIdentity,
-			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
+			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed,
+			DescriptionExProps.value as Description
 		FROM  INFORMATION_SCHEMA.COLUMNS
+		OUTER APPLY fn_listextendedproperty('MS_Description', 'schema', @schemaName, 'table', @tableName, 'column', COLUMN_NAME) As DescriptionExProps
 		WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
 		ORDER BY OrdinalPosition ASC";
 
