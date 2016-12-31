@@ -30,10 +30,12 @@ namespace Dapper.FastCrud.Tests.Models
 		/// <summary>
 		/// Test starting with a digit
 		/// </summary>
+		[Column("123mb")]
 	    public virtual int _123mb { get; set; }
 		/// <summary>
 		/// Test starting with a C# keyword
 		/// </summary>
+		[Column("switch")]
 	    public virtual int @switch { get; set; }
 	}
 
@@ -110,6 +112,11 @@ namespace Dapper.FastCrud.Tests.Models
 		/// InventoryIndex Column
 		/// </summary>
 	    public virtual int InventoryIndex { get; set; }
+		/// <summary>
+		/// 10PinSlots Column
+		/// </summary>
+		[Column("10PinSlots")]
+	    public virtual int? _10PinSlots { get; set; }
 		public virtual IEnumerable<Employee> Employees { get; set; }
 	}
 

@@ -31,10 +31,10 @@
         [When(@"I insert (\d*) workstation entities using (.*) methods")]
         public void WhenIInsertWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Workstation>(makeAsyncCalls, index => new Workstation()
-            {
+            this.InsertEntity<Workstation>(makeAsyncCalls, index => new Workstation() {
                 InventoryIndex = index,
-                Name = $"Workstation {Guid.NewGuid().ToString("N")}"
+                Name = $"Workstation {Guid.NewGuid().ToString("N")}",
+                _10PinSlots = index
             },
             entitiesCount);
         }
@@ -209,7 +209,7 @@
         public void WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
         {
             FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
-            var buildingIds = string.Join(",", _testContext.LocalInsertedEntities.OfType<Building>().Select(building => building.BuildingId)); 
+            var buildingIds = string.Join(",", _testContext.LocalInsertedEntities.OfType<Building>().Select(building => building.BuildingId));
 
             _testContext.QueriedEntitiesDbCount = useAsyncMethods
                                           ? _testContext
@@ -229,7 +229,7 @@
         [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]
         public void WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods 
+            _testContext.QueriedEntitiesDbCount = useAsyncMethods
                 ? _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement.Include<Employee>()).GetAwaiter().GetResult()
                 : _testContext.DatabaseConnection.Count<Workstation>(statement => statement.Include<Employee>());
         }
@@ -274,7 +274,7 @@
                                                                                       WorkstationId = originalEmployeeEntity.WorkstationId,
                                                                                       FirstName = "Updated " + originalEmployeeEntity.FirstName,
                                                                                       LastName = "Updated " + originalEmployeeEntity.LastName,
-                                                                                      KeyPass = originalEmployeeEntity.KeyPass,                                                                                      
+                                                                                      KeyPass = originalEmployeeEntity.KeyPass,
                                                                                   });
         }
 
