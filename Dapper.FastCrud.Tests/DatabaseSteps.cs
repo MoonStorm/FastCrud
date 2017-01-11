@@ -258,7 +258,8 @@
                             InventoryIndex int NOT NULL,
 	                        Name nvarchar(100) NULL,
                             AccessLevel int NOT NULL DEFAULT(1),
-                            BuildingId int NULL
+                            BuildingId int NULL,
+                            ""10PinSlots"" int NULL
                         )";
 
                 command.ExecuteNonQuery();
@@ -375,6 +376,7 @@
                             ""InventoryIndex"" int NOT NULL,
                             ""AccessLevel"" int NOT NULL DEFAULT 1,
                             ""BuildingId"" int NULL,
+                            ""10PinSlots"" int NULL,
 	                        PRIMARY KEY (""WorkstationId"")
                         );
 
@@ -451,6 +453,7 @@
                             InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
                             BuildingId int NULL,
+                            10PinSlots int NULL,
 	                        PRIMARY KEY (WorkstationId)
                         );
 
@@ -499,12 +502,12 @@
                 }
                 catch (FailedOperationException ex)
                 {
-                    // sometimes db test files are left behind
+					// sometimes db test files are left behind
 
-                    var fileInUseErrorMatch =
-                        new Regex("Cannot create file '(.*?)' because it already exists.").Match(
-                            ((ex.InnerException as ExecutionFailureException)?.InnerException as SqlException)?.Message ?? string.Empty);
-                    if (fileInUseErrorMatch.Success)
+					var fileInUseErrorMatch =
+						new Regex("Cannot create file '(.*?)' because it already exists.").Match(
+							((ex.InnerException as ExecutionFailureException)?.InnerException as SqlException)?.Message ?? string.Empty);
+					if (fileInUseErrorMatch.Success)
                     {
                         var dbFilePath = fileInUseErrorMatch.Groups[1].Value;
                         var dbLogFilePath = Path.Combine(Path.GetDirectoryName(dbFilePath), $"{Path.GetFileNameWithoutExtension(dbFilePath)}_log.ldf");
@@ -523,12 +526,12 @@
                     else
                     {
                         throw;
-                    }                    
+                    }
                 }
 
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET SINGLE_USER"); // for benchmarking purposes                                
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET COMPATIBILITY_LEVEL = 110"); // for benchmarking purposes                
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY BULK_LOGGED"); // for benchmarking purposes                
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET SINGLE_USER"); // for benchmarking purposes
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET COMPATIBILITY_LEVEL = 110"); // for benchmarking purposes
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET RECOVERY BULK_LOGGED"); // for benchmarking purposes
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_CREATE_STATISTICS OFF"); // for benchmarking purposes
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET AUTO_UPDATE_STATISTICS OFF"); // for benchmarking purposes
                 database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} MODIFY FILE(NAME=[{DatabaseName}], SIZE=100MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
@@ -538,7 +541,7 @@
 	                    [FirstName] [nvarchar](50) NULL,
 	                    [LastName] [nvarchar](50) NOT NULL,
 	                    [DateOfBirth] [datetime] NULL,
-                        CONSTRAINT [PK_SimpleBenchmarkEntities] PRIMARY KEY CLUSTERED 
+                        CONSTRAINT [PK_SimpleBenchmarkEntities] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC
                         ))");
@@ -549,7 +552,9 @@
                         [InventoryIndex] [int] NOT NULL,
                         [AccessLevel] [int] NOT NULL DEFAULT(1),
                         [BuildingId] [int] NULL,
-                        CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED 
+                        -- Verify that column names that begin with numbers will work
+                        [10PinSlots] [int] NULL,
+                        CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED
                         (
 	                        [WorkstationId] ASC
                         ))");
@@ -563,7 +568,7 @@
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
                         [FullName] AS ([FirstName] + [LastName]),
-                        CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
+                        CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC,
 	                        [EmployeeId] ASC
@@ -574,15 +579,15 @@
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [BuildingName] [nvarchar](100) NULL,
                         [Description] [nvarchar](100) NULL,
-                        CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED 
+                        CONSTRAINT [PK_Buildings] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC
                         ))");
 
-                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET MULTI_USER"); // for benchmarking purposes                                
+                database.ExecuteNonQuery($@"ALTER DATABASE {DatabaseName} SET MULTI_USER"); // for benchmarking purposes
 
                 // no longer required. local db instances are destroyed and re-created
-                //database.ExecuteNonQuery(@"CHECKPOINT;");               
+                //database.ExecuteNonQuery(@"CHECKPOINT;");
                 //database.ExecuteNonQuery(@"DBCC DROPCLEANBUFFERS;");
                 //database.ExecuteNonQuery(@"DBCC FREESYSTEMCACHE('ALL') WITH NO_INFOMSGS;");
                 //database.ExecuteNonQuery(@"DBCC FREESESSIONCACHE WITH NO_INFOMSGS;");
@@ -608,9 +613,9 @@
         private void CleanupLocalDbDatabase()
         {
             SqlLocalDbApi.AutomaticallyDeleteInstanceFiles = true;
-            SqlLocalDbApi.StopOptions=StopInstanceOptions.KillProcess;
+			SqlLocalDbApi.StopOptions = StopInstanceOptions.KillProcess;
 
-            var localDbProvider = new SqlLocalDbProvider();
+			var localDbProvider = new SqlLocalDbProvider();
             var localDbInstanceInfo = localDbProvider.GetInstances().FirstOrDefault(instance => instance.Name==DatabaseName);
             if (localDbInstanceInfo != null)
             {
@@ -619,11 +624,11 @@
                 {
                     localDbInstance.Start();
                 }
-                this.CleanupMsSqlDatabase(localDbInstance.CreateConnectionStringBuilder().ConnectionString);
-                SqlLocalDbApi.StopInstance(DatabaseName,TimeSpan.FromSeconds(20.0));
-                SqlLocalDbApi.DeleteInstance(DatabaseName);
-            }
-        }
+				this.CleanupMsSqlDatabase(localDbInstance.CreateConnectionStringBuilder().ConnectionString);
+				SqlLocalDbApi.StopInstance(DatabaseName, TimeSpan.FromSeconds(20.0));
+				SqlLocalDbApi.DeleteInstance(DatabaseName);
+			}
+		}
 
         private void CleanupMsSqlDatabase(string connectionString)
         {

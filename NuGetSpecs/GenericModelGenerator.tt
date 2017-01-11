@@ -56,6 +56,9 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	if (col.IsPK) { #>
 	[Key]
 	<#}
+	if (col.Name != col.PropertyName) { #>
+	[Column("<#=col.Name#>")]
+	<#}
 	if(col.IsComputed) { #>
 	[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
 	<#}
@@ -190,10 +193,11 @@ static string[] cs_keywords = { "abstract", "event", "new", "struct", "as", "exp
 static Func<string, string> CleanUp = (str) =>
 {
 	str = rxCleanUp.Replace(str, "_");
+	if (char.IsDigit(str[0])) str = "_" + str;
 
-	if (char.IsDigit(str[0]) || cs_keywords.Contains(str))
+	if (cs_keywords.Contains(str))
 		str = "@" + str;
-	
+
     return str;
 };
 

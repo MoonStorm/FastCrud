@@ -10,7 +10,8 @@
         /// </summary>
         public SqlDatabaseOptions()
         {
-            this.StartDelimiter = this.EndDelimiter = string.Empty;
+            // The ANSI standard delimeter is a double quote mark
+            this.StartDelimiter = this.EndDelimiter = "\"";
             this.ParameterPrefix = "@";
         }
 
