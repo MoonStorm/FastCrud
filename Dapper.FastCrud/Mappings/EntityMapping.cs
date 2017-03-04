@@ -4,6 +4,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -211,7 +212,7 @@
 
         private void ConstructParentChildEntityRelationships()
         {
-            _parentChildRelationships = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>()
+            var selectedProps = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>()
                 .Where(propDescriptor =>
                        {
                            var propInfo =
@@ -220,11 +221,13 @@
 #else
                            propDescriptor.PropertyType;
 #endif
-                           return propInfo.IsGenericType && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
-                                  && propDescriptor.PropertyType.GetGenericArguments().Length == 1;
-                       } )
+                                    return propInfo.IsGenericType 
+                                            && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
+                                            && propDescriptor.PropertyType.GetGenericArguments().Length == 1 
+                                            && !propDescriptor.Attributes.OfType<NotMappedAttribute>().Any(); ;
+                                });
                 //.GroupBy(propDescriptor => propDescriptor.PropertyType)
-                .ToDictionary(
+            _parentChildRelationships = selectedProps.ToDictionary(
                     propDescriptor => propDescriptor.PropertyType.GetGenericArguments()[0],
                     propDescriptor =>
                     {
