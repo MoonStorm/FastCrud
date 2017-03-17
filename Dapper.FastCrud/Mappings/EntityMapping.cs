@@ -193,7 +193,25 @@
 
                         if (referencingEntityPropertyNames.Length > 1)
                         {
-                            throw new InvalidOperationException($"Multiple entity referencing properties were registered for the '{this.EntityType}' - '{groupedRelMappings.Key}' relationship");
+                            // Check for NotMapped attributes on the related Names
+                            // and remove all the properties with NotMapped Attributes.
+                            var finalprops = new List<String>();
+                            foreach (var name in referencingEntityPropertyNames)
+                            {
+                                var prop = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == name);
+
+                                var attr = prop?.Attributes.OfType<NotMappedAttribute>().FirstOrDefault();
+                                if (attr==null) 
+                                {
+                                    // Only add properties names which do not have NotMappedAttribute Set
+                                    finalprops.Add(name);
+                                }
+                            }
+                            referencingEntityPropertyNames = finalprops.ToArray();
+                            if (referencingEntityPropertyNames.Length > 1)
+                            {
+                                throw new InvalidOperationException($"Multiple entity referencing properties were registered for the '{this.EntityType}' - '{groupedRelMappings.Key}' relationship");
+                            }
                         }
 
                         var referencingEntityPropertyName = referencingEntityPropertyNames.Length == 0
