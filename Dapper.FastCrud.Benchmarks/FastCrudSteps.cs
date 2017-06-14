@@ -20,7 +20,7 @@
         [When(@"I insert (.*) benchmark entities using Fast Crud")]
         public void WhenIInsertSingleIntKeyEntitiesUsingFastCrud(int entitiesCount)
         {
-            var dbConnection = _testContext.DatabaseConnection;
+            var dbConnection = _testContext.DatabaseConnection; 
 
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
