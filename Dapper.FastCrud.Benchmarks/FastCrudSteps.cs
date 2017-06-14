@@ -21,6 +21,7 @@
         public void WhenIInsertSingleIntKeyEntitiesUsingFastCrud(int entitiesCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
+	        var test = 2;
 
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
