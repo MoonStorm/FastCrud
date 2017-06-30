@@ -1,6 +1,0 @@
-﻿{
-  "projects": [ "Dapper.FastCrud", "Dapper.FastCrud.Tests" ]
-  //"sdk": {
-  //  "version": "1.0.0-preview1-002702"
-  //}
-}

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{56071DBE-4F21-40DD-BCD1-A0CAD8247EB2}"
 EndProject
@@ -10,10 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGetSpecs\Dapper.FastCrud.ModelGenerator.nuspec = NuGetSpecs\Dapper.FastCrud.ModelGenerator.nuspec
 		NuGetSpecs\Dapper.FastCrud.nuspec = NuGetSpecs\Dapper.FastCrud.nuspec
 		NuGetSpecs\GenericModelGenerator.tt = NuGetSpecs\GenericModelGenerator.tt
-		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dapper.FastCrud", "Dapper.FastCrud\Dapper.FastCrud.xproj", "{A2B22949-0DB7-4130-B813-420B839774B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud", "Dapper.FastCrud\Dapper.FastCrud.csproj", "{A2B22949-0DB7-4130-B813-420B839774B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Tests", "Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj", "{C746BCF1-692B-4450-A864-D76681F3B37D}"
 	ProjectSection(ProjectDependencies) = postProject
