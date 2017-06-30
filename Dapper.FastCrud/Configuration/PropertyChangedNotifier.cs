@@ -3,6 +3,9 @@
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
 
+    /// <summary>
+    /// Helper class for property change notifications.
+    /// </summary>
     public abstract class PropertyChangedNotifier
     {
         /// <summary>

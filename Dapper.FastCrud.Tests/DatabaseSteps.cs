@@ -652,7 +652,7 @@
                         database.Alter(TerminationClause.RollbackTransactionsImmediately);
                         database.Refresh();
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // this may fail if the db files are no longer there
                     }

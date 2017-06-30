@@ -414,6 +414,9 @@
             return clonedPropertyMapping;
         }
 
+        /// <summary>
+        /// Checks if two property mappings are equal.
+        /// </summary>
         protected bool Equals(PropertyMapping other)
         {
             return this.EntityMapping.Equals(other.EntityMapping) && this.PropertyName.Equals(other.PropertyName);
@@ -454,11 +457,17 @@
             return this.PropertyName.GetHashCode();
         }
 
+        /// <summary>
+        /// Equality operator
+        /// </summary>
         public static bool operator ==(PropertyMapping left, PropertyMapping right)
         {
             return Equals(left, right);
         }
 
+        /// <summary>
+        /// Inequality operator
+        /// </summary>
         public static bool operator !=(PropertyMapping left, PropertyMapping right)
         {
             return !Equals(left, right);

@@ -196,7 +196,6 @@
         /// </summary>
         /// <param name="condition">The expression that must evaluate to true to avoid an <see cref="InvalidOperationException"/>.</param>
         /// <param name="message">The message to include with the exception.</param>
-        /// <param name="messageArgs">Message parameetrs</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidState(bool condition, string message)
         {

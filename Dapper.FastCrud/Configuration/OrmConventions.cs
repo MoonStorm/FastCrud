@@ -100,7 +100,7 @@
 
         /// <summary>
         /// Returns the schema name for an entity type. It can return null.
-        /// In order for the schema to be used, you must also ensure that <see cref="IsUsingSqlSchemas"/> for the dialect also returns <c>true</c>.
+        /// In order for the schema to be used, you must also ensure that <see cref="SqlDatabaseOptions.IsUsingSchemas"/> for the dialect also returns <c>true</c>.
         /// </summary>
         public virtual string GetSchemaName(Type entityType)
         {

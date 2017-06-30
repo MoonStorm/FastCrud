@@ -24,8 +24,8 @@ Code first entities are also supported which can either be decorated with attrib
 Most of us love Dapper for its speed. 
 Let's have a look at how ``Fast Crud`` performs against other similar libraries out there:  
 
-- ``Dapper.SimpleCRUD v1.9.1``
-- ``DapperExtensions v1.4.4 ``
+- ``Dapper.SimpleCRUD v1.13.0``
+- ``DapperExtensions v1.5.0 ``
 - ``Entity Framework v6.1.3`` was included as well, even though it's in a different class of ORMs.
 In an attempt to keep it on the same playing field, its proxy generation was turned off.
 
