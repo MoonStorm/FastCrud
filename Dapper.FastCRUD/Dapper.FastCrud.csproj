@@ -6,12 +6,13 @@
     <AssemblyName>Dapper.FastCrud</AssemblyName>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnableDocumentationFile>true</EnableDocumentationFile>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DynaFile.Services.DocumentManagement.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Dapper.FastCrud.xml</DocumentationFile>
 
     <Authors>MoonStorm</Authors>
     <PackageId>Dapper.FastCrud</PackageId>
     <PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</PackageIconUrl>
     <PackageLicenseUrl>http://www.opensource.org/licenses/MIT</PackageLicenseUrl>
+	<PackageTags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
@@ -19,27 +20,23 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <Description>The fastest micro-orm type extension for Dapper is built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings. VS2015 or an equivalent build environment is recommended.</Description>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>	
+	<Title>The fastest micro-orm for Dapper</Title> 
+    <Description>Dapper.FastCRUD is built around essential features of the C# 6 / VB that  have finally raised the simplicity of raw SQL constructs to acceptable maintenance  levels. These features leave no chance to mistypings or problems arising from db entity refactorings. Visual Studio 2015 or later is recommended.</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.2" />
+  </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="StringInterpolationBridge" Version="0.9.1" />
-    <PackageReference Include="Dapper" Version="1.50.2" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <PackageReference Include="Dapper" Version="1.50.2" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
+     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
@@ -51,11 +48,20 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.1.0" />
-    <PackageReference Include="System.Data.Common" Version="4.1.0" />
-    <PackageReference Include="System.Reflection.Extensions" Version="4.0.1" />
-    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
 
+  <Target Name="SetPackageVersion">
+    <ItemGroup>
+	  <AssemblyInfoFiles Include="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')" Condition="'%(Extension)' == '.dll'"/>
+	</ItemGroup>
+    <Message Text="Extracting the assembly version from '@(AssemblyInfoFiles)'" Importance="High"/>
+	<GetAssemblyIdentity AssemblyFiles="@(AssemblyInfoFiles)">
+		<Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
+	</GetAssemblyIdentity>
+	<PropertyGroup>
+		<PackageVersion>%(AssemblyInfo.Version)</PackageVersion>
+	</PropertyGroup>
+  </Target>
 </Project>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Dapper.FastCrud.ModelGenerator</id>
-    <version>$version$</version>
+    <version>$PackageVersion$</version>
     <title>Dapper.FastCrud.ModelGenerator</title>
     <authors>MoonStorm</authors>
     <owners>MoonStorm</owners>

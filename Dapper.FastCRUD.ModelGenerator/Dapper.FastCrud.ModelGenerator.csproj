@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
+    <AssemblyTitle>Dapper.FastCrud.ModelGenerator</AssemblyTitle>
+    <AssemblyName>Dapper.FastCrud.ModelGenerator</AssemblyName>	
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDocumentationFile>false</EnableDocumentationFile>
+	<Title>The model generator for the Dapper.FastCrud micro-orm</Title> 
+    <Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
+Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
+Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
+
+More details are available on the project site.
+	</Description>
+	<Authors>MoonStorm</Authors>
+	<PackageId>Dapper.FastCrud</PackageId>
+	<PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png	</PackageIconUrl>
+	<PackageLicenseUrl>http://www.opensource.org/licenses/MIT</PackageLicenseUrl>
+	<PackageTags>dapper fastcrud entity generator orm</PackageTags>
+
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
+  </PropertyGroup>
+  
+  <Target Name="SetPackageVersion">
+    <ItemGroup>
+	  <AssemblyInfoFiles Include="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')" Condition="'%(Extension)' == '.dll'" />
+	</ItemGroup>
+    <Message Text="Extracting the assembly version from '@(AssemblyInfoFiles)'" Importance="High" />
+	<GetAssemblyIdentity AssemblyFiles="@(AssemblyInfoFiles)">
+		<Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
+	</GetAssemblyIdentity>
+	<PropertyGroup>
+		<PackageVersion>%(AssemblyInfo.Version)</PackageVersion>
+	</PropertyGroup>
+  </Target>
+  
+  <ItemGroup>
+    <None Update="Content\Models\GenericModelGenerator.tt">
+      <Generator></Generator>
+    </None>
+    <None Update="Content\Models\SampleModelGeneratorConfig.tt">
+      <Generator></Generator>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+</Project>

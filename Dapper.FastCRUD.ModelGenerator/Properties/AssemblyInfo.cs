@@ -5,10 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Dapper.FastCrud")]
-[assembly: AssemblyDescription("Dapper.FastCRUD is built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings. VS2015 or an equivalent build environment is recommended.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyTitle("Dapper.FastCrud.ModelGenerator")]
+[assembly: AssemblyDescription("Model generator for the Dapper.FastCRUD micro-orm.")]
 [assembly: AssemblyProduct("Dapper.FastCrud")]
 [assembly: AssemblyCopyright("Copyright © Dan Cristiu 2017")]
 [assembly: AssemblyTrademark("")]
@@ -23,6 +21,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0044043b-c8ec-497c-8b58-abe028014d24")]
-[assembly:InternalsVisibleTo("Dapper.FastCrud.Tests")]
+[assembly: Guid("ad67fb4a-1683-4d9e-bab9-0af6f9814435")]
 
