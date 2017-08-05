@@ -207,7 +207,8 @@ static Func<string, string> CleanUp = (str) =>
 // about multiple lines.
 static string CleanDescription(string str)
 {
-    const string oneSpace = " ";
+    const int maxLength = 140;
+	const string oneSpace = " ";
     const string twoSpaces = oneSpace + oneSpace;
     if (str == null) { return str; } // Don't process nulls
     str = str.Replace("\r", oneSpace).Replace("\n", oneSpace).Replace("\t", oneSpace);
