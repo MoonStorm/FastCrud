@@ -43,7 +43,7 @@ More details are available on the project site.
     </Content>
     <Content Include="Tools\Install.ps1">
 		<Generator></Generator>
-		<Pack>true</Pack>
+		<Pack>false</Pack>
 		<PackagePath>Tools\</PackagePath>
 	</Content>
   </ItemGroup>

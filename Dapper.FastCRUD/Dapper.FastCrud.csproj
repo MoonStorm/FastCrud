@@ -7,6 +7,9 @@
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Dapper.FastCrud.xml</DocumentationFile>
+	
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>True</DebugSymbols>
 
     <Authors>MoonStorm</Authors>
     <PackageId>Dapper.FastCrud</PackageId>
@@ -54,9 +57,9 @@
 
   <Target Name="SetPackageVersion">
     <ItemGroup>
-	  <AssemblyInfoFiles Include="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')" Condition="'%(Extension)' == '.dll'"/>
+	  <AssemblyInfoFiles Include="@(_TargetPathsToAssemblies->'%(FinalOutputPath)')" Condition="'%(Extension)' == '.dll'" />
 	</ItemGroup>
-    <Message Text="Extracting the assembly version from '@(AssemblyInfoFiles)'" Importance="High"/>
+    <Message Text="Extracting the assembly version from '@(AssemblyInfoFiles)'" Importance="High" />
 	<GetAssemblyIdentity AssemblyFiles="@(AssemblyInfoFiles)">
 		<Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
 	</GetAssemblyIdentity>

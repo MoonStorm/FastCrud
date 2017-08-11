@@ -15,7 +15,7 @@ This is the configuration file for GenericModelGenerator.tt
 	IgnoreColumnDefaultValues = false; 
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire.", "Building"};
 #>
-<#@ include file="..\..\NuGetSpecs\GenericModelGenerator.tt" #>
+<#@ include file="..\..\Dapper.FastCRUD.ModelGenerator\Content\Models\GenericModelGenerator.tt" #>
 <#+
 	void ConfigureTableMappings(Tables tables){
 		/*

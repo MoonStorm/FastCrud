@@ -2,7 +2,8 @@
 
 <#
 /*
-This is the configuration file for GenericModelGenerator.tt
+This is a sample configuration file for GenericModelGenerator.tt. 
+When you create your own configuration file, don't forget to set the 'Custom Tool' to TextTemplatingFileGenerator
 */
 	// Settings
 	ConfigPath = @""; //Looks in current project for web.config or app.config by default. You can override it to point to a different config file.
