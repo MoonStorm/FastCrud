@@ -4,7 +4,7 @@
     <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
     <AssemblyTitle>Dapper.FastCrud.ModelGenerator</AssemblyTitle>
     <AssemblyName>Dapper.FastCrud.ModelGenerator</AssemblyName>	
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <EnableDocumentationFile>false</EnableDocumentationFile>
 	<Title>The model generator for the Dapper.FastCrud micro-orm</Title> 
     <Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
@@ -21,7 +21,14 @@ More details are available on the project site.
 
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<IncludeBuildOutput>False</IncludeBuildOutput>
-	<GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetPackageVersion</GenerateNuspecDependsOn>
+
+	<AssemblyVersion>1.0.0.0</AssemblyVersion>
+	<FileVersion>1.0.0.0</FileVersion>
+	
+    <!--<GenerateNuspecDependsOn>
+		$(GenerateNuspecDependsOn);
+		SetPackageVersion
+	</GenerateNuspecDependsOn>-->  
   </PropertyGroup>
   
   <ItemGroup>
@@ -63,6 +70,7 @@ More details are available on the project site.
 	<PropertyGroup>
 		<PackageVersion>%(AssemblyInfo.Version)</PackageVersion>
 	</PropertyGroup>
+    <Message Text="Package version set to '$(PackageVersion)'" Importance="High" />	
   </Target>
   
 </Project>
