@@ -83,7 +83,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Dapper.FastCRUD.Tests\Dapper.FastCrud.Tests.csproj">
+    <ProjectReference Include="..\Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj">
       <Project>{0fc75c39-9eb9-445c-ac0c-e1fbf79bbdf2}</Project>
       <Name>Dapper.FastCrud.Tests</Name>
     </ProjectReference>
