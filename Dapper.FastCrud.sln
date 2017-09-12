@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud", "Dapper.FastCrud\Dapper.FastCrud.csproj", "{A2B22949-0DB7-4130-B813-420B839774B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Tests", "Dapper.FastCRUD.Tests\Dapper.FastCrud.Tests.csproj", "{0FC75C39-9EB9-445C-AC0C-E1FBF79BBDF2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Tests", "Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj", "{0FC75C39-9EB9-445C-AC0C-E1FBF79BBDF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Benchmarks", "Dapper.FastCRUD.Benchmarks\Dapper.FastCrud.Benchmarks.csproj", "{ED7BCE12-A776-437B-A1D1-9E3D3AE5A90B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.FastCrud.Benchmarks", "Dapper.FastCrud.Benchmarks\Dapper.FastCrud.Benchmarks.csproj", "{ED7BCE12-A776-437B-A1D1-9E3D3AE5A90B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud.ModelGenerator", "Dapper.FastCRUD.ModelGenerator\Dapper.FastCrud.ModelGenerator.csproj", "{61E1B675-C862-4AB8-828E-AE2360DDD11C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud.ModelGenerator", "Dapper.FastCrud.ModelGenerator\Dapper.FastCrud.ModelGenerator.csproj", "{61E1B675-C862-4AB8-828E-AE2360DDD11C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
