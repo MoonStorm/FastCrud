@@ -29,12 +29,17 @@
 	
 	<AssemblyVersion>1.0.0.0</AssemblyVersion>
 	<FileVersion>1.0.0.0</FileVersion>
+	<PackageVersion>1.0.0.0</PackageVersion>
 
     <!--<GenerateNuspecDependsOn>
 		$(GenerateNuspecDependsOn);
 		SetPackageVersion
 	</GenerateNuspecDependsOn>-->  
 	</PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo_unused.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
@@ -60,6 +65,10 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <Target Name="SetPackageVersion">

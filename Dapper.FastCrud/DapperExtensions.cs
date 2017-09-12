@@ -1,4 +1,8 @@
-﻿namespace Dapper.FastCrud
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Dapper.FastCrud.Tests")]
+
+namespace Dapper.FastCrud
 {
     using System;
     using System.Collections.Generic;
