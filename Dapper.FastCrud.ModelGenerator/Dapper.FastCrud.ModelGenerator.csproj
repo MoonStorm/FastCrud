@@ -6,13 +6,7 @@
     <AssemblyName>Dapper.FastCrud.ModelGenerator</AssemblyName>	
 	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <EnableDocumentationFile>false</EnableDocumentationFile>
-	<Title>The model generator for the Dapper.FastCrud micro-orm</Title> 
-    <Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
-Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
-Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
 
-More details are available on the project site.
-	</Description>
 	<Authors>MoonStorm</Authors>
 	<PackageId>Dapper.FastCrud.ModelGenerator</PackageId>
 	<PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png	</PackageIconUrl>
@@ -22,13 +16,16 @@ More details are available on the project site.
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<IncludeBuildOutput>False</IncludeBuildOutput>
 
+	<Company />
+	<Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
+Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
+Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
+More details are available on the project site.</Description>
+	<PackageProjectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</PackageProjectUrl>
+
 	<AssemblyVersion>1.0.0.0</AssemblyVersion>
-	<FileVersion>1.0.0.0</FileVersion>
-	
-    <!--<GenerateNuspecDependsOn>
-		$(GenerateNuspecDependsOn);
-		SetPackageVersion
-	</GenerateNuspecDependsOn>-->  
+	<FileVersion>1.0.0.0</FileVersion>	
+	<Version>1.0.0.0</Version>	
   </PropertyGroup>
 
   <ItemGroup>
@@ -66,19 +63,5 @@ More details are available on the project site.
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-
-  <Target Name="SetPackageVersion">
-    <ItemGroup>
-	  <AssemblyInfoFiles Include="$(OutputPath)\**\*.dll" />
-	</ItemGroup>
-    <Message Text="Extracting the assembly version from '@(AssemblyInfoFiles)'" Importance="High" />
-	<GetAssemblyIdentity AssemblyFiles="@(AssemblyInfoFiles)">
-		<Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
-	</GetAssemblyIdentity>
-	<PropertyGroup>
-		<PackageVersion>%(AssemblyInfo.Version)</PackageVersion>
-	</PropertyGroup>
-    <Message Text="Package version set to '$(PackageVersion)'" Importance="High" />	
-  </Target>
   
 </Project>
