@@ -8,7 +8,7 @@ namespace Dapper.FastCrud.SqlBuilders
     internal class MsSql2008Builder : MsSqlBuilder
     {
         public MsSql2008Builder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
-            : base(entityDescriptor, entityMapping, SqlDialect.MsSql)
+            : base(entityDescriptor, entityMapping, SqlDialect.MsSql2008)
         {
         }
 
