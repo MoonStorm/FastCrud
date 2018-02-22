@@ -457,7 +457,7 @@ Tables LoadTables()
 			var rxClean = new Regex("^(Equals|GetHashCode|GetType|ToString|repo|Save|IsNew|Insert|Update|Delete|Exists|SingleOrDefault|Single|First|FirstOrDefault|Fetch|Page|Query)$");
 			foreach (var t in result)
 			{
-				t.ClassName = ClassPrefix + t.Schema + t.ClassName + ClassSuffix;
+				t.ClassName = ClassPrefix + t.ClassName + ClassSuffix;
 				foreach (var c in t.Columns)
 				{
 					c.PropertyName = rxClean.Replace(c.PropertyName, "_$1");
