@@ -40,20 +40,11 @@
             }
 
             var dbInsertedOutputColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = this.ConstructRefreshOnInsertColumnSelection();
 
-            // the union will make the constraints be ignored
-            return this.ResolveWithCultureInvariantFormatter($@"
-                SELECT *
-                    INTO #temp 
-                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
-                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
-            
+            return this.ResolveWithCultureInvariantFormatter($@"            
                 INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
-                    OUTPUT {dbInsertedOutputColumns} INTO #temp 
-                    VALUES ({this.ConstructParamEnumerationForInsert()});
-
-                SELECT * FROM #temp");
+                    OUTPUT {dbInsertedOutputColumns}
+                    VALUES ({this.ConstructParamEnumerationForInsert()});");
         }
 
         /// <summary>
@@ -67,21 +58,11 @@
             }
 
             var dbUpdatedOutputColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
 
-            // the union will make the constraints be ignored
-            return this.ResolveWithCultureInvariantFormatter($@"
-                SELECT *
-                    INTO #temp 
-                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
-                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
-
-                UPDATE {this.GetTableName()} 
+            return this.ResolveWithCultureInvariantFormatter($@"UPDATE {this.GetTableName()} 
                     SET {this.ConstructUpdateClause()}
-                    OUTPUT {dbUpdatedOutputColumns} INTO #temp
-                    WHERE {this.ConstructKeysWhereClause()}
-
-                SELECT * FROM #temp");
+                    OUTPUT {dbUpdatedOutputColumns}
+                    WHERE {this.ConstructKeysWhereClause()}");
         }
 
         protected override string ConstructFullSelectStatementInternal(

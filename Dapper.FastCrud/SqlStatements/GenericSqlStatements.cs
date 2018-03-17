@@ -10,7 +10,7 @@
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Validations;
 
-    internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
+    internal class GenericSqlStatements<TEntity> : ISqlStatements<TEntity>
     {
         private readonly GenericStatementSqlBuilder _sqlBuilder;
 
@@ -21,7 +21,7 @@
         {
             _sqlBuilder = sqlBuilder;
         }
-        
+
         /// <summary>
         /// Gets the publicly accessible SQL builder.
         /// </summary>
@@ -32,7 +32,7 @@
         /// </summary>
         public ISqlStatements<TEntity> CombineWith<TJoinedEntity>(ISqlStatements<TJoinedEntity> joinedEntitySqlStatements)
         {
-            return new TwoEntitiesRelationshipSqlStatements<TEntity,TJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
+            return new TwoEntitiesRelationshipSqlStatements<TEntity, TJoinedEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
 
         /// <summary>
@@ -132,6 +132,8 @@
                         statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
 
+                Requires.ValidState(_sqlBuilder.HasConcurrencyField == false || updatedEntity != null, $"no rows have been updated by the update command");
+
                 if (updatedEntity != null)
                 {
                     // copy all the database generated props back onto our entity
@@ -142,10 +144,10 @@
             }
 
             return connection.Execute(
-                _sqlBuilder.ConstructFullSingleUpdateStatement(), 
-                keyEntity, 
-                transaction: 
-                statementOptions.Transaction, 
+                _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                keyEntity,
+                transaction:
+                statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
         }
 
@@ -173,9 +175,9 @@
             }
 
             return (await connection.ExecuteAsync(
-                _sqlBuilder.ConstructFullSingleUpdateStatement(), 
-                keyEntity, 
-                transaction: statementOptions.Transaction, 
+                _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                keyEntity,
+                transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)) > 0;
         }
 
@@ -241,7 +243,7 @@
                 _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
-                commandTimeout:(int?)statementOptions.CommandTimeout?.TotalSeconds);
+                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
         /// <summary>

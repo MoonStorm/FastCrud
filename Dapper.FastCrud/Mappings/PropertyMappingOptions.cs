@@ -39,5 +39,10 @@
         /// The value is not going to be re-read from the database on UPDATEs.
         /// </summary>
         RefreshPropertyOnUpdates = 0x20,
+
+        /// <summary>
+        /// concurrency properties determine how to resolve multiple actions on the same row
+        /// </summary>
+        ConcurrencyProperty = 0x40,
     }
 }

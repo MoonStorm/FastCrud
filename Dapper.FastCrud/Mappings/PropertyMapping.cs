@@ -103,6 +103,31 @@
         }
 
         /// <summary>
+        /// Gets or sets a flag indicating the property is mapped to a concurrency check field.
+        /// </summary>
+        public bool IsConcurrencyProperty
+        {
+            get
+            {
+                return (_options & PropertyMappingOptions.ConcurrencyProperty) == PropertyMappingOptions.ConcurrencyProperty;
+            }
+            set
+            {
+                this.ValidateState();
+
+                if (value)
+                {
+                    _options |= PropertyMappingOptions.ConcurrencyProperty;
+                    this.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
+                }
+                else
+                {
+                    _options &= ~PropertyMappingOptions.ConcurrencyProperty;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a flag indicating the property is refreshed after an INSERT.
         /// </summary>
         public bool IsRefreshedOnInserts
@@ -156,6 +181,15 @@
         public PropertyMapping SetPrimaryKey(bool isPrimaryKey = true)
         {
             this.IsPrimaryKey = isPrimaryKey;
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the property as concurrency
+        /// </summary>
+        public PropertyMapping SetConcurrencyProperty(bool isConcurrencyProperty = true)
+        {
+            this.IsConcurrencyProperty = isConcurrencyProperty;
             return this;
         }
 
@@ -404,13 +438,13 @@
         internal PropertyMapping Clone(EntityMapping newEntityMapping)
         {
             var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
-                {
-                    _options = _options,
-                    _childParentRelationship = _childParentRelationship == null ? null : new PropertyMappingRelationship(_childParentRelationship.ReferencedEntityType, _childParentRelationship.ReferencingPropertyName),
-                    _databaseColumnName = this._databaseColumnName,
-                    _columnOrder =  _columnOrder
+            {
+                _options = _options,
+                _childParentRelationship = _childParentRelationship == null ? null : new PropertyMappingRelationship(_childParentRelationship.ReferencedEntityType, _childParentRelationship.ReferencingPropertyName),
+                _databaseColumnName = this._databaseColumnName,
+                _columnOrder = _columnOrder
 
-                };
+            };
             return clonedPropertyMapping;
         }
 

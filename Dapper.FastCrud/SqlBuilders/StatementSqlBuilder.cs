@@ -15,7 +15,7 @@
     using Dapper.FastCrud.Validations;
     using System.Reflection;
 
-    internal abstract class GenericStatementSqlBuilder:ISqlBuilder
+    internal abstract class GenericStatementSqlBuilder : ISqlBuilder
     {
         //private static readonly RelationshipOrderComparer _relationshipOrderComparer = new RelationshipOrderComparer();
 
@@ -68,6 +68,11 @@
                 .Select(propMapping => propMapping.Value)
                 .OrderBy(propMapping => propMapping.ColumnOrder)
                 .ToArray();
+            this.UpdateWhereKeyProperties = this.EntityMapping.PropertyMappings
+                .Where(propMapping => propMapping.Value.IsPrimaryKey || propMapping.Value.IsConcurrencyProperty)
+                .Select(propMapping => propMapping.Value)
+                .OrderBy(propMapping => propMapping.ColumnOrder)
+                .ToArray();
             this.RefreshOnInsertProperties = this.SelectProperties
                 .Where(propInfo => propInfo.IsRefreshedOnInserts)
                 .ToArray();
@@ -83,21 +88,22 @@
             this.InsertProperties = this.SelectProperties
                 .Where(propInfo => !propInfo.IsExcludedFromInserts)
                 .ToArray();
+            this.HasConcurrencyField = this.EntityMapping.PropertyMappings.Any(propMapping => propMapping.Value.IsConcurrencyProperty);
 
-            _noAliasTableName = new Lazy<string>(()=>this.GetTableNameInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noAliasKeysWhereClause = new Lazy<string>(()=>this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noAliasTableName = new Lazy<string>(() => this.GetTableNameInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noAliasKeysWhereClause = new Lazy<string>(() => this.ConstructKeysWhereClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
             _noAliasKeyColumnEnumeration = new Lazy<string>(() => this.ConstructKeyColumnEnumerationInternal(), LazyThreadSafetyMode.PublicationOnly);
             _noAliasColumnEnumerationForSelect = new Lazy<string>(() => this.ConstructColumnEnumerationForSelectInternal(), LazyThreadSafetyMode.PublicationOnly);
-            _columnEnumerationForInsert = new Lazy<string>(()=>this.ConstructColumnEnumerationForInsertInternal(), LazyThreadSafetyMode.PublicationOnly);
-            _paramEnumerationForInsert = new Lazy<string>(()=>this.ConstructParamEnumerationForInsertInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noAliasUpdateClause = new Lazy<string>(()=>this.ConstructUpdateClauseInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _fullInsertStatement = new Lazy<string>(()=>this.ConstructFullInsertStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _fullSingleUpdateStatement = new Lazy<string>(()=>this.ConstructFullSingleUpdateStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noConditionFullBatchUpdateStatement = new Lazy<string>(()=>this.ConstructFullBatchUpdateStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _fullSingleDeleteStatement = new Lazy<string>(()=>this.ConstructFullSingleDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noConditionFullBatchDeleteStatement = new Lazy<string>(()=>this.ConstructFullBatchDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noConditionFullCountStatement = new Lazy<string>(()=>this.ConstructFullCountStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _columnEnumerationForInsert = new Lazy<string>(() => this.ConstructColumnEnumerationForInsertInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _paramEnumerationForInsert = new Lazy<string>(() => this.ConstructParamEnumerationForInsertInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noAliasUpdateClause = new Lazy<string>(() => this.ConstructUpdateClauseInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _fullInsertStatement = new Lazy<string>(() => this.ConstructFullInsertStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleUpdateStatement = new Lazy<string>(() => this.ConstructFullSingleUpdateStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullBatchUpdateStatement = new Lazy<string>(() => this.ConstructFullBatchUpdateStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleDeleteStatement = new Lazy<string>(() => this.ConstructFullSingleDeleteStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullBatchDeleteStatement = new Lazy<string>(() => this.ConstructFullBatchDeleteStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullCountStatement = new Lazy<string>(() => this.ConstructFullCountStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
+            _fullSingleSelectStatement = new Lazy<string>(() => this.ConstructFullSingleSelectStatementInternal(), LazyThreadSafetyMode.PublicationOnly);
         }
 
 
@@ -107,11 +113,13 @@
         //public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
         //public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
         public PropertyMapping[] KeyProperties { get; }
+        public PropertyMapping[] UpdateWhereKeyProperties { get; }
         public PropertyMapping[] InsertProperties { get; }
         public PropertyMapping[] UpdateProperties { get; }
         public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
         public PropertyMapping[] RefreshOnInsertProperties { get; }
         public PropertyMapping[] RefreshOnUpdateProperties { get; }
+        public bool HasConcurrencyField { get; }
         protected string IdentifierStartDelimiter { get; }
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
@@ -384,7 +392,7 @@
             long? limitRowsCount = null)
         {
             Requires.NotNull(joinInstructions, nameof(joinInstructions));
-            var allSqlJoinInstructions = new[] { new StatementSqlBuilderJoinInstruction(this, SqlJoinType.LeftOuterJoin,  whereClause, orderClause) }.Concat(joinInstructions).ToArray();
+            var allSqlJoinInstructions = new[] { new StatementSqlBuilderJoinInstruction(this, SqlJoinType.LeftOuterJoin, whereClause, orderClause) }.Concat(joinInstructions).ToArray();
             Requires.Argument(allSqlJoinInstructions.Length > 1, nameof(joinInstructions), "Unable to create a full JOIN statement when no extra SQL builders were provided");
 
             var selectClauseBuilder = selectClause == null ? new StringBuilder() : null;
@@ -395,7 +403,7 @@
             var joinClauseBuilder = new StringBuilder();
 
             // enumerate through the join instructions and construct FIRST ENTITY - SECOND ENTITY joins
-            for(var secondEntityJoinInstructionIndex = 0; secondEntityJoinInstructionIndex < allSqlJoinInstructions.Length; secondEntityJoinInstructionIndex++)
+            for (var secondEntityJoinInstructionIndex = 0; secondEntityJoinInstructionIndex < allSqlJoinInstructions.Length; secondEntityJoinInstructionIndex++)
             {
                 var secondEntityJoinSqlInstruction = allSqlJoinInstructions[secondEntityJoinInstructionIndex];
                 var secondEntitySqlBuilder = secondEntityJoinSqlInstruction.SqlBuilder;
@@ -481,7 +489,7 @@
                         atLeastOneRelationshipDiscovered = true;
 
                         joinClauseBuilder.Append('(');
-                        for (var firstEntityPropertyIndex = 0; firstEntityPropertyIndex<firstEntityPropertyMappings.Length; firstEntityPropertyIndex++)
+                        for (var firstEntityPropertyIndex = 0; firstEntityPropertyIndex < firstEntityPropertyMappings.Length; firstEntityPropertyIndex++)
                         {
                             if (firstEntityPropertyIndex > 0)
                             {
@@ -564,7 +572,7 @@
             if ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
             {
                 fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
-            }                                
+            }
             else
             {
                 fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
@@ -578,7 +586,7 @@
         /// </summary>
         protected virtual string ConstructKeysWhereClauseInternal(string tableAlias = null)
         {
-            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
+            return string.Join(" AND ", this.UpdateWhereKeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
         }
 
         /// <summary>
@@ -767,9 +775,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void FindRelationship(
             GenericStatementSqlBuilder firstEntitySqlBuilder,
-            GenericStatementSqlBuilder secondEntitySqlBuilder, 
-            out PropertyMapping[] firstEntityRelationshipPropertyMappings, 
-            out PropertyMapping[] secondEntityRelationshipPropertyMappings, 
+            GenericStatementSqlBuilder secondEntitySqlBuilder,
+            out PropertyMapping[] firstEntityRelationshipPropertyMappings,
+            out PropertyMapping[] secondEntityRelationshipPropertyMappings,
             ref SqlJoinType secondEntityJoinType)
         {
             var firstEntityMapping = firstEntitySqlBuilder.EntityMapping;
