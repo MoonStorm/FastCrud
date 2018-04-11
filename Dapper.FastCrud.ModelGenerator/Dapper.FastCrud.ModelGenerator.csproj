@@ -23,9 +23,7 @@ Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail t
 More details are available on the project site.</Description>
 	<PackageProjectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</PackageProjectUrl>
 
-	<AssemblyVersion>1.0.0.0</AssemblyVersion>
-	<FileVersion>1.0.0.0</FileVersion>	
-	<Version>1.0.0.0</Version>	
+	<Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
