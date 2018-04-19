@@ -2,8 +2,6 @@
 
 When using this library, a compiler equivalent to the one included inside Visual Studio 2015 is required. 
 
-[![moonstorm MyGet Build Status](https://www.myget.org/BuildSource/Badge/moonstorm?identifier=72ae5221-4023-477f-bfac-837f2e07e2bb)](https://www.myget.org/)
-
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
 - Entities having composite primary keys are supported
