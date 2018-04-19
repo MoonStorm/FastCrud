@@ -6,6 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0FC75C39-9EB9-445C-AC0C-E1FBF79BBDF2}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <Prefer32Bit>false</Prefer32Bit>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Dapper.FastCrud.Tests</RootNamespace>
     <AssemblyName>Dapper.FastCrud.Tests</AssemblyName>
