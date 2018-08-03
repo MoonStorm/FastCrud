@@ -42,7 +42,7 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 		if(IsExcluded(tbl.Schema, tbl.Name, ExcludeTablePrefixes)) continue;
 #>
     /// <summary>
-    /// Represents the <#=tbl.Name#> <#=(tbl.IsView)?"view":"table"#><#=String.IsNullOrEmpty(tbl.Description)?"":" ("+tbl.Description+")"#>.
+    /// Represents the <#=tbl.Name#> <#=(tbl.IsView)?"view":"table"#><#=String.IsNullOrEmpty(tbl.Description)?"":" ("+tbl.Description.Replace(Environment.NewLine, " ")+")"#>.
     /// </summary>
 	[Table("<#=tbl.Name#>")]
 	public partial class <#=tbl.ClassName#>
@@ -50,7 +50,7 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 <#foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
 {#>
 		/// <summary>
-		/// <#=col.Description#>
+		/// <#=col.Description.Replace(Environment.NewLine, " ")#>
 		/// </summary>
 	<#
 	if (col.IsPK) { #>
