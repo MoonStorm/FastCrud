@@ -16,7 +16,7 @@
     internal abstract class RelationshipSqlStatements<TEntity> : ISqlStatements<TEntity>
     {
         private readonly ISqlStatements<TEntity> _mainEntitySqlStatements;
-        private readonly GenericStatementSqlBuilder[] _joinedEntitiesSqlBuilders;
+        protected readonly GenericStatementSqlBuilder[] _joinedEntitiesSqlBuilders;
         private readonly EntityMapping[] _allEntityMappings;
 
         /// <summary>
