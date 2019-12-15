@@ -28,6 +28,7 @@ Let's have a look at how ``Fast Crud`` performs against other similar libraries 
 In an attempt to keep it on the same playing field, its proxy generation was turned off.
 
 ##### Automatic Benchmark Report (Last Run: Sunday, January 03, 2016)
+
 |  Library   |  Operation | Op Count |Time (ms) | Time/op (μs) |
 |------------|------------|----------|----------|--------------|
 ||||||
