@@ -24,6 +24,18 @@
         }
 
         /// <summary>
+        /// Returns a parameter formatter for an SQL function, allowing it to be properly formatted by adding delimiters.
+        /// Do not use this method for table or column names.
+        /// </summary>
+        /// <param name="sqlFunction">An SQL identifier that is not a table or a column name.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IFormattable Function(string sqlFunction)
+        {
+            Requires.NotNullOrEmpty(sqlFunction, nameof(sqlFunction));
+            return new SqlParameterFormatter(SqlParameterElementType.Function, sqlFunction, null);
+        }
+
+        /// <summary>
         /// Returns a parameter formatter for the SQL table name of the main entity.
         /// If you wish to resolve the table name of another entity, please use the generic overload instead.
         /// The resolver can be used as-is in a formattable string expression.

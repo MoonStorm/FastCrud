@@ -1,16 +1,15 @@
-﻿namespace Dapper.FastCrud.Mappings
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Globalization;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using Dapper.FastCrud.Validations;
+﻿using Dapper.FastCrud.Validations;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
+namespace Dapper.FastCrud.Mappings
+{
     /// <summary>
     /// Holds information about table mapped properties for a particular entity type.
     /// Multiple instances of such mappings can be active for a single entity type.
@@ -75,6 +74,49 @@
         /// Gets all the parent-child relationships.
         /// </summary>
         internal IReadOnlyDictionary<Type, EntityMappingRelationship> ParentChildRelationships => _parentChildRelationships;
+
+        /// <summary>
+        /// Returns property mapping information for a particular property.
+        /// </summary>
+        /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
+        public PropertyMapping GetProperty(string propertyName)
+        {
+            PropertyMappings.TryGetValue(propertyName, out PropertyMapping propertyMapping);
+            return propertyMapping;
+        }
+
+        /// <summary>
+        /// Returns all the property mappings, optionally filtered by their options.
+        /// </summary>
+        public PropertyMapping[] GetProperties(params PropertyMappingOptions[] includeFilter)
+        {
+            return this.PropertyMappings.Values
+                .Where(propInfo => (includeFilter.Length == 0 || includeFilter.Any(options => (options & propInfo.Options) == options)))
+                //.OrderBy(propInfo => propInfo.Order)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Returns all the property mappings, filtered by an exclusion filter.
+        /// </summary>
+        public PropertyMapping[] GetPropertiesExcluding(params string[] propNames)
+        {
+            return this.PropertyMappings.Values
+                .Where(propInfo => (propNames.Length == 0 || !propNames.Contains(propInfo.PropertyName)))
+                //.OrderBy(propInfo => propInfo.Order)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Returns all the property mappings, filtered by an exclusion filter.
+        /// </summary>
+        public PropertyMapping[] GetPropertiesExcluding(params PropertyMappingOptions[] excludeFilter)
+        {
+            return this.PropertyMappings.Values
+                .Where(propInfo => (excludeFilter.Length == 0 || excludeFilter.All(options => (options & propInfo.Options) != options)))
+                //.OrderBy(propInfo => propInfo.Order)
+                .ToArray();
+        }
 
         /// <summary>
         /// Freezes changes to the property mappings.
@@ -143,7 +185,25 @@
                 {
                     throw new InvalidOperationException($"Failure removing property '{propertyName}'");
                 }
-            } 
+            }
+        }
+
+        /// <summary>
+        /// Sets the database table associated with your entity.
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        protected void SetTableNameInternal(string tableName)
+        {
+            this.TableName = tableName;
+        }
+
+        /// <summary>
+        /// Sets the database schema associated with your entity.
+        /// </summary>
+        /// <param name="schemaName">Shema name</param>
+        protected void SetSchemaNameInternal(string schemaName)
+        {
+            this.SchemaName = schemaName;
         }
 
         /// <summary>
@@ -168,7 +228,7 @@
         /// </summary>
         protected PropertyMapping SetPropertyInternal(PropertyMapping propertyMapping)
         {
-            Requires.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
+            Requires.Argument(propertyMapping.EntityMapping == this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
             _propertyMappings.Remove(propertyMapping);
             _propertyMappings.Add(propertyMapping);
             _propertyNameMappingsMap[propertyMapping.PropertyName] = propertyMapping;
@@ -179,7 +239,7 @@
         private void ConstructChildParentEntityRelationships()
         {
             _childParentRelationships = _propertyMappings
-                .Where(propertyMapping => propertyMapping.ChildParentRelationship!=null)
+                .Where(propertyMapping => propertyMapping.ChildParentRelationship != null)
                 .GroupBy(propertyMapping => propertyMapping.ChildParentRelationship.ReferencedEntityType)
                 .ToDictionary(
                     groupedRelMappings => groupedRelMappings.Key,
@@ -201,7 +261,7 @@
                                 var prop = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == name);
 
                                 var attr = prop?.Attributes.OfType<NotMappedAttribute>().FirstOrDefault();
-                                if (attr==null) 
+                                if (attr == null)
                                 {
                                     // Only add properties names which do not have NotMappedAttribute Set
                                     finalprops.Add(name);
@@ -224,7 +284,7 @@
                                                                                       .SingleOrDefault(propDescriptor => propDescriptor.Name == referencingEntityPropertyName);
 
 
-                        return new EntityMappingRelationship(groupedRelMappings.Key,groupedRelMappings.OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
+                        return new EntityMappingRelationship(groupedRelMappings.Key, groupedRelMappings.OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
                     });
         }
 
@@ -239,12 +299,12 @@
 #else
                            propDescriptor.PropertyType;
 #endif
-                                    return propInfo.IsGenericType 
-                                            && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
-                                            && propDescriptor.PropertyType.GetGenericArguments().Length == 1 
-                                            && !propDescriptor.Attributes.OfType<NotMappedAttribute>().Any(); ;
-                                });
-                //.GroupBy(propDescriptor => propDescriptor.PropertyType)
+                           return propInfo.IsGenericType
+                                   && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
+                                   && propDescriptor.PropertyType.GetGenericArguments().Length == 1
+                                   && !propDescriptor.Attributes.OfType<NotMappedAttribute>().Any(); ;
+                       });
+            //.GroupBy(propDescriptor => propDescriptor.PropertyType)
             _parentChildRelationships = selectedProps.ToDictionary(
                     propDescriptor => propDescriptor.PropertyType.GetGenericArguments()[0],
                     propDescriptor =>
@@ -254,13 +314,37 @@
                         return new EntityMappingRelationship(propDescriptor.PropertyType, keyPropMappings, propDescriptor);
                     });
         }
+
+        /// <summary>
+        /// Initialize the entity mapping by all properties and entity type.
+        /// </summary>
+        public virtual void InitializeEntityMapping()
+        {
+            var currentConventions = OrmConfiguration.Conventions;
+
+            var tableName = currentConventions.GetTableName(this.EntityType);
+            this.SetTableNameInternal(tableName);
+
+            var schemaName = currentConventions.GetSchemaName(this.EntityType);
+            if (!string.IsNullOrEmpty(schemaName))
+            {
+                this.SetSchemaNameInternal(schemaName);
+            }
+
+
+            foreach (var propDescriptor in currentConventions.GetEntityProperties(this.EntityType))
+            {
+                var propMapping = this.SetPropertyInternal(propDescriptor);
+                currentConventions.ConfigureEntityPropertyMapping(propMapping);
+            }
+        }
     }
 
     /// <summary>
     /// Holds information about table mapped properties for a particular entity type.
     /// Multiple instances of such mappings can be active for a single entity type.
     /// </summary>
-    public class EntityMapping<TEntity> : EntityMapping
+    public abstract class EntityMapping<TEntity, TEntityMapping> : EntityMapping
     {
         /// <summary>
         /// Default constructor.
@@ -271,28 +355,33 @@
         }
 
         /// <summary>
+        /// Current Entity Mapping
+        /// </summary>
+        protected abstract TEntityMapping CurrentEntityMapping { get; }
+
+        /// <summary>
         /// Sets the database table associated with your entity.
         /// </summary>
         /// <param name="tableName">Table name</param>
-        public EntityMapping<TEntity> SetTableName(string tableName)
+        public TEntityMapping SetTableName(string tableName)
         {
             Requires.NotNullOrWhiteSpace(tableName, nameof(tableName));
             this.ValidateState();
 
-            this.TableName = tableName;
-            return this;
+            this.SetTableNameInternal(tableName);
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
         /// Sets the database schema associated with your entity.
         /// </summary>
         /// <param name="schemaName">Shema name</param>
-        public EntityMapping<TEntity> SetSchemaName(string schemaName)
+        public TEntityMapping SetSchemaName(string schemaName)
         {
             this.ValidateState();
 
-            this.SchemaName = schemaName;
-            return this;
+            this.SetSchemaNameInternal(schemaName);
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
@@ -300,19 +389,19 @@
         /// However, if plan on using the same dialect for all your db operations, it's best to use <see cref="OrmConfiguration.DefaultDialect"/> instead.
         /// </summary>
         /// <param name="dialect">Sql dialect</param>
-        public EntityMapping<TEntity> SetDialect(SqlDialect dialect)
+        public TEntityMapping SetDialect(SqlDialect dialect)
         {
             this.ValidateState();
 
             this.Dialect = dialect;
-            return this;
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
         /// Registers a regular property.
         /// </summary>
         /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
-        public EntityMapping<TEntity> SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> property)
+        public TEntityMapping SetProperty<TProperty>(Expression<Func<TEntity, TProperty>> property)
         {
             return this.SetProperty(property, (Action<PropertyMapping>)null);
         }
@@ -322,7 +411,7 @@
         /// </summary>
         /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
         /// <param name="propertySetupFct">A callback which will be called for setting up the property mapping.</param>
-        public EntityMapping<TEntity> SetProperty<TProperty>(
+        public TEntityMapping SetProperty<TProperty>(
             Expression<Func<TEntity, TProperty>> property,
             Action<PropertyMapping> propertySetupFct)
         {
@@ -337,7 +426,7 @@
             {
                 propertySetupFct(propMapping);
             }
-            return this;
+            return this.CurrentEntityMapping;
         }
 
         ///// <summary>
@@ -347,7 +436,7 @@
         ///// <param name="options">Column options</param>
         ///// <param name="databaseColumnName">Optional database column name override.</param>
         //[Obsolete("This method is marked as obsolete and will be removed in future versions.")]
-        //public EntityMapping<TEntity> SetProperty<TProperty>(
+        //public TEntityMapping SetProperty<TProperty>(
         //    Expression<Func<TEntity, TProperty>> property,
         //    PropertyMappingOptions options,
         //    string databaseColumnName = null)
@@ -357,78 +446,6 @@
         //    var propName = ((MemberExpression)property.Body).Member.Name;
         //    return this.SetProperty(propName, options, databaseColumnName);
         //}
-
-        /// <summary>
-        /// Returns all the property mappings, optionally filtered by their options.
-        /// </summary>
-        public PropertyMapping[] GetProperties(params PropertyMappingOptions[] includeFilter)
-        {
-            return this.PropertyMappings.Values
-                .Where(propInfo => (includeFilter.Length == 0 || includeFilter.Any(options => (options & propInfo.Options) == options)))
-                //.OrderBy(propInfo => propInfo.Order)
-                .ToArray();
-        }
-
-        /// <summary>
-        /// Gives an option for updating all the property mappings, optionally filtered by their options.
-        /// </summary>
-        public EntityMapping<TEntity> UpdateProperties(Action<PropertyMapping> updateFct, params PropertyMappingOptions[] includeFilter)
-        {
-            foreach (var propMapping in this.GetProperties(includeFilter))
-            {
-                updateFct(propMapping);
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Returns all the property mappings, filtered by an exclusion filter.
-        /// </summary>
-        public PropertyMapping[] GetPropertiesExcluding(params PropertyMappingOptions[] excludeFilter)
-        {
-            return this.PropertyMappings.Values
-                .Where(propInfo => (excludeFilter.Length==0 || excludeFilter.All(options => (options & propInfo.Options) != options)))
-                //.OrderBy(propInfo => propInfo.Order)
-                .ToArray();
-        }
-
-        /// <summary>
-        /// Gives an option for updating all the property mappings, filtered by an exclusion filter.
-        /// </summary>
-        public EntityMapping<TEntity> UpdatePropertiesExcluding(Action<PropertyMapping> updateFct, params PropertyMappingOptions[] excludeFilter)
-        {
-            foreach (var propMapping in this.GetPropertiesExcluding(excludeFilter))
-            {
-                updateFct(propMapping);
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Returns all the property mappings, filtered by an exclusion filter.
-        /// </summary>
-        public PropertyMapping[] GetPropertiesExcluding(params string[] propNames)
-        {
-            return this.PropertyMappings.Values
-                .Where(propInfo => (propNames.Length == 0 || !propNames.Contains(propInfo.PropertyName)))
-                //.OrderBy(propInfo => propInfo.Order)
-                .ToArray();
-        }
-
-        /// <summary>
-        /// Returns all the property mappings, filtered by an exclusion filter.
-        /// </summary>
-        public EntityMapping<TEntity> UpdatePropertiesExcluding(Action<PropertyMapping> updateFct,params string[] propNames)
-        {
-            foreach (var propMapping in this.GetPropertiesExcluding(propNames))
-            {
-                updateFct(propMapping);
-            }
-
-            return this;
-        }
 
         /// <summary>
         /// Returns property mapping information for a particular property.
@@ -441,51 +458,79 @@
         }
 
         /// <summary>
-        /// Returns property mapping information for a particular property.
+        /// Gives an option for updating all the property mappings, optionally filtered by their options.
         /// </summary>
-        /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
-        public PropertyMapping GetProperty(string propertyName)
+        public TEntityMapping UpdateProperties(Action<PropertyMapping> updateFct, params PropertyMappingOptions[] includeFilter)
         {
-            PropertyMapping propertyMapping = null;
-            PropertyMappings.TryGetValue(propertyName, out propertyMapping);
-            return propertyMapping;
+            foreach (var propMapping in this.GetProperties(includeFilter))
+            {
+                updateFct(propMapping);
+            }
+
+            return this.CurrentEntityMapping;
+        }
+
+        /// <summary>
+        /// Gives an option for updating all the property mappings, filtered by an exclusion filter.
+        /// </summary>
+        public TEntityMapping UpdatePropertiesExcluding(Action<PropertyMapping> updateFct, params PropertyMappingOptions[] excludeFilter)
+        {
+            foreach (var propMapping in this.GetPropertiesExcluding(excludeFilter))
+            {
+                updateFct(propMapping);
+            }
+
+            return this.CurrentEntityMapping;
+        }
+
+        /// <summary>
+        /// Returns all the property mappings, filtered by an exclusion filter.
+        /// </summary>
+        public TEntityMapping UpdatePropertiesExcluding(Action<PropertyMapping> updateFct, params string[] propNames)
+        {
+            foreach (var propMapping in this.GetPropertiesExcluding(propNames))
+            {
+                updateFct(propMapping);
+            }
+
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
         /// Removes the mapping for a property.
         /// </summary>
         /// <param name="property">Name of the property (e.g. user => user.LastName ) </param>
-        public EntityMapping<TEntity> RemoveProperty<TProperty>(Expression<Func<TEntity, TProperty>> property)
+        public TEntityMapping RemoveProperty<TProperty>(Expression<Func<TEntity, TProperty>> property)
         {
             this.ValidateState();
 
             var propName = ((MemberExpression)property.Body).Member.Name;
-            this.RemoveProperties(new [] { propName}, false);
-            return this;
+            this.RemoveProperties(new[] { propName }, false);
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
         /// Removes the mapping for a property.
         /// </summary>
         /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
-        public EntityMapping<TEntity> RemoveProperty(params string[] propertyName)
+        public TEntityMapping RemoveProperty(params string[] propertyName)
         {
             this.ValidateState();
 
             this.RemoveProperties(propertyName, false);
-            return this;
+            return this.CurrentEntityMapping;
         }
 
         /// <summary>
         /// Removes all the property mappings with the exception of the provided list.
         /// </summary>
         /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
-        public EntityMapping<TEntity> RemoveAllPropertiesExcluding(params string[] propertyName)
+        public TEntityMapping RemoveAllPropertiesExcluding(params string[] propertyName)
         {
             this.ValidateState();
 
             this.RemoveProperties(propertyName, true);
-            return this;
+            return this.CurrentEntityMapping;
         }
 
         ///// <summary>
@@ -495,7 +540,7 @@
         ///// <param name="options">Column options</param>
         ///// <param name="databaseColumnName">Optional database column name override.</param>
         //[Obsolete("This method is marked as obsolete and will be removed in future versions.")]
-        //public EntityMapping<TEntity> SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
+        //public TEntityMapping SetProperty(string propertyName, PropertyMappingOptions options, string databaseColumnName = null)
         //{
         //    this.ValidateState();
         //    Requires.NotNull(propertyName, nameof(propertyName));
@@ -525,18 +570,36 @@
         //    {
         //        throw new NotSupportedException("It is not possible to set up foreign keys via this method.");
         //    }
-        //    return this;
+        //    return this.CurrentEntityMapping;
         //}
 
         /// <summary>
         /// Clones the current mapping set, allowing for further modifications.
         /// </summary>
-        public EntityMapping<TEntity> Clone()
+        public abstract TEntityMapping Clone();
+    }
+
+    /// <summary>
+    /// Holds information about table mapped properties for a particular entity type.
+    /// Multiple instances of such mappings can be active for a single entity type.
+    /// </summary>
+    public class EntityMapping<TEntity> : EntityMapping<TEntity, EntityMapping<TEntity>>
+    {
+        /// <summary>
+        /// Current Entity Mapping
+        /// </summary>
+        protected override EntityMapping<TEntity> CurrentEntityMapping => this;
+
+        /// <summary>
+        /// Clones the current mapping set, allowing for further modifications.
+        /// </summary>
+        public override EntityMapping<TEntity> Clone()
         {
             var clonedMappings = new EntityMapping<TEntity>()
                 .SetSchemaName(this.SchemaName)
                 .SetTableName(this.TableName)
                 .SetDialect(this.Dialect);
+
             foreach (var clonedPropMapping in this.PropertyMappings.Select(propNameMapping => propNameMapping.Value.Clone(clonedMappings)))
             {
                 clonedMappings.SetPropertyInternal(clonedPropMapping);

@@ -12,7 +12,7 @@
         /// <summary>
         /// Overrides the entity mapping for the current statement.
         /// </summary>
-        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity> entityMapping)
+        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping entityMapping)
         {
             this.EntityMappingOverride = entityMapping;
             return this.Builder;

@@ -13,7 +13,7 @@
         /// <summary>
         /// Overrides the entity mapping for the current statement.
         /// </summary>
-        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity> entityMapping);
+        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping entityMapping);
 
         /// <summary>
         /// Limits the result set with a where clause.

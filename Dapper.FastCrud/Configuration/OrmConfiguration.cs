@@ -36,9 +36,9 @@ namespace Dapper.FastCrud
         /// Once the mappings have been used in query calls, the instance will be frozen and it won't support further modifications, but you can always call <see cref="EntityMapping{TEntity}.Clone"/> to create a new instance.
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        public static EntityMapping<TEntity> GetDefaultEntityMapping<TEntity>()
+        public static EntityMapping GetDefaultEntityMapping<TEntity>()
         {
-            return GetEntityDescriptor<TEntity>().DefaultEntityMapping as EntityMapping<TEntity>;
+            return GetEntityDescriptor<TEntity>().DefaultEntityMapping;
         }
 
         /// <summary>
@@ -47,7 +47,16 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         public static EntityMapping<TEntity> RegisterEntity<TEntity>()
         {
-            return SetDefaultEntityMapping(new EntityMapping<TEntity>());
+            return SetDefaultEntityMapping<TEntity>(new EntityMapping<TEntity>()) as EntityMapping<TEntity>;
+        }
+
+        /// <summary>
+        /// Registers a new entity. Please continue setting up property mappings and other entity options with the returned default entity mapping instance.
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        public static TableValuedFunctionEntityMapping<TEntity> RegisterTableValuedFunctionEntity<TEntity>()
+        {
+            return SetDefaultEntityMapping<TEntity>(new TableValuedFunctionEntityMapping<TEntity>()) as TableValuedFunctionEntityMapping<TEntity>;
         }
 
         /// <summary>
@@ -55,7 +64,7 @@ namespace Dapper.FastCrud
         /// This must be called before any query operations were made on the entity.
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
-        public static EntityMapping<TEntity> SetDefaultEntityMapping<TEntity>(EntityMapping<TEntity> mappings)
+        public static EntityMapping SetDefaultEntityMapping<TEntity>(EntityMapping mappings)
         {
             Requires.NotNull(mappings, nameof(mappings));
             Requires.Argument(!mappings.IsFrozen,nameof(mappings),  "The entity mappings were frozen and can't be used as defaults. They must be cloned first.");
@@ -70,7 +79,7 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="entityMapping">If NULL, de default entity mapping will be used.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity> entityMapping = null)
+        public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping entityMapping = null)
         {
             return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping).SqlBuilder;
         }
