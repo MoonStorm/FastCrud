@@ -31,6 +31,11 @@
         public bool IsUsingSchemas { get; protected set; }
 
         /// <summary>
+        /// Gets the default schema name.
+        /// </summary>
+        public string DefaultSchema { get; protected set; }
+
+        /// <summary>
         /// Gets the prefix used for named parameters
         /// </summary>
         public string ParameterPrefix { get; protected set; }

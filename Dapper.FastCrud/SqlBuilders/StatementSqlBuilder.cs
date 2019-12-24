@@ -584,14 +584,31 @@
                 : $" AS {this.GetDelimitedIdentifier(tableAlias)}";
 
             FormattableString fullTableName;
-            string tableName = this.EntityMapping.TableName;
-            if ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+            string tableName = this.GetDelimitedIdentifier(this.EntityMapping.TableName);
+            string schemaName = string.IsNullOrEmpty(this.EntityMapping.SchemaName) ? string.Empty : this.GetDelimitedIdentifier(this.EntityMapping.SchemaName);
+            string databaseName = string.IsNullOrEmpty(this.EntityMapping.DatabaseName) ? string.Empty : this.GetDelimitedIdentifier(this.EntityMapping.DatabaseName);
+
+            if (!this.UsesSchemaForTableNames || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
             {
-                fullTableName = $"{this.GetDelimitedIdentifier(tableName)}";
+                if (string.IsNullOrEmpty(databaseName))
+                {
+                    fullTableName = $"{tableName}";
+                }
+                else
+                {
+                    fullTableName = $"{databaseName}.{tableName}";
+                }
             }
             else
             {
-                fullTableName = $"{this.GetDelimitedIdentifier(EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(tableName)}";
+                if (string.IsNullOrEmpty(databaseName))
+                {
+                    fullTableName = $"{schemaName}.{tableName}";
+                }
+                else
+                {
+                    fullTableName = $"{databaseName}.{schemaName}.{tableName}";
+                }
             }
 
             if (this.EntityMapping is ITableValuedFunctionEntityMapping tableValuedFunctionEntityMapping)

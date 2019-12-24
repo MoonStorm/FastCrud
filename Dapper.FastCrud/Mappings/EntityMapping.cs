@@ -34,6 +34,10 @@ namespace Dapper.FastCrud.Mappings
             _propertyMappings = new List<PropertyMapping>();
             _propertyNameMappingsMap = new Dictionary<string, PropertyMapping>();
         }
+        /// <summary>
+        /// The database associated with the entity.
+        /// </summary>
+        public string DatabaseName { get; protected set; }
 
         /// <summary>
         /// The table associated with the entity.
@@ -185,6 +189,20 @@ namespace Dapper.FastCrud.Mappings
                 {
                     throw new InvalidOperationException($"Failure removing property '{propertyName}'");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets the database name associated with your entity.
+        /// </summary>
+        /// <param name="databaseName">Database name</param>
+        protected void SetDatabaseNameInternal(string databaseName)
+        {
+            this.DatabaseName = databaseName;
+
+            if (string.IsNullOrEmpty(this.SchemaName) && !string.IsNullOrEmpty(this.DatabaseName))
+            {
+                this.SchemaName = OrmConfiguration.Conventions.GetDatabaseOptions(this.Dialect).DefaultSchema;
             }
         }
 
@@ -358,6 +376,19 @@ namespace Dapper.FastCrud.Mappings
         /// Current Entity Mapping
         /// </summary>
         protected abstract TEntityMapping CurrentEntityMapping { get; }
+
+        /// <summary>
+        /// Sets the database name associated with your entity.
+        /// </summary>
+        /// <param name="databaseName">Database name</param>
+        public TEntityMapping SetDatabaseName(string databaseName)
+        {
+            Requires.NotNullOrWhiteSpace(databaseName, nameof(databaseName));
+            this.ValidateState();
+
+            this.SetDatabaseNameInternal(databaseName);
+            return this.CurrentEntityMapping;
+        }
 
         /// <summary>
         /// Sets the database table associated with your entity.

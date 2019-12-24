@@ -6,6 +6,7 @@
         {
             this.StartDelimiter = this.EndDelimiter = "\"";
             this.IsUsingSchemas = true;
+            this.DefaultSchema = "public";
         }
     }
 }
