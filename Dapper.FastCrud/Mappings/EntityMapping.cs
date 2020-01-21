@@ -257,8 +257,9 @@ namespace Dapper.FastCrud.Mappings
         private void ConstructChildParentEntityRelationships()
         {
             _childParentRelationships = _propertyMappings
-                .Where(propertyMapping => propertyMapping.ChildParentRelationship != null)
-                .GroupBy(propertyMapping => propertyMapping.ChildParentRelationship.ReferencedEntityType)
+                .Where(propertyMapping => propertyMapping.ChildParentRelationships != null)
+                .SelectMany(propertyMapping => propertyMapping.ChildParentRelationships.Select(item => new { ChildParentRelationship= item, PropertyMapping = propertyMapping }))
+                .GroupBy(relationship => relationship.ChildParentRelationship.ReferencedEntityType)
                 .ToDictionary(
                     groupedRelMappings => groupedRelMappings.Key,
                     groupedRelMappings =>
@@ -302,7 +303,7 @@ namespace Dapper.FastCrud.Mappings
                                                                                       .SingleOrDefault(propDescriptor => propDescriptor.Name == referencingEntityPropertyName);
 
 
-                        return new EntityMappingRelationship(groupedRelMappings.Key, groupedRelMappings.OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
+                        return new EntityMappingRelationship(groupedRelMappings.Key, groupedRelMappings.Select(propMapping=> propMapping.PropertyMapping).OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
                     });
         }
 
