@@ -76,7 +76,7 @@
                 out statement,
                 out splitOnCondition,
                 this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
-                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
+                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableAliasName())}");
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
             var queriedEntityIdentities = this.Query(connection,
@@ -101,7 +101,7 @@
                 out statement,
                 out splitOnCondition,
                 this.ConstructJoinInstructions(statementOptions, _joinedEntitiesSqlBuilders),
-                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableName())}");
+                whereClause: $"{this.SqlBuilder.ConstructKeysWhereClause(this.SqlBuilder.GetTableAliasName())}");
 
             var relationshipInstanceBuilder = new RelationshipEntityInstanceBuilder(_allEntityMappings);
             var queriedEntityIdentities  = await this.QueryAsync(connection, 

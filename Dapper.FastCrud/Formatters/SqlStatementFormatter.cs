@@ -97,7 +97,7 @@
                         return string.Format(
                             CultureInfo.InvariantCulture,
                             "{0}.{1}",
-                            this.MainEntitySqlBuilder.GetTableName(),
+                            this.MainEntitySqlBuilder.GetTableAliasName(),
                             this.MainEntitySqlBuilder.GetColumnName(stringArg));
                     case "T":
                         return this.MainEntitySqlBuilder.GetTableName();
@@ -105,6 +105,8 @@
                         return this.MainEntitySqlBuilder.GetColumnName(stringArg);
                     case "I":
                         return this.MainEntitySqlBuilder.GetDelimitedIdentifier(stringArg);
+                    case "F":
+                        return this.MainEntitySqlBuilder.GetFullFunctionCallClause();
                 }
             }
 

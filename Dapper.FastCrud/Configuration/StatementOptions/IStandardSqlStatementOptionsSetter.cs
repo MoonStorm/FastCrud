@@ -22,6 +22,6 @@
         /// <summary>
         /// Overrides the entity mapping for the current statement.
         /// </summary>
-        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity> entityMapping);
+        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping entityMapping);
     }
 }

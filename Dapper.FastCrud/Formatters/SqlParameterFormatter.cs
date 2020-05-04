@@ -115,9 +115,11 @@
                 case SqlParameterElementType.Table:
                     return sqlBuilder.GetTableName();
                 case SqlParameterElementType.TableAndColumn:
-                    return string.Format(CultureInfo.InvariantCulture,"{0}.{1}", sqlBuilder.GetTableName(), sqlBuilder.GetColumnName(this.ParameterValue));
+                    return string.Format(CultureInfo.InvariantCulture,"{0}.{1}", sqlBuilder.GetTableAliasName(), sqlBuilder.GetColumnName(this.ParameterValue));
                 case SqlParameterElementType.Identifier:
                     return sqlBuilder.GetDelimitedIdentifier(this.ParameterValue);
+                case SqlParameterElementType.Function:
+                    return sqlBuilder.GetFullFunctionCallClause();
                 default:
                     throw new InvalidOperationException($"Unknown SQL element type {this.ElementType}");
             }

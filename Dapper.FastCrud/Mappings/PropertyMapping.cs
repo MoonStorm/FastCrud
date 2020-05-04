@@ -1,9 +1,11 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using Dapper.FastCrud.Validations;
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations.Schema;
-    using Dapper.FastCrud.Validations;
+    using System.Linq;
 
     /// <summary>
     /// Reeturns mapping information held for a particular property.
@@ -13,7 +15,7 @@
         private PropertyMappingOptions _options;
         private string _databaseColumnName;
         private int _columnOrder = -1;
-        private PropertyMappingRelationship _childParentRelationship;
+        private List<PropertyMappingRelationship> _childParentRelationships;
 
         /// <summary>
         /// Default constructor.
@@ -29,16 +31,16 @@
         /// <summary>
         /// Gets or sets a child-parent relationship.
         /// </summary>
-        public PropertyMappingRelationship ChildParentRelationship
+        public List<PropertyMappingRelationship> ChildParentRelationships
         {
             get
             {
-                return _childParentRelationship;
+                return _childParentRelationships;
             }
             set
             {
                 this.ValidateState();
-                _childParentRelationship = value;
+                _childParentRelationships = value;
             }
         }
 
@@ -59,7 +61,29 @@
         /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the referenced entity when instructed to do so in a JOIN statement.</param>
         internal PropertyMapping SetChildParentRelationship(Type relatedEntityType, string referencingEntityPropertyName)
         {
-            this.ChildParentRelationship = new PropertyMappingRelationship(relatedEntityType, referencingEntityPropertyName);
+            this.ChildParentRelationships = new List<PropertyMappingRelationship> { new PropertyMappingRelationship(relatedEntityType, referencingEntityPropertyName) };
+            return this;
+        }
+
+        /// <summary>
+        /// Add a foreign key relationship with another entity.
+        /// </summary>
+        /// <typeparam name="TRelatedEntityType">Foreign entity type.</typeparam>
+        /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the referenced entity when instructed to do so in a JOIN statement.</param>
+        public PropertyMapping AddChildParentRelationship<TRelatedEntityType>(string referencingEntityPropertyName)
+        {
+            return this.AddChildParentRelationship(typeof(TRelatedEntityType), referencingEntityPropertyName);
+        }
+
+        /// <summary>
+        /// Add a foreign key relationship with another entity.
+        /// </summary>
+        /// <param name="relatedEntityType">Foreign entity type.</param>
+        /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the referenced entity when instructed to do so in a JOIN statement.</param>
+        internal PropertyMapping AddChildParentRelationship(Type relatedEntityType, string referencingEntityPropertyName)
+        {
+            this.ChildParentRelationships = (this.ChildParentRelationships ?? new List<PropertyMappingRelationship>());
+            this.ChildParentRelationships.Add(new PropertyMappingRelationship(relatedEntityType, referencingEntityPropertyName));
             return this;
         }
 
@@ -68,7 +92,7 @@
         /// </summary>
         public PropertyMapping RemoveChildParentRelationship()
         {
-            this.ChildParentRelationship = null;
+            this.ChildParentRelationships = null;
             return this;
         }
 
@@ -404,13 +428,13 @@
         internal PropertyMapping Clone(EntityMapping newEntityMapping)
         {
             var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
-                {
-                    _options = _options,
-                    _childParentRelationship = _childParentRelationship == null ? null : new PropertyMappingRelationship(_childParentRelationship.ReferencedEntityType, _childParentRelationship.ReferencingPropertyName),
-                    _databaseColumnName = this._databaseColumnName,
-                    _columnOrder =  _columnOrder
+            {
+                _options = _options,
+                _childParentRelationships = _childParentRelationships == null ? null : _childParentRelationships.Select(item => new PropertyMappingRelationship(item.ReferencedEntityType, item.ReferencingPropertyName)).ToList(),
+                _databaseColumnName = this._databaseColumnName,
+                _columnOrder = _columnOrder
 
-                };
+            };
             return clonedPropertyMapping;
         }
 

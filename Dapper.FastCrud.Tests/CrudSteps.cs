@@ -442,7 +442,7 @@
         public void WhenIPartiallyUpdateAllTheInsertedEmployeeEntities()
         {
             // prepare a new mapping
-            var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>();
+            var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>() as Mappings.EntityMapping<Employee>;
             Assert.IsTrue(defaultMapping.IsFrozen);
 
             var lastNamePropMapping = defaultMapping.GetProperty(employee => employee.LastName);

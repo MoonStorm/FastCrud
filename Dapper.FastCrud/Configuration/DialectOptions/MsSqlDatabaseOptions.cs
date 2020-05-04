@@ -1,12 +1,13 @@
 ﻿namespace Dapper.FastCrud.Configuration.DialectOptions
 {
-    internal class MsSqlDatabaseOptions:SqlDatabaseOptions
+    internal class MsSqlDatabaseOptions : SqlDatabaseOptions
     {
         public MsSqlDatabaseOptions()
         {
             this.StartDelimiter = "[";
             this.EndDelimiter = "]";
             this.IsUsingSchemas = true;
+            this.DefaultSchema = "dbo";
         }
     }
 }

@@ -24,6 +24,30 @@
         }
 
         /// <summary>
+        /// Returns a parameter formatter for the SQL function name of the main entity.
+        /// If you wish to resolve the table name of another entity, please use the generic overload instead.
+        /// The resolver can be used as-is in a formattable string expression.
+        /// </summary>
+        /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IFormattable Function(EntityMapping entityMappingOverride = null)
+        {
+            return new SqlParameterFormatter(SqlParameterElementType.Function, null, entityMappingOverride);
+        }
+
+        /// <summary>
+        /// Returns a parameter formatter for the SQL function name of the provided entity.
+        /// If you wish to resolve the table name of the main entity, please use the non-generic overload instead.
+        /// The resolver can be used as-is in a formattable string expression.
+        /// </summary>
+        /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IFormattable Function<TEntity>(EntityMapping entityMappingOverride = null)
+        {
+            return new SqlEntityFormattableParameter<TEntity>(SqlParameterElementType.Function, null, entityMappingOverride);
+        }
+
+        /// <summary>
         /// Returns a parameter formatter for the SQL table name of the main entity.
         /// If you wish to resolve the table name of another entity, please use the generic overload instead.
         /// The resolver can be used as-is in a formattable string expression.

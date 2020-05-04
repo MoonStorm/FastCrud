@@ -81,9 +81,9 @@
         {
             var buildingSqlBuilder = OrmConfiguration.GetSqlBuilder<Building>();
             var expectedQuery =
-                $@" SELECT {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.WorkstationId))}, {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))}
+                $@" SELECT {_currentSqlBuilder.GetTableAliasName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.WorkstationId))}, {buildingSqlBuilder.GetTableAliasName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))}
                     FROM {_currentSqlBuilder.GetTableName()}, {buildingSqlBuilder.GetTableName()}
-                    WHERE {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.BuildingId))} = {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))}";
+                    WHERE {_currentSqlBuilder.GetTableAliasName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.BuildingId))} = {buildingSqlBuilder.GetTableAliasName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))}";
 
             Assert.AreEqual(expectedQuery, _buildingRawJoinQueryStatement);
         }
