@@ -109,7 +109,7 @@
             }
             else
             {
-                connection.Execute(
+                await connection.ExecuteAsync(
                     _sqlBuilder.ConstructFullInsertStatement(),
                     entity,
                     transaction: statementOptions.Transaction,
