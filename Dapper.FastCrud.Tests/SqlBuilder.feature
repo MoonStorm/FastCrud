@@ -1,18 +1,18 @@
 ﻿Feature: SQL Builder
 
-@InMemoryDatabase
+@AutomaticBuildServerTest
 Scenario Outline: Select all columns
 	Given I extract the SQL builder for <database type> and <entity type>
 	When I construct the select column enumeration
 	Then I should get a valid select column enumeration
 	Examples: 
 	| database type | entity type |
-	| LocalDb       | workstation    |
-	| PostgreSql    | workstation    |
-	| MySql         | workstation    |
-	| SqLite        | workstation    |
+	| LocalDb       | workstation |
+	| PostgreSql    | workstation |
+	| MySql         | workstation |
+	| SqLite        | workstation |
 
-@InMemoryDatabase
+@AutomaticBuildServerTest
 Scenario Outline: Manual query
 	Given I extract the SQL builder for <database type> and <entity type>
 	When I construct a complex join query for <entity type> using <sql query builder method>

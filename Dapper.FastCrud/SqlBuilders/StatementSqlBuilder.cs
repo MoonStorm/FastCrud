@@ -836,7 +836,7 @@
             {
                 var propType = propMapping.Descriptor.PropertyType;
                 return
-#if COREFX
+#if NETSTANDARD
                                                                                                                                                     propType.GetTypeInfo().IsValueType
 #else
                                                                                                                                                     propType.IsValueType

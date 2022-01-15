@@ -1,4 +1,6 @@
-﻿namespace Dapper.FastCrud.SqlStatements
+﻿using System.Drawing;
+
+namespace Dapper.FastCrud.SqlStatements
 {
     using System.Collections.Generic;
     using System.Data;

@@ -1,0 +1,45 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+	<LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDocumentationFile>true</EnableDocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(MSBuildProjectName).xml</DocumentationFile>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+	<AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+
+	<Description>Dapper.FastCRUD is built around essential features of the C# 6 / VB that  have finally raised the simplicity of raw SQL constructs to acceptable maintenance  levels. These features leave no chance to mistypings or problems arising from db entity refactorings. Visual Studio 2015 or later is recommended.</Description>
+    <Authors>Dapper.FastCRUD Contributors</Authors>
+	<!-- deprecated but still in use -->
+    <PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</PackageIconUrl>
+	<PackageIcon>logo.png</PackageIcon>	
+	<!-- deprecated -->
+    <!-- <PackageLicenseUrl>http://www.opensource.org/licenses/MIT</PackageLicenseUrl> -->
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageTags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<Summary>The fastest micro-orm for Dapper</Summary>
+	<Company />	
+	<Copyright />	
+	<PackageProjectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</PackageProjectUrl>	
+	
+    <!--<RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>-->
+    <!--<SkipDefaultEditorConfigAsAdditionalFile>true</SkipDefaultEditorConfigAsAdditionalFile>-->
+    <!--<NoWarn>1701;1702;168</NoWarn>-->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$(MSBuildProjectName.Contains('.Tests.'))">
+    <!-- <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Dapper.FastCrud.ruleset</CodeAnalysisRuleSet> -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.Contains('.Tests.'))">
+    <!--<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Dapper.FastCrud.Tests.ruleset</CodeAnalysisRuleSet>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--<AdditionalFiles Include="$(MSBuildThisFileDirectory).editorconfig" />-->
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalAssemblyInfo.cs" />
+	<None Include="$(MSBuildThisFileDirectory)logo.png" Pack="true" PackagePath="\"/>	
+  </ItemGroup>
+</Project>

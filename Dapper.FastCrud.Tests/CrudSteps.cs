@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -20,40 +22,85 @@
         }
 
         [When(@"I insert (\d*) building entities using (.*) methods")]
-        public void WhenIInsertBuildingEntities(int entitiesCount, bool makeAsyncCalls)
+        public async Task WhenIInsertBuildingEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Building>(makeAsyncCalls, index => new Building()
-                                                  {
-                                                      Name = $"Building {Guid.NewGuid().ToString("N")}"
-                                                  }, entitiesCount);
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Building>(CreateBuilding, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Building>(CreateBuilding, entitiesCount);
+            }
+
+            Building CreateBuilding(int index)
+            {
+                return new Building()
+                    {
+                        Name = $"Building {Guid.NewGuid().ToString("N")}"
+                    };
+            }
         }
 
         [When(@"I insert (\d*) workstation entities using (.*) methods")]
-        public void WhenIInsertWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
+        public async Task WhenIInsertWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Workstation>(makeAsyncCalls, index => new Workstation() {
-                InventoryIndex = index,
-                Name = $"Workstation {Guid.NewGuid().ToString("N")}",
-                _10PinSlots = index
-            },
-            entitiesCount);
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Workstation>(CreateWorkstation, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Workstation>(CreateWorkstation, entitiesCount);
+            }
+
+            Workstation CreateWorkstation(int index)
+            {
+                return new Workstation()
+                    {
+                        InventoryIndex = index,
+                        Name = $"Workstation {Guid.NewGuid().ToString("N")}",
+                        _10PinSlots = index
+                    };
+            }
         }
 
         [When(@"I insert (\d*) employee entities using (.*) methods")]
-        public void WhenIInsertEmployeeEntities(int entitiesCount, bool makeAsyncCalls)
+        public async Task WhenIInsertEmployeeEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Employee>(makeAsyncCalls, index => new Employee()
-                                                  {
-                                                      FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
-                                                      LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
-                                                      BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
-            }, entitiesCount);
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+            }
+
+            Employee CreateEmployee(int index)
+            {
+                return new Employee()
+                    {
+                        FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
+                        LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
+                        BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
+                    };
+            }
         }
 
         [When(@"I insert (\d*) employee entities parented to existing workstation entities using (.*) methods")]
-        public void WhenIInsertEmployeeEntitiesLinkedToWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
+        public async Task WhenIInsertEmployeeEntitiesLinkedToWorkstationEntities(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Employee>(makeAsyncCalls, index =>
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+            }
+
+            Employee CreateEmployee(int index)
             {
                 var workstation = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(index).FirstOrDefault();
 
@@ -64,17 +111,17 @@
                 }
 
                 var employee = new Employee()
-                {
-                    FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
-                    LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
-                    BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
+                    {
+                        FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
+                        LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
+                        BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
 
-                    // assign a workstation id for the join tests
-                    WorkstationId = workstation.WorkstationId,
+                        // assign a workstation id for the join tests
+                        WorkstationId = workstation.WorkstationId,
 
-                    // this is not going to get inserted in the db, but we need it for local comparisons
-                    Workstation = workstation
-                };
+                        // this is not going to get inserted in the db, but we need it for local comparisons
+                        Workstation = workstation
+                    };
 
                 if (workstation.Employees == null)
                 {
@@ -84,13 +131,22 @@
                 ((IList<Employee>)workstation.Employees).Add(employee);
 
                 return employee;
-            }, entitiesCount);
+            }
         }
 
         [When(@"I insert (\d*) workstation entities parented to existing building entities using (.*) methods")]
-        public void WhenIInsertWorkstationEntitiesParentedToExistingBuildingEntitiesUsingSynchronousMethods(int entitiesCount, bool makeAsyncCalls)
+        public async Task WhenIInsertWorkstationEntitiesParentedToExistingBuildingEntitiesUsingSynchronousMethods(int entitiesCount, bool makeAsyncCalls)
         {
-            this.InsertEntity<Workstation>(makeAsyncCalls, index =>
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Workstation>(CreateEntity, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Workstation>(CreateEntity, entitiesCount);
+            }
+
+            Workstation CreateEntity(int index)
             {
                 var building = _testContext.LocalInsertedEntities.OfType<Building>().Skip(index).First();
                 var workstation = new Workstation()
@@ -113,112 +169,222 @@
                 ((IList<Workstation>)building.Workstations).Add(workstation);
 
                 return workstation;
-            }, entitiesCount);
+            }
         }
 
         [When(@"I query for all the workstation entities using (.*) methods")]
-        public void WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Workstation>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Workstation>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Workstation>();
+            }
         }
 
         [When(@"I query for one workstation entity combined with the employee entities using (.*) methods")]
-        public void WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
             var workstationId = _testContext.LocalInsertedEntities.OfType<Workstation>().Select(workStation => workStation.WorkstationId).Single();
-            var queriedEntity = useAsyncMethods
-                    ? _testContext.DatabaseConnection.GetAsync<Workstation>(
-                        new Workstation() {WorkstationId  = workstationId}, options => options.Include<Employee>()).GetAwaiter().GetResult()
-                    : _testContext.DatabaseConnection.Get<Workstation>(
-                        new Workstation() { WorkstationId = workstationId} ,options => options.Include<Employee>());
+            Workstation queriedEntity;
 
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntity = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.GetAsync<Workstation>(
+                               new Workstation()
+                                   {
+                                       WorkstationId = workstationId
+                                   },
+                               options => options.Include<Employee>());
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                queriedEntity = _testContext.DatabaseConnection.Get<Workstation>(
+                    new Workstation()
+                        {
+                            WorkstationId = workstationId
+                        }, options => options.Include<Employee>());
+
+            }
+            
             _testContext.QueriedEntities.Add(queriedEntity);
         }
 
         [When(@"I query for all the workstation entities combined with the employee entities using (.*) methods")]
-        public void WhenIQueryForAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var queriedEntityes = useAsyncMethods
-                    ? _testContext.DatabaseConnection.FindAsync<Workstation>(options => options.Include<Employee>()).Result
-                    : _testContext.DatabaseConnection.Find<Workstation>(options => options.Include<Employee>());
+            IEnumerable<Workstation> queriedEntities;
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<Workstation>(options => options.Include<Employee>());
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<Workstation>(options => options.Include<Employee>());
+            }
 
-            _testContext.QueriedEntities.AddRange(queriedEntityes);
+            _testContext.QueriedEntities.AddRange(queriedEntities);
         }
 
         [When(@"I query for all the employee entities combined with the workstation entities using (.*) methods")]
-        public void WhenIQueryForAllTheEmployeeEntitiesCombinedWithTheWorkstationEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithTheWorkstationEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var queriedEntityes = useAsyncMethods
-                    ? _testContext.DatabaseConnection.FindAsync<Employee>(options => options.Include<Workstation>()).Result
-                    : _testContext.DatabaseConnection.Find<Employee>(options => options.Include<Workstation>());
+            IEnumerable<Employee> queriedEntities;
 
-            _testContext.QueriedEntities.AddRange(queriedEntityes);
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<Employee>(options => options.Include<Workstation>());
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options.Include<Workstation>());
+            }
+
+            _testContext.QueriedEntities.AddRange(queriedEntities);
         }
 
         [When(@"I query for all the building entities combined with workstation and employee entities using (.*) methods")]
-        public void WhenIQueryForAllTheBuildingEntitiesCombinedWithWorkstationAndEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheBuildingEntitiesCombinedWithWorkstationAndEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var queriedEntityes = useAsyncMethods
-                    ? _testContext.DatabaseConnection.FindAsync<Building>(options => options.Include<Workstation>().Include<Employee>()).Result
-                    : _testContext.DatabaseConnection.Find<Building>(options => options.Include<Workstation>().Include<Employee>());
+            IEnumerable<Building> queriedEntities;
 
-            _testContext.QueriedEntities.AddRange(queriedEntityes);
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<Building>(options => options
+                                                                                                .Include<Workstation>()
+                                                                                                .Include<Employee>());
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<Building>(options => options
+                                                                                            .Include<Workstation>()
+                                                                                            .Include<Employee>());
+            }
+
+            _testContext.QueriedEntities.AddRange(queriedEntities);
         }
 
         [When(@"I query for all the employee entities combined with workstation and building entities using (.*) methods")]
-        public void WhenIQueryForAllTheEmployeeEntitiesCombinedWithWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var queriedEntityes = useAsyncMethods
-                    ? _testContext.DatabaseConnection.FindAsync<Employee>(options => options.Include<Workstation>().Include<Building>()).Result
-                    : _testContext.DatabaseConnection.Find<Employee>(options => options.Include<Workstation>().Include<Building>());
+            IEnumerable<Employee> queriedEntities;
 
-            _testContext.QueriedEntities.AddRange(queriedEntityes);
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async()=>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<Employee>(options => options
+                                                                                                .Include<Workstation>()
+                                                                                                .Include<Building>());
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
+                                                                                            .Include<Workstation>()
+                                                                                            .Include<Building>());
+            }
+
+            _testContext.QueriedEntities.AddRange(queriedEntities);
         }
 
         [When(@"I query for all the building entities using (.*) methods")]
-        public void WhenIQueryForAllTheBuildingEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Building>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Building>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Building>();
+            }
         }
 
         [When(@"I query for all the employee entities using (.*) methods")]
-        public void WhenIQueryForAllTheEmployeeEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForAllTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Employee>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Employee>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Employee>();
+            }
         }
 
         [When(@"I query for the count of all the employee entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheEmployeeEntitiesUsingAsynchronous(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            this.QueryEntityCount<Employee>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryEntityCountAsync<Employee>();
+            }
+            else
+            {
+                this.QueryEntityCount<Employee>();
+            }
         }
 
         [When(@"I query for the count of all the building entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            this.QueryEntityCount<Building>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryEntityCountAsync<Building>();
+            }
+            else
+            {
+                this.QueryEntityCount<Building>();
+            }
         }
 
         [When(@"I query for the count of all the workstation entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheWorkstationEntitiesUsingAsynchronous(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesUsingMethods(bool useAsyncMethods)
         {
-            this.QueryEntityCount<Workstation>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryEntityCountAsync<Workstation>();
+            }
+            else
+            {
+                this.QueryEntityCount<Workstation>();
+            }
         }
 
         [When(@"I query for the count of all the inserted building entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingAsynchronous(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
             FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
             var buildingIds = string.Join(",", _testContext.LocalInsertedEntities.OfType<Building>().Select(building => building.BuildingId));
 
             _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                                          ? _testContext
+                                          ? await _testContext
                                                 .DatabaseConnection
                                                 .CountAsync<Building>(statement => statement
                                                     .Where(whereClause)
                                                     .WithParameters(new {BuildingIds = buildingIds}))
-                                                .GetAwaiter()
-                                                .GetResult()
                                           : _testContext
                                                 .DatabaseConnection
                                                 .Count<Building>(statement => statement
@@ -227,59 +393,68 @@
         }
 
         [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
             _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                ? _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement.Include<Employee>()).GetAwaiter().GetResult()
+                ? await _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement
+                                                                                    .Include<Employee>())
                 : _testContext.DatabaseConnection.Count<Workstation>(statement => statement.Include<Employee>());
         }
 
         [When(@"I query for the count of all the employee entities strictly linked to workstation and building entities using (.*) methods")]
-        public void WhenIQueryForTheCountOfAllTheEmployeeEntitiesStrictlyLinkedToWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
+        public async Task WhenIQueryForTheCountOfAllTheEmployeeEntitiesStrictlyLinkedToWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
             _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                ? _testContext.DatabaseConnection.CountAsync<Employee>(statement => statement.Include<Workstation>(join => join.InnerJoin()).Include<Building>()).GetAwaiter().GetResult()
-                : _testContext.DatabaseConnection.Count<Employee>(statement => statement.Include<Workstation>(join=> join.InnerJoin()).Include<Building>(join => join.InnerJoin()));
+                                                      ? await _testContext.DatabaseConnection.CountAsync<Employee>(statement => statement
+                                                                                                                                .Include<Workstation>(join => join.InnerJoin())
+                                                                                                                                .Include<Building>())
+                                                      : _testContext.DatabaseConnection.Count<Employee>(statement => statement
+                                                                                                                     .Include<Workstation>(join => join.InnerJoin())
+                                                                                                                     .Include<Building>(join => join.InnerJoin()));
         }
 
         [When(@"I query for the inserted building entities using (.*) methods")]
-        public void WhenIQueryForTheInsertedBuildingEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForTheInsertedBuildingEntities(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Building>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Building>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Building>();
+            }
         }
 
         [When(@"I query for the inserted workstation entities using (.*) methods")]
-        public void WhenIQueryForTheInsertedWorkstationEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForTheInsertedWorkstationEntities(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Workstation>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Workstation>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Workstation>();
+            }
         }
 
         [When(@"I query for the inserted employee entities using (.*) methods")]
-        public void WhenIQueryForTheInsertedEmployeeEntities(bool useAsyncMethods)
+        public async Task WhenIQueryForTheInsertedEmployeeEntities(bool useAsyncMethods)
         {
-            this.QueryForInsertedEntities<Employee>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Employee>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Employee>();
+            }
         }
 
-
-        [When(@"I update all the inserted employee entities using (.*) methods")]
-        public void WhenIUpdateAllTheInsertedEmployeeEntities(bool useAsyncMethods)
-        {
-            this.UpdateInsertedEntities<Employee>(useAsyncMethods,
-                                                  (originalEmployeeEntity) => new Employee()
-                                                                                  {
-                                                                                      // all the properties linked to the composite primary key must be used
-                                                                                      UserId = originalEmployeeEntity.UserId,
-                                                                                      EmployeeId = originalEmployeeEntity.EmployeeId,
-                                                                                      BirthDate = new DateTime(2020, 03, 01),
-                                                                                      WorkstationId = originalEmployeeEntity.WorkstationId,
-                                                                                      FirstName = "Updated " + originalEmployeeEntity.FirstName,
-                                                                                      LastName = "Updated " + originalEmployeeEntity.LastName,
-                                                                                      KeyPass = originalEmployeeEntity.KeyPass,
-                                                                                  });
-        }
 
         [When(@"I batch update a maximum of (.*) employee entities skipping (.*) and using (.*) methods")]
-        public void WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        public async Task WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
             var updateData = new Employee()
             {
@@ -310,7 +485,7 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition));
             }
             else
             {
@@ -321,7 +496,7 @@
         }
 
         [When(@"I batch update a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
-        public void WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        public async Task WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
             var updateData = new Workstation()
             {
@@ -344,7 +519,7 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition));
             }
             else
             {
@@ -355,7 +530,7 @@
         }
 
         [When(@"I batch delete a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
-        public void WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingSynchronousMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        public async Task WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
             // mimic the behavior on our side
             var entitiesToDelete = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
@@ -369,7 +544,7 @@
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition)).GetAwaiter().GetResult();
+                recordsUpdated = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition));
             }
             else
             {
@@ -379,45 +554,116 @@
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToDelete.Count()));
         }
 
-        [When(@"I update all the inserted building entities using (.*) methods")]
-        public void WhenIUpdateAllTheInsertedBuildingEntities(bool useAsyncMethods)
+        [When(@"I update all the inserted employee entities using (.*) methods")]
+        public async Task WhenIUpdateAllTheInsertedEmployeeEntitiesSynchronous(bool useAsyncMethods)
         {
-            this.UpdateInsertedEntities<Building>(useAsyncMethods,
-                                                  (originalBuildingEntity) => new Building()
-                                                                                  {
-                                                                                      BuildingId = originalBuildingEntity.BuildingId,
-                                                                                      Name = "Updated " + originalBuildingEntity.Name,
-                                                                                      Description = "Long text"
-                                                                                  });
+            if (useAsyncMethods)
+            {
+                await this.UpdateInsertedEntitiesAsync<Employee>(UpdateEmployee);
+            }
+            else
+            {
+                this.UpdateInsertedEntities<Employee>(UpdateEmployee);
+            }
+
+            Employee UpdateEmployee(Employee originalEmployeeEntity)
+            {
+                return new Employee()
+                    {
+                        // all the properties linked to the composite primary key must be used
+                        UserId = originalEmployeeEntity.UserId,
+                        EmployeeId = originalEmployeeEntity.EmployeeId,
+                        BirthDate = new DateTime(2020, 03, 01),
+                        WorkstationId = originalEmployeeEntity.WorkstationId,
+                        FirstName = "Updated " + originalEmployeeEntity.FirstName,
+                        LastName = "Updated " + originalEmployeeEntity.LastName,
+                        KeyPass = originalEmployeeEntity.KeyPass,
+                    };
+            }
+        }
+
+        [When(@"I update all the inserted building entities using (.*) methods")]
+        public async Task WhenIUpdateAllTheInsertedBuildingEntities(bool useAsyncMethods)
+        {
+            if (useAsyncMethods)
+            {
+                await this.UpdateInsertedEntitiesAsync<Building>(UpdateBuilding);
+            }
+            else
+            {
+                this.UpdateInsertedEntities<Building>(UpdateBuilding);
+            }
+
+            Building UpdateBuilding(Building originalBuildingEntity)
+            {
+                return new Building()
+                    {
+                        BuildingId = originalBuildingEntity.BuildingId,
+                        Name = "Updated " + originalBuildingEntity.Name,
+                        Description = "Long text"
+                    };
+            }
         }
 
         [When(@"I update all the inserted workstation entities using (.*) methods")]
-        public void WhenIUpdateAllTheInsertedWorkstationEntities(bool useAsyncMethods)
+        public async Task WhenIUpdateAllTheInsertedWorkstationEntities(bool useAsyncMethods)
         {
-            this.UpdateInsertedEntities<Workstation>(useAsyncMethods,
-                                                     (originalWorkstationEntity) => new Workstation()
-                                                                                        {
-                                                                                            WorkstationId = originalWorkstationEntity.WorkstationId,
-                                                                                            Name = "Updated " + originalWorkstationEntity.Name
-                                                                                        });
-        }
+            if (useAsyncMethods)
+            {
+                await this.UpdateInsertedEntitiesAsync<Workstation>(UpdateWorkstation);
+            }
+            else
+            {
+                this.UpdateInsertedEntities<Workstation>(UpdateWorkstation);
+            }
 
-        [When(@"I delete all the inserted employee entities using (.*) methods")]
-        public void WhenIDeleteAllTheInsertedEmployeeEntities(bool useAsyncMethods)
-        {
-            this.DeleteInsertedEntities<Employee>(useAsyncMethods);
+            Workstation UpdateWorkstation(Workstation originalWorkstationEntity)
+            {
+                return new Workstation()
+                    {
+                        WorkstationId = originalWorkstationEntity.WorkstationId,
+                        Name = "Updated " + originalWorkstationEntity.Name
+                    };
+            }
         }
 
         [When(@"I delete all the inserted workstation entities using (.*) methods")]
-        public void WhenIDeleteAllTheInsertedWorkstationEntities(bool useAsyncMethods)
+        public async Task WhenIDeleteAllTheInsertedWorkstationEntities(bool useAsyncMethods)
         {
-            this.DeleteInsertedEntities<Workstation>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.DeleteInsertedEntitiesAsync<Workstation>();
+            }
+            else
+            {
+                this.DeleteInsertedEntities<Workstation>();
+            }
+        }
+
+        [When(@"I delete all the inserted employee entities using (.*) methods")]
+        public async Task WhenIDeleteAllTheInsertedEmployeeEntities(bool useAsyncMethods)
+        {
+            if (useAsyncMethods)
+            {
+                await this.DeleteInsertedEntitiesAsync<Employee>();
+            }
+            else
+            {
+                this.DeleteInsertedEntities<Employee>();
+            }
         }
 
         [When(@"I delete all the inserted building entities using (.*) methods")]
-        public void WhenIDeleteAllTheInsertedBuildingEntities(bool useAsyncMethods)
+        public async Task WhenIDeleteAllTheInsertedBuildingEntities(bool useAsyncMethods)
         {
-            this.DeleteInsertedEntities<Building>(useAsyncMethods);
+            if (useAsyncMethods)
+            {
+                await this.DeleteInsertedEntitiesAsync<Building>();
+            }
+            else
+            {
+                this.DeleteInsertedEntities<Building>();
+            }
         }
 
         [Then(@"the database count of the queried entities should be (.*)")]
@@ -429,13 +675,13 @@
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
         public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int? max, int? skip)
         {
-            _testContext.QueriedEntities.AddRange(
-                _testContext.DatabaseConnection.Find<Workstation>(
-                    statementOptions =>
+            var queriedEntities = _testContext.DatabaseConnection.Find<Workstation>(
+                statementOptions =>
                     statementOptions.Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
                                     .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
                                     .Skip(skip)
-                                    .Top(max)));
+                                    .Top(max));
+            _testContext.QueriedEntities.AddRange(queriedEntities);
         }
 
         [When(@"I partially update all the inserted employee entities")]
@@ -494,119 +740,198 @@
             }
         }
 
-        [StepArgumentTransformation]
-        public bool FlagConversion(string input)
+        private async Task DeleteInsertedEntitiesAsync<TEntity>(int? skipCount = null, int? maxCount = null)
         {
-            switch (input)
+            var entitiesToBeDeleted = _testContext.LocalInsertedEntities
+                                                  .OfType<TEntity>()
+                                                  .Skip(skipCount ?? 0)
+                                                  .Take(maxCount ?? int.MaxValue)
+                                                  .ToArray();
+
+            // we have to escape Specflow's bad synchronization context
+            await Task.Run(async () =>
             {
-                case "synchronous":
-                    return false;
-                case "asynchronous":
-                    return true;
-                default:
-                    throw new ArgumentException($"Unknown flag {input}", nameof(input));
+                foreach (var entityToBeDeleted in entitiesToBeDeleted)
+                {
+                    await _testContext.DatabaseConnection.DeleteAsync(entityToBeDeleted);
+                    _testContext.LocalInsertedEntities.Remove(entityToBeDeleted);
+                }
+            });
+        }
+
+        private void DeleteInsertedEntities<TEntity>(int? skipCount = null, int? maxCount = null)
+        {
+            var entitiesToBeDeleted = _testContext.LocalInsertedEntities
+                                                  .OfType<TEntity>()
+                                                  .Skip(skipCount ?? 0)
+                                                  .Take(maxCount ?? int.MaxValue)
+                                                  .ToArray();
+            foreach (var entityToBeDeleted in entitiesToBeDeleted)
+            {
+                    _testContext.DatabaseConnection.Delete(entityToBeDeleted);
+                    _testContext.LocalInsertedEntities.Remove(entityToBeDeleted);
             }
         }
 
-        [StepArgumentTransformation()]
-        public int? RowCountTransform(string rowCount)
+        private async Task UpdateInsertedEntitiesAsync<TEntity>(Func<TEntity, TEntity> updateFunc, int? skipCount = null, int? maxCount = null)
         {
-            if (rowCount == "NULL")
-                return null;
-            return int.Parse(rowCount);
+            var entitiesToUpdate = _testContext.LocalInsertedEntities
+                                               .OfType<TEntity>()
+                                               .Skip(skipCount ?? 0)
+                                               .Take(maxCount ?? int.MaxValue)
+                                               .ToArray();
+
+            // we have to escape Specflow's bad synchronization context
+            await Task.Run(async () =>
+            {
+                foreach (var entityToUpdate in entitiesToUpdate)
+                {
+                    var updatedEntity = updateFunc(entityToUpdate);
+                    await _testContext.DatabaseConnection.UpdateAsync(updatedEntity);
+                    _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(entityToUpdate)] = updatedEntity;
+                }
+            });
         }
 
-        private void DeleteInsertedEntities<TEntity>(bool useAsyncMethods, int? skipCount = null, int? maxCount = null)
-            where TEntity:class
+        private void UpdateInsertedEntities<TEntity>(Func<TEntity, TEntity> updateFunc,  int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToBeDeleted = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue);
-            foreach (var insertedEntity in entitiesToBeDeleted)
+            var entitiesToUpdate = _testContext.LocalInsertedEntities
+                                               .OfType<TEntity>()
+                                               .Skip(skipCount ?? 0)
+                                               .Take(maxCount ?? int.MaxValue)
+                                               .ToArray();
+            foreach (var entityToUpdate in entitiesToUpdate)
             {
-                if (useAsyncMethods)
-                {
-                    _testContext.DatabaseConnection.DeleteAsync(insertedEntity).GetAwaiter().GetResult();
-                }
-                else
-                {
-                    _testContext.DatabaseConnection.Delete(insertedEntity);
-                }
-            }
-            _testContext.LocalInsertedEntities = new List<object>(_testContext.LocalInsertedEntities.Except(entitiesToBeDeleted));
-        }
-
-        private void UpdateInsertedEntities<TEntity>(bool useAsyncMethods, Func<TEntity, TEntity> updateFunc,  int? skipCount = null, int? maxCount = null)
-        {
-            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
-            foreach (var originalEntity in entitiesToUpdate)
-            {
-                object updatedEntity = updateFunc(originalEntity);
-
-                if (useAsyncMethods)
-                {
-                    _testContext.DatabaseConnection.UpdateAsync((TEntity)updatedEntity).GetAwaiter().GetResult();
-                }
-                else
-                {
-                    _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
-                }
-                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = updatedEntity;
+                var updatedEntity = updateFunc(entityToUpdate);
+                _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
+                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(entityToUpdate)] = updatedEntity;
             }
         }
 
-        private void QueryForInsertedEntities<TEntity>(bool useAsyncMethods, int? skipCount = null, int? maxCount = null)
+        private async Task QueryForInsertedEntitiesAsync<TEntity>(int? skipCount = null, int? maxCount = null)
+        {
+            var entitiesToQuery = _testContext.LocalInsertedEntities
+                                              .OfType<TEntity>()
+                                              .Skip(skipCount ?? 0)
+                                              .Take(maxCount ?? int.MaxValue)
+                                              .ToArray();
+
+            // we have to escape Specflow's bad synchronization context
+            await Task.Run(async () =>
+            {
+                foreach (var originalEntity in entitiesToQuery)
+                {
+                    // this looks a bit stupid, but we want to test the typed queries
+                    switch (originalEntity)
+                    {
+                        case Employee originalEmployeeEntity:
+                            var queriedEmployeeEntity = await _testContext.DatabaseConnection.GetAsync(
+                                                            new Employee
+                                                                {
+                                                                    UserId = originalEmployeeEntity.UserId, 
+                                                                    EmployeeId = originalEmployeeEntity.EmployeeId
+                                                                });
+                            _testContext.QueriedEntities.Add(queriedEmployeeEntity);
+                            break;
+                        case Workstation originalWorkstationEntity:
+                            var queriedWorkstationEntity = await _testContext.DatabaseConnection.GetAsync(new Workstation
+                                {
+                                    WorkstationId = originalWorkstationEntity.WorkstationId
+                                });
+                            _testContext.QueriedEntities.Add(queriedWorkstationEntity);
+                            break;
+                        case Building originalBuildingEntity:
+                            var queriedBuildingEntity = await _testContext.DatabaseConnection.GetAsync(new Building
+                                {
+                                    BuildingId = originalBuildingEntity.BuildingId
+                                });
+                            _testContext.QueriedEntities.Add(queriedBuildingEntity);
+                            break;
+                        default:
+                            throw new NotSupportedException($"Don't know what to do with {typeof(TEntity)}");
+                    }
+                }
+            });
+        }
+
+        private void QueryForInsertedEntities<TEntity>(int? skipCount = null, int? maxCount = null)
         {
             var entitiesToQuery = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
             foreach (var originalEntity in entitiesToQuery)
             {
-                object queriedEntity = null;
-
-                Employee originalEmployeeEntity;
-                Workstation originalWorkstationEntity;
-                Building originalBuildingEntity;
-
-                if ((originalEmployeeEntity = originalEntity as Employee) != null)
+                // this looks a bit stupid, but we want to test the typed queries
+                switch (originalEntity)
                 {
-                    queriedEntity = useAsyncMethods
-                    ? _testContext.DatabaseConnection.GetAsync(new Employee { UserId = originalEmployeeEntity.UserId, EmployeeId = originalEmployeeEntity.EmployeeId}).Result
-                    : _testContext.DatabaseConnection.Get(new Employee { UserId = originalEmployeeEntity.UserId, EmployeeId = originalEmployeeEntity.EmployeeId});
+                    case Employee originalEmployeeEntity:
+                        var queriedEmployeeEntity = _testContext.DatabaseConnection.Get(
+                                                        new Employee
+                                                        {
+                                                            UserId = originalEmployeeEntity.UserId,
+                                                            EmployeeId = originalEmployeeEntity.EmployeeId
+                                                        });
+                        _testContext.QueriedEntities.Add(queriedEmployeeEntity);
+                        break;
+                    case Workstation originalWorkstationEntity:
+                        var queriedWorkstationEntity = _testContext.DatabaseConnection.Get(new Workstation
+                        {
+                            WorkstationId = originalWorkstationEntity.WorkstationId
+                        });
+                        _testContext.QueriedEntities.Add(queriedWorkstationEntity);
+                        break;
+                    case Building originalBuildingEntity:
+                        var queriedBuildingEntity = _testContext.DatabaseConnection.Get(new Building
+                        {
+                            BuildingId = originalBuildingEntity.BuildingId
+                        });
+                        _testContext.QueriedEntities.Add(queriedBuildingEntity);
+                        break;
+                    default:
+                        throw new NotSupportedException($"Don't know what to do with {typeof(TEntity)}");
                 }
-                else if ((originalWorkstationEntity = originalEntity as Workstation) != null)
-                {
-                    queriedEntity = useAsyncMethods
-                    ? _testContext.DatabaseConnection.GetAsync(new Workstation { WorkstationId = originalWorkstationEntity.WorkstationId }).Result
-                    : _testContext.DatabaseConnection.Get(new Workstation { WorkstationId = originalWorkstationEntity.WorkstationId });
-                }
-                else if ((originalBuildingEntity = originalEntity as Building) != null)
-                {
-                    queriedEntity = useAsyncMethods
-                    ? _testContext.DatabaseConnection.GetAsync(new Building {BuildingId = originalBuildingEntity.BuildingId}).Result
-                    : _testContext.DatabaseConnection.Get(new Building { BuildingId = originalBuildingEntity.BuildingId });
-                }
-
-                _testContext.QueriedEntities.Add(queriedEntity);
             }
         }
 
-        private void InsertEntity<TEntity>(bool useAsyncMethods, Func<int, TEntity> insertFunc,  int entityCount = 1)
+        private async Task InsertEntityAsync<TEntity>(Func<int, TEntity> insertFunc, int entityCount = 1)
+        {
+            // we have to escape Specflow's bad synchronization context
+            await Task.Run(async () =>
+            {
+                var dbConnection = _testContext.DatabaseConnection;
+                for (var entityIndex = 0; entityIndex < entityCount; entityIndex++)
+                {
+                    object entityToInsert = insertFunc(entityIndex);
+                    await dbConnection.InsertAsync<TEntity>((TEntity)entityToInsert);
+                    _testContext.LocalInsertedEntities.Add(entityToInsert);
+                }
+
+            });
+        }
+
+        private void InsertEntity<TEntity>(Func<int, TEntity> insertFunc,  int entityCount = 1)
         {
             var dbConnection = _testContext.DatabaseConnection;
             for(var entityIndex = 0; entityIndex<entityCount; entityIndex++)
             {
                 object entityToInsert = insertFunc(entityIndex);
-                if (useAsyncMethods)
-                    dbConnection.InsertAsync<TEntity>((TEntity)entityToInsert).GetAwaiter().GetResult();
-                else
-                    dbConnection.Insert<TEntity>((TEntity)entityToInsert);
-
+                dbConnection.Insert<TEntity>((TEntity)entityToInsert);
                 _testContext.LocalInsertedEntities.Add(entityToInsert);
             }
         }
 
-        private void QueryEntityCount<TEntity>(bool useAsyncMethods)
+        private async Task<int> QueryEntityCountAsync<TEntity>()
         {
-                _testContext.QueriedEntitiesDbCount = useAsyncMethods
-                                                          ? _testContext.DatabaseConnection.CountAsync<TEntity>().GetAwaiter().GetResult()
-                                                          : _testContext.DatabaseConnection.Count<TEntity>();
+            // we have to escape Specflow's bad synchronization context
+            var recCount = _testContext.QueriedEntitiesDbCount = await Task.Run(async () =>
+            {
+                return await _testContext.DatabaseConnection.CountAsync<TEntity>();
+            });
+
+            return recCount;
+        }
+
+        private void QueryEntityCount<TEntity>()
+        {
+                _testContext.QueriedEntitiesDbCount = _testContext.DatabaseConnection.Count<TEntity>();
         }
     }
 }

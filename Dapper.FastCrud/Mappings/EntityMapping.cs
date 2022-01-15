@@ -234,7 +234,7 @@
                 .Where(propDescriptor =>
                        {
                            var propInfo =
-#if COREFX
+#if NETSTANDARD
                            propDescriptor.PropertyType.GetTypeInfo();
 #else
                            propDescriptor.PropertyType;

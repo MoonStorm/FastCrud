@@ -6,7 +6,7 @@
 // 
 //     Connection String Name: `EntityGeneration`
 //     Provider:               `System.Data.SqlClient`
-//     Connection String:      `Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=D:\_Projects\Dapper.FastCRUD\Dapper.FastCRUD.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
+//     Connection String:      `Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=D:\Code\Dapper.FastCRUD\Dapper.FastCrud.Tests\App_Data\\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True`
 //     Include Views:          `True`
 
 namespace Dapper.FastCrud.Tests.Models

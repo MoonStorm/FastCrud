@@ -1,8 +1,8 @@
 ﻿Feature: Relationships
 	Tests for the relationship between the entities Workstation -> Employee (single relationship) and Building -> Workstation -> Employee (two level relationship)
 
-@InMemoryDatabase
-Scenario Outline: Query single relationship parent with children (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query single relationship parent with children (build server test)
 	Given I have initialized a <database type> database
 	When I insert 1 workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
@@ -27,8 +27,8 @@ Scenario Outline: Query single relationship parent with children (external datab
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query single relationship parents with children (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query single relationship parents with children (build server test)
 	Given I have initialized a <database type> database
 	When I insert <parent entity count> workstation entities using <method type> methods
 	And I insert <child entity count> employee entities parented to existing workstation entities using <method type> methods
@@ -53,8 +53,8 @@ Scenario Outline: Query single relationship parents with children (external data
 	| MySql         | 10                  | 20                 | synchronous  |
 	| MySql         | 10                  | 20                 | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Count single relationship parents with children (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Count single relationship parents with children (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
@@ -79,8 +79,8 @@ Scenario Outline: Count single relationship parents with children (external data
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline:  Query single relationship children with parents (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline:  Query single relationship children with parents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
@@ -105,8 +105,8 @@ Scenario Outline:  Query single relationship children with parents (external dat
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query single relationship children with no parents (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query single relationship children with no parents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with the workstation entities using <method type> methods
@@ -129,8 +129,8 @@ Scenario Outline: Query single relationship children with no parents (external d
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query single relationship parents with no children (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query single relationship parents with no children (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
@@ -153,8 +153,8 @@ Scenario Outline: Query single relationship parents with no children (external d
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query two level relationship grandparents with parents and children (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query two level relationship grandparents with parents and children (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> building entities using <method type> methods
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
@@ -181,8 +181,8 @@ Scenario Outline: Query two level relationship grandparents with parents and chi
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query two level relationship children with parents and grandparents (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query two level relationship children with parents and grandparents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> building entities using <method type> methods
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
@@ -209,8 +209,8 @@ Scenario Outline: Query two level relationship children with parents and grandpa
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Query two level relationship children with no parents or grandparents (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Query two level relationship children with no parents or grandparents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with workstation and building entities using <method type> methods
@@ -233,8 +233,8 @@ Scenario Outline: Query two level relationship children with no parents or grand
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
-@InMemoryDatabase
-Scenario Outline: Count two level relationship children with no parents or grandparents (in-memory database)
+@AutomaticBuildServerTest
+Scenario Outline: Count two level relationship children with no parents or grandparents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for the count of all the employee entities strictly linked to workstation and building entities using <method type> methods

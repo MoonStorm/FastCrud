@@ -3,6 +3,7 @@
 bin
 obj
 *.user
+*.feature.cs
 *.nupkg
 /Releases/*.nupkg
 *.suo

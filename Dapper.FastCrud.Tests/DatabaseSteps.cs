@@ -3,9 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Configuration;
     using System.Data.SqlClient;
-    using System.Data.SqlLocalDb;
     using System.Data.SqlServerCe;
     using System.Data.SQLite;
     using System.Diagnostics;
@@ -13,7 +11,10 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Dapper.FastCrud.Tests.Common;
     using Dapper.FastCrud.Tests.Models;
+    using MartinCostello.SqlLocalDb;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;
     using MySql.Data.MySqlClient;
@@ -24,14 +25,17 @@
     [Binding]
     public class DatabaseSteps
     {
-        private DatabaseTestContext _testContext;
-        private const string DatabaseName = "FastCrudTestDatabase";
+        private readonly DatabaseTestContext _testContext;
+        private readonly IConfiguration _configuration;
+
+        private const string DatabaseName = "FastCrudTestDatabaseF8D8B1E3";
         //private static string OriginalDatabaseFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data");
         //private static string FinalDatabaseFolder = Path.Combine(OriginalDatabaseFolder, $"FastCrudDatabaseTests");
 
-        public DatabaseSteps(DatabaseTestContext testContext)
+        public DatabaseSteps(DatabaseTestContext testContext, IConfiguration configuration)
         {
-            this._testContext = testContext;
+            _testContext = testContext;
+            _configuration = configuration;
         }
 
         [AfterScenario]
@@ -45,8 +49,9 @@
         [Given(@"I have initialized a PostgreSql database")]
         public void GivenIHaveInitializedPostgreSqlDatabase()
         {
-            this.CleanupPostgreSqlDatabase(ConfigurationManager.ConnectionStrings["PostgreSql"].ConnectionString);
-            this.SetupPostgreSqlDatabase(ConfigurationManager.ConnectionStrings["PostgreSql"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("PostgreSql");
+            this.CleanupPostgreSqlDatabase(connectionString);
+            this.SetupPostgreSqlDatabase(connectionString);
         }
 
         [Given(@"I have initialized a Benchmark LocalDb database")]
@@ -59,34 +64,42 @@
         [Given(@"I have initialized a LocalDb database")]
         public void GivenIHaveInitializedLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
-            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.CleanupLocalDbDatabase();
+            this.SetupLocalDbDatabase();
+
+            //var connectionString = this.GetConnectionStringFor("LocalDb");
+            //this.CleanupMsSqlDatabase(connectionString);
+            //this.SetupMsSqlDatabase(connectionString);
         }
 
         [Given(@"I have initialized a SqLite database")]
         public void GivenIHaveInitializedSqlLiteDatabase()
         {
-            this.SetupSqLiteDatabase(ConfigurationManager.ConnectionStrings["SqLite"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("SqLite");
+            this.SetupSqLiteDatabase(connectionString);
         }
 
         [Given(@"I have initialized a MySql database")]
         public void GivenIHaveInitializedMySqlDatabase()
         {
-            this.CleanupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
-            this.SetupMySqlDatabase(ConfigurationManager.ConnectionStrings["MySql"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("MySql");
+            this.CleanupMySqlDatabase(connectionString);
+            this.SetupMySqlDatabase(connectionString);
         }
 
         [Given(@"I have initialized a SQLCE database")]
         public void GivenIHaveInitializedSqlCeDatabase()
         {
-            this.CleanupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
-            this.SetupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("SqlCompact");
+            this.CleanupSqlCeDatabase(connectionString);
+            this.SetupSqlCeDatabase(connectionString);
         }
 
         [Then(@"I cleanup the SQLCE database")]
         public void ThenICleanupTheSqlCeDatabase()
         {
-            this.CleanupSqlCeDatabase(ConfigurationManager.ConnectionStrings["SqlCompact"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("SqlCompact");
+            this.CleanupSqlCeDatabase(connectionString);
         }
 
         [Then(@"I cleanup the Benchmark LocalDb database")]
@@ -98,20 +111,23 @@
         [Then(@"I cleanup the LocalDb database")]
         public void ThenICleanupTheLocalDbDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
+            this.CleanupLocalDbDatabase();
+            // this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["LocalDb"].ConnectionString);
         }
 
         [Given(@"I have initialized a MsSqlServer database")]
         public void GivenIHaveInitializedAnMsSqlServerDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
-            this.SetupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("MsSqlServer");
+            this.CleanupMsSqlDatabase(connectionString);
+            this.SetupMsSqlDatabase(connectionString);
         }
 
         [Then(@"I cleanup the MsSqlServer database")]
         public void ThenICleanupTheMsSqlServerDatabase()
         {
-            this.CleanupMsSqlDatabase(ConfigurationManager.ConnectionStrings["MsSqlServer"].ConnectionString);
+            var connectionString = this.GetConnectionStringFor("MsSqlServer");
+            this.CleanupMsSqlDatabase(connectionString);
         }
 
         [When(@"I refresh the database connection")]
@@ -220,7 +236,7 @@
             connectionString = string.Format(
                 CultureInfo.InvariantCulture,
                 connectionString,
-                Path.Combine(Path.GetDirectoryName(typeof(DatabaseSteps).Assembly.Location), $"{DatabaseName}.sdf"));
+                Path.Combine(typeof(DatabaseSteps).Assembly.GetDirectory(), $"{DatabaseName}.sdf"));
 
             // create the database
             using(var sqlCeEngine = new SqlCeEngine(connectionString))
@@ -339,7 +355,7 @@
                 {
                     command.CommandText =$@"
                         CREATE TABLE ""Employee"" (
-	                        ""Id"" SERIAL,
+	                        ""UserId"" SERIAL,
                             ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""LastName"" varchar(100) NOT NULL,
@@ -428,7 +444,7 @@
                     command.CommandText = $@"USE {DatabaseName};
 
                         CREATE TABLE `Employee` (
-	                        Id int NOT NULL AUTO_INCREMENT,
+	                        UserId int NOT NULL AUTO_INCREMENT,
                             EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        LastName nvarchar(100) NOT NULL,
@@ -474,16 +490,28 @@
             }
 
 
-            _testContext.DatabaseConnection = new MySqlConnection(connectionString+$";Database={DatabaseName}");
+            _testContext.DatabaseConnection = new MySqlConnection($"{connectionString};Database={DatabaseName}");
             _testContext.DatabaseConnection.Open();
         }
 
         private void SetupLocalDbDatabase()
         {
-            var localDbProvider = new SqlLocalDbProvider();
-            var localInstance = localDbProvider.CreateInstance(DatabaseName); // instance name = db name, the api will always use the latest version
-            localInstance.Start();
-            this.SetupMsSqlDatabase(localInstance.CreateConnectionStringBuilder().ConnectionString);
+            // UPDATE: We'll be using the single automatic instance of LocalDb instead
+            // The commented code works but for an individual instance:
+            //using (var localDbProvider = new SqlLocalDbApi())
+            //{
+            //    var localInstance = localDbProvider.GetOrCreateInstance(DatabaseName);
+            //    var localInstanceManager = localInstance.Manage();
+            //    // instance name = db name, the api will always use the latest version
+            //    if (!localInstance.IsRunning)
+            //    {
+            //        localInstanceManager.Start();
+            //    }
+            //    this.SetupMsSqlDatabase(localInstance.CreateConnectionStringBuilder().ConnectionString);
+            //}
+
+            var connectionString = this.GetConnectionStringFor("LocalDb");
+            this.SetupMsSqlDatabase($"{connectionString}");
         }
 
         private void SetupMsSqlDatabase(string connectionString)
@@ -560,7 +588,7 @@
                         ))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
-	                    [Id] [int] IDENTITY(2,1) NOT NULL,
+	                    [UserId] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [LastName] [nvarchar](100) NOT NULL,
@@ -570,7 +598,7 @@
                         [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
-	                        [Id] ASC,
+	                        [UserId] ASC,
 	                        [EmployeeId] ASC
                         ),
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
@@ -602,7 +630,7 @@
         {
             _testContext.DatabaseConnection?.Close();
 
-            var dbFile = Path.Combine(Path.GetDirectoryName(typeof(DatabaseSteps).Assembly.Location), $"{DatabaseName}.sdf");
+            var dbFile = Path.Combine(typeof(DatabaseSteps).Assembly.GetDirectory(), $"{DatabaseName}.sdf");
 
             if (File.Exists(dbFile))
             {
@@ -612,22 +640,30 @@
 
         private void CleanupLocalDbDatabase()
         {
-            SqlLocalDbApi.AutomaticallyDeleteInstanceFiles = true;
-			SqlLocalDbApi.StopOptions = StopInstanceOptions.KillProcess;
-
-			var localDbProvider = new SqlLocalDbProvider();
-            var localDbInstanceInfo = localDbProvider.GetInstances().FirstOrDefault(instance => instance.Name==DatabaseName);
-            if (localDbInstanceInfo != null)
-            {
-                var localDbInstance = localDbProvider.GetInstance(DatabaseName);
-                if (!localDbInstance.IsRunning)
-                {
-                    localDbInstance.Start();
-                }
-				this.CleanupMsSqlDatabase(localDbInstance.CreateConnectionStringBuilder().ConnectionString);
-				SqlLocalDbApi.StopInstance(DatabaseName, TimeSpan.FromSeconds(20.0));
-				SqlLocalDbApi.DeleteInstance(DatabaseName);
-			}
+            //UPDATE: We'll be using the single automatic instance of LocalDb instead
+            // The commented code works but for an individual instance:
+            //using (var localDbProvider = new SqlLocalDbApi())
+            //{
+            //    var localInstance = localDbProvider.GetInstanceInfo(DatabaseName);
+            //    if (localInstance != null && localInstance.Exists)
+            //    {
+            //        try
+            //        {
+            //            if (localInstance.IsRunning)
+            //            {
+            //                this.CleanupMsSqlDatabase(localInstance.CreateConnectionStringBuilder().ConnectionString);
+            //                localDbProvider.StopInstance(DatabaseName);
+            //            }
+            //        }
+            //        catch
+            //        {
+            //            // this might fail for whatever reason
+            //        }
+            //        localDbProvider.DeleteInstance(DatabaseName, true);
+            //    }
+            //}
+            var connectionString = this.GetConnectionStringFor("LocalDb");
+            this.CleanupMsSqlDatabase($"{connectionString}");
 		}
 
         private void CleanupMsSqlDatabase(string connectionString)
@@ -677,6 +713,12 @@
         private void CompareQueriedEntitiesWithLocalEntities<TEntity>()
         {
             CollectionAssert.AreEquivalent(_testContext.QueriedEntities.OfType<TEntity>(), _testContext.LocalInsertedEntities.OfType<TEntity>());
+        }
+
+        private string GetConnectionStringFor(string connectionStringKey)
+        {
+            var connectionString = _configuration[$"connectionStrings:add:{connectionStringKey}:connectionString"];
+            return connectionString;
         }
     }
 }

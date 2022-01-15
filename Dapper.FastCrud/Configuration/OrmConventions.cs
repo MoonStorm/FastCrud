@@ -226,7 +226,7 @@
             var underlyingType = Nullable.GetUnderlyingType(propertyType);
             propertyType = underlyingType ?? propertyType;
             return
-#if COREFX
+#if NETSTANDARD
                 propertyType.GetTypeInfo().IsEnum
 #else
                 propertyType.IsEnum 
@@ -260,7 +260,7 @@
         private Attribute[] GetEntityAttributes(Type entityType)
         {
             var entityAttributes = TypeDescriptor.GetAttributes(entityType).OfType<Attribute>().ToArray();
-#if COREFX
+#if NETSTANDARD
             return entityAttributes;
 #else
             var entityMetadataAttribute = entityAttributes.OfType<MetadataTypeAttribute>().FirstOrDefault();
@@ -274,7 +274,7 @@
         private Attribute[] GetEntityPropertyAttributes(Type entityType, PropertyDescriptor property)
         {
             var entityPropertyAttributes = property.Attributes.OfType<Attribute>().ToArray();
-#if COREFX
+#if NETSTANDARD
             return entityPropertyAttributes;
 #else
 

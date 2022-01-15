@@ -22,7 +22,7 @@
                 return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})");
             }
 
-            // one database generated field to be inserted, and that alone is a the primary key
+            // one database generated field to be inserted, and that alone is the primary key
             if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.RefreshOnInsertProperties.Length == 1)
             {
                 var keyProperty = this.InsertKeyDatabaseGeneratedProperties[0];
