@@ -1,4 +1,5 @@
 # ASP.NET Core
+
 # Build and test ASP.NET Core projects targeting .NET Core.
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
@@ -13,5 +14,22 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: Assembly-Info-NetCore@3
+  inputs:
+    Path: '$(Build.SourcesDirectory)'
+    FileNames: 'GlobalAssemblyInfo.cs'
+    InsertAttributes: false
+    FileEncoding: 'auto'
+    WriteBOM: false
+    VersionNumber: '2.6.$(Build.BuildNumber)-preview'
+    FileVersionNumber: '2.6.$(Build.BuildNumber)-preview'
+    LogLevel: 'verbose'
+    FailOnWarning: false
+    DisableTelemetry: false
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --filter TestCategory=AutomaticBuildServerTest'
