@@ -14,22 +14,16 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: Assembly-Info-NetCore@3
+- task: Update AssemblyInfo@1
   inputs:
-    Path: '$(Build.SourcesDirectory)'
-    FileNames: 'GlobalAssemblyInfo.cs'
-    InsertAttributes: false
-    FileEncoding: 'auto'
-    WriteBOM: false
-    VersionNumber: '2.6.$(Build.BuildNumber)-preview'
-    FileVersionNumber: '2.6.$(Build.BuildNumber)-preview'
-    LogLevel: 'verbose'
-    FailOnWarning: false
-    DisableTelemetry: false
+    rootFolder: '$(Build.SourcesDirectory)'
+    filePattern: 'GlobalAssemblyInfo.cs'
+    assemblyVersion: '2.6.$(Build.BuildNumber)-preview'
+    assemblyFileVersion: '2.6.$(Build.BuildNumber)-preview'
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
 - task: DotNetCoreCLI@2
   inputs:
     command: test
     projects: '**/*.Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --filter TestCategory=AutomaticBuildServerTest'
+    arguments: '--configuration $(buildConfiguration) --filter TestCategory="AutomaticBuildServerTest"'
