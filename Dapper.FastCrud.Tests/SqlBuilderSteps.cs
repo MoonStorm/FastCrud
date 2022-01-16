@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-    using System.Security.Cryptography;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
@@ -13,7 +12,7 @@
     {
         private GenericStatementSqlBuilder _currentSqlBuilder;
         private string _rawSqlStatement;
-        private string[] _selectColumnNames;
+        private string[] _selectColumnNamesWithDelimiters;
         private SqlDialect _currentDialect;
         private string _buildingRawJoinQueryStatement;
 
@@ -54,7 +53,7 @@
             var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(_currentDialect);
             var expectedSql = string.Join(
                 ",",
-                _selectColumnNames.Select(colName => $"{databaseOptions.StartDelimiter}{colName}{databaseOptions.EndDelimiter}"));
+                _selectColumnNamesWithDelimiters.Select(colName => $"{colName}"));
             Assert.That(_rawSqlStatement, Is.EqualTo(expectedSql));
         }
 
@@ -95,7 +94,17 @@
             // in real library usage, people will use the ISqlBuilder, but for our tests we're gonna need more than that
             _currentSqlBuilder = OrmConfiguration.GetSqlBuilder<TEntity>() as GenericStatementSqlBuilder;
             _currentDialect = dialect;
-            _selectColumnNames = _currentSqlBuilder.SelectProperties.Select(propInfo => propInfo.DatabaseColumnName).ToArray();
+
+            var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(_currentDialect);
+            _selectColumnNamesWithDelimiters = _currentSqlBuilder.SelectProperties.Select(propInfo =>
+            {
+                if (propInfo.DatabaseColumnName != propInfo.PropertyName)
+                {
+                    return $"{databaseOptions.StartDelimiter}{propInfo.DatabaseColumnName}{databaseOptions.EndDelimiter} AS {databaseOptions.StartDelimiter}{propInfo.PropertyName}{databaseOptions.EndDelimiter}";
+                }
+                
+                return $"{databaseOptions.StartDelimiter}{propInfo.PropertyName}{databaseOptions.EndDelimiter}";
+            }).ToArray();
         }
     }
 }
