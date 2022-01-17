@@ -5,6 +5,7 @@
 <#@ assembly name="System.Xml" #>
 <#@ assembly name="System.Configuration" #>
 <#@ assembly name="System.Windows.Forms" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Data" #>
 <#@ import namespace="System.Data.SqlClient" #>
@@ -304,7 +305,8 @@ public EnvDTE.Project GetCurrentProject()  {
     if (_ServiceProvider == null)
         throw new Exception("Host property returned unexpected value (null)");
 	
-    EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetService(typeof(EnvDTE.DTE));
+    // EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetService(typeof(EnvDTE.DTE));
+	EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetCOMService(typeof(EnvDTE.DTE));
     if (dte == null)
         throw new Exception("Unable to retrieve EnvDTE.DTE");
 	

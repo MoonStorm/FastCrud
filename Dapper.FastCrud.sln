@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54E575C2-7D28-48E1-91FD-694DEEB09CD0}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		Dapper.FastCrud.ModelGenerator\Content\Models\GenericModelGenerator.tt = Dapper.FastCrud.ModelGenerator\Content\Models\GenericModelGenerator.tt
 		README.md = README.md
 	EndProjectSection
 EndProject

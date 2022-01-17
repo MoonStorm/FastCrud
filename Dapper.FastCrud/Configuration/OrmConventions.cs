@@ -41,6 +41,7 @@
             typeof (char),
             typeof (Guid),
             typeof (DateTime),
+            typeof (TimeSpan),
             typeof (DateTimeOffset),
             typeof (byte[])
         };

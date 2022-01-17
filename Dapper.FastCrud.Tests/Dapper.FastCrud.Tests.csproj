@@ -33,8 +33,13 @@
     <None Update="App.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Models\ModelGeneratorConfig.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ModelGeneratorConfig.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
+  <!--
   <ItemGroup Condition="'$(Platform)' == 'x86'">
     <None Include="$(PkgMicrosoft_SqlServer_Compact)\NativeBinaries\x86\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -46,6 +51,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  -->
 
   <ItemGroup>
     <EditorConfigFiles Remove="D:\Code\Dapper.FastCRUD\Dapper.FastCrud.Tests\.editorconfig" />
@@ -53,5 +59,17 @@
 
   <ItemGroup>
     <None Include="D:\Code\Dapper.FastCRUD\Dapper.FastCrud.Tests\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Models\ModelGeneratorConfig.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModelGeneratorConfig.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
