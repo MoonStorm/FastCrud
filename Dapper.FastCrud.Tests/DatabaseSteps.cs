@@ -309,7 +309,7 @@
 
         private void CleanupPostgreSqlDatabase(string connectionString)
         {
-            using (var dataConnection = new NpgsqlConnection(connectionString))
+            using (var dataConnection = new NpgsqlConnection($"{connectionString};Database=postgres"))
             {
                 dataConnection.Open();
 
@@ -336,13 +336,13 @@
         {
             this.SetupOrmConfiguration(SqlDialect.PostgreSql);
 
-            using (var dataConnection = new NpgsqlConnection(connectionString))
+            using (var dataConnection = new NpgsqlConnection($"{connectionString};Database=postgres"))
             {
                 dataConnection.Open();
 
                 using (var command = dataConnection.CreateCommand())
                 {
-                    command.CommandText = $@"CREATE DATABASE {DatabaseName}";
+                    command.CommandText = $@"CREATE DATABASE {DatabaseName.ToLowerInvariant()}";
                     command.ExecuteNonQuery();
                 }
             }
@@ -363,7 +363,7 @@
                             ""FullName"" varchar(200) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
                             ""WorkstationId"" int NULL,
-	                        PRIMARY KEY (""Id"", ""EmployeeId"")
+	                        PRIMARY KEY (""UserId"", ""EmployeeId"")
                         );
 
                         CREATE OR REPLACE FUNCTION computed_full_name()
@@ -452,7 +452,7 @@
                             FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
                             WorkstationId int NULL,
-	                        PRIMARY KEY (Id, EmployeeId)
+	                        PRIMARY KEY (UserId, EmployeeId)
                         );
 
                         ALTER TABLE `Employee` auto_increment=2;
