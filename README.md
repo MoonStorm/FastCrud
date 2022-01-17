@@ -14,6 +14,13 @@ When using this library, a compiler equivalent to the one included inside Visual
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
 
+
+#### Release Notes
+- 2.6
+  - Upgraded the Dapper dependency
+  - Added support for .NET Standard 2.0 and .NET Framework 4.6.1
+
+
 #### WIKI
 [The wiki](https://github.com/MoonStorm/Dapper.FastCRUD/wiki) is a great place for learning more about this library.
 
