@@ -22,20 +22,21 @@ More details are available on the project site.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Content\Models\GenericModelGenerator.tt" />
-    <None Remove="Content\Models\SampleModelGeneratorConfig.tt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Content\Models\GenericModelGenerator.tt">
+    <None Include="Content\Models\GenericModelGenerator.tt">
       <Pack>true</Pack>
       <PackagePath>contentFiles/any/any/Models/GenericModelGenerator.tt</PackagePath>
-    </Content>
-    <Content Include="Content\Models\SampleModelGeneratorConfig.tt">
+    </None>
+    <None Include="Content\Models\SampleModelGeneratorConfig.tt">
       <Pack>true</Pack>
       <PackagePath>contentFiles/any/any/Models/SampleModelGeneratorConfig.tt</PackagePath>
       <Generator></Generator>
-    </Content>
+    </None>
+    <None Include="Build\Dapper.FastCrud.ModelGenerator.props">
+      <Pack>true</Pack>
+      <!--More info here: -->
+      <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#include-msbuild-props-and-targets-in-a-package-->
+      <PackagePath>Build/Dapper.FastCrud.ModelGenerator.props</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

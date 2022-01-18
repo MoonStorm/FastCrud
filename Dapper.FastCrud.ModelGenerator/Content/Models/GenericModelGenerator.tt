@@ -20,7 +20,7 @@
 <#@ import namespace="System.Windows.Forms" #>
 <#
 /*
-This code is based on the work of the guys and girls behind the Dapper.SimpleCRUD and PetaPoco projects.
+This code is based on the work of the contributors of Dapper.SimpleCRUD, PetaPoco and Dapper.FastCrud projects.
  -----------------------------------------------------------------------------------------
  This template can read minimal schema information from the following databases:
 
@@ -350,7 +350,7 @@ public string GetDataDirectory()
     return System.IO.Path.GetDirectoryName(project.FileName)+"\\App_Data\\";
 }
 
-static string zap_password(string connectionString)
+static string RemovePassword(string connectionString)
 {
 	var rx = new Regex("Password=.*;", RegexOptions.Singleline | RegexOptions.Multiline | RegexOptions.IgnoreCase);
 	return rx.Replace(connectionString, "Password=******;");
@@ -399,7 +399,8 @@ Tables LoadTables()
 	WriteLine("// ");
 	WriteLine("//     Connection String Name: `{0}`", ConnectionStringName);
 	WriteLine("//     Provider:               `{0}`", ProviderName);
-	WriteLine("//     Connection String:      `{0}`", zap_password(ConnectionString));
+	// For security reasons, do not include this information
+	//WriteLine("//     Connection String:      `{0}`", RemovePassword(ConnectionString));
 	WriteLine("//     Include Views:          `{0}`", IncludeViews);
 	WriteLine("");
 

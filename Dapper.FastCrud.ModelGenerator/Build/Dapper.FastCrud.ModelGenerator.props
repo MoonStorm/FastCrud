@@ -1,0 +1,11 @@
+﻿<Project>
+  <PropertyGroup>
+    <DapperFastCrudModelGeneratorPath>$(MSBuildThisFileDirectory)/../contentFiles/any/any/Models/</DapperFastCrudModelGeneratorPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <T4ParameterValues Include="DapperFastCrudModelGeneratorPath">
+      <Value>$(DapperFastCrudModelGeneratorPath)</Value>
+    </T4ParameterValues>
+  </ItemGroup>
+</Project>
