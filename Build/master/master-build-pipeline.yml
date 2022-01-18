@@ -6,10 +6,10 @@
 
 # for an explanation on build number notation and tokens:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/run-number?view=azure-devops&tabs=yaml
-name: 3.0.$(Rev)
+name: 3.0.$(Rev:r)
 
-trigger:
-- master
+#trigger:
+#- master
 
 pool:
   vmImage: windows-2019
