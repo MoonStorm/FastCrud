@@ -9,7 +9,7 @@
 name: $(Rev:rrrrr)
 
 trigger:
-- master
+- release
 
 pool:
   vmImage: windows-2019
