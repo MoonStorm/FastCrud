@@ -62,6 +62,8 @@ steps:
 - task: PublishPipelineArtifact@1
   displayName: 'Publishing artifact Dapper.FastCrud.ModelGenerator'
   inputs:
-    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)/*.nupkg'
+    # the following input does not support wildcards
+    # hence we're using the .artifactignore file to exclude everything other than the NuGet packages
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)/'
     artifact: 'Dapper.FastCrud.ModelGenerator.NuGet.Package'
     publishLocation: 'pipeline'    
