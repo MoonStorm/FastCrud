@@ -15,13 +15,13 @@ steps:
     pipeline: '8'
     buildVersionToDownload: 'latest'
     downloadType: 'single'
-    artifactName: 'nugetPackages'
+    artifactName: 'masterNugetPackages'
     downloadPath: '$(System.ArtifactsDirectory)'
     checkDownloadedFiles: true
 - task: NuGetCommand@2
-  displayName: 'Pushing the main Dapper.FastCrud package to nuget.org'
+  displayName: 'Pushing the Dapper.FastCrud generator package to nuget.org'
   inputs:
     command: 'push'
-    packagesToPush: '$(System.ArtifactsDirectory)/nugetPackages/Dapper.FastCrud/bin/Release/Dapper.FastCrud.*.nupkg'
+    packagesToPush: '$(System.ArtifactsDirectory)/masterNugetPackages/Dapper.FastCrud.ModelGenerator/bin/Release/Dapper.FastCrud.*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'

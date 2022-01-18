@@ -1,0 +1,78 @@
+# ASP.NET Core
+
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+# for an explanation on build number notation and tokens:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/run-number?view=azure-devops&tabs=yaml
+name: $(Rev:rrrrr)
+
+trigger:
+- master
+
+pool:
+  vmImage: windows-2019
+
+variables:
+  buildConfiguration: 'Release'
+  assemblyVersion: '3.0.0'
+  packageVersion: '$(assemblyVersion)-preview$(Build.BuildNumber)'
+
+steps:
+- script: |
+    echo "Preparing for building the NuGet package version $(packageVersion)"
+  displayName: 'Preparing'
+- task: Update AssemblyInfo@1
+  displayName: 'Updating the assembly version'
+  inputs:
+    rootFolder: '$(Build.SourcesDirectory)'
+    filePattern: 'GlobalAssemblyInfo.cs'
+    assemblyVersion: '$(assemblyVersion)'
+    assemblyFileVersion: '$(assemblyVersion)'
+- task: Assembly-Info-NetCore@3
+  displayName: 'Updating the package version'
+  inputs:
+    Path: '$(Build.SourcesDirectory)'
+    FileNames: 'Directory.Build.props'
+    InsertAttributes: false
+    FileEncoding: 'auto'
+    WriteBOM: false
+    PackageVersion: '$(packageVersion)'
+    GenerateDocumentationFile: true
+    LogLevel: 'verbose'
+    FailOnWarning: false
+    DisableTelemetry: false
+- task: DotNetCoreCLI@2
+  displayName: 'Building'
+  inputs:
+    command: build
+    arguments: '--configuration $(buildConfiguration)'
+#- script: dotnet build --configuration $(buildConfiguration)
+#  displayName: 'dotnet build $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  displayName: 'Running tests'
+  inputs:
+    command: test
+    projects: '**/*.Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-build --filter TestCategory="AutomaticBuildServerTest"'
+- task: NuGetAuthenticate@0
+  displayName: 'NuGet Authenticate'
+- task: NuGetCommand@2
+  displayName: 'Internal feed NuGet push'
+  inputs:
+    command: push
+    packagesToPush: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/*.nupkg'
+    publishVstsFeed: 'Dapper.FastCrud'
+    allowPackageConflicts: true
+- task: CopyFiles@2
+  displayName: 'Preparing NuGet packages to be published as artifacts'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/bin/$(BuildConfiguration)/*.nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publishing artifacts'
+  inputs:
+    ArtifactName: masterNugetPackages
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'

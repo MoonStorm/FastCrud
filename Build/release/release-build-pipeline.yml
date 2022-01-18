@@ -16,7 +16,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  assemblyVersion: '2.6.0'
+  assemblyVersion: '2.7.0'
   packageVersion: '$(assemblyVersion)-preview$(Build.BuildNumber)'
 
 steps:
@@ -74,5 +74,5 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publishing artifacts'
   inputs:
-    ArtifactName: nugetPackages
+    ArtifactName: releaseNugetPackages
     pathToPublish: '$(Build.ArtifactStagingDirectory)'
