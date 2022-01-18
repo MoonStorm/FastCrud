@@ -67,6 +67,6 @@ steps:
     allowPackageConflicts: true
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/'
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/*.nupkg'
     artifact: 'Master.Dapper.FastCrud.NuGet.Package'
     publishLocation: 'pipeline'
