@@ -1,23 +1,10 @@
-# ASP.NET Core
-
-# Build and test ASP.NET Core projects targeting .NET Core.
-# Add steps that run tests, create a NuGet package, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
-# for an explanation on build number notation and tokens:
-# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/run-number?view=azure-devops&tabs=yaml
-name: 2.7.$(Rev:r)
-
-#trigger:
-#- master
+name: $(buildPackageVersion)
 
 pool:
   vmImage: windows-2019
 
 variables:
   buildConfiguration: 'Release'
-  assemblyVersion: '$(Build.BuildNumber)'
-  packageVersion: '$(assemblyVersion)-preview'
 
 steps:
 - script: |
