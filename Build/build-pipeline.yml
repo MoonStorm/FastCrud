@@ -1,12 +1,12 @@
-name: $(buildBaseVersion).$(Rev:r)$(buildPreviewSuffix)
+name: $(buildBaseVersion).$(Rev:r)
 
 pool:
   vmImage: windows-2019
 
 variables:
   buildConfiguration: 'Release'
-  assemblyVersion: '$(buildBaseVersion).$(Rev:r)'
-  packageVersion: '$(buildBaseVersion).$(Rev:r)$(buildPreviewSuffix)'
+  assemblyVersion: '$(Build.BuildNumber)'
+  packageVersion: '$(assemblyVersion)$(buildPreviewSuffix)'
 
 steps:
 - script: |
