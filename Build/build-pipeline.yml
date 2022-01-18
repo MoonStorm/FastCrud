@@ -38,12 +38,12 @@ steps:
   inputs:
     command: build
     arguments: '--configuration $(buildConfiguration)'
-- task: DotNetCoreCLI@2
-  displayName: 'Running tests'
-  inputs:
-    command: test
-    projects: '**/*.Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --filter TestCategory="AutomaticBuildServerTest"'
+#- task: DotNetCoreCLI@2
+#  displayName: 'Running tests'
+#  inputs:
+#    command: test
+#    projects: '**/*.Tests/*.csproj'
+#    arguments: '--configuration $(buildConfiguration) --no-build --filter TestCategory="AutomaticBuildServerTest"'
 - task: NuGetAuthenticate@0
   displayName: 'NuGet Authenticate'
 - task: NuGetCommand@2
