@@ -17,7 +17,7 @@ Code first entities are also supported which can either be decorated with attrib
 
 #### Release Notes
 - 2.7-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
-- 2.6 
+- 2.6 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
   - Upgraded the Dapper dependency
   - Added support for .NET Standard 2.0 and .NET Framework 4.6.1
 
