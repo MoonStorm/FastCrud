@@ -53,7 +53,14 @@ steps:
     publishVstsFeed: 'Dapper.FastCrud'
     allowPackageConflicts: true
 - task: PublishPipelineArtifact@1
+  displayName: 'Publishing artifact Dapper.FastCrud'
   inputs:
     targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/*.nupkg'
     artifact: 'Dapper.FastCrud.NuGet.Package'
     publishLocation: 'pipeline'
+- task: PublishPipelineArtifact@1
+  displayName: 'Publishing artifact Dapper.FastCrud.ModelGenerator'
+  inputs:
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)/*.nupkg'
+    artifact: 'Dapper.FastCrud.ModelGenerator.NuGet.Package'
+    publishLocation: 'pipeline'    
