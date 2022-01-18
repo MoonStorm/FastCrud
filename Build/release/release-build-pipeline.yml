@@ -6,18 +6,18 @@
 
 # for an explanation on build number notation and tokens:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/run-number?view=azure-devops&tabs=yaml
-name: $(Rev:rrrrr)
+name: 2.6.$(Rev:r)
 
-trigger:
-- release
+#trigger:
+#- release
 
 pool:
   vmImage: windows-2019
 
 variables:
   buildConfiguration: 'Release'
-  assemblyVersion: '2.7.0'
-  packageVersion: '$(assemblyVersion)-preview$(Build.BuildNumber)'
+  assemblyVersion: '$(Build.BuildNumber)'
+  packageVersion: '$(assemblyVersion)'
 
 steps:
 - script: |
@@ -48,8 +48,6 @@ steps:
   inputs:
     command: build
     arguments: '--configuration $(buildConfiguration)'
-#- script: dotnet build --configuration $(buildConfiguration)
-#  displayName: 'dotnet build $(buildConfiguration)'
 - task: DotNetCoreCLI@2
   displayName: 'Running tests'
   inputs:
@@ -62,17 +60,11 @@ steps:
   displayName: 'Internal feed NuGet push'
   inputs:
     command: push
-    packagesToPush: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/*.nupkg'
+    packagesToPush: '$(Build.SourcesDirectory)/**/bin/$(buildConfiguration)/*.nupkg'
     publishVstsFeed: 'Dapper.FastCrud'
     allowPackageConflicts: true
-- task: CopyFiles@2
-  displayName: 'Preparing NuGet packages to be published as artifacts'
+- task: PublishPipelineArtifact@1
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: '**/bin/$(BuildConfiguration)/*.nupkg'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publishing artifacts'
-  inputs:
-    ArtifactName: releaseNugetPackages
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/*.nupkg'
+    artifact: 'Master.Dapper.FastCrud.NuGet.Package'
+    publishLocation: 'pipeline'
