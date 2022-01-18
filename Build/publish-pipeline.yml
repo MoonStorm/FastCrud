@@ -1,12 +1,16 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 pool:
   vmImage: 'windows-latest'
 
 steps:
+- task: DownloadPipelineArtifact@2
+  inputs:
+    buildType: 'specific'
+    project: '29a10764-6d64-4c35-82d3-f77ddac3b138'
+    definition: '10'
+    specificBuildWithTriggering: true
+    buildVersionToDownload: 'latest'
+    artifactName: 'testArtifact'
+    targetPath: '$(Pipeline.Workspace)'
 - task: DownloadBuildArtifacts@1
   displayName: 'Downloading artifacts'
   inputs:
