@@ -5,11 +5,11 @@
     <AssemblyTitle>Dapper.FastCrud.ModelGenerator</AssemblyTitle>
     <AssemblyName>Dapper.FastCrud.ModelGenerator</AssemblyName>	
     <EnableDocumentationFile>false</EnableDocumentationFile>
-    <GenerateDocumentationFile>frue</GenerateDocumentationFile>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
 	  <PackageTags>dapper fastcrud entity generator orm</PackageTags>
-	  <IncludeBuildOutput>False</IncludeBuildOutput>
+	  <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Dapper.FastCrud.ModelGenerator</PackageId>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
 Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
@@ -24,27 +24,20 @@ More details are available on the project site.</Description>
   <ItemGroup>
     <None Remove="Content\Models\GenericModelGenerator.tt" />
     <None Remove="Content\Models\SampleModelGeneratorConfig.tt" />
-    <None Remove="Tools\Install.ps1" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="Content\Models\GenericModelGenerator.tt">
-		<Generator></Generator>
-		<Pack>true</Pack>
-		<PackagePath>Content\Models\</PackagePath>
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/Models/GenericModelGenerator.tt</PackagePath>
     </Content>
     <Content Include="Content\Models\SampleModelGeneratorConfig.tt">
-		<Generator></Generator>
-		<Pack>true</Pack>
-		<PackagePath>Content\Models\</PackagePath>
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/Models/SampleModelGeneratorConfig.tt</PackagePath>
+      <Generator></Generator>
     </Content>
-    <Content Include="Tools\Install.ps1">
-		<Generator></Generator>
-		<Pack>false</Pack>
-		<PackagePath>Tools\</PackagePath>
-	</Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
