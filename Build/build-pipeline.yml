@@ -1,17 +1,18 @@
-name: $(buildBaseVersion).$(Rev:.r)$(buildPreviewSuffix)
+name: $(buildBaseVersion).$(Rev:r)$(buildPreviewSuffix)
 
 pool:
   vmImage: windows-2019
 
 variables:
   buildConfiguration: 'Release'
-  assemblyVersion: '$(buildBaseVersion).$(Rev:.r)'
-  packageVersion: '$(buildBaseVersion).$(Rev:.r)$(buildPreviewSuffix)'
+  assemblyVersion: '$(buildBaseVersion).$(Rev:r)'
+  packageVersion: '$(buildBaseVersion).$(Rev:r)$(buildPreviewSuffix)'
 
 steps:
 - script: |
-    echo "Preparing for building the NuGet package version $(packageVersion)"
-  displayName: 'Preparing'
+    echo "Assembly version: $(assemblyVersion)"
+    echo "NuGet package version: $(packageVersion)"
+  displayName: 'Setting variables'
 - task: Update AssemblyInfo@1
   displayName: 'Updating the assembly version'
   inputs:
