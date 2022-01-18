@@ -1,10 +1,12 @@
-name: $(buildPackageVersion)
+name: $(buildBaseVersion).$(Rev:.r)$(buildPreviewSuffix)
 
 pool:
   vmImage: windows-2019
 
 variables:
   buildConfiguration: 'Release'
+  assemblyVersion: '$(buildBaseVersion).$(Rev:.r)'
+  packageVersion: '$(buildBaseVersion).$(Rev:.r)$(buildPreviewSuffix)'
 
 steps:
 - script: |
@@ -53,5 +55,5 @@ steps:
 - task: PublishPipelineArtifact@1
   inputs:
     targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/*.nupkg'
-    artifact: '($buildArtifactPrefix).Dapper.FastCrud.NuGet.Package'
+    artifact: 'Dapper.FastCrud.NuGet.Package'
     publishLocation: 'pipeline'
