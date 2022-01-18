@@ -53,12 +53,24 @@ steps:
     packagesToPush: '$(Build.SourcesDirectory)/**/bin/$(buildConfiguration)/*.nupkg'
     publishVstsFeed: 'Dapper.FastCrud'
     allowPackageConflicts: true
+- task: CopyFiles@2
+  displayName: 'Preparing for artifact publishing of Dapper.FastCrud.NuGet.Package'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/.artifactignore'
+    TargetFolder: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)'
+- task: CopyFiles@2
+  displayName: 'Preparing for artifact publishing of Dapper.FastCrud.ModelGenerator'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/.artifactignore'
+    TargetFolder: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)'
 - task: PublishPipelineArtifact@1
   displayName: 'Publishing artifact Dapper.FastCrud'
   inputs:
     # the following input does not support wildcards
     # hence we're using the .artifactignore file to exclude everything other than the NuGet packages
-    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)/'
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud/bin/$(buildConfiguration)'
     artifact: 'Dapper.FastCrud.NuGet.Package'
     publishLocation: 'pipeline'
 - task: PublishPipelineArtifact@1
@@ -66,6 +78,6 @@ steps:
   inputs:
     # the following input does not support wildcards
     # hence we're using the .artifactignore file to exclude everything other than the NuGet packages
-    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)/'
+    targetPath: '$(Build.SourcesDirectory)/Dapper.FastCrud.ModelGenerator/bin/$(buildConfiguration)'
     artifact: 'Dapper.FastCrud.ModelGenerator.NuGet.Package'
     publishLocation: 'pipeline'    
