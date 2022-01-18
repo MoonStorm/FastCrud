@@ -6,7 +6,7 @@
 
 # for an explanation on build number notation and tokens:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/run-number?view=azure-devops&tabs=yaml
-name: 3.0.$(Rev:r)
+name: 2.7.$(Rev:r)
 
 #trigger:
 #- master
