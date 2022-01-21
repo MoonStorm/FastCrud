@@ -85,37 +85,69 @@
             Assert.That(queriedEntities.Length, Is.EqualTo(queryEntitiesCount));
         }
 
+        [Then(@"the queried (.+) entities should be the same as the inserted ones")]
+        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheInsertedOnes(Type entityType)
+        {
+            var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
+            var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType);
+
+            this.AssertEquivalentEntityCollections(queriedEntities, insertedEntities, false);
+        }
+
         [Then(@"the queried (.+) entities should be the same as the updated ones")]
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheUpdatedOnes(Type entityType)
         {
             var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
             var updatedEntities = _testContext.GetUpdatedEntitiesOfType(entityType);
 
-            this.AssertEquivalentEntityCollections(queriedEntities, updatedEntities);
+            this.AssertEquivalentEntityCollections(queriedEntities, updatedEntities, false);
         }
 
-        private void AssertEquivalentEntityCollections(IEnumerable<object> firstEntityCollection, IEnumerable<object> secondEntityCollection)
+        [Then(@"the queried (.+) entities should be the same as the ones I inserted, in reverse order, starting from (.*) counting (.*)")]
+        public void ThenTheQueriedWorkstationEntitiesShouldBeTheSameAsTheOnesIInsertedInReverseOrderStartingFromCounting(Type entityType, int? startIndex, int? maxCount)
         {
-            Assert.AreEqual(firstEntityCollection.Count(), secondEntityCollection.Count());
+            var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
+            var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType)
+                                               .Reverse()
+                                               .Skip(startIndex ?? 0)
+                                               .Take(maxCount ?? int.MaxValue);
+            this.AssertEquivalentEntityCollections(queriedEntities, insertedEntities, true);
+        }
 
-            foreach (var firstEntity in firstEntityCollection)
+        private void AssertEquivalentEntityCollections(
+            IEnumerable<object> actualEntityCollection,
+            IEnumerable<object> expectedEntityCollection,
+            bool enforceOrder)
+        {
+            Assert.That(actualEntityCollection.Count(), Is.EqualTo(expectedEntityCollection.Count()));
+
+            var expectedEntityIndex = 0;
+            foreach (var expectedEntity in expectedEntityCollection)
             {
                 var matchFound = false;
-                foreach (var secondEntity in secondEntityCollection)
+                var actualEntityIndex = 0;
+                foreach (var actualEntity in actualEntityCollection)
                 {
-                    if (DbEntityComparer.Instance.Compare(firstEntity, secondEntity) == 0)
+                    if (DbEntityComparer.Instance.Compare(expectedEntity, actualEntity) == 0)
                     {
                         matchFound = true;
+                        if (enforceOrder)
+                        {
+                            Assert.That(actualEntityIndex, Is.EqualTo(expectedEntityIndex), $"Expected entity to be located at index {expectedEntityIndex} but it was found in index {actualEntityIndex}");
+                        }
                         break;
                     }
+
+                    actualEntityIndex++;
                 }
 
                 if (!matchFound)
                 {
-                    Assert.Fail($"Two collections were found not to be equivalent. The check failed for the entity '{firstEntity}'");
+                    Assert.Fail($"The entity at index {expectedEntityIndex} could not be located");
                 }
+
+                expectedEntityIndex++;
             }
         }
-
     }
 }

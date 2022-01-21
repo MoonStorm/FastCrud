@@ -17,16 +17,20 @@ Code first entities are also supported which can either be decorated with attrib
 
 #### Release Notes
 - 2.7-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
-  - Added support for .NET Standard 2.1
-  - Extended the support for the MetadataType attribute to .NET Standard 2.1
-  - Database first T4 template refactored:
+  - Main library:
+    - Added support for .NET Standard 2.1
+    - Extended support for the MetadataType attribute in .NET Standard 2.1
+    - Bulk update can now be used with parameters.
+    - Formatter :P added for SQL parameters.
+  - Model generator (database first):
     - Added support for self referenced entities.
     - Added support for multiple references to the same target using the InverseProperty attribute.
     - Better handling of columns representing reserved keywords in C#.
+    - Support for new csproj style projects.
     - Fixed a problem preventing it from being used in VS2019 and later.
-    - It can now be used in the new style projects.
-  - Tests refactored:
-    - Workaround implemented for the badly implemented serialization context in Specflow.
+  - Tests:
+    - All the tests have been reviewed and most were refactored.
+    - Workaround added for the badly implemented serialization context in Specflow.
     - Better model registration samples in the test project for:
       - POCO/fluent mapping
       - code first

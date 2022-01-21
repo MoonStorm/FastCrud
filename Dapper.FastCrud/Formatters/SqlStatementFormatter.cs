@@ -105,6 +105,8 @@
                         return this.MainEntitySqlBuilder.GetColumnName(stringArg);
                     case "I":
                         return this.MainEntitySqlBuilder.GetDelimitedIdentifier(stringArg);
+                    case "P":
+                        return string.Format(CultureInfo.InvariantCulture, "@{0}", stringArg);
                 }
             }
 

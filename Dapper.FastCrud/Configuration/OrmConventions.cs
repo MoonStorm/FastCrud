@@ -275,7 +275,7 @@
         private Attribute[] GetEntityPropertyAttributes(Type entityType, PropertyDescriptor property)
         {
             var entityPropertyAttributes = property.Attributes.OfType<Attribute>().ToArray();
-#if NETSTANDARD
+#if NETSTANDARD2_0
             return entityPropertyAttributes;
 #else
 

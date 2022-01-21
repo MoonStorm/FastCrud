@@ -16,8 +16,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud.ModelGenera
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud.Tests", "Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj", "{0FB4A7ED-4161-4509-8EE4-B4B8A56D65B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.FastCrud.Benchmarks", "Dapper.FastCrud.Benchmarks\Dapper.FastCrud.Benchmarks.csproj", "{459B13E6-503B-4DA1-AE92-8ED0D125EF30}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,10 +34,6 @@ Global
 		{0FB4A7ED-4161-4509-8EE4-B4B8A56D65B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FB4A7ED-4161-4509-8EE4-B4B8A56D65B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB4A7ED-4161-4509-8EE4-B4B8A56D65B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{459B13E6-503B-4DA1-AE92-8ED0D125EF30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{459B13E6-503B-4DA1-AE92-8ED0D125EF30}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{459B13E6-503B-4DA1-AE92-8ED0D125EF30}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{459B13E6-503B-4DA1-AE92-8ED0D125EF30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

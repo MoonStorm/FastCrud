@@ -9,5 +9,6 @@
         Column,
         TableAndColumn,
         Identifier,
+        Parameter
     }
 }

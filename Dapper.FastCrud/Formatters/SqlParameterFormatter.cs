@@ -118,6 +118,8 @@
                     return string.Format(CultureInfo.InvariantCulture,"{0}.{1}", sqlBuilder.GetTableName(), sqlBuilder.GetColumnName(this.ParameterValue));
                 case SqlParameterElementType.Identifier:
                     return sqlBuilder.GetDelimitedIdentifier(this.ParameterValue);
+                case SqlParameterElementType.Parameter:
+                    return string.Format(CultureInfo.InvariantCulture, "@{0}", this.ParameterValue);
                 default:
                     throw new InvalidOperationException($"Unknown SQL element type {this.ElementType}");
             }

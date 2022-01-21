@@ -2,7 +2,6 @@
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Dapper.FastCrud.Tests.Models.CodeFirst;
     using Dapper.FastCrud.Tests.Models.Poco;
     

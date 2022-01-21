@@ -152,15 +152,13 @@
                         [InventoryIndex] [int] NOT NULL,
                         [AccessLevel] [int] NOT NULL DEFAULT(1),
                         [BuildingId] [int] NULL,
-                        -- Verify that column names that begin with numbers will work
-                        [10PinSlots] [int] NULL,
                         CONSTRAINT [PK_Workstations] PRIMARY KEY CLUSTERED
                         (
 	                        [WorkstationId] ASC
                         ))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
-	                    [UserId] [int] IDENTITY(2,1) NOT NULL,
+	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [LastName] [nvarchar](100) NOT NULL,
@@ -170,7 +168,7 @@
                         [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
-	                        [UserId] ASC,
+	                        [Id] ASC,
 	                        [EmployeeId] ASC
                         ),
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");

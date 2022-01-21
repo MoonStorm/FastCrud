@@ -176,19 +176,6 @@
             }
         }
 
-        [When(@"I query for all the workstation entities using (.*) methods")]
-        public async Task WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
-        {
-            if (useAsyncMethods)
-            {
-                await this.QueryForInsertedEntitiesAsync<Workstation>();
-            }
-            else
-            {
-                this.QueryForInsertedEntities<Workstation>();
-            }
-        }
-
         [When(@"I query for one workstation entity combined with the employee entities using (.*) methods")]
         public async Task WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
@@ -326,7 +313,20 @@
             }
         }
 
-        [When(@"I query for all the building entities using (.*) methods")]
+        [When(@"I query for all the inserted workstation entities using (.*) methods")]
+        public async Task WhenIQueryForAllTheWorkstationEntities(bool useAsyncMethods)
+        {
+            if (useAsyncMethods)
+            {
+                await this.QueryForInsertedEntitiesAsync<Workstation>();
+            }
+            else
+            {
+                this.QueryForInsertedEntities<Workstation>();
+            }
+        }
+
+        [When(@"I query for all the inserted building entities using (.*) methods")]
         public async Task WhenIQueryForAllTheBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
             if (useAsyncMethods)
@@ -339,7 +339,7 @@
             }
         }
 
-        [When(@"I query for all the employee entities using (.*) methods")]
+        [When(@"I query for all the inserted employee entities using (.*) methods")]
         public async Task WhenIQueryForAllTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
             if (useAsyncMethods)
@@ -472,31 +472,62 @@
         }
 
 
-        [When(@"I batch update a maximum of (.*) employee entities skipping (.*) and using (.*) methods")]
-        public async Task WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        [When(@"I batch update all the inserted employee entities using (.*) methods")]
+        public async Task WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
-            // mimic the behavior on our side
             var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Employee>()
-                                               .Skip(skipCount ?? 0)
-                                               .Take(maxCount ?? int.MaxValue)
                                                .ToArray();
 
-            // update the db
+            var customMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>()
+                                                .Clone()
+                                                .UpdatePropertiesExcluding(prop =>
+                                                                               prop.IsExcludedFromUpdates = true,
+                                                                           nameof(Employee.KeyPass),
+                                                                           nameof(Employee.BirthDate));
+
             var updateData = new Employee()
                 {
                     KeyPass = Guid.NewGuid(),
                     BirthDate = new DateTime(1951, 09, 30),
                 };
 
-            FormattableString whereCondition = $"{nameof(Employee.UserId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.UserId))})";
+            var statementParams = new
+                {
+                    EntityIds = entitiesToUpdate.Select(originalEntity => originalEntity.UserId).ToArray()
+                };
+            FormattableString whereCondition;
+            switch (OrmConfiguration.DefaultDialect)
+            {
+                case SqlDialect.PostgreSql:
+                    whereCondition = $"{nameof(Employee.UserId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    break;
+                case SqlDialect.SqLite:
+                    whereCondition = $"{nameof(Employee.UserId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+                default:
+                    whereCondition = $"{nameof(Employee.UserId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+            }
+
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition));
+                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(
+                                     updateData,
+                                     statement => statement
+                                                  .WithEntityMappingOverride(customMapping)
+                                                  .Where(whereCondition)
+                                                  .WithParameters(statementParams)
+                                                  );
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement=>statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(
+                    updateData,
+                    statement => statement
+                                 .WithEntityMappingOverride(customMapping)
+                                 .Where(whereCondition)
+                                 .WithParameters(statementParams));
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -511,29 +542,59 @@
             }
         }
 
-        [When(@"I batch update a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
-        public async Task WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        [When(@"I batch update all the inserted workstation entities using (.*) methods")]
+        public async Task WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
             var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Workstation>()
-                                               .Skip(skipCount ?? 0)
-                                               .Take(maxCount ?? int.MaxValue)
                                                .ToArray();
+
+            var customMapping = OrmConfiguration.GetDefaultEntityMapping<Workstation>()
+                                                .Clone()
+                                                .UpdatePropertiesExcluding(prop =>
+                                                                               prop.IsExcludedFromUpdates = true,
+                                                                           nameof(Workstation.Name));
 
             var updateData = new Workstation()
                 {
                     Name = "Batch updated workstation"
                 };
 
-            // update the db
-            FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.WorkstationId))})";
+            var statementParams = new
+                {
+                    EntityIds = entitiesToUpdate.Select(originalEntity => originalEntity.WorkstationId).ToArray()
+                };
+            FormattableString whereCondition;
+            switch (OrmConfiguration.DefaultDialect)
+            {
+                case SqlDialect.PostgreSql:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    break;
+                case SqlDialect.SqLite:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+                default:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+            }
+
             int recordsUpdated;
             if (useAsyncMethods)
             {
-                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(updateData, statement => statement.Where(whereCondition));
+                recordsUpdated = await _testContext.DatabaseConnection.BulkUpdateAsync(updateData,
+                                                                                       statement => statement
+                                                                                                    .Where(whereCondition)
+                                                                                                    .WithParameters(statementParams)
+                                                                                                    .WithEntityMappingOverride(customMapping)
+                                 );
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData, statement => statement.Where(whereCondition));
+                recordsUpdated = _testContext.DatabaseConnection.BulkUpdate(updateData,
+                                                                            statement => statement
+                                                                                         .Where(whereCondition)
+                                                                                         .WithParameters(statementParams)
+                                                                                         .WithEntityMappingOverride(customMapping)
+                );
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
@@ -548,24 +609,44 @@
 
         }
 
-        [When(@"I batch delete a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
-        public async Task WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
+        [When(@"I batch delete all the inserted workstation entities using (.*) methods")]
+        public async Task WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
             var entitiesToDelete = _testContext.GetInsertedEntitiesOfType<Workstation>()
-                                               .Skip(skipCount ?? 0)
-                                               .Take(maxCount ?? int.MaxValue)
                                                .ToArray();
 
-            // update the db
-            FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToDelete.Select(originalEntity => originalEntity.WorkstationId))})";
+            var statementParams = new
+                {
+                    EntityIds = entitiesToDelete.Select(originalEntity => originalEntity.WorkstationId).ToArray()
+                };
+            FormattableString whereCondition;
+            switch (OrmConfiguration.DefaultDialect)
+            {
+                case SqlDialect.PostgreSql:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    break;
+                case SqlDialect.SqLite:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+                default:
+                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    break;
+            }
+
             int recordsDeleted;
             if (useAsyncMethods)
             {
-                recordsDeleted = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition));
+                recordsDeleted = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement
+                                                                                                                 .Where(whereCondition)
+                                                                                                                 .WithParameters(statementParams)
+                                 );
             }
             else
             {
-                recordsDeleted = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement.Where(whereCondition));
+                recordsDeleted = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement
+                                                                                             .Where(whereCondition)
+                                                                                             .WithParameters(statementParams)
+                );
             }
 
             Assert.That(recordsDeleted, Is.EqualTo(entitiesToDelete.Count()));
@@ -700,7 +781,7 @@
                                     .Top(max));
             foreach (var queriedEntity in queriedEntities)
             {
-                _testContext.RecordInsertedEntity(queriedEntity);
+                _testContext.RecordQueriedEntity(queriedEntity);
             }
         }
 
@@ -711,7 +792,6 @@
             var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>();
             Assert.IsTrue(defaultMapping.IsFrozen);
 
-            var lastNamePropMapping = defaultMapping.GetProperty(employee => employee.LastName);
             try
             {
                 // updates are not possible when the mapping is frozen
@@ -722,7 +802,7 @@
             {
             }
 
-            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName), nameof(Employee.FullName));
+            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName));
 
             foreach (var insertedEntity in _testContext.GetInsertedEntitiesOfType<Employee>())
             {
@@ -740,6 +820,7 @@
                 // now record it with the copied props
                 var updatedEntity = insertedEntity.Clone();
                 updatedEntity.LastName = partialUpdatedEntity.LastName;
+                updatedEntity.FullName = partialUpdatedEntity.FullName;
                 _testContext.RecordUpdatedEntity(updatedEntity);
             }
         }
@@ -899,8 +980,8 @@
                 var dbConnection = _testContext.DatabaseConnection;
                 for (var entityIndex = 0; entityIndex < entityCount; entityIndex++)
                 {
-                    object entityToInsert = insertFunc(entityIndex);
-                    await dbConnection.InsertAsync<TEntity>((TEntity)entityToInsert);
+                    TEntity entityToInsert = insertFunc(entityIndex);
+                    await dbConnection.InsertAsync(entityToInsert);
                     _testContext.RecordInsertedEntity(entityToInsert);
                 }
 
@@ -912,8 +993,8 @@
             var dbConnection = _testContext.DatabaseConnection;
             for(var entityIndex = 0; entityIndex<entityCount; entityIndex++)
             {
-                object entityToInsert = insertFunc(entityIndex);
-                dbConnection.Insert<TEntity>((TEntity)entityToInsert);
+                TEntity entityToInsert = insertFunc(entityIndex);
+                dbConnection.Insert(entityToInsert);
                 _testContext.RecordInsertedEntity(entityToInsert);
             }
         }

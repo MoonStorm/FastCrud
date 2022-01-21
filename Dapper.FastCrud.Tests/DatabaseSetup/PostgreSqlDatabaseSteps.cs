@@ -73,7 +73,7 @@
                 {
                     command.CommandText = $@"
                         CREATE TABLE ""Employee"" (
-	                        ""UserId"" SERIAL,
+	                        ""Id"" SERIAL,
                             ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""LastName"" varchar(100) NOT NULL,
@@ -81,7 +81,7 @@
                             ""FullName"" varchar(200) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
                             ""WorkstationId"" int NULL,
-	                        PRIMARY KEY (""UserId"", ""EmployeeId"")
+	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
 
                         CREATE OR REPLACE FUNCTION computed_full_name()
@@ -110,7 +110,6 @@
                             ""InventoryIndex"" int NOT NULL,
                             ""AccessLevel"" int NOT NULL DEFAULT 1,
                             ""BuildingId"" int NULL,
-                            ""10PinSlots"" int NULL,
 	                        PRIMARY KEY (""WorkstationId"")
                         );
 

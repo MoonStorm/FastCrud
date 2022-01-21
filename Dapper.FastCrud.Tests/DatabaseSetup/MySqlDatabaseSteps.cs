@@ -57,7 +57,7 @@
                     command.CommandText = $@"USE {_testContext.DatabaseName};
 
                         CREATE TABLE `Employee` (
-	                        UserId int NOT NULL AUTO_INCREMENT,
+	                        Id int NOT NULL AUTO_INCREMENT,
                             EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        LastName nvarchar(100) NOT NULL,
@@ -65,7 +65,7 @@
                             FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
                             WorkstationId int NULL,
-	                        PRIMARY KEY (UserId, EmployeeId)
+	                        PRIMARY KEY (Id, EmployeeId)
                         );
 
                         ALTER TABLE `Employee` auto_increment=2;
@@ -82,7 +82,6 @@
                             InventoryIndex int NOT NULL,
                             AccessLevel int NOT NULL DEFAULT 1,
                             BuildingId int NULL,
-                            10PinSlots int NULL,
 	                        PRIMARY KEY (WorkstationId)
                         );
 

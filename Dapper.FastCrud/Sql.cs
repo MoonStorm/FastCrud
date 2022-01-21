@@ -12,6 +12,17 @@
     public static class Sql
     {
         /// <summary>
+        /// Returns a formatter for an SQL parameter, allowing it to be properly formatted.
+        /// </summary>
+        /// <param name="sqlParameterName">An SQL identifier that is not a table or a column name.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IFormattable Parameter(string sqlParameterName)
+        {
+            Requires.NotNullOrEmpty(sqlParameterName, nameof(sqlParameterName));
+            return new SqlParameterFormatter(SqlParameterElementType.Parameter, sqlParameterName, null);
+        }
+
+        /// <summary>
         /// Returns a parameter formatter for an SQL identifier, allowing it to be properly formatted by adding delimiters.
         /// Do not use this method for table or column names.
         /// </summary>

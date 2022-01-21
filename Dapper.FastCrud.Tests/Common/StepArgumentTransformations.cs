@@ -22,22 +22,19 @@
             return false;
         }
 
-        [StepArgumentTransformation("workstation entity")]
-        [StepArgumentTransformation("workstation entities")]
+        [StepArgumentTransformation("workstation")]
         public Type WorkstationEntityToType()
         {
             return typeof(Workstation);
         }
 
-        [StepArgumentTransformation("employee entity")]
-        [StepArgumentTransformation("employee entities")]
+        [StepArgumentTransformation("employee")]
         public Type EmployeeEntityToType()
         {
             return typeof(Employee);
         }
 
-        [StepArgumentTransformation("workstation entity")]
-        [StepArgumentTransformation("workstation entities")]
+        [StepArgumentTransformation("building")]
         public Type BuildingEntityToType()
         {
             return typeof(Building);

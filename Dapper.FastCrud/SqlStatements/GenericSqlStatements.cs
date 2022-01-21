@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Dapper.FastCrud.SqlStatements
+﻿namespace Dapper.FastCrud.SqlStatements
 {
     using System.Collections.Generic;
     using System.Data;
@@ -10,7 +8,6 @@ namespace Dapper.FastCrud.SqlStatements
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlBuilders;
-    using Dapper.FastCrud.Validations;
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
@@ -69,11 +66,12 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var insertStatement = _sqlBuilder.ConstructFullInsertStatement();
             if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
                 var insertedEntity =
                     connection.Query<TEntity>(
-                        _sqlBuilder.ConstructFullInsertStatement(),
+                        insertStatement,
                         entity,
                         transaction: statementOptions.Transaction,
                         commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
@@ -97,12 +95,13 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task InsertAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var insertStatement = _sqlBuilder.ConstructFullInsertStatement();
             if (_sqlBuilder.RefreshOnInsertProperties.Length > 0)
             {
                 var insertedEntity =
                     (await
                      connection.QueryAsync<TEntity>(
-                         _sqlBuilder.ConstructFullInsertStatement(),
+                         insertStatement,
                          entity,
                          transaction: statementOptions.Transaction,
                          commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).FirstOrDefault();
@@ -125,10 +124,11 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool UpdateById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var singleUpdateStatement = _sqlBuilder.ConstructFullSingleUpdateStatement();
             if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
             {
                 var updatedEntity = connection.Query<TEntity>(
-                    _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                    singleUpdateStatement,
                     keyEntity,
                     transaction:
                         statementOptions.Transaction,
@@ -157,10 +157,11 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<bool> UpdateByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var singleUpdateStatement = _sqlBuilder.ConstructFullSingleUpdateStatement();
             if (_sqlBuilder.RefreshOnUpdateProperties.Length > 0)
             {
                 var updatedEntity = (await connection.QueryAsync<TEntity>(
-                    _sqlBuilder.ConstructFullSingleUpdateStatement(),
+                    singleUpdateStatement,
                     keyEntity,
                     transaction: statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds)).FirstOrDefault();
@@ -187,9 +188,16 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkUpdate(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause);
+            var combinedParameters = new DynamicParameters();
+            combinedParameters.AddDynamicParams(entity);
+            if (statementOptions.Parameters != null)
+            {
+                combinedParameters.AddDynamicParams(statementOptions.Parameters);
+            }
             return connection.Execute(
-                _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
-                entity,
+                batchUpdateStatement,
+                combinedParameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
@@ -200,9 +208,16 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause);
+            var combinedParameters = new DynamicParameters();
+            combinedParameters.AddDynamicParams(entity);
+            if (statementOptions.Parameters != null)
+            {
+                combinedParameters.AddDynamicParams(statementOptions.Parameters);
+            }
             return connection.ExecuteAsync(
-                _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause),
-                entity,
+                batchUpdateStatement,
+                combinedParameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
@@ -213,8 +228,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool DeleteById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var singleDeleteStatement = _sqlBuilder.ConstructFullSingleDeleteStatement();
             return connection.Execute(
-                _sqlBuilder.ConstructFullSingleDeleteStatement(),
+                singleDeleteStatement,
                 keyEntity,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
@@ -226,8 +242,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<bool> DeleteByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions<TEntity> statementoptions)
         {
+            var singleDeleteStatement = _sqlBuilder.ConstructFullSingleDeleteStatement();
             return await connection.ExecuteAsync(
-                _sqlBuilder.ConstructFullSingleDeleteStatement(),
+                singleDeleteStatement,
                 keyEntity,
                 transaction: statementoptions.Transaction,
                 commandTimeout: (int?)statementoptions.CommandTimeout?.TotalSeconds) > 0;
@@ -239,8 +256,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkDelete(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause);
             return connection.Execute(
-                _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
+                bulkDeleteStatement,
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout:(int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -252,8 +270,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkDeleteAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause);
             return connection.ExecuteAsync(
-                _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause),
+                bulkDeleteStatement,
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -265,8 +284,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var countStatement = _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause);
             return connection.ExecuteScalar<int>(
-                _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
+                countStatement,
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -278,8 +298,9 @@ namespace Dapper.FastCrud.SqlStatements
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions<TEntity> statementOptions)
         {
+            var countStatement = _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause);
             return connection.ExecuteScalarAsync<int>(
-                _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause),
+                countStatement,
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
@@ -296,12 +317,13 @@ namespace Dapper.FastCrud.SqlStatements
             //    (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
             //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
+            var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
+                whereClause: statementOptions.WhereClause,
+                orderClause: statementOptions.OrderClause,
+                skipRowsCount: statementOptions.SkipResults,
+                limitRowsCount: statementOptions.LimitResults);
             return connection.Query<TEntity>(
-                _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause: statementOptions.WhereClause,
-                    orderClause: statementOptions.OrderClause,
-                    skipRowsCount: statementOptions.SkipResults,
-                    limitRowsCount: statementOptions.LimitResults),
+                selectStatement,
                 statementOptions.Parameters,
                 buffered: !statementOptions.ForceStreamResults,
                 transaction: statementOptions.Transaction,
@@ -319,12 +341,13 @@ namespace Dapper.FastCrud.SqlStatements
             //    (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
             //    || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
+            var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
+                whereClause: statementOptions.WhereClause,
+                orderClause: statementOptions.OrderClause,
+                skipRowsCount: statementOptions.SkipResults,
+                limitRowsCount: statementOptions.LimitResults);
             return connection.QueryAsync<TEntity>(
-                _sqlBuilder.ConstructFullBatchSelectStatement(
-                    whereClause: statementOptions.WhereClause,
-                    orderClause: statementOptions.OrderClause,
-                    skipRowsCount: statementOptions.SkipResults,
-                    limitRowsCount: statementOptions.LimitResults),
+                selectStatement,
                 statementOptions.Parameters,
                 transaction: statementOptions.Transaction,
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
