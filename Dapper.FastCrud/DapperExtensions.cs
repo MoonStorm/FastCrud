@@ -25,9 +25,9 @@ namespace Dapper.FastCrud
         public static TEntity Get<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            Action<ISelectSqlSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<ISelectSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new SelectSqlSqlStatementOptionsBuilder<TEntity>();
+            var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return options.SqlStatementsFactoryChain().SelectById(connection, entityKeys, options);
         }
@@ -43,9 +43,9 @@ namespace Dapper.FastCrud
         public static Task<TEntity> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
-            Action<ISelectSqlSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
+            Action<ISelectSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
         {
-            var options = new SelectSqlSqlStatementOptionsBuilder<TEntity>();
+            var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
             return options.SqlStatementsFactoryChain().SelectByIdAsync(connection, entityKeys, options);
         }

@@ -5,19 +5,19 @@
     /// <summary>
     /// Single statement options builder for a single record select.
     /// </summary>
-    public interface ISelectSqlSqlStatementOptionsBuilder<TEntity>
-        : IRelationalSqlStatementOptionsSetter<TEntity, ISelectSqlSqlStatementOptionsBuilder<TEntity>>, 
-        IStandardSqlStatementOptionsSetter<TEntity, ISelectSqlSqlStatementOptionsBuilder<TEntity>>
+    public interface ISelectSqlStatementOptionsBuilder<TEntity>
+        : IRelationalSqlStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>, 
+        IStandardSqlStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
     {
     }
 
     /// <summary>
     /// Single statement options builder for a single record select.
     /// </summary>
-    internal class SelectSqlSqlStatementOptionsBuilder<TEntity>
-        : AggregatedSqlStatementOptionsBuilder<TEntity, ISelectSqlSqlStatementOptionsBuilder<TEntity>>
-        , ISelectSqlSqlStatementOptionsBuilder<TEntity>
+    internal class SelectSqlStatementOptionsBuilder<TEntity>
+        : AggregatedSqlStatementOptionsBuilder<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
+        , ISelectSqlStatementOptionsBuilder<TEntity>
     {
-        protected override ISelectSqlSqlStatementOptionsBuilder<TEntity> Builder => this;
+        protected override ISelectSqlStatementOptionsBuilder<TEntity> Builder => this;
     }
 }

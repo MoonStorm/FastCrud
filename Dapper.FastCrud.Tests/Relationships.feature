@@ -7,7 +7,7 @@ Scenario Outline: Query single relationship parent with children (build server t
 	When I insert 1 workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for one workstation entity combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -19,7 +19,7 @@ Scenario Outline: Query single relationship parent with children (external datab
 	When I insert 1 workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for one workstation entity combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -33,7 +33,7 @@ Scenario Outline: Query single relationship parents with children (build server 
 	When I insert <parent entity count> workstation entities using <method type> methods
 	And I insert <child entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | parent entity count | child entity count | method type  |
 	| LocalDb       | 10                  | 20                 | synchronous  |
@@ -45,7 +45,7 @@ Scenario Outline: Query single relationship parents with children (external data
 	When I insert <parent entity count> workstation entities using <method type> methods
 	And I insert <child entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | parent entity count | child entity count | method type  |
 	| PostgreSql    | 10                  | 20                 | synchronous  |
@@ -59,7 +59,7 @@ Scenario Outline: Count single relationship parents with children (build server 
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for the count of all the workstation entities combined with the employee entities using <method type> methods
-	Then the database count of the queried entities should be <entity count>
+	Then the result of the last query count should be <entity count>
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -71,7 +71,7 @@ Scenario Outline: Count single relationship parents with children (external data
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for the count of all the workstation entities combined with the employee entities using <method type> methods
-	Then the database count of the queried entities should be <entity count>
+	Then the result of the last query count should be <entity count>
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -85,7 +85,7 @@ Scenario Outline:  Query single relationship children with parents (build server
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the employee entities combined with the workstation entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -97,7 +97,7 @@ Scenario Outline:  Query single relationship children with parents (external dat
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the employee entities combined with the workstation entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -110,7 +110,7 @@ Scenario Outline: Query single relationship children with no parents (build serv
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with the workstation entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -121,7 +121,7 @@ Scenario Outline: Query single relationship children with no parents (external d
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with the workstation entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -134,7 +134,7 @@ Scenario Outline: Query single relationship parents with no children (build serv
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -145,7 +145,7 @@ Scenario Outline: Query single relationship parents with no children (external d
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I query for all the workstation entities combined with the employee entities using <method type> methods
-	Then the queried workstation entities should be the same as the local ones
+	Then the queried workstation entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -160,7 +160,7 @@ Scenario Outline: Query two level relationship grandparents with parents and chi
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the building entities combined with workstation and employee entities using <method type> methods
-	Then the queried building entities should be the same as the local ones
+	Then the queried building entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -173,7 +173,7 @@ Scenario Outline: Query two level relationship grandparents with parents and chi
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the building entities combined with workstation and employee entities using <method type> methods
-	Then the queried building entities should be the same as the local ones
+	Then the queried building entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -188,7 +188,7 @@ Scenario Outline: Query two level relationship children with parents and grandpa
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the employee entities combined with workstation and building entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -201,7 +201,7 @@ Scenario Outline: Query two level relationship children with parents and grandpa
 	And I insert <entity count> workstation entities parented to existing building entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
 	And I query for all the employee entities combined with workstation and building entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -214,7 +214,7 @@ Scenario Outline: Query two level relationship children with no parents or grand
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with workstation and building entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -225,7 +225,7 @@ Scenario Outline: Query two level relationship children with no parents or grand
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for all the employee entities combined with workstation and building entities using <method type> methods
-	Then the queried employee entities should be the same as the local ones
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -238,7 +238,7 @@ Scenario Outline: Count two level relationship children with no parents or grand
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for the count of all the employee entities strictly linked to workstation and building entities using <method type> methods
-	Then the database count of the queried entities should be 0
+	Then the result of the last query count should be 0
 	Examples: 
 	| database type | entity count | method type  |
 	| LocalDb       | 10           | synchronous  |
@@ -249,7 +249,7 @@ Scenario Outline: Count two level relationship children with no parents or grand
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods
 	And I query for the count of all the employee entities strictly linked to workstation and building entities using <method type> methods
-	Then the database count of the queried entities should be 0
+	Then the result of the last query count should be 0
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
