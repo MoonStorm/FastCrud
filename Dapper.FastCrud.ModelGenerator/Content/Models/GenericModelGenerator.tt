@@ -73,19 +73,21 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	<#}
 	if (IncludeRelationships) {
-		var tableKey = (from key in tbl.OuterKeys where col.PropertyName==tbl[key.ReferencingTableColumnName].PropertyName select key).FirstOrDefault();
-		if(tableKey != null){#>    [ForeignKey("<#=tables[tableKey.ReferencedTableName].ClassName#>")]
+		var tableKey = (from key in tbl.RelationshipForeignKeys where key.CurrentTableColumn==col.Name select key).FirstOrDefault();
+		if(tableKey != null){#>    [ForeignKey("<#=tableKey.CurrentEntityPropertyReferencingOtherEntity#>")]
     <#}
 	}#>    public virtual <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
+
 <#}#>
 <# if (IncludeRelationships) { #>
-<#foreach(var tableKey in from k in tbl.OuterKeys group k by k.ReferencedTableName into gk select new {ReferencedTableName=gk.Key, Keys=gk})
-{#>
-		public virtual <#=tables[tableKey.ReferencedTableName].ClassName #> <#=tables[tableKey.ReferencedTableName].ClassName #> { get; set; }
+<#foreach(var tableKey in (from key in tbl.RelationshipForeignKeys select key))
+{#>		public virtual <#=tables[tableKey.OuterTableName].ClassName #> <#=tableKey.CurrentEntityPropertyReferencingOtherEntity #> { get; set; }
+
 <#}#>
-<#foreach(var tableKey in from k in tbl.InnerKeys group k by k.ReferencingTableName into gk select new {ReferencingTableName=gk.Key, Keys=gk})
-{#>
-		public virtual IEnumerable<<#=tables[tableKey.ReferencingTableName].ClassName #>> <#=Pluralize(tables[tableKey.ReferencingTableName].CleanName) #> { get; set; }
+<#foreach(var tableKey in (from key in tbl.RelationshipPrimaryKeys select key))
+{#>        [InverseProperty("<#=tables[tableKey.OuterTableName][tableKey.OuterTableColumn].PropertyName#>")]
+		public virtual IEnumerable<<#=tables[tableKey.OuterTableName].ClassName #>> <#=tableKey.CurrentEntityPropertyReferencingOtherEntities #> { get; set; }
+
 <#}#>
 <#}#>
 	}
@@ -97,6 +99,7 @@ foreach(Table tbl in tables.Where(t=> !t.Ignore)){
 string ConnectionStringName = "";
 string ConfigPath = "";
 string Namespace = "";
+string InvalidPropertyNamePrefix = "P";
 string ClassPrefix = "";
 string ClassSuffix = "";
 string SchemaName = null;
@@ -105,83 +108,12 @@ bool IncludeRelationships = false;
 bool IgnoreColumnDefaultValues = true;
 string[] ExcludeTablePrefixes = new string[]{};
 
-public class Table
-{
-    public List<Column> Columns;	
-	public List<Key> InnerKeys = new List<Key>();
-    public List<Key> OuterKeys = new List<Key>(); 
-    public string Name;
-	public string Schema;
-	public bool IsView;
-    public string CleanName;
-    public string ClassName;
-	public string SequenceName;
-	public bool Ignore;
-	public string Description;
+// we'll uppercase all the chars in the name that match the following regex: 
+// \p{L} = all letters in unicode
+static Regex NameTitleCaseUppercaseRegex = new Regex(@"(?<=(^|[^\p{L}]))\p{L}", RegexOptions.IgnoreCase);
 
-	public Column GetColumn(string columnName)
-	{
-		return Columns.Single(x=>string.Compare(x.Name, columnName, true)==0);
-	}
-
-	public Column this[string columnName]
-	{
-		get
-		{
-			return GetColumn(columnName);
-		}
-	}
-
-}
-
-public class Column
-{
-    public string Name;
-    public string PropertyName;
-    public string PropertyType;
-    public bool IsPK;
-	public bool HasDefaultValue;
-    public bool IsNullable;
-	public bool IsAutoIncrement;
-	public bool IsComputed;
-	public bool Ignore;
-	public bool IsGeneratedUniqueIdentifier;
-	public string Description;
-}
-
-public class Key
-{
-    public string Name;
-    public string ReferencedTableName;
-    public string ReferencedTableColumnName;
-    public string ReferencingTableName;
-    public string ReferencingTableColumnName;
-}
-
-public class Tables : List<Table>
-{
-	public Tables()
-	{
-	}
-	
-	public Table GetTable(string tableName)
-	{
-		return this.Single(x=>string.Compare(x.Name, tableName, true)==0);
-	}
-
-	public Table this[string tableName]
-	{
-		get
-		{
-			return GetTable(tableName);
-		}
-	}
-
-}
-
-static Regex rxCleanUp = new Regex(@"[^\w\d_]", RegexOptions.Compiled);
-
-static string[] cs_keywords = { "abstract", "event", "new", "struct", "as", "explicit", "null", 
+// we'll prefix the name if it starts with the following:
+static string[] ReservedFullNames = { "abstract", "event", "new", "struct", "as", "explicit", "null", 
 	"switch", "base", "extern", "object", "this", "bool", "false", "operator", "throw", 
 	"break", "finally", "out", "true", "byte", "fixed", "override", "try", "case", "float", 
 	"params", "typeof", "catch", "for", "private", "uint", "char", "foreach", "protected", 
@@ -189,619 +121,816 @@ static string[] cs_keywords = { "abstract", "event", "new", "struct", "as", "exp
 	"const", "implicit", "ref", "ushort", "continue", "in", "return", "using", "decimal", 
 	"int", "sbyte", "virtual", "default", "interface", "sealed", "volatile", "delegate", 
 	"internal", "short", "void", "do", "is", "sizeof", "while", "double", "lock", 
-	"stackalloc", "else", "long", "static", "enum", "namespace", "string" };
-
-static Func<string, string> CleanUp = (str) =>
-{
-	str = rxCleanUp.Replace(str, "_");
-	if (char.IsDigit(str[0])) str = "_" + str;
-
-	if (cs_keywords.Contains(str))
-		str = "@" + str;
-
-    return str;
+	"stackalloc", "else", "long", "static", "enum", "namespace", "string",
+	"Equals", "GetHashCode","GetType","ToString","repo","Save","IsNew","Insert","Update",
+	"Delete","Exists","SingleOrDefault","Single","First","FirstOrDefault","Fetch","Page","Query"
 };
 
-string CheckNullable(Column col)
-{
-    string result="";
-    if(col.IsNullable && 
-		col.PropertyType !="byte[]" && 
-		col.PropertyType !="string" &&
-		col.PropertyType !="Microsoft.SqlServer.Types.SqlGeography" &&
-		col.PropertyType !="Microsoft.SqlServer.Types.SqlGeometry"
-		)
-        result="?";
-    return result;
-}
+// we'll prefix the name if it starts with the following regex: 
+static Regex ReservedStartNameRegex = new Regex(@"^(\d)|(tbl)", RegexOptions.IgnoreCase);
 
-string GetConnectionString(ref string connectionStringName, out string providerName)
-{
-    var _CurrentProject = GetCurrentProject();
+// we'll remove the following instances of regex, no matter where they are in the name:
+static Regex InvalidNamePortionRegex = new Regex(@"([\s_]+)|(tbl)", RegexOptions.IgnoreCase);
 
-	providerName=null;
-    
-    string result="";
-    ExeConfigurationFileMap configFile = new ExeConfigurationFileMap();
-    configFile.ExeConfigFilename = GetConfigPath();
-
-    if (string.IsNullOrEmpty(configFile.ExeConfigFilename))
-        throw new ArgumentNullException("The project does not contain App.config or Web.config file.");
-    
-    
-    var config = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
-    var connSection=config.ConnectionStrings;
-
-    //if the connectionString is empty - which is the defauls
-    //look for count-1 - this is the last connection string
-    //and takes into account AppServices and LocalSqlServer
-    if(string.IsNullOrEmpty(connectionStringName))
-    {
-        if(connSection.ConnectionStrings.Count>1)
-        {
-			connectionStringName = connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].Name;
-            result=connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].ConnectionString;
-            providerName=connSection.ConnectionStrings[connSection.ConnectionStrings.Count-1].ProviderName;
-        }            
-    }
-    else
-    {
-        try
-        {
-            result=connSection.ConnectionStrings[connectionStringName].ConnectionString;
-            providerName=connSection.ConnectionStrings[connectionStringName].ProviderName;
-        }
-        catch
-        {
-            result="There is no connection string name called '"+connectionStringName+"'";
-        }
-    }
-
-//	if (String.IsNullOrEmpty(providerName))
-//		providerName="System.Data.SqlClient";
-    
-    return result;
-}
-
-string _connectionString="";
-string _providerName="";
-
-void InitConnectionString()
-{
-    if(String.IsNullOrEmpty(_connectionString))
-    {
-        _connectionString=GetConnectionString(ref ConnectionStringName, out _providerName);
-
-		if(_connectionString.Contains("|DataDirectory|"))
+	static string ToFirstUppercase(string s)
+	{
+		if (s == null || s.Length == 0)
 		{
-			//have to replace it
-			string dataFilePath=GetDataDirectory();
-			_connectionString=_connectionString.Replace("|DataDirectory|",dataFilePath);
-		}    
-	}
-}
-
-public string ConnectionString
-{
-    get 
-    {
-		InitConnectionString();
-        return _connectionString;
-    }
-}
-
-public string ProviderName
-{
-    get 
-    {
-		InitConnectionString();
-        return _providerName;
-    }
-}
-
-public EnvDTE.Project GetCurrentProject()  {
-
-    IServiceProvider _ServiceProvider = (IServiceProvider)Host;
-    if (_ServiceProvider == null)
-        throw new Exception("Host property returned unexpected value (null)");
-	
-    // EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetService(typeof(EnvDTE.DTE));
-	EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetCOMService(typeof(EnvDTE.DTE));
-    if (dte == null)
-        throw new Exception("Unable to retrieve EnvDTE.DTE");
-	
-    Array activeSolutionProjects = (Array)dte.ActiveSolutionProjects;
-    if (activeSolutionProjects == null)
-        throw new Exception("DTE.ActiveSolutionProjects returned null");
-	
-    EnvDTE.Project dteProject = (EnvDTE.Project)activeSolutionProjects.GetValue(0);
-    if (dteProject == null)
-        throw new Exception("DTE.ActiveSolutionProjects[0] returned null");
-	
-    return dteProject;
-
-}
-
-private string GetProjectPath()
-{
-    EnvDTE.Project project = GetCurrentProject();
-    System.IO.FileInfo info = new System.IO.FileInfo(project.FullName);
-    return info.Directory.FullName;
-}
-
-private string GetConfigPath()
-{
-	if(ConfigPath !="")
-		return Host.ResolvePath(ConfigPath);
-
-    EnvDTE.Project project = GetCurrentProject();
-    foreach (EnvDTE.ProjectItem item in project.ProjectItems)
-    {
-        // if it is the app.config file, then open it up
-        if (item.Name.Equals("App.config",StringComparison.InvariantCultureIgnoreCase) || item.Name.Equals("Web.config",StringComparison.InvariantCultureIgnoreCase))
-			return GetProjectPath() + "\\" + item.Name;
-    }
-    return String.Empty;
-}
-
-public string GetDataDirectory()
-{
-    EnvDTE.Project project=GetCurrentProject();
-    return System.IO.Path.GetDirectoryName(project.FileName)+"\\App_Data\\";
-}
-
-static string RemovePassword(string connectionString)
-{
-	var rx = new Regex("Password=.*;", RegexOptions.Singleline | RegexOptions.Multiline | RegexOptions.IgnoreCase);
-	return rx.Replace(connectionString, "Password=******;");
-}
-
-static string Singularize(string word)
-{
-	var singularword = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Singularize(word);
-	return singularword;
-}
-
-static string Pluralize(string word)
-{
-	var pluralWord = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Pluralize(word);
-	return pluralWord;
-}
-		
-static string RemoveTablePrefixes(string word)
-{
-	var cleanword = word;
-	if(cleanword.StartsWith("tbl_")) cleanword = cleanword.Replace("tbl_",""); 
-	if(cleanword.StartsWith("tbl")) cleanword = cleanword.Replace("tbl",""); 
-	cleanword = cleanword.Replace("_","");
-	return cleanword;
-}
-
-static bool IsExcluded(string schemaname, string tablename, string[] ExcludeTablePrefixes)
-{
-	for (int i = 0; i < ExcludeTablePrefixes.Length; i++)
-	{
-		string s = ExcludeTablePrefixes[i];
-		if(tablename.StartsWith(s)) return true;
-		if((schemaname+"."+tablename).StartsWith(s)) return true;
-	}
-	return false;
-}
-
-Tables LoadTables()
-{
-	InitConnectionString();
-
-	WriteLine("// This file was automatically generated by the Dapper.FastCRUD T4 Template");
-	WriteLine("// Do not make changes directly to this file - edit the template configuration instead");
-	WriteLine("// ");
-	WriteLine("// The following connection settings were used to generate this file");
-	WriteLine("// ");
-	WriteLine("//     Connection String Name: `{0}`", ConnectionStringName);
-	WriteLine("//     Provider:               `{0}`", ProviderName);
-	// For security reasons, do not include this information
-	//WriteLine("//     Connection String:      `{0}`", RemovePassword(ConnectionString));
-	WriteLine("//     Include Views:          `{0}`", IncludeViews);
-	WriteLine("");
-
-	DbProviderFactory _factory;
-	try
-	{
-		_factory = DbProviderFactories.GetFactory(ProviderName);
-	}
-	catch (Exception x)
-	{
-		var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
-		Warning(string.Format("Failed to load provider `{0}` - {1}", ProviderName, error));
-		WriteLine("");
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("// Failed to load provider `{0}` - {1}", ProviderName, error);
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("");
-		return new Tables();
-	}
-
-	try
-	{
-		Tables result;
-		using(var conn=_factory.CreateConnection())
-		{
-			conn.ConnectionString=ConnectionString;         
-			conn.Open();
-        
-			SchemaReader reader=null;
-        
-			// Assume SQL Server
-			reader=new SqlServerSchemaReader();
-			
-			reader.outer=this;
-			result=reader.ReadSchema(conn, _factory);
-
-			// Remove unrequired tables/views
-			for (int i=result.Count-1; i>=0; i--)
-			{
-				if (SchemaName!=null && string.Compare(result[i].Schema, SchemaName, true)!=0)
-				{
-					result.RemoveAt(i);
-					continue;
-				}
-				if (!IncludeViews && result[i].IsView)
-				{
-					result.RemoveAt(i);
-					continue;
-				}
-			}
-
-			conn.Close();
-
-
-			var rxClean = new Regex("^(Equals|GetHashCode|GetType|ToString|repo|Save|IsNew|Insert|Update|Delete|Exists|SingleOrDefault|Single|First|FirstOrDefault|Fetch|Page|Query)$");
-			foreach (var t in result)
-			{
-				t.ClassName = ClassPrefix + t.ClassName + ClassSuffix;
-				foreach (var c in t.Columns)
-				{
-					c.PropertyName = rxClean.Replace(c.PropertyName, "_$1");
-
-					// Make sure property name doesn't clash with class name
-					if (c.PropertyName == t.ClassName)
-						c.PropertyName = "_" + c.PropertyName;
-				}
-			}
-
-		    return result;
+			return s;
 		}
-	}
-	catch (Exception x)
-	{
-		var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
-		Warning(string.Format("Failed to read database schema - {0}", error));
-		WriteLine("");
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("// Failed to read database schema - {0}", error);
-		WriteLine("// -----------------------------------------------------------------------------------------");
-		WriteLine("");
-		return new Tables();
+
+		return char.ToUpper(s[0], CultureInfo.CurrentCulture) + s.Substring(1);
 	}
 
-        
-}
-
-abstract class SchemaReader
-{
-	public abstract Tables ReadSchema(DbConnection connection, DbProviderFactory factory);
-	public GeneratedTextTransformation outer;
-	public void WriteLine(string o)
+	static string ToTitleCase(string inputString)
 	{
-		outer.WriteLine(o);
-	}
-
-}
-
-class SqlServerSchemaReader : SchemaReader
-{
-	// SchemaReader.ReadSchema
-	public override Tables ReadSchema(DbConnection connection, DbProviderFactory factory)
-	{
-		var result=new Tables();
-		
-		_connection=connection;
-		_factory=factory;
-
-		var cmd=_factory.CreateCommand();
-		cmd.Connection=connection;
-		cmd.CommandText=TABLE_SQL;
-
-		//pull the tables in a reader
-		using(cmd)
+		if (string.IsNullOrEmpty(inputString))
 		{
+			return inputString;
+		}
 
-			using (var rdr=cmd.ExecuteReader())
+		var outputString = NameTitleCaseUppercaseRegex.Replace(inputString,
+		                                                       match =>
+		                                                       {
+			                                                       return match.Value.ToUpper(CultureInfo.CurrentCulture);
+		                                                       });
+		return outputString;
+	}
+
+	static string Singularize(string word)
+	{
+		var singularword = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Singularize(word);
+		return singularword;
+	}
+
+	static string Pluralize(string word)
+	{
+		var pluralWord = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(System.Globalization.CultureInfo.GetCultureInfo("en-us")).Pluralize(word);
+		return pluralWord;
+	}
+
+	static bool IsExcluded(string schemaname, string tablename, string[] ExcludeTablePrefixes)
+	{
+		for (int i = 0; i < ExcludeTablePrefixes.Length; i++)
+		{
+			string s = ExcludeTablePrefixes[i];
+			if (tablename.StartsWith(s)) return true;
+			if ((schemaname + "." + tablename).StartsWith(s)) return true;
+		}
+		return false;
+	}
+
+	public class Table
+	{
+		private string _invalidPropertyNamePrefix;
+		public List<Column> Columns = new List<Column>();
+		public List<PrimaryRelationshipKey> RelationshipPrimaryKeys = new List<PrimaryRelationshipKey>();
+		public List<ForeignRelationshipKey> RelationshipForeignKeys = new List<ForeignRelationshipKey>();
+		public string Name;
+		public string Schema;
+		public bool IsView;
+		public string ClassName;
+		public string SequenceName;
+		public bool Ignore;
+		public string Description;
+
+		public Table(string invalidPropertyNamePrefix)
+		{
+			_invalidPropertyNamePrefix = invalidPropertyNamePrefix;
+		}
+
+		public Column GetColumn(string columnName)
+		{
+			return this.Columns.Single(x => string.Equals(x.Name, columnName, StringComparison.CurrentCultureIgnoreCase));
+		}
+
+		public Column this[string columnName]
+		{
+			get
 			{
-				while(rdr.Read())
-				{
-					Table tbl=new Table();
-					tbl.Name=rdr["TABLE_NAME"].ToString();
-					tbl.Schema=rdr["TABLE_SCHEMA"].ToString();
-					tbl.IsView=string.Compare(rdr["TABLE_TYPE"].ToString(), "View", true)==0;
-					tbl.CleanName=CleanUp(tbl.Name);
-					if(tbl.CleanName.StartsWith("tbl_")) tbl.CleanName = tbl.CleanName.Replace("tbl_",""); 
-					if(tbl.CleanName.StartsWith("tbl")) tbl.CleanName = tbl.CleanName.Replace("tbl",""); 
-					tbl.CleanName = tbl.CleanName.Replace("_","");
-					tbl.ClassName=Singularize(RemoveTablePrefixes(tbl.CleanName));
-					tbl.Description=rdr["TABLE_DESCRIPTION"] as string;
-
-					result.Add(tbl);
-				}
+				return GetColumn(columnName);
 			}
 		}
 
-		foreach (var tbl in result)
+		public string GetNewValidPropertyName(string newPropNameHint)
 		{
-			tbl.Columns=LoadColumns(tbl);
-		            
-			// Mark the primary keys
-			var primaryKeys=GetPKs(tbl.Name).Select(pk => pk.ToLower().Trim());
-			foreach(var pkColumn in tbl.Columns.Where( tblCol => primaryKeys.Any(pk => pk == tblCol.Name.ToLower().Trim()))){
-				pkColumn.IsPK = true;	
+			var propName = newPropNameHint;
+
+			// In case of a full reserved name, prepend the whole name
+			if (ReservedFullNames.Any(reservedFullName => string.Equals(reservedFullName, propName, StringComparison.CurrentCultureIgnoreCase)))
+			{
+				if (string.IsNullOrEmpty(_invalidPropertyNamePrefix))
+				{
+					throw new ArgumentException($"Invalid property name '{propName}' (reserved name). Check the wiki for instructions on how to tweak the template parameters.");
+				}
+				propName = $"{_invalidPropertyNamePrefix}{ToFirstUppercase(propName)}";
 			}
 
-			// Mark the columns with default columns
-			var defaultCols=GetColumnsWithDefaultValues(tbl.Name).Select(pk => pk.ToLower().Trim());
-			foreach(var pkColumn in tbl.Columns.Where( tblCol => defaultCols.Any(pk => pk == tblCol.Name.ToLower().Trim()))){
-				pkColumn.HasDefaultValue = true;	
+			// before we go with checking the characters, we need to convert it to title case
+			propName = ToTitleCase(propName);
+
+			// if they start with something bad, prepend it
+			if (ReservedStartNameRegex.Matches(propName).Count > 0)
+			{
+				propName = $"{_invalidPropertyNamePrefix}{ToFirstUppercase(propName)}";
 			}
 
+			// if any of it contains invalid characters, remove them
+			propName = InvalidNamePortionRegex.Replace(propName, "");
+
+			// now we need to check with the rest of property names already reserved
+			var basePropName = propName;
+			var prefixCount = 1;
+			while (this.Columns.Select(col => col.PropertyName)
+			           .Concat(this.RelationshipPrimaryKeys.Select(key => key.CurrentEntityPropertyReferencingOtherEntities))
+			           .Concat(this.RelationshipForeignKeys.Select(key => key.CurrentEntityPropertyReferencingOtherEntity))
+			           .Concat(new []{this.ClassName})
+			           .Contains(propName))
+			{
+				propName = basePropName + prefixCount.ToString();
+				prefixCount++;
+			}
+
+			return propName;
+		}
+	}
+
+	public class Column
+	{
+		public string Name;
+		public string PropertyName;
+		public string PropertyType;
+		public bool IsPK;
+		public bool HasDefaultValue;
+		public bool IsNullable;
+		public bool IsAutoIncrement;
+		public bool IsComputed;
+		public bool Ignore;
+		public bool IsGeneratedUniqueIdentifier;
+		public string Description;
+	}
+
+	public class RelationshipKey
+	{
+		public string Name;
+		public string CurrentTableColumn;
+		public string OuterTableName;
+		public string OuterTableColumn;
+	}
+
+	public class PrimaryRelationshipKey: RelationshipKey
+	{
+		public string CurrentEntityPropertyReferencingOtherEntities;
+	}
+
+	public class ForeignRelationshipKey: RelationshipKey
+	{
+		public string CurrentEntityPropertyReferencingOtherEntity;
+	}
+
+	public class Tables : List<Table>
+	{
+		public Tables()
+		{
+		}
+
+		public Table GetTable(string tableName)
+		{
+			return this.Single(x => string.Compare(x.Name, tableName, true) == 0);
+		}
+
+		public Table this[string tableName]
+		{
+			get
+			{
+				return GetTable(tableName);
+			}
+		}
+
+		public string GetNewValidClassName(string newClassNameHint)
+		{
+			var className = newClassNameHint;
+
+			// In case of a full reserved name, prepend the whole name
+			if (ReservedFullNames.Any(reservedFullName => string.Equals(reservedFullName, className, StringComparison.CurrentCultureIgnoreCase)))
+			{
+				// this should not happen and can be fixed by changing the template parameters
+				throw new ArgumentException($"Invalid class name '{newClassNameHint}' (reserved word). Check the wiki for instructions on how to tweak the template parameters.");
+			}
+
+			// before we go with checking the characters, we need to convert it to title case
+			className = ToTitleCase(className);
+
+			// if they start with something bad, remove it
+			className = InvalidNamePortionRegex.Replace(className, "");
+
+			if (className == string.Empty)
+			{
+				throw new ArgumentException($"Invalid table name (empty class names).");
+			}
+
+			if (this.Any(table => string.Equals(table.ClassName, className, StringComparison.CurrentCultureIgnoreCase)))
+			{
+				throw new ArgumentException($"Invalid class name '{newClassNameHint}' (duplicate class names).");
+			}
+
+			return className;
+		}
+
+	}
+
+	string CheckNullable(Column col)
+	{
+		string result = "";
+		if (col.IsNullable &&
+		    col.PropertyType != "byte[]" &&
+		    col.PropertyType != "string" &&
+		    col.PropertyType != "Microsoft.SqlServer.Types.SqlGeography" &&
+		    col.PropertyType != "Microsoft.SqlServer.Types.SqlGeometry"
+			)
+			result = "?";
+		return result;
+	}
+
+	string GetConnectionString(ref string connectionStringName, out string providerName)
+	{
+		var currentProject = GetCurrentProject();
+
+		providerName = null;
+
+		string result = "";
+		ExeConfigurationFileMap configFile = new ExeConfigurationFileMap();
+		configFile.ExeConfigFilename = GetConfigPath();
+
+		if (string.IsNullOrEmpty(configFile.ExeConfigFilename))
+			throw new ArgumentNullException("The project does not contain App.config or Web.config file.");
+
+
+		var config = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);
+		var connSection = config.ConnectionStrings;
+
+		//if the connectionString is empty - which is the defauls
+		//look for count-1 - this is the last connection string
+		//and takes into account AppServices and LocalSqlServer
+		if (string.IsNullOrEmpty(connectionStringName))
+		{
+			if (connSection.ConnectionStrings.Count > 1)
+			{
+				connectionStringName = connSection.ConnectionStrings[connSection.ConnectionStrings.Count - 1].Name;
+				result = connSection.ConnectionStrings[connSection.ConnectionStrings.Count - 1].ConnectionString;
+				providerName = connSection.ConnectionStrings[connSection.ConnectionStrings.Count - 1].ProviderName;
+			}
+		}
+		else
+		{
 			try
-		    {
-		        tbl.OuterKeys = LoadOuterKeys(tbl);
-		        tbl.InnerKeys = LoadInnerKeys(tbl);
-		    }
-		    catch (Exception x)
-		    {
-		        var error=x.Message.Replace("\r\n", "\n").Replace("\n", " ");
-				WriteLine("");
-				WriteLine("// -----------------------------------------------------------------------------------------");
-				WriteLine(String.Format("// Failed to get relationships for `{0}` - {1}", tbl.Name, error));
-				WriteLine("// -----------------------------------------------------------------------------------------");
-				WriteLine("");
-		    }
+			{
+				result = connSection.ConnectionStrings[connectionStringName].ConnectionString;
+				providerName = connSection.ConnectionStrings[connectionStringName].ProviderName;
+			}
+			catch
+			{
+				result = "There is no connection string name called '" + connectionStringName + "'";
+			}
 		}
-	    
+
+		//	if (String.IsNullOrEmpty(providerName))
+		//		providerName="System.Data.SqlClient";
 
 		return result;
 	}
-	
-	DbConnection _connection;
-	DbProviderFactory _factory;
-	
 
-	List<Column> LoadColumns(Table tbl)
+	string _connectionString="";
+	string _providerName="";
+
+	void InitConnectionString()
 	{
-	
-		using (var cmd=_factory.CreateCommand())
+		if (String.IsNullOrEmpty(_connectionString))
 		{
-			cmd.Connection=_connection;
-			cmd.CommandText=COLUMN_SQL;
+			_connectionString = GetConnectionString(ref ConnectionStringName, out _providerName);
 
-			var p = cmd.CreateParameter();
-			p.ParameterName = "@tableName";
-			p.Value=tbl.Name;
-			cmd.Parameters.Add(p);
-
-			p = cmd.CreateParameter();
-			p.ParameterName = "@schemaName";
-			p.Value=tbl.Schema;
-			cmd.Parameters.Add(p);
-
-			var result=new List<Column>();
-			using (IDataReader rdr=cmd.ExecuteReader())
+			if (_connectionString.Contains("|DataDirectory|"))
 			{
-				while(rdr.Read())
-				{
-					Column col=new Column();
-					col.Name=rdr["ColumnName"].ToString();
-					col.IsComputed=((int)rdr["IsComputed"])==1;
-					col.PropertyName=CleanUp(col.Name);
-					col.PropertyType=GetPropertyType(rdr["DataType"].ToString());
-					col.IsNullable=rdr["IsNullable"].ToString()=="YES";
-					col.IsAutoIncrement=((int)rdr["IsIdentity"])==1;
-					col.IsGeneratedUniqueIdentifier = rdr["DefaultSetting"].ToString().ToLower().Trim(' ','(',')')=="newid";
-					col.Description = rdr["Description"] as string ?? ((rdr["ColumnName"] as string) + " Column");
-					result.Add(col);
-				}
+				//have to replace it
+				string dataFilePath = GetDataDirectory();
+				_connectionString = _connectionString.Replace("|DataDirectory|", dataFilePath);
 			}
-
-			return result;
 		}
 	}
 
-	List<Key> LoadOuterKeys(Table tbl)
+	public string ConnectionString
 	{
-		using (var cmd=_factory.CreateCommand())
+		get
 		{
-			cmd.Connection=_connection;
-			cmd.CommandText=OUTER_KEYS_SQL;
-
-			var p = cmd.CreateParameter();
-			p.ParameterName = "@tableName";
-			p.Value=tbl.Name;
-			cmd.Parameters.Add(p);
-
-			var result=new List<Key>();
-			using (IDataReader rdr=cmd.ExecuteReader())
-			{
-				while(rdr.Read())
-				{
-					var key=new Key();
-					key.Name=rdr["FK"].ToString();
-				    key.ReferencedTableName = rdr["Referenced_tbl"].ToString();
-				    key.ReferencedTableColumnName = rdr["Referenced_col"].ToString();
-				    key.ReferencingTableColumnName = rdr["Referencing_col"].ToString();
-					result.Add(key);
-				}
-			}
-
-			return result;
+			InitConnectionString();
+			return _connectionString;
 		}
 	}
 
-	List<Key> LoadInnerKeys(Table tbl)
+	public string ProviderName
 	{
-		using (var cmd=_factory.CreateCommand())
+		get
 		{
-			cmd.Connection=_connection;
-			cmd.CommandText=INNER_KEYS_SQL;
-
-			var p = cmd.CreateParameter();
-			p.ParameterName = "@tableName";
-			p.Value=tbl.Name;
-			cmd.Parameters.Add(p);
-
-			var result=new List<Key>();
-			using (IDataReader rdr=cmd.ExecuteReader())
-			{
-				while(rdr.Read())
-				{
-					var key=new Key();
-					key.Name=rdr["FK"].ToString();
-				    key.ReferencingTableName = rdr["Referencing_tbl"].ToString();
-				    key.ReferencedTableColumnName = rdr["Referenced_col"].ToString();
-				    key.ReferencingTableColumnName = rdr["Referencing_col"].ToString();
-					result.Add(key);
-				}
-			}
-
-			return result;
+			InitConnectionString();
+			return _providerName;
 		}
 	}
 
-	List<string> GetPKs(string table){
-		
-		string sql=@"SELECT c.name AS ColumnName
+	public EnvDTE.Project GetCurrentProject()
+	{
+
+		IServiceProvider _ServiceProvider = (IServiceProvider)Host;
+		if (_ServiceProvider == null)
+			throw new Exception("Host property returned unexpected value (null)");
+
+		// EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetService(typeof(EnvDTE.DTE));
+		EnvDTE.DTE dte = (EnvDTE.DTE)_ServiceProvider.GetCOMService(typeof(EnvDTE.DTE));
+		if (dte == null)
+			throw new Exception("Unable to retrieve EnvDTE.DTE");
+
+		Array activeSolutionProjects = (Array)dte.ActiveSolutionProjects;
+		if (activeSolutionProjects == null)
+			throw new Exception("DTE.ActiveSolutionProjects returned null");
+
+		EnvDTE.Project dteProject = (EnvDTE.Project)activeSolutionProjects.GetValue(0);
+		if (dteProject == null)
+			throw new Exception("DTE.ActiveSolutionProjects[0] returned null");
+
+		return dteProject;
+
+	}
+
+	private string GetProjectPath()
+	{
+		EnvDTE.Project project = GetCurrentProject();
+		System.IO.FileInfo info = new System.IO.FileInfo(project.FullName);
+		return info.Directory.FullName;
+	}
+
+	private string GetConfigPath()
+	{
+		if (ConfigPath != "")
+			return Host.ResolvePath(ConfigPath);
+
+		EnvDTE.Project project = GetCurrentProject();
+		foreach (EnvDTE.ProjectItem item in project.ProjectItems)
+		{
+			// if it is the app.config file, then open it up
+			if (item.Name.Equals("App.config", StringComparison.InvariantCultureIgnoreCase) || item.Name.Equals("Web.config", StringComparison.InvariantCultureIgnoreCase))
+				return GetProjectPath() + "\\" + item.Name;
+		}
+		return String.Empty;
+	}
+
+	public string GetDataDirectory()
+	{
+		EnvDTE.Project project = GetCurrentProject();
+		return System.IO.Path.GetDirectoryName(project.FileName) + "\\App_Data\\";
+	}
+
+	public string RemovePassword(string connectionString)
+	{
+		var rx = new Regex("Password=.*;", RegexOptions.Singleline | RegexOptions.Multiline | RegexOptions.IgnoreCase);
+		return rx.Replace(connectionString, "Password=******;");
+	}
+
+	Tables LoadTables()
+	{
+		InitConnectionString();
+
+		WriteLine("// This file was automatically generated by the Dapper.FastCRUD T4 Template");
+		WriteLine("// Do not make changes directly to this file - edit the template configuration instead");
+		WriteLine("// ");
+		WriteLine("// The following connection settings were used to generate this file");
+		WriteLine("// ");
+		WriteLine("//     Connection String Name: `{0}`", ConnectionStringName);
+		WriteLine("//     Provider:               `{0}`", ProviderName);
+		// For security reasons, do not include this information
+		//WriteLine("//     Connection String:      `{0}`", RemovePassword(ConnectionString));
+		WriteLine("//     Include Views:          `{0}`", IncludeViews);
+		WriteLine("");
+
+		DbProviderFactory _factory;
+		try
+		{
+			_factory = DbProviderFactories.GetFactory(ProviderName);
+		}
+		catch (Exception x)
+		{
+			var error = x.Message.Replace("\r\n", "\n").Replace("\n", " ");
+			Warning(string.Format("Failed to load provider `{0}` - {1}", ProviderName, error));
+			WriteLine("");
+			WriteLine("// -----------------------------------------------------------------------------------------");
+			WriteLine("// Failed to load provider `{0}` - {1}", ProviderName, error);
+			WriteLine("// -----------------------------------------------------------------------------------------");
+			WriteLine("");
+			return new Tables();
+		}
+
+		try
+		{
+			Tables result;
+			using (var conn = _factory.CreateConnection())
+			{
+				conn.ConnectionString = ConnectionString;
+				conn.Open();
+
+				SchemaReader reader = null;
+
+				// Assume SQL Server
+				reader = new SqlServerSchemaReader(
+					this.ClassPrefix,
+					this.ClassSuffix,
+					this.InvalidPropertyNamePrefix,
+					this.IncludeRelationships);
+
+				reader.outer = this;
+				result = reader.ReadSchema(conn, _factory);
+
+				// Remove unrequired tables/views
+				for (int i = result.Count - 1; i >= 0; i--)
+				{
+					if (SchemaName != null && string.Compare(result[i].Schema, SchemaName, true) != 0)
+					{
+						result.RemoveAt(i);
+						continue;
+					}
+					if (!IncludeViews && result[i].IsView)
+					{
+						result.RemoveAt(i);
+						continue;
+					}
+				}
+
+				conn.Close();
+
+
+				return result;
+			}
+		}
+		catch (Exception x)
+		{
+			var error = x.Message.Replace("\r\n", "\n").Replace("\n", " ");
+			Warning(string.Format("Failed to read database schema - {0}", error));
+			WriteLine("");
+			WriteLine("// -----------------------------------------------------------------------------------------");
+			WriteLine("// Failed to read database schema - {0}", error);
+			WriteLine("// -----------------------------------------------------------------------------------------");
+			WriteLine("");
+			return new Tables();
+		}
+	}
+
+	public abstract class SchemaReader
+	{
+		public abstract Tables ReadSchema(DbConnection connection, DbProviderFactory factory);
+
+		public GeneratedTextTransformation outer;
+
+		public void WriteLine(string o)
+		{
+			outer.WriteLine(o);
+		}
+
+	}
+
+	public class SqlServerSchemaReader : SchemaReader
+	{
+		private readonly string _invalidPropertyNamePrefix;
+		private readonly bool _includeRelationships;
+		private readonly string _tablePrefix;
+		private readonly string _tableSuffix;
+
+		public SqlServerSchemaReader(
+			string tablePrefix,
+			string tableSuffix,
+			string invalidPropertyNamePrefix, 
+			bool includeRelationships)
+		{
+			_tablePrefix = tablePrefix;
+			_tableSuffix = tableSuffix;
+			_invalidPropertyNamePrefix = invalidPropertyNamePrefix;
+			_includeRelationships = includeRelationships;
+		}
+
+		public override Tables ReadSchema(
+			DbConnection connection,
+			DbProviderFactory factory)
+		{
+			var discoveredTables = new Tables();
+
+			_connection = connection;
+			_factory = factory;
+
+			var cmd = _factory.CreateCommand();
+			cmd.Connection = connection;
+			cmd.CommandText = TABLE_SQL;
+
+			//pull the tables in a reader
+			using (cmd)
+			{
+
+				using (var rdr = cmd.ExecuteReader())
+				{
+					while (rdr.Read())
+					{
+						Table tbl = new Table(_invalidPropertyNamePrefix);
+						tbl.Name = rdr["TABLE_NAME"].ToString();
+						tbl.Schema = rdr["TABLE_SCHEMA"].ToString();
+						tbl.IsView = string.Equals(rdr["TABLE_TYPE"].ToString(), "View", StringComparison.CurrentCultureIgnoreCase);
+						tbl.ClassName = discoveredTables.GetNewValidClassName($"{_tablePrefix}{Singularize(tbl.Name)}{_tableSuffix}");
+						tbl.Description = rdr["TABLE_DESCRIPTION"] as string;
+
+						discoveredTables.Add(tbl);
+					}
+				}
+			}
+
+			foreach (var tbl in discoveredTables)
+			{
+				DiscoverColumns(tbl);
+
+				// Mark the primary keys
+				var primaryKeys = GetPKs(tbl.Name).Select(pk => pk.ToLower().Trim());
+				foreach (var pkColumn in tbl.Columns.Where(tblCol => primaryKeys.Any(pk => pk == tblCol.Name.ToLower().Trim())))
+				{
+					pkColumn.IsPK = true;
+				}
+
+				// Mark the columns with default columns
+				var defaultCols = GetColumnsWithDefaultValues(tbl.Name).Select(pk => pk.ToLower().Trim());
+				foreach (var pkColumn in tbl.Columns.Where(tblCol => defaultCols.Any(pk => pk == tblCol.Name.ToLower().Trim())))
+				{
+					pkColumn.HasDefaultValue = true;
+				}
+
+				if (_includeRelationships)
+				{
+					try
+					{
+						this.DiscoverRelationshipForeignKeys(tbl);
+						this.DiscoverRelationshipPrimaryKeys(tbl);
+					}
+					catch (Exception x)
+					{
+						var error = x.Message.Replace("\r\n", "\n").Replace("\n", " ");
+						WriteLine("");
+						WriteLine("// -----------------------------------------------------------------------------------------");
+						WriteLine(String.Format("// Failed to get relationships for `{0}` - {1}", tbl.Name, error));
+						WriteLine("// -----------------------------------------------------------------------------------------");
+						WriteLine("");
+					}
+				}
+			}
+
+			// all the tables have been discovered, it's time to find some valid property names for our relationships
+			foreach (var tbl in discoveredTables)
+			{
+				foreach (var primaryKey in tbl.RelationshipPrimaryKeys)
+				{
+					var outerTbl = discoveredTables[primaryKey.OuterTableName];
+					primaryKey.CurrentEntityPropertyReferencingOtherEntities = tbl.GetNewValidPropertyName(Pluralize(outerTbl.Name));
+				}
+
+				foreach (var foreignKey in tbl.RelationshipForeignKeys)
+				{
+					var outerTbl = discoveredTables[foreignKey.OuterTableName];
+					foreignKey.CurrentEntityPropertyReferencingOtherEntity = tbl.GetNewValidPropertyName(Singularize(outerTbl.Name));
+				}
+			}
+
+			return discoveredTables;
+		}
+
+		DbConnection _connection;
+		DbProviderFactory _factory;
+
+
+		void DiscoverColumns(Table tbl)
+		{
+			using (var cmd = _factory.CreateCommand())
+			{
+				cmd.Connection = _connection;
+				cmd.CommandText = COLUMN_SQL;
+
+				var p = cmd.CreateParameter();
+				p.ParameterName = "@tableName";
+				p.Value = tbl.Name;
+				cmd.Parameters.Add(p);
+
+				p = cmd.CreateParameter();
+				p.ParameterName = "@schemaName";
+				p.Value = tbl.Schema;
+				cmd.Parameters.Add(p);
+
+				using (IDataReader rdr = cmd.ExecuteReader())
+				{
+					while (rdr.Read())
+					{
+						Column col = new Column();
+						col.Name = rdr["ColumnName"].ToString();
+						col.IsComputed = ((int)rdr["IsComputed"]) == 1;
+						col.PropertyName = tbl.GetNewValidPropertyName(col.Name);
+						col.PropertyType = GetPropertyType(rdr["DataType"].ToString());
+						col.IsNullable = rdr["IsNullable"].ToString() == "YES";
+						col.IsAutoIncrement = ((int)rdr["IsIdentity"]) == 1;
+						col.IsGeneratedUniqueIdentifier = rdr["DefaultSetting"].ToString().ToLower().Trim(' ', '(', ')') == "newid";
+						col.Description = rdr["Description"] as string ?? ((rdr["ColumnName"] as string) + " Column");
+
+						tbl.Columns.Add(col);
+					}
+				}
+			}
+		}
+
+		void DiscoverRelationshipForeignKeys(Table tbl)
+		{
+			using (var cmd = _factory.CreateCommand())
+			{
+				cmd.Connection = _connection;
+				cmd.CommandText = OUTER_KEYS_SQL;
+
+				var p = cmd.CreateParameter();
+				p.ParameterName = "@tableName";
+				p.Value = tbl.Name;
+				cmd.Parameters.Add(p);
+
+				var result = new List<ForeignRelationshipKey>();
+				using (IDataReader rdr = cmd.ExecuteReader())
+				{
+					while (rdr.Read())
+					{
+						var key = new ForeignRelationshipKey();
+						key.Name = rdr["FK"].ToString();
+						key.OuterTableName = rdr["Referenced_tbl"].ToString();
+						key.OuterTableColumn = rdr["Referenced_col"].ToString();
+						key.CurrentTableColumn = rdr["Referencing_col"].ToString();
+						result.Add(key);
+					}
+				}
+
+				tbl.RelationshipForeignKeys = result;
+			}
+		}
+
+		void DiscoverRelationshipPrimaryKeys(Table tbl)
+		{
+			using (var cmd = _factory.CreateCommand())
+			{
+				cmd.Connection = _connection;
+				cmd.CommandText = INNER_KEYS_SQL;
+
+				var p = cmd.CreateParameter();
+				p.ParameterName = "@tableName";
+				p.Value = tbl.Name;
+				cmd.Parameters.Add(p);
+
+				var result = new List<PrimaryRelationshipKey>();
+				using (IDataReader rdr = cmd.ExecuteReader())
+				{
+					while (rdr.Read())
+					{
+						var key = new PrimaryRelationshipKey();
+						key.Name = rdr["FK"].ToString();
+						key.OuterTableName = rdr["Referencing_tbl"].ToString();
+						key.OuterTableColumn = rdr["Referencing_col"].ToString();
+						key.CurrentTableColumn = rdr["Referenced_col"].ToString();
+						result.Add(key);
+					}
+				}
+
+				tbl.RelationshipPrimaryKeys = result;
+			}
+		}
+
+		List<string> GetPKs(string table)
+		{
+
+			string sql = @"SELECT c.name AS ColumnName
                 FROM sys.indexes AS i 
                 INNER JOIN sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id 
                 INNER JOIN sys.objects AS o ON i.object_id = o.object_id 
                 LEFT OUTER JOIN sys.columns AS c ON ic.object_id = c.object_id AND c.column_id = ic.column_id
                 WHERE (i.type = 1) AND (o.name = @tableName)";
 
-		var pks=new List<string>();
+			var pks = new List<string>();
 
-		using (var cmd=_factory.CreateCommand())
-		{
-			cmd.Connection=_connection;
-			cmd.CommandText=sql;
-
-			var p = cmd.CreateParameter();
-			p.ParameterName = "@tableName";
-			p.Value=table;
-			cmd.Parameters.Add(p);
-
-			using (IDataReader rdr=cmd.ExecuteReader())
+			using (var cmd = _factory.CreateCommand())
 			{
-				while(rdr.Read())
+				cmd.Connection = _connection;
+				cmd.CommandText = sql;
+
+				var p = cmd.CreateParameter();
+				p.ParameterName = "@tableName";
+				p.Value = table;
+				cmd.Parameters.Add(p);
+
+				using (IDataReader rdr = cmd.ExecuteReader())
 				{
-					pks.Add(rdr["ColumnName"].ToString());
+					while (rdr.Read())
+					{
+						pks.Add(rdr["ColumnName"].ToString());
+					}
 				}
 			}
-		}	         
-		
-		return pks;
-	}
 
-	List<string> GetColumnsWithDefaultValues(string table){
-		
-		string sql=@"SELECT d.ColumnName FROM
+			return pks;
+		}
+
+		List<string> GetColumnsWithDefaultValues(string table)
+		{
+
+			string sql = @"SELECT d.ColumnName FROM
 						(SELECT c.name as ColumnName, object_definition(c.default_object_id) AS DefaultDefinition
 						FROM   sys.columns as c
 						INNER JOIN sys.objects as o ON o.object_id = c.object_id
 						WHERE o.name=@tableName) as d
 					WHERE d.DefaultDefinition IS NOT NULL";
 
-		var defaultCols=new List<string>();
+			var defaultCols = new List<string>();
 
-		using (var cmd=_factory.CreateCommand())
-		{
-			cmd.Connection=_connection;
-			cmd.CommandText=sql;
-
-			var p = cmd.CreateParameter();
-			p.ParameterName = "@tableName";
-			p.Value=table;
-			cmd.Parameters.Add(p);
-
-			using (IDataReader rdr=cmd.ExecuteReader())
+			using (var cmd = _factory.CreateCommand())
 			{
-				while(rdr.Read())
+				cmd.Connection = _connection;
+				cmd.CommandText = sql;
+
+				var p = cmd.CreateParameter();
+				p.ParameterName = "@tableName";
+				p.Value = table;
+				cmd.Parameters.Add(p);
+
+				using (IDataReader rdr = cmd.ExecuteReader())
 				{
-					defaultCols.Add(rdr["ColumnName"].ToString());
+					while (rdr.Read())
+					{
+						defaultCols.Add(rdr["ColumnName"].ToString());
+					}
 				}
 			}
-		}	         
-		
-		return defaultCols;
-	}
 
-	
-	string GetPropertyType(string sqlType)
-	{
-		string sysType="string";
-		switch (sqlType) 
-		{
-			case "bigint":
-				sysType = "long";
-				break;
-			case "smallint":
-				sysType= "short";
-				break;
-			case "int":
-				sysType= "int";
-				break;
-			case "uniqueidentifier":
-				sysType=  "Guid";
-				 break;
-			case "smalldatetime":
-			case "datetime":
-			case "datetime2":
-			case "date":
-			case "time":
-				sysType=  "DateTime";
-				  break;
-			case "float":
-				sysType="double";
-				break;
-			case "real":
-				sysType="float";
-				break;
-			case "numeric":
-			case "smallmoney":
-			case "decimal":
-			case "money":
-				sysType=  "decimal";
-				 break;
-			case "tinyint":
-				sysType = "byte";
-				break;
-			case "bit":
-				sysType=  "bool";
-				   break;
-			case "image":
-			case "binary":
-			case "varbinary":
-			case "timestamp":
-				sysType=  "byte[]";
-				 break;
-			case "geography":
-				sysType = "Microsoft.SqlServer.Types.SqlGeography";
-				break;
-			case "geometry":
-				sysType = "Microsoft.SqlServer.Types.SqlGeometry";
-				break;
+			return defaultCols;
 		}
-		return sysType;
-	}
 
-	const string TABLE_SQL=@"SELECT TABLES.*,
+
+		static string GetPropertyType(string sqlType)
+		{
+			string sysType = "string";
+			switch (sqlType)
+			{
+				case "bigint":
+					sysType = "long";
+					break;
+				case "smallint":
+					sysType = "short";
+					break;
+				case "int":
+					sysType = "int";
+					break;
+				case "uniqueidentifier":
+					sysType = "Guid";
+					break;
+				case "smalldatetime":
+				case "datetime":
+				case "datetime2":
+				case "date":
+				case "time":
+					sysType = "DateTime";
+					break;
+				case "float":
+					sysType = "double";
+					break;
+				case "real":
+					sysType = "float";
+					break;
+				case "numeric":
+				case "smallmoney":
+				case "decimal":
+				case "money":
+					sysType = "decimal";
+					break;
+				case "tinyint":
+					sysType = "byte";
+					break;
+				case "bit":
+					sysType = "bool";
+					break;
+				case "image":
+				case "binary":
+				case "varbinary":
+				case "timestamp":
+					sysType = "byte[]";
+					break;
+				case "geography":
+					sysType = "Microsoft.SqlServer.Types.SqlGeography";
+					break;
+				case "geometry":
+					sysType = "Microsoft.SqlServer.Types.SqlGeometry";
+					break;
+			}
+			return sysType;
+		}
+
+		const string TABLE_SQL = @"SELECT TABLES.*,
 		DescriptionExProps.value as TABLE_DESCRIPTION
 		FROM  INFORMATION_SCHEMA.TABLES
 		OUTER APPLY fn_listextendedproperty('MS_Description', 'schema', TABLES.TABLE_SCHEMA, 'table', TABLES.TABLE_NAME, null, null) As DescriptionExProps
@@ -809,7 +938,7 @@ class SqlServerSchemaReader : SchemaReader
 		ORDER BY TABLE_SCHEMA, TABLE_NAME
 		";
 
-	const string COLUMN_SQL=@"SELECT 
+		const string COLUMN_SQL = @"SELECT 
 			TABLE_CATALOG AS [Database],
 			TABLE_SCHEMA AS Owner, 
 			TABLE_NAME AS TableName, 
@@ -827,7 +956,7 @@ class SqlServerSchemaReader : SchemaReader
 		WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
 		ORDER BY OrdinalPosition ASC";
 
-	const string OUTER_KEYS_SQL = @"SELECT 
+		const string OUTER_KEYS_SQL = @"SELECT 
 			FK = OBJECT_NAME(pt.constraint_object_id),
 			Referenced_tbl = OBJECT_NAME(pt.referenced_object_id),
 			Referencing_col = pc.name, 
@@ -841,7 +970,7 @@ class SqlServerSchemaReader : SchemaReader
 		AND pt.referenced_object_id = rc.[object_id]
 		WHERE pt.parent_object_id = OBJECT_ID(@tableName);";
 
-    const string INNER_KEYS_SQL = @"SELECT 
+		const string INNER_KEYS_SQL = @"SELECT 
 			[Schema] = OBJECT_SCHEMA_NAME(pt.parent_object_id),
 			Referencing_tbl = OBJECT_NAME(pt.parent_object_id),
 			FK = OBJECT_NAME(pt.constraint_object_id),
@@ -855,7 +984,7 @@ class SqlServerSchemaReader : SchemaReader
 		ON pt.referenced_column_id = rc.column_id
 		AND pt.referenced_object_id = rc.[object_id]
 		WHERE pt.referenced_object_id = OBJECT_ID(@tableName);";
-	  
-}
+
+	}
 
 #>

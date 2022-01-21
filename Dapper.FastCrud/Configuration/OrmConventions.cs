@@ -261,7 +261,7 @@
         private Attribute[] GetEntityAttributes(Type entityType)
         {
             var entityAttributes = TypeDescriptor.GetAttributes(entityType).OfType<Attribute>().ToArray();
-#if NETSTANDARD
+#if NETSTANDARD2_0
             return entityAttributes;
 #else
             var entityMetadataAttribute = entityAttributes.OfType<MetadataTypeAttribute>().FirstOrDefault();

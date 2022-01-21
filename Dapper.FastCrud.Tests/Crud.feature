@@ -6,7 +6,7 @@ Scenario Outline:  Batch update (build server test)
 	When I insert <entity count> <entity type> entities using <method type> methods
 	And I batch update a maximum of <max> <entity type> entities skipping <skip> and using <method type> methods
 	And I query for all the <entity type> entities using <method type> methods
-	Then the queried entities should be the same as the local ones
+	Then the queried <entity type> entities should be the same as the updated ones
 	Examples: 
 	| database type | entity type | entity count | skip | max | method type  |
 	| LocalDb       | employee    | 10           | 3    | 2   | synchronous  |

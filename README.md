@@ -17,9 +17,28 @@ Code first entities are also supported which can either be decorated with attrib
 
 #### Release Notes
 - 2.7-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
+  - Added support for .NET Standard 2.1
+  - Extended the support for the MetadataType attribute to .NET Standard 2.1
+  - Database first T4 template refactored:
+    - Added support for self referenced entities.
+    - Added support for multiple references to the same target using the InverseProperty attribute.
+    - Better handling of columns representing reserved keywords in C#.
+    - Fixed a problem preventing it from being used in VS2019 and later.
+    - It can now be used in the new style projects.
+  - Tests refactored:
+    - Workaround implemented for the badly implemented serialization context.
+    - Better model registration samples in the test project for:
+      - POCO/fluent mapping
+      - code first
+      - metadata classes
+      - database first
 - 2.6 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
-  - Upgraded the Dapper dependency
+  - Upgraded the Dapper dependency.
   - Added support for .NET Standard 2.0 and .NET Framework 4.6.1
+  - InsertAsync now calling the corresponding async Dapper method.
+  - Added support for TimeSpan.
+  - CI relocated.
+
 
 
 #### WIKI

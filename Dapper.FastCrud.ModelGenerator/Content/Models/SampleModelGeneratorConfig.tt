@@ -10,7 +10,8 @@ When you create your own configuration file, don't forget to set the 'Custom Too
     ConnectionStringName = ""; // Uses the last connection string in the config if not specified
     Namespace = "Dapper.FastCrud.Tests.Models";
 	ClassPrefix = "";
-	ClassSuffix = "";
+	ClassSuffix = "Entity";
+	InvalidPropertyNamePrefix = "Prop";
     IncludeViews = true;
 	IgnoreColumnDefaultValues = true; // when set to false, the generated properties mapped to columns having default values will be refreshed with the database assigned values on insert.
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire."};

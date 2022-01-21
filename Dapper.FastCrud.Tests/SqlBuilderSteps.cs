@@ -4,6 +4,8 @@
     using System.Linq;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Tests.Models;
+    using Dapper.FastCrud.Tests.Models.CodeFirst;
+    using Dapper.FastCrud.Tests.Models.Poco;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 

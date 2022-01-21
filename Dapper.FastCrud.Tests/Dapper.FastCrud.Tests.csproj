@@ -11,10 +11,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="3.1.22" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.22" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="Microsoft.SqlServer.Compact">
+    <!--<PackageReference Include="Microsoft.SqlServer.Compact">
       <Version>4.0.8876.1</Version>
       <GeneratePathProperty>true</GeneratePathProperty>
-    </PackageReference>
+    </PackageReference>-->
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="150.18208.0" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.2" />
     <PackageReference Include="MySql.Data" Version="8.0.27" />
@@ -33,7 +33,7 @@
     <None Update="App.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Models\ModelGeneratorConfig.tt">
+    <None Update="Models\Generator\ModelGeneratorConfig.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ModelGeneratorConfig.cs</LastGenOutput>
     </None>
@@ -66,7 +66,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Models\ModelGeneratorConfig.cs">
+    <Compile Update="DatabaseSetup\MySqlDatabaseSteps.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="DatabaseSetup\SqLiteDatabaseSteps.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="DatabaseSetup\PostgreSqlDatabaseSteps.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Models\Generator\ModelGeneratorConfig.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ModelGeneratorConfig.tt</DependentUpon>

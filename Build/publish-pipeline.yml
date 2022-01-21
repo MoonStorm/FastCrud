@@ -1,20 +1,27 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
 pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: DownloadPipelineArtifact@2
+- task: DownloadBuildArtifacts@1
   displayName: 'Downloading artifacts'
   inputs:
     buildType: 'specific'
-    project: '$(buildProjectId)'
-    definition: '$(buildPipelineDefinitionId)'
-    specificBuildWithTriggering: true
+    project: '29a10764-6d64-4c35-82d3-f77ddac3b138'
+    pipeline: '8'
     buildVersionToDownload: 'latest'
-    targetPath: '$(Pipeline.Workspace)'
+    downloadType: 'single'
+    artifactName: 'masterNugetPackages'
+    downloadPath: '$(System.ArtifactsDirectory)'
+    checkDownloadedFiles: true
 - task: NuGetCommand@2
-  displayName: 'Pushing the artifact $(buildArtifactName) to nuget.org'
+  displayName: 'Pushing the main Dapper.FastCrud package to nuget.org'
   inputs:
     command: 'push'
-    packagesToPush: '$(Pipeline.Workspace)/$(buildArtifactName)/**/Dapper.FastCrud.*.nupkg'
+    packagesToPush: '$(System.ArtifactsDirectory)/masterNugetPackages/Dapper.FastCrud/bin/Release/Dapper.FastCrud.*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'

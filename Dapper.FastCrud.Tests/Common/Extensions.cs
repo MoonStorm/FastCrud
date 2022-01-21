@@ -1,8 +1,10 @@
 ﻿namespace Dapper.FastCrud.Tests.Common
 {
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using Dapper.FastCrud.Validations;
+    using Microsoft.Extensions.Configuration;
 
     public static class Extensions
     {
@@ -20,6 +22,18 @@
             //It’s also good to know that the CodeBase is not guaranteed to be set for assemblies in the GAC.Location will always be set for assemblies loaded from disk, however.
             //return Path.GetDirectoryName(assembly.Location);
             return Path.GetDirectoryName(new System.Uri(assembly.CodeBase).LocalPath);
+        }
+
+        public static TEntity Clone<TEntity>(this TEntity entity) where TEntity : class,new()
+        {
+            var clone = new TEntity();
+            foreach(var propInfo in typeof(TEntity).GetProperties())
+            {
+                var propValue = propInfo.GetValue(entity);
+                propInfo.SetValue(clone, propValue);
+            }
+
+            return clone;
         }
     }
 }

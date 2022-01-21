@@ -5,7 +5,12 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dapper.FastCrud.Tests.Common;
+    using Dapper.FastCrud.Tests.Contexts;
     using Dapper.FastCrud.Tests.Models;
+    using Dapper.FastCrud.Tests.Models.CodeFirst;
+    using Dapper.FastCrud.Tests.Models.Metadata;
+    using Dapper.FastCrud.Tests.Models.Poco;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 
@@ -60,7 +65,6 @@
                     {
                         InventoryIndex = index,
                         Name = $"Workstation {Guid.NewGuid().ToString("N")}",
-                        _10PinSlots = index
                     };
             }
         }
@@ -102,12 +106,12 @@
 
             Employee CreateEmployee(int index)
             {
-                var workstation = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(index).FirstOrDefault();
+                var workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Skip(index).FirstOrDefault();
 
                 // in case we link more employees tan workstations available, use the last one there
                 if (workstation == null)
                 {
-                    workstation = _testContext.LocalInsertedEntities.OfType<Workstation>().Last();
+                    workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Last();
                 }
 
                 var employee = new Employee()
@@ -148,7 +152,7 @@
 
             Workstation CreateEntity(int index)
             {
-                var building = _testContext.LocalInsertedEntities.OfType<Building>().Skip(index).First();
+                var building = _testContext.GetInsertedEntitiesOfType<Building>().Skip(index).First();
                 var workstation = new Workstation()
                     {
                         InventoryIndex = index,
@@ -188,7 +192,9 @@
         [When(@"I query for one workstation entity combined with the employee entities using (.*) methods")]
         public async Task WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var workstationId = _testContext.LocalInsertedEntities.OfType<Workstation>().Select(workStation => workStation.WorkstationId).Single();
+            var workstationId = _testContext.GetInsertedEntitiesOfType<Workstation>()
+                                            .Select(workStation => workStation.WorkstationId)
+                                            .Single();
             Workstation queriedEntity;
 
             if (useAsyncMethods)
@@ -214,7 +220,7 @@
 
             }
             
-            _testContext.QueriedEntities.Add(queriedEntity);
+            _testContext.RecordQueriedEntity(queriedEntity);
         }
 
         [When(@"I query for all the workstation entities combined with the employee entities using (.*) methods")]
@@ -234,7 +240,10 @@
                 queriedEntities = _testContext.DatabaseConnection.Find<Workstation>(options => options.Include<Employee>());
             }
 
-            _testContext.QueriedEntities.AddRange(queriedEntities);
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
         }
 
         [When(@"I query for all the employee entities combined with the workstation entities using (.*) methods")]
@@ -255,7 +264,10 @@
                 queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options.Include<Workstation>());
             }
 
-            _testContext.QueriedEntities.AddRange(queriedEntities);
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
         }
 
         [When(@"I query for all the building entities combined with workstation and employee entities using (.*) methods")]
@@ -280,7 +292,10 @@
                                                                                             .Include<Employee>());
             }
 
-            _testContext.QueriedEntities.AddRange(queriedEntities);
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
         }
 
         [When(@"I query for all the employee entities combined with workstation and building entities using (.*) methods")]
@@ -305,7 +320,10 @@
                                                                                             .Include<Building>());
             }
 
-            _testContext.QueriedEntities.AddRange(queriedEntities);
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
         }
 
         [When(@"I query for all the building entities using (.*) methods")]
@@ -377,9 +395,10 @@
         public async Task WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
             FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
-            var buildingIds = string.Join(",", _testContext.LocalInsertedEntities.OfType<Building>().Select(building => building.BuildingId));
+            var buildingIds = string.Join(",", _testContext.GetInsertedEntitiesOfType<Building>()
+                                                           .Select(building => building.BuildingId));
 
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+            _testContext.LastCountQueryResult = useAsyncMethods
                                           ? await _testContext
                                                 .DatabaseConnection
                                                 .CountAsync<Building>(statement => statement
@@ -395,7 +414,7 @@
         [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+            _testContext.LastCountQueryResult = useAsyncMethods
                 ? await _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement
                                                                                     .Include<Employee>())
                 : _testContext.DatabaseConnection.Count<Workstation>(statement => statement.Include<Employee>());
@@ -404,7 +423,7 @@
         [When(@"I query for the count of all the employee entities strictly linked to workstation and building entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheEmployeeEntitiesStrictlyLinkedToWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            _testContext.QueriedEntitiesDbCount = useAsyncMethods
+            _testContext.LastCountQueryResult = useAsyncMethods
                                                       ? await _testContext.DatabaseConnection.CountAsync<Employee>(statement => statement
                                                                                                                                 .Include<Workstation>(join => join.InnerJoin())
                                                                                                                                 .Include<Building>())
@@ -456,31 +475,19 @@
         [When(@"I batch update a maximum of (.*) employee entities skipping (.*) and using (.*) methods")]
         public async Task WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
-            var updateData = new Employee()
-            {
-                KeyPass = Guid.NewGuid(),
-                BirthDate = new DateTime(1951, 09, 30),
-                FirstName = "Rest",
-                LastName = "In Peace",
-            };
-
             // mimic the behavior on our side
-            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<Employee>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
-            foreach (var originalEntity in entitiesToUpdate)
-            {
-                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = new Employee()
-                                                                                                     {
-                                                                                                         UserId = originalEntity.UserId,
-                                                                                                         EmployeeId =  originalEntity.EmployeeId,
-                                                                                                         KeyPass = updateData.KeyPass,
-                                                                                                         BirthDate = updateData.BirthDate,
-                                                                                                         FirstName = updateData.FirstName,
-                                                                                                         LastName = updateData.LastName,
-                                                                                                         FullName = updateData.FirstName+updateData.LastName,
-                                                                                                     };
-            }
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Employee>()
+                                               .Skip(skipCount ?? 0)
+                                               .Take(maxCount ?? int.MaxValue)
+                                               .ToArray();
 
             // update the db
+            var updateData = new Employee()
+                {
+                    KeyPass = Guid.NewGuid(),
+                    BirthDate = new DateTime(1951, 09, 30),
+                };
+
             FormattableString whereCondition = $"{nameof(Employee.UserId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.UserId))})";
             int recordsUpdated;
             if (useAsyncMethods)
@@ -493,26 +500,29 @@
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
+
+            // mimic what we've done on our side
+            foreach (var entityToUpdate in entitiesToUpdate)
+            {
+                var updatedEntity = entityToUpdate.Clone();
+                updatedEntity.BirthDate = updateData.BirthDate;
+                updatedEntity.KeyPass = updateData.KeyPass;
+                _testContext.RecordUpdatedEntity(updatedEntity);
+            }
         }
 
         [When(@"I batch update a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
         public async Task WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
-            var updateData = new Workstation()
-            {
-                Name = "Batch updated workstation"
-            };
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Workstation>()
+                                               .Skip(skipCount ?? 0)
+                                               .Take(maxCount ?? int.MaxValue)
+                                               .ToArray();
 
-            // mimic the behavior on our side
-            var entitiesToUpdate = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
-            foreach (var originalEntity in entitiesToUpdate)
-            {
-                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(originalEntity)] = new Workstation()
+            var updateData = new Workstation()
                 {
-                    WorkstationId =  originalEntity.WorkstationId,
-                    Name = updateData.Name
+                    Name = "Batch updated workstation"
                 };
-            }
 
             // update the db
             FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToUpdate.Select(originalEntity => originalEntity.WorkstationId))})";
@@ -527,31 +537,38 @@
             }
 
             Assert.That(recordsUpdated, Is.EqualTo(entitiesToUpdate.Count()));
+
+            // mimic what we've done on our side
+            foreach (var entityToUpdate in entitiesToUpdate)
+            {
+                var updatedEntity = entityToUpdate.Clone();
+                updatedEntity.Name = updateData.Name;
+                _testContext.RecordUpdatedEntity(updatedEntity);
+            }
+
         }
 
         [When(@"I batch delete a maximum of (.*) workstation entities skipping (.*) and using (.*) methods")]
         public async Task WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(int? maxCount, int? skipCount, bool useAsyncMethods)
         {
-            // mimic the behavior on our side
-            var entitiesToDelete = _testContext.LocalInsertedEntities.OfType<Workstation>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
-            foreach (var entityToDelete in entitiesToDelete)
-            {
-                _testContext.LocalInsertedEntities.Remove(entityToDelete);
-            }
+            var entitiesToDelete = _testContext.GetInsertedEntitiesOfType<Workstation>()
+                                               .Skip(skipCount ?? 0)
+                                               .Take(maxCount ?? int.MaxValue)
+                                               .ToArray();
 
             // update the db
             FormattableString whereCondition = $"{nameof(Workstation.WorkstationId):C} in ({string.Join(",", entitiesToDelete.Select(originalEntity => originalEntity.WorkstationId))})";
-            int recordsUpdated;
+            int recordsDeleted;
             if (useAsyncMethods)
             {
-                recordsUpdated = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition));
+                recordsDeleted = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement.Where(whereCondition));
             }
             else
             {
-                recordsUpdated = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement.Where(whereCondition));
+                recordsDeleted = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement.Where(whereCondition));
             }
 
-            Assert.That(recordsUpdated, Is.EqualTo(entitiesToDelete.Count()));
+            Assert.That(recordsDeleted, Is.EqualTo(entitiesToDelete.Count()));
         }
 
         [When(@"I update all the inserted employee entities using (.*) methods")]
@@ -666,10 +683,10 @@
             }
         }
 
-        [Then(@"the database count of the queried entities should be (.*)")]
+        [Then(@"the result of the last query count should be (.*)")]
         public void ThenTheDatabaseCountOfTheQueriedEntitiesShouldBe(int expectedQueryCount)
         {
-            Assert.AreEqual(expectedQueryCount, _testContext.QueriedEntitiesDbCount);
+            Assert.That(_testContext.LastCountQueryResult, Is.EqualTo(expectedQueryCount));
         }
 
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
@@ -681,7 +698,10 @@
                                     .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
                                     .Skip(skip)
                                     .Top(max));
-            _testContext.QueriedEntities.AddRange(queriedEntities);
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordInsertedEntity(queriedEntity);
+            }
         }
 
         [When(@"I partially update all the inserted employee entities")]
@@ -704,46 +724,29 @@
 
             var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName), nameof(Employee.FullName));
 
-            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
+            foreach (var insertedEntity in _testContext.GetInsertedEntitiesOfType<Employee>())
             {
-                var insertedEntity = _testContext.LocalInsertedEntities[entityIndex] as Employee;
-                if (insertedEntity == null)
-                    continue;
-
                 var partialUpdatedEntity = new Employee()
-                {
-                    UserId = insertedEntity.UserId,
-                    EmployeeId = insertedEntity.EmployeeId,
-                    BirthDate = new DateTime(2020, 03, 01),
-                    WorkstationId = 10 + insertedEntity.WorkstationId,
-                    FirstName = "Updated " + insertedEntity.FirstName,
+                    {
+                        UserId = insertedEntity.UserId,
+                        EmployeeId = insertedEntity.EmployeeId,
 
-                    // all of the above will be ignored with the exception of the next ones
-                    LastName = "Updated " + insertedEntity.LastName
-                };
+                        // all the other properties with the exception of the next one will be ignored
+                        LastName = "Updated " + insertedEntity.LastName
+                    };
 
                 _testContext.DatabaseConnection.Update(partialUpdatedEntity, statement => statement.WithEntityMappingOverride(customMapping));
 
-                _testContext.LocalInsertedEntities[entityIndex] = new Employee()
-                {
-                    UserId = insertedEntity.UserId,
-                    KeyPass = insertedEntity.KeyPass,
-                    EmployeeId = insertedEntity.EmployeeId,
-                    BirthDate = insertedEntity.BirthDate,
-                    WorkstationId = insertedEntity.WorkstationId,
-                    FirstName = insertedEntity.FirstName,
-
-                    // all of the above were ignored with the exception of the next ones
-                    LastName = partialUpdatedEntity.LastName,
-                    FullName = partialUpdatedEntity.FullName
-                };
+                // now record it with the copied props
+                var updatedEntity = insertedEntity.Clone();
+                updatedEntity.LastName = partialUpdatedEntity.LastName;
+                _testContext.RecordUpdatedEntity(updatedEntity);
             }
         }
 
         private async Task DeleteInsertedEntitiesAsync<TEntity>(int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToBeDeleted = _testContext.LocalInsertedEntities
-                                                  .OfType<TEntity>()
+            var entitiesToBeDeleted = _testContext.GetInsertedEntitiesOfType<TEntity>()
                                                   .Skip(skipCount ?? 0)
                                                   .Take(maxCount ?? int.MaxValue)
                                                   .ToArray();
@@ -754,29 +757,25 @@
                 foreach (var entityToBeDeleted in entitiesToBeDeleted)
                 {
                     await _testContext.DatabaseConnection.DeleteAsync(entityToBeDeleted);
-                    _testContext.LocalInsertedEntities.Remove(entityToBeDeleted);
                 }
             });
         }
 
         private void DeleteInsertedEntities<TEntity>(int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToBeDeleted = _testContext.LocalInsertedEntities
-                                                  .OfType<TEntity>()
+            var entitiesToBeDeleted = _testContext.GetInsertedEntitiesOfType<TEntity>()
                                                   .Skip(skipCount ?? 0)
                                                   .Take(maxCount ?? int.MaxValue)
                                                   .ToArray();
             foreach (var entityToBeDeleted in entitiesToBeDeleted)
             {
                     _testContext.DatabaseConnection.Delete(entityToBeDeleted);
-                    _testContext.LocalInsertedEntities.Remove(entityToBeDeleted);
             }
         }
 
         private async Task UpdateInsertedEntitiesAsync<TEntity>(Func<TEntity, TEntity> updateFunc, int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToUpdate = _testContext.LocalInsertedEntities
-                                               .OfType<TEntity>()
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<TEntity>()
                                                .Skip(skipCount ?? 0)
                                                .Take(maxCount ?? int.MaxValue)
                                                .ToArray();
@@ -788,30 +787,28 @@
                 {
                     var updatedEntity = updateFunc(entityToUpdate);
                     await _testContext.DatabaseConnection.UpdateAsync(updatedEntity);
-                    _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(entityToUpdate)] = updatedEntity;
+                    _testContext.RecordUpdatedEntity(updatedEntity);
                 }
             });
         }
 
         private void UpdateInsertedEntities<TEntity>(Func<TEntity, TEntity> updateFunc,  int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToUpdate = _testContext.LocalInsertedEntities
-                                               .OfType<TEntity>()
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<TEntity>()
                                                .Skip(skipCount ?? 0)
                                                .Take(maxCount ?? int.MaxValue)
                                                .ToArray();
             foreach (var entityToUpdate in entitiesToUpdate)
             {
                 var updatedEntity = updateFunc(entityToUpdate);
-                _testContext.DatabaseConnection.Update((TEntity)updatedEntity);
-                _testContext.LocalInsertedEntities[_testContext.LocalInsertedEntities.IndexOf(entityToUpdate)] = updatedEntity;
+                _testContext.DatabaseConnection.Update(updatedEntity);
+                _testContext.RecordUpdatedEntity(updatedEntity);
             }
         }
 
         private async Task QueryForInsertedEntitiesAsync<TEntity>(int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToQuery = _testContext.LocalInsertedEntities
-                                              .OfType<TEntity>()
+            var entitiesToQuery = _testContext.GetInsertedEntitiesOfType<TEntity>()
                                               .Skip(skipCount ?? 0)
                                               .Take(maxCount ?? int.MaxValue)
                                               .ToArray();
@@ -831,21 +828,21 @@
                                                                     UserId = originalEmployeeEntity.UserId, 
                                                                     EmployeeId = originalEmployeeEntity.EmployeeId
                                                                 });
-                            _testContext.QueriedEntities.Add(queriedEmployeeEntity);
+                            _testContext.RecordQueriedEntity(queriedEmployeeEntity);
                             break;
                         case Workstation originalWorkstationEntity:
                             var queriedWorkstationEntity = await _testContext.DatabaseConnection.GetAsync(new Workstation
                                 {
                                     WorkstationId = originalWorkstationEntity.WorkstationId
                                 });
-                            _testContext.QueriedEntities.Add(queriedWorkstationEntity);
+                            _testContext.RecordQueriedEntity(queriedWorkstationEntity);
                             break;
                         case Building originalBuildingEntity:
                             var queriedBuildingEntity = await _testContext.DatabaseConnection.GetAsync(new Building
                                 {
                                     BuildingId = originalBuildingEntity.BuildingId
                                 });
-                            _testContext.QueriedEntities.Add(queriedBuildingEntity);
+                            _testContext.RecordQueriedEntity(queriedBuildingEntity);
                             break;
                         default:
                             throw new NotSupportedException($"Don't know what to do with {typeof(TEntity)}");
@@ -856,7 +853,10 @@
 
         private void QueryForInsertedEntities<TEntity>(int? skipCount = null, int? maxCount = null)
         {
-            var entitiesToQuery = _testContext.LocalInsertedEntities.OfType<TEntity>().Skip(skipCount ?? 0).Take(maxCount ?? int.MaxValue).ToArray();
+            var entitiesToQuery = _testContext.GetInsertedEntitiesOfType<TEntity>()
+                                              .Skip(skipCount ?? 0)
+                                              .Take(maxCount ?? int.MaxValue)
+                                              .ToArray();
             foreach (var originalEntity in entitiesToQuery)
             {
                 // this looks a bit stupid, but we want to test the typed queries
@@ -869,21 +869,21 @@
                                                             UserId = originalEmployeeEntity.UserId,
                                                             EmployeeId = originalEmployeeEntity.EmployeeId
                                                         });
-                        _testContext.QueriedEntities.Add(queriedEmployeeEntity);
+                        _testContext.RecordQueriedEntity(queriedEmployeeEntity);
                         break;
                     case Workstation originalWorkstationEntity:
                         var queriedWorkstationEntity = _testContext.DatabaseConnection.Get(new Workstation
                         {
                             WorkstationId = originalWorkstationEntity.WorkstationId
                         });
-                        _testContext.QueriedEntities.Add(queriedWorkstationEntity);
+                        _testContext.RecordQueriedEntity(queriedWorkstationEntity);
                         break;
                     case Building originalBuildingEntity:
                         var queriedBuildingEntity = _testContext.DatabaseConnection.Get(new Building
                         {
                             BuildingId = originalBuildingEntity.BuildingId
                         });
-                        _testContext.QueriedEntities.Add(queriedBuildingEntity);
+                        _testContext.RecordQueriedEntity(queriedBuildingEntity);
                         break;
                     default:
                         throw new NotSupportedException($"Don't know what to do with {typeof(TEntity)}");
@@ -901,7 +901,7 @@
                 {
                     object entityToInsert = insertFunc(entityIndex);
                     await dbConnection.InsertAsync<TEntity>((TEntity)entityToInsert);
-                    _testContext.LocalInsertedEntities.Add(entityToInsert);
+                    _testContext.RecordInsertedEntity(entityToInsert);
                 }
 
             });
@@ -914,24 +914,22 @@
             {
                 object entityToInsert = insertFunc(entityIndex);
                 dbConnection.Insert<TEntity>((TEntity)entityToInsert);
-                _testContext.LocalInsertedEntities.Add(entityToInsert);
+                _testContext.RecordInsertedEntity(entityToInsert);
             }
         }
 
-        private async Task<int> QueryEntityCountAsync<TEntity>()
+        private async Task QueryEntityCountAsync<TEntity>()
         {
             // we have to escape Specflow's bad synchronization context
-            var recCount = _testContext.QueriedEntitiesDbCount = await Task.Run(async () =>
+            _testContext.LastCountQueryResult = await Task.Run(async () =>
             {
                 return await _testContext.DatabaseConnection.CountAsync<TEntity>();
             });
-
-            return recCount;
         }
 
         private void QueryEntityCount<TEntity>()
         {
-                _testContext.QueriedEntitiesDbCount = _testContext.DatabaseConnection.Count<TEntity>();
+                _testContext.LastCountQueryResult = _testContext.DatabaseConnection.Count<TEntity>();
         }
     }
 }
