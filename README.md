@@ -26,7 +26,7 @@ Code first entities are also supported which can either be decorated with attrib
     - Fixed a problem preventing it from being used in VS2019 and later.
     - It can now be used in the new style projects.
   - Tests refactored:
-    - Workaround implemented for the badly implemented serialization context.
+    - Workaround implemented for the badly implemented serialization context in Specflow.
     - Better model registration samples in the test project for:
       - POCO/fluent mapping
       - code first
