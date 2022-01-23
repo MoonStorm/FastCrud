@@ -103,9 +103,18 @@
         /// Returns the schema name for an entity type. It can return null.
         /// In order for the schema to be used, you must also ensure that <see cref="SqlDatabaseOptions.IsUsingSchemas"/> for the dialect also returns <c>true</c>.
         /// </summary>
-        public virtual string GetSchemaName(Type entityType)
+        public virtual string? GetSchemaName(Type entityType)
         {
             return this.GetEntityAttributes(entityType).OfType<TableAttribute>().FirstOrDefault()?.Schema;
+        }
+
+        /// <summary>
+        /// Returns the database name for an entity type. It can return null.
+        /// In order for the schema to be used, you must also ensure that <see cref="SqlDatabaseOptions.IsUsingSchemas"/> for the dialect also returns <c>true</c>.
+        /// </summary>
+        public virtual string? GetDatabaseName(Type entityType)
+        {
+            return null;
         }
 
         /// <summary>
@@ -143,8 +152,9 @@
         /// <summary>
         ///  Sets up an entity property mapping.
         /// </summary>
-        public virtual void ConfigureEntityPropertyMapping(PropertyMapping propertyMapping)
+        public virtual void ConfigureEntityPropertyMapping<TEntity>(PropertyMapping<TEntity> propertyMapping)
         {
+            /*
             // set the Id property to be the primary database generated key in case we don't find any orm attributes on the entity or on the properties
             if(string.Equals(propertyMapping.PropertyName, "id", StringComparison.OrdinalIgnoreCase)
                 && this.GetEntityAttributes(propertyMapping.EntityMapping.EntityType).Length == 0
@@ -209,14 +219,28 @@
                 propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
             }
 
+            // the foreign key attribute could be placed:
+            // 1. on the property already holding the parent entity, targeting to the property identifying the column or
+            // 2. on the property denoting the column, targeting the property holding the parent entity
             var foreignKeyAttribute = propertyAttributes.OfType<ForeignKeyAttribute>().FirstOrDefault();
             if (foreignKeyAttribute != null)
             {
-                var referencingTypePropertyDescriptor = TypeDescriptor.GetProperties(propertyMapping.Descriptor.ComponentType)
+                var targetProperty = TypeDescriptor.GetProperties(propertyMapping.Descriptor.ComponentType)
                                                                                       .OfType<PropertyDescriptor>()
                                                                                       .Single(propDescriptor => propDescriptor.Name == foreignKeyAttribute.Name);
-                propertyMapping.SetChildParentRelationship(referencingTypePropertyDescriptor.PropertyType, referencingTypePropertyDescriptor.Name);
+
+                if (this.IsSimpleSqlType(propertyMapping.Descriptor.PropertyType))
+                {
+                    // we've identified scenario no. 2
+                    propertyMapping.SetChildParentRelationship(targetProperty.PropertyType, targetProperty.Name);
+                }
+                else
+                {
+                    // we've identified scenario no. 1
+                    propertyMapping.SetChildParentRelationship(propertyMapping.Descriptor.PropertyType, propertyMapping.Descriptor.Name);
+                }
             }
+            */
         }
 
         /// <summary>

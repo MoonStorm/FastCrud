@@ -14,7 +14,7 @@
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity> entityMapping)
         {
-            this.EntityMappingOverride = entityMapping;
+            this.EntityMappingOverride = entityMapping.Registration;
             return this.Builder;
         }
 

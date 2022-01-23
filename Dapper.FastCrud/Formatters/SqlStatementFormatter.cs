@@ -48,7 +48,7 @@
         /// <summary>
         /// The main entity mapping used by the query.
         /// </summary>
-        public EntityMapping MainEntityMapping { get; set; }
+        internal EntityMapping MainEntityMapping { get; set; }
 
         /// <summary>
         /// Returns an object that provides formatting services for the specified type.

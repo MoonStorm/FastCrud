@@ -6,14 +6,14 @@
     using Dapper.FastCrud.Mappings;
 
     /// <summary>
-    /// Deferrs the resolution of a parameter until the query is ready to produce the SQL.
+    /// Defers the resolution of a parameter until we're resolved later with our custom format provider.
     /// </summary>
     internal class SqlParameterFormatter: IFormattable
     {
         /// <summary>
         /// Constructor used when the entity type is set to the query's main one.
         /// </summary>
-        public SqlParameterFormatter(SqlParameterElementType elementType, string parameterValue, EntityMapping entityMappingOverride)
+        public SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, EntityMapping? entityMappingOverride)
             : this(elementType, parameterValue, null, entityMappingOverride)
         {
         }
@@ -21,7 +21,7 @@
         /// <summary>
         /// Constructor used by entity type aware formatters.
         /// </summary>
-        protected SqlParameterFormatter(SqlParameterElementType elementType, string parameterValue, Type entityType, EntityMapping entityMappingOverride)
+        protected SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, Type? entityType, EntityMapping? entityMappingOverride)
         {
             this.ElementType = elementType;
             this.ParameterValue = parameterValue;
@@ -32,7 +32,7 @@
         /// <summary>
         /// Gets the original value of the parameter.
         /// </summary>
-        public string ParameterValue { get; }
+        public string? ParameterValue { get; }
 
         /// <summary>
         /// Gets the SQL representation of the parameter.
@@ -43,18 +43,18 @@
         /// Gets the type of the entity attached to the resolver.
         /// If NULL, the resolver was created for the main entity.
         /// </summary>
-        public Type EntityType { get; }
+        public Type? EntityType { get; }
 
         /// <summary>
         /// Optional entity mapping .
         /// </summary>
-        protected EntityMapping EntityMappingOverride { get; }
+        protected EntityMapping? EntityMappingOverride { get; }
 
         /// <summary>
         /// If overridden, returns the sql builder associated with the optional entity descriptor and entity mapping.
         /// Note: Any or all the parameters can be <c>NULL</c>
         /// </summary>
-        protected virtual ISqlBuilder GetSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+        protected virtual ISqlBuilder GetSqlBuilder(EntityDescriptor? entityDescriptor, EntityMapping? entityMapping)
         {
             return null;
         }

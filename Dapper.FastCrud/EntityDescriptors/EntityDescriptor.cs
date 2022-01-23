@@ -1,9 +1,9 @@
 ﻿namespace Dapper.FastCrud.EntityDescriptors
 {
     using System;
-    using System.Collections.Generic;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlStatements;
+    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Basic entity descriptor, holding entity mappings for a specific entity type.
@@ -12,25 +12,38 @@
     {
         // this can be set by the developer, prior to making any sql statement calls
         // alternatively it is set by us on first usage
-        private volatile EntityMapping _defaultEntityMapping;
+        private EntityMapping? _currentEntityMappingRegistration;
 
+        // entity mappings should have a very long timespan if used correctly (they should be stored by the developer and reused), however we can't make that assumption
+        // hence we'll have to keep them for the duration of their lifespan and attach precomputed sql statements
+        private readonly ConditionalWeakTable<EntityMapping, ISqlStatements> _historicEntityMappingRegistrations;
+        
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         protected EntityDescriptor(Type entityType)
         {
             this.EntityType = entityType;
+            _historicEntityMappingRegistrations = new ConditionalWeakTable<EntityMapping, ISqlStatements>();
         }
 
         /// <summary>
-        /// Returns the default entity mapping.
+        /// Returns the current entity mapping registration.
         /// </summary>
-        public EntityMapping DefaultEntityMapping
+        public EntityMapping CurrentEntityMappingRegistration
         {
             get
             {
-                return _defaultEntityMapping;
+                if (_currentEntityMappingRegistration == null)
+                {
+                    _currentEntityMappingRegistration = this.DefaultEntityMappingRegistration;
+                }
+
+                return _currentEntityMappingRegistration;
             }
             set
             {
-                _defaultEntityMapping = value;
+                _currentEntityMappingRegistration = value;
             }
         }
 
@@ -38,5 +51,24 @@
         /// Gets the associated entity type.
         /// </summary>
         public Type EntityType { get; }
+
+        /// <summary>
+        /// Returns the default entity mapping registration.
+        /// </summary>
+        protected abstract EntityMapping DefaultEntityMappingRegistration { get; }
+
+        /// <summary>
+        /// Returns the sql statements for an entity mapping, or the current one if the argument is null.
+        /// </summary>
+        public ISqlStatements GetSqlStatements(EntityMapping? entityMapping = null)
+        {
+            var sqlStatements = _historicEntityMappingRegistrations.GetValue(
+                entityMapping ?? this.CurrentEntityMappingRegistration,
+                passedMapping => this.ConstructSqlStatements(passedMapping));
+
+            return sqlStatements;
+        }
+
+        protected abstract ISqlStatements ConstructSqlStatements(EntityMapping entityMapping);
     }
 }

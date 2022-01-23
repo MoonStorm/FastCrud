@@ -4,45 +4,40 @@
     using Dapper.FastCrud.Validations;
 
     /// <summary>
-    /// Holds details about a relationship
+    /// Holds details about a child-parent relationship
     /// </summary>
     public class PropertyMappingRelationship
     {
         /// <summary>
-        /// Constructor. BLOCKED FOR THE TIME BEING
+        /// Default constructor
         /// </summary>
-        /// <param name="referencedEntityType">The entity type referenced in the foreign key relationship.</param>
-        public PropertyMappingRelationship(Type referencedEntityType)
+        internal PropertyMappingRelationship(Type referencedEntityType, 
+                                             string? referencingParentEntityPropertyName, 
+                                             string? referencingChildrenCollectionPropertyName)
         {
             Requires.NotNull(referencedEntityType, nameof(referencedEntityType));
 
-            this.ReferencedEntityType = referencedEntityType;
+            ReferencedEntityType = referencedEntityType;
+            ReferencingParentEntityPropertyName = referencingParentEntityPropertyName;
+            ReferencingChildrenCollectionPropertyName = referencingChildrenCollectionPropertyName;
         }
 
         /// <summary>
-        /// Constructor. 
-        /// </summary>
-        /// <param name="referencingPropertyName">
-        /// The property of type <paramref name="referencedEntityType"/> 
-        ///  that would hold the foreign entity on SELECTs, when the statement was instructed to.
-        /// </param>
-        /// <param name="referencedEntityType">The entity type referenced in the foreign key relationship.</param>
-        public PropertyMappingRelationship(Type referencedEntityType, string referencingPropertyName)
-            :this(referencedEntityType)
-        {
-            Requires.NotNullOrWhiteSpace(referencingPropertyName, nameof(referencingPropertyName));
-
-            this.ReferencingPropertyName = referencingPropertyName;
-        }
-
-        /// <summary>
-        /// Gets the referenced entity type.
+        /// Gets the referenced parent entity type.
         /// </summary>
         public Type ReferencedEntityType { get; }
 
         /// <summary>
-        /// Gets the referencing property name. It might return null if not provided.
+        /// Gets the name of the property on the current entity holding the parent entity.
+        /// This can be optionally provided via ForeignKey attribute in the child entity or via fluent mapping.
         /// </summary>
-        public string ReferencingPropertyName { get; }
+        public string? ReferencingParentEntityPropertyName { get; }
+
+        /// <summary>
+        /// Gets the name of the property on the referenced entity holding the children entities.
+        /// This can be optionally provided via InverseProperty attribute in the parent entity or via fluent mapping.
+        /// </summary>
+        public string? ReferencingChildrenCollectionPropertyName { get; }
+
     }
 }

@@ -2,13 +2,13 @@
 namespace Dapper.FastCrud
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Runtime.CompilerServices;
     using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.SqlStatements;
     using Dapper.FastCrud.Validations;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Sets up various FastCrud settings.
@@ -17,7 +17,9 @@ namespace Dapper.FastCrud
     {
         private static volatile SqlDialect _currentDefaultDialect = SqlDialect.MsSql;
         private static volatile OrmConventions _currentOrmConventions = new OrmConventions();
-        private static readonly ConcurrentDictionary<Type, EntityDescriptor> _entityDescriptorCache = new ConcurrentDictionary<Type, EntityDescriptor>();
+        // UPDATE: concurrent dictionaries are super slow in our case for the framework we're normally targeting, use regular locking methods instead
+        private static readonly Dictionary<Type, EntityDescriptor> _entityDescriptorCache = new Dictionary<Type, EntityDescriptor>();
+        private static readonly object _entityDescriptorCacheSyncLock = new object();
         private static volatile SqlStatementOptions _defaultStatementOptions = new SqlStatementOptions();
 
         /// <summary>
@@ -25,7 +27,10 @@ namespace Dapper.FastCrud
         /// </summary>
         public static void ClearEntityRegistrations()
         {
-            _entityDescriptorCache.Clear();
+            lock (_entityDescriptorCacheSyncLock)
+            {
+                _entityDescriptorCache.Clear();
+            }
         }
 
         /// <summary>
@@ -38,16 +43,20 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         public static EntityMapping<TEntity> GetDefaultEntityMapping<TEntity>()
         {
-            return GetEntityDescriptor<TEntity>().DefaultEntityMapping as EntityMapping<TEntity>;
+            var entityDescriptor = GetEntityDescriptor<TEntity>();
+            return new EntityMapping<TEntity>(entityDescriptor.CurrentEntityMappingRegistration);
         }
 
         /// <summary>
         /// Registers a new entity. Please continue setting up property mappings and other entity options with the returned default entity mapping instance.
+        /// Remember that multiple instances of mappings for a single entity can be active at any time for a single entity type,
+        /// but also multiple entities pointing to the same database table having different mappings.
         /// </summary>
         /// <typeparam name="TEntity">Entity type</typeparam>
         public static EntityMapping<TEntity> RegisterEntity<TEntity>()
         {
-            return SetDefaultEntityMapping(new EntityMapping<TEntity>());
+            var entityRegistration = new EntityMapping(typeof(TEntity));
+            return SetDefaultEntityMapping(new EntityMapping<TEntity>(entityRegistration));
         }
 
         /// <summary>
@@ -58,11 +67,13 @@ namespace Dapper.FastCrud
         public static EntityMapping<TEntity> SetDefaultEntityMapping<TEntity>(EntityMapping<TEntity> mappings)
         {
             Requires.NotNull(mappings, nameof(mappings));
-            Requires.Argument(!mappings.IsFrozen,nameof(mappings),  "The entity mappings were frozen and can't be used as defaults. They must be cloned first.");
-            GetEntityDescriptor<TEntity>().DefaultEntityMapping = mappings;
+            var mappingRegistration = mappings.Registration;
+            Requires.Argument(!mappingRegistration.IsFrozen, nameof(mappings), "The entity mappings were frozen and can't be used as defaults. They must be cloned first.");
+
+            var entityRegistration = GetEntityDescriptor<TEntity>();
+            entityRegistration.CurrentEntityMappingRegistration = mappingRegistration;
             return mappings;
         }
-
 
         /// <summary>
         /// Returns an SQL builder helpful for constructing verbatim SQL queries.
@@ -72,11 +83,11 @@ namespace Dapper.FastCrud
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity> entityMapping = null)
         {
-            return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping).SqlBuilder;
+            return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping.Registration).SqlBuilder;
         }
 
         /// <summary>
-        /// Gets or sets the default command options. 
+        /// Gets the default command options. 
         /// </summary>
         public static SqlStatementOptions DefaultSqlStatementOptions
         {
@@ -84,11 +95,6 @@ namespace Dapper.FastCrud
             {
                 return _defaultStatementOptions;
             }
-            //set
-            //{
-            //    Requires.NotNull(value, nameof(DefaultSqlStatementOptions));
-            //    _defaultStatementOptions = value;
-            //}
         }
 
         /// <summary>
@@ -124,9 +130,22 @@ namespace Dapper.FastCrud
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static EntityDescriptor<TEntity> GetEntityDescriptor<TEntity>()
         {
+            EntityDescriptor<TEntity> typedEntityDescriptor;
             var entityType = typeof(TEntity);
+            lock (_entityDescriptorCacheSyncLock)
+            {
+                if (_entityDescriptorCache.TryGetValue(entityType, out EntityDescriptor genericEntityDescriptor))
+                {
+                    typedEntityDescriptor = (EntityDescriptor<TEntity>)genericEntityDescriptor;
+                }
+                else
+                {
+                    typedEntityDescriptor = new EntityDescriptor<TEntity>();
+                    _entityDescriptorCache.Add(entityType, typedEntityDescriptor);
+                }
+            }
 
-            return (EntityDescriptor<TEntity>)_entityDescriptorCache.GetOrAdd(entityType, cacheKey => new EntityDescriptor<TEntity>());
+            return typedEntityDescriptor;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

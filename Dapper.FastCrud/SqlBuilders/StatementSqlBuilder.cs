@@ -561,13 +561,19 @@
                 : $" AS {this.GetDelimitedIdentifier(tableAlias)}";
 
             FormattableString fullTableName;
-            if ((!this.UsesSchemaForTableNames) || string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+            fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
+            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityMapping.SchemaName))
             {
-                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
-            }                                
-            else
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{fullTableName}";
+            }
+
+            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityMapping.DatabaseName))
             {
-                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
+                if (string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+                {
+                    fullTableName = $".{fullTableName}";
+                }
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.DatabaseName)}.{fullTableName}";
             }
 
             return this.ResolveWithCultureInvariantFormatter($"{fullTableName}{sqlAlias}");

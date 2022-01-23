@@ -92,7 +92,7 @@
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity> entityMapping)
         {
-            this.EntityMappingOverride = entityMapping;
+            this.EntityMappingOverride = entityMapping.Registration;
             return this.Builder;
         }
 

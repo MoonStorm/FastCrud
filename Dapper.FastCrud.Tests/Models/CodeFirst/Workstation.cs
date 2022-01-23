@@ -36,14 +36,17 @@
         /// </summary>
         public virtual int InventoryIndex { get; set; }
 
-        [ForeignKey(nameof(Building))]
         public int? BuildingId { get; set; }
 
         /// <summary>
-        /// Extra foreign entity, referenced by <see cref="BuildingId"/>.
+        /// Parent entity, referenced by <see cref="BuildingId"/>.
         /// </summary>
+        [ForeignKey(nameof(BuildingId))]
         public Building Building { get; set; }
 
+        /// <summary>
+        /// Children entities.
+        /// </summary>
         public virtual IEnumerable<Employee> Employees { get; set; }
     }
 }

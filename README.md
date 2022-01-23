@@ -100,5 +100,5 @@ Environment details: Windows 7, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD
 
 You can find more details about how to run the benchmarks yourself in the wiki.
 
-##### Install via NuGet and Enjoy !
+##### Install [the main library](https://www.nuget.org/packages/Dapper.FastCrud/) and [the model generator](https://www.nuget.org/packages/Dapper.FastCrud.ModelGenerator/) via NuGet and enjoy!
 
