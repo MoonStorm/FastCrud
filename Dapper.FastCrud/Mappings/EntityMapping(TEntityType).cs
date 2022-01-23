@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
     using System.Linq;
@@ -12,12 +13,12 @@
     /// </summary>
     public class EntityMapping<TEntity>
     {
-        private readonly EntityMapping _entityRegistration;
+        private readonly EntityRegistration _entityRegistration;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal EntityMapping(EntityMapping entityRegistration)
+        internal EntityMapping(EntityRegistration entityRegistration)
         {
             Requires.NotNull(entityRegistration, nameof(entityRegistration));
             _entityRegistration = entityRegistration;
@@ -26,7 +27,7 @@
         /// <summary>
         /// Returns the underlying entity registration.
         /// </summary>
-        internal EntityMapping Registration => _entityRegistration;
+        internal EntityRegistration Registration => _entityRegistration;
 
         /// <summary>
         /// Sets the database table associated with your entity.

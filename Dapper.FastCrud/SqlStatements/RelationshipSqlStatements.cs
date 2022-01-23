@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
     using System.Linq;
 
@@ -17,7 +18,7 @@
     {
         private readonly ISqlStatements<TEntity> _mainEntitySqlStatements;
         protected readonly GenericStatementSqlBuilder[] _joinedEntitiesSqlBuilders;
-        private readonly EntityMapping[] _allEntityMappings;
+        private readonly EntityRegistration[] _allEntityMappings;
 
         /// <summary>
         /// Constructor that takes as arguments the statements for an existing relationship plus a newly joined entity sql builder.
@@ -42,7 +43,7 @@
             var alreadyJoinedEntitiesCount = joinedEntitiesSqlBuilders?.Length??0;
 
             _joinedEntitiesSqlBuilders = new GenericStatementSqlBuilder[alreadyJoinedEntitiesCount + 1];
-            _allEntityMappings = new EntityMapping[alreadyJoinedEntitiesCount + 2];
+            _allEntityMappings = new EntityRegistration[alreadyJoinedEntitiesCount + 2];
             for (var joinedSqlBuilderIndex = 0; joinedSqlBuilderIndex < alreadyJoinedEntitiesCount; joinedSqlBuilderIndex++)
             {
                 _allEntityMappings[joinedSqlBuilderIndex + 1] = joinedEntitiesSqlBuilders[joinedSqlBuilderIndex].EntityMapping;

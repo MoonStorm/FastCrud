@@ -4,6 +4,7 @@
     using System.Globalization;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
 
     /// <summary>
@@ -21,7 +22,7 @@
         /// <param name="mainEntityMapping">Main entity mappings</param>
         /// <param name="mainEntitySqlBuilder">SQL mapper for the main entity</param>
         /// <param name="forceColumnAsTableColumnResolution">If true, the format identifier 'C' will be treated as 'TC' </param>
-        internal SqlStatementFormatter(EntityDescriptor mainEntityDescriptor, EntityMapping mainEntityMapping, ISqlBuilder mainEntitySqlBuilder, bool forceColumnAsTableColumnResolution)
+        internal SqlStatementFormatter(EntityDescriptor mainEntityDescriptor, EntityRegistration mainEntityMapping, ISqlBuilder mainEntitySqlBuilder, bool forceColumnAsTableColumnResolution)
         {
             _forceColumnAsTableColumnResolution = forceColumnAsTableColumnResolution;
             this.MainEntityType = mainEntityDescriptor.EntityType;
@@ -48,7 +49,7 @@
         /// <summary>
         /// The main entity mapping used by the query.
         /// </summary>
-        internal EntityMapping MainEntityMapping { get; set; }
+        internal EntityRegistration MainEntityMapping { get; set; }
 
         /// <summary>
         /// Returns an object that provides formatting services for the specified type.

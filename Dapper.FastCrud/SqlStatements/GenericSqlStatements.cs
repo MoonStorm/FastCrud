@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
 
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
@@ -354,7 +355,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CopyEntity(TEntity source, TEntity destination, PropertyMapping[] properties)
+        private void CopyEntity(TEntity source, TEntity destination, PropertyRegistration[] properties)
         {
             foreach (var propMapping in properties)
             {

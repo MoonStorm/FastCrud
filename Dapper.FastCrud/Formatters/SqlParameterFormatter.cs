@@ -4,6 +4,7 @@
     using System.Globalization;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     /// <summary>
     /// Defers the resolution of a parameter until we're resolved later with our custom format provider.
@@ -13,7 +14,7 @@
         /// <summary>
         /// Constructor used when the entity type is set to the query's main one.
         /// </summary>
-        public SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, EntityMapping? entityMappingOverride)
+        public SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, EntityRegistration? entityMappingOverride)
             : this(elementType, parameterValue, null, entityMappingOverride)
         {
         }
@@ -21,7 +22,7 @@
         /// <summary>
         /// Constructor used by entity type aware formatters.
         /// </summary>
-        protected SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, Type? entityType, EntityMapping? entityMappingOverride)
+        protected SqlParameterFormatter(SqlParameterElementType elementType, string? parameterValue, Type? entityType, EntityRegistration? entityMappingOverride)
         {
             this.ElementType = elementType;
             this.ParameterValue = parameterValue;
@@ -48,13 +49,13 @@
         /// <summary>
         /// Optional entity mapping .
         /// </summary>
-        protected EntityMapping? EntityMappingOverride { get; }
+        protected EntityRegistration? EntityMappingOverride { get; }
 
         /// <summary>
         /// If overridden, returns the sql builder associated with the optional entity descriptor and entity mapping.
         /// Note: Any or all the parameters can be <c>NULL</c>
         /// </summary>
-        protected virtual ISqlBuilder GetSqlBuilder(EntityDescriptor? entityDescriptor, EntityMapping? entityMapping)
+        protected virtual ISqlBuilder GetSqlBuilder(EntityDescriptor? entityDescriptor, EntityRegistration? entityMapping)
         {
             return null;
         }

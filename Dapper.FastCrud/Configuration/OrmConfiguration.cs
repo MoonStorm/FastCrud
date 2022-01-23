@@ -6,6 +6,7 @@ namespace Dapper.FastCrud
     using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlStatements;
     using Dapper.FastCrud.Validations;
     using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         public static EntityMapping<TEntity> RegisterEntity<TEntity>()
         {
-            var entityRegistration = new EntityMapping(typeof(TEntity));
+            var entityRegistration = new EntityRegistration(typeof(TEntity));
             return SetDefaultEntityMapping(new EntityMapping<TEntity>(entityRegistration));
         }
 
@@ -149,7 +150,7 @@ namespace Dapper.FastCrud
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ISqlStatements<TEntity> GetSqlStatements<TEntity>(EntityMapping entityMapping = null)
+        internal static ISqlStatements<TEntity> GetSqlStatements<TEntity>(EntityRegistration entityMapping = null)
         {
             return (ISqlStatements<TEntity>)GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping);
         }

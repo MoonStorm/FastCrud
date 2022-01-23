@@ -3,10 +3,11 @@
     using System;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     internal class PostgreSqlBuilder : GenericStatementSqlBuilder
     {
-        public PostgreSqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+        public PostgreSqlBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityMapping)
             : base(entityDescriptor, entityMapping, SqlDialect.PostgreSql)
         {
         }

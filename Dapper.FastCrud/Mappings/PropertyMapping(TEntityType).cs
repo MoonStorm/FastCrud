@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
     using System.Collections.Generic;
@@ -12,12 +13,12 @@
     /// </summary>
     public class PropertyMapping<TEntityType>
     {
-        private readonly PropertyMapping _propertyRegistration;
+        private readonly PropertyRegistration _propertyRegistration;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal PropertyMapping(PropertyMapping propertyRegistration)
+        internal PropertyMapping(PropertyRegistration propertyRegistration)
         {
             Requires.NotNull(propertyRegistration, nameof(propertyRegistration));
             _propertyRegistration = propertyRegistration;
@@ -26,7 +27,7 @@
         /// <summary>
         /// Gets the underlying property registration.
         /// </summary>
-        internal PropertyMapping Registration => _propertyRegistration;
+        internal PropertyRegistration Registration => _propertyRegistration;
 
         /// <summary>
         /// Gets the property name.

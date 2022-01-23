@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using Dapper.FastCrud.Mappings.Registrations;
     using System;
     using System.ComponentModel;
 
@@ -13,7 +14,7 @@
         /// </summary>
         public EntityMappingRelationship(
             Type referencedEntityType,
-            PropertyMapping[] referencingKeyProperties,
+            PropertyRegistration[] referencingKeyProperties,
             PropertyDescriptor referencingEntityProperty = null)
         {
             this.ReferencingKeyProperties = referencingKeyProperties;
@@ -24,7 +25,7 @@
         /// <summary>
         /// The main entity properties through which the relationship is established.
         /// </summary>
-        public PropertyMapping[] ReferencingKeyProperties { get; }
+        public PropertyRegistration[] ReferencingKeyProperties { get; }
 
         /// <summary>
         /// The property representing the entity the relationship reffers to. It can be null.

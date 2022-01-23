@@ -2,6 +2,7 @@
 {
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     /// <summary>
     /// Deferrs the resolution of a parameter for a specified entity until the query is ready to produce the SQL.
@@ -14,7 +15,7 @@
         public SqlEntityFormattableParameter(
             SqlParameterElementType elementType,
             string? parameterValue,
-            EntityMapping? entityMappingOverride)
+            EntityRegistration? entityMappingOverride)
             : base(elementType, parameterValue, typeof(TEntity), entityMappingOverride)
         {
         }
@@ -23,7 +24,7 @@
         /// If overriden, returns the sql builder associated with the optional entity descriptor and entity mapping.
         /// Note: Any or all the parameters can be <c>NULL</c>
         /// </summary>
-        protected override ISqlBuilder GetSqlBuilder(EntityDescriptor? entityDescriptor, EntityMapping? entityMapping)
+        protected override ISqlBuilder GetSqlBuilder(EntityDescriptor? entityDescriptor, EntityRegistration? entityMapping)
         {
             return (entityDescriptor ?? OrmConfiguration.GetEntityDescriptor<TEntity>())
                     .GetSqlStatements(entityMapping)

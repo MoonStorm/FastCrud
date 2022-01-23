@@ -2,13 +2,14 @@
 {
     using System.Linq;
     using Dapper.FastCrud.Mappings;
-    
+    using Dapper.FastCrud.Mappings.Registrations;
+
     /// <summary>
     /// Typed entity identity used by the entity builder. 
     /// </summary>
     internal class RelationshipEntityInstanceIdentity<TEntity> : RelationshipEntityInstanceIdentity
     {
-        public RelationshipEntityInstanceIdentity(EntityMapping entityMapping, TEntity instance)
+        public RelationshipEntityInstanceIdentity(EntityRegistration entityMapping, TEntity instance)
             : base(entityMapping, instance)
         {
             this.TypedInstance = instance;
@@ -31,7 +32,7 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public RelationshipEntityInstanceIdentity(EntityMapping entityMapping, object entity)
+        public RelationshipEntityInstanceIdentity(EntityRegistration entityMapping, object entity)
         {
             this.EntityMapping = entityMapping;
             this.Instance = entity;
@@ -57,7 +58,7 @@
         /// <summary>
         /// Gets the entity mapping of the instance attached to this identity.
         /// </summary>
-        public EntityMapping EntityMapping { get; }
+        public EntityRegistration EntityMapping { get; }
 
         /// <summary>
         /// Gets or sets a flag indicating that the instance attached to this identity is a duplicate and should be ignored.

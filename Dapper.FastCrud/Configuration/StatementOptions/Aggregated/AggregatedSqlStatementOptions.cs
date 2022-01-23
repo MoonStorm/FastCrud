@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlStatements;
 
     /// <summary>
@@ -36,7 +37,7 @@
         /// <summary>
         /// The entity mapping override to be used for the main entity.
         /// </summary>
-        public EntityMapping EntityMappingOverride { get; protected set; }
+        public EntityRegistration EntityMappingOverride { get; protected set; }
 
         /// <summary>
         /// Gets a timeout for the command being executed.

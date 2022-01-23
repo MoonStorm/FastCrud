@@ -4,10 +4,11 @@
     using System.Linq;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     internal class MySqlBuilder:GenericStatementSqlBuilder
     {
-        public MySqlBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+        public MySqlBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityMapping)
             : base(entityDescriptor, entityMapping, SqlDialect.MySql)
         {
         }

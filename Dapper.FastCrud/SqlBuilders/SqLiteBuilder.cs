@@ -5,10 +5,11 @@
     using System.Linq;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     internal class SqLiteBuilder:GenericStatementSqlBuilder
     {
-        public SqLiteBuilder(EntityDescriptor entityDescriptor, EntityMapping entityMapping)
+        public SqLiteBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityMapping)
             : base(entityDescriptor, entityMapping, SqlDialect.SqLite)
         {
         }

@@ -2,6 +2,7 @@
 {
     using System;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     /// <summary>
     /// Groups together all the statement options related to a joined entity.
@@ -19,7 +20,7 @@
         /// <summary>
         /// The entity mapping override to be used for the joined entity.
         /// </summary>
-        public EntityMapping EntityMappingOverride { get; protected set; }
+        public EntityRegistration EntityMappingOverride { get; protected set; }
 
         /// <summary>
         /// Gets or sets a where clause.

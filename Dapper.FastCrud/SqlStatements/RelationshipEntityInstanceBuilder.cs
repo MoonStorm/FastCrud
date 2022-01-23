@@ -4,6 +4,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     /// <summary>
     /// Entity instance builder used in queries involving relationships.
@@ -18,7 +19,7 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public RelationshipEntityInstanceBuilder(params EntityMapping[] entityMappings)
+        public RelationshipEntityInstanceBuilder(params EntityRegistration[] entityMappings)
         {
             _entityInstanceContainers = new Dictionary<Type, EntityInstanceContainer>();
             _currentRowEntityInstances = new RelationshipEntityInstanceIdentity[entityMappings.Length];
@@ -142,7 +143,7 @@
             _currentRowParticipatingEntityCount = 0;
         }
 
-        private static void Bind(EntityMapping mainEntityMapping, object mainEntity, EntityMapping childEntityMapping, object childEntity)
+        private static void Bind(EntityRegistration mainEntityMapping, object mainEntity, EntityRegistration childEntityMapping, object childEntity)
         {
             if (ReferenceEquals(mainEntity, null) || ReferenceEquals(childEntity, null))
             {
@@ -163,7 +164,7 @@
             }
         }
 
-        private static void InitializeRelationships(EntityMapping entityMapping, object entity)
+        private static void InitializeRelationships(EntityRegistration entityMapping, object entity)
         {
             foreach (var parentChildRelationship in entityMapping.ParentChildRelationships)
             {
@@ -175,13 +176,13 @@
         private class EntityInstanceContainer
         {
             /// <summary>Initializes a new instance of the <see cref="T:System.Object" /> class.</summary>
-            public EntityInstanceContainer(EntityMapping entityMapping)
+            public EntityInstanceContainer(EntityRegistration entityMapping)
             {
                 this.EntityMapping = entityMapping;
                 this.KnownInstances = new Dictionary<RelationshipEntityInstanceIdentity, object>();
             }
 
-            public EntityMapping EntityMapping { get; }
+            public EntityRegistration EntityMapping { get; }
             public Dictionary<RelationshipEntityInstanceIdentity, object> KnownInstances { get; }
         }
     }

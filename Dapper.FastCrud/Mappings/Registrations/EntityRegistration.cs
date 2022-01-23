@@ -1,21 +1,19 @@
-﻿namespace Dapper.FastCrud.Mappings
+﻿namespace Dapper.FastCrud.Mappings.Registrations
 {
+    using Dapper.FastCrud.Validations;
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Globalization;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
-    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Holds information about table mapped properties for a particular entity type.
     /// Multiple instances of such mappings can be active for a single entity type.
     /// </summary>
-    internal class EntityMapping
+    internal class EntityRegistration
     {
         private volatile bool _isFrozen;
         private string _tableName;
@@ -23,22 +21,22 @@
         private string? _databaseName;
         private SqlDialect _dialect;
 
-        private readonly Dictionary<string, PropertyMapping> _propertyNameMappingsMap;
-        private readonly List<PropertyMapping> _propertyMappings;
+        private readonly Dictionary<string, PropertyRegistration> _propertyNameMappingsMap;
+        private readonly List<PropertyRegistration> _propertyMappings;
         private Dictionary<Type, EntityMappingRelationship> _childParentRelationships;
         private Dictionary<Type, EntityMappingRelationship> _parentChildRelationships;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal EntityMapping(Type entityType)
+        internal EntityRegistration(Type entityType)
         {
             this.EntityType = entityType;
 
             _dialect = OrmConfiguration.DefaultDialect;
             _tableName = entityType.Name;
-            _propertyMappings = new List<PropertyMapping>();
-            _propertyNameMappingsMap = new Dictionary<string, PropertyMapping>();
+            _propertyMappings = new List<PropertyRegistration>();
+            _propertyNameMappingsMap = new Dictionary<string, PropertyRegistration>();
         }
 
         /// <summary>
@@ -49,7 +47,7 @@
             get => _tableName;
             set
             {
-                Requires.NotNullOrWhiteSpace(value, nameof(TableName));
+                Requires.NotNullOrWhiteSpace(value, nameof(this.TableName));
                 this.ValidateState();
                 _tableName = value;
             }
@@ -107,7 +105,7 @@
         /// <summary>
         /// Gets the property mapping asscoiated with the entity.
         /// </summary>
-        internal IReadOnlyDictionary<string, PropertyMapping> PropertyMappings => _propertyNameMappingsMap;
+        internal IReadOnlyDictionary<string, PropertyRegistration> PropertyMappings => _propertyNameMappingsMap;
 
         /// <summary>
         /// Gets all the child-parent relationships.
@@ -142,7 +140,7 @@
         {
             this.ValidateState();
 
-            PropertyMapping propertyMapping;
+            PropertyRegistration propertyMapping;
             if (_propertyNameMappingsMap.TryGetValue(propertyName, out propertyMapping))
             {
                 if (!_propertyNameMappingsMap.Remove(propertyName) || !_propertyMappings.Remove(propertyMapping))
@@ -155,7 +153,7 @@
         /// <summary>
         /// Prepares a new property mapping. 
         /// </summary>
-        internal PropertyMapping SetProperty(string propertyName)
+        internal PropertyRegistration SetProperty(string propertyName)
         {
             this.ValidateState();
 
@@ -166,17 +164,17 @@
         /// <summary>
         /// Registers a property mapping. 
         /// </summary>
-        internal PropertyMapping SetProperty(PropertyDescriptor property)
+        internal PropertyRegistration SetProperty(PropertyDescriptor property)
         {
             this.ValidateState();
 
-            return this.SetProperty(new PropertyMapping(this, property));
+            return this.SetProperty(new PropertyRegistration(this, property));
         }
 
         /// <summary>
         /// Registers a property mapping.
         /// </summary>
-        internal PropertyMapping SetProperty(PropertyMapping propertyMapping)
+        internal PropertyRegistration SetProperty(PropertyRegistration propertyMapping)
         {
             Requires.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
             this.ValidateState();
@@ -191,9 +189,9 @@
         /// <summary>
         /// Clones the current mapping set, allowing for further modifications.
         /// </summary>
-        public EntityMapping Clone()
+        public EntityRegistration Clone()
         {
-            var clonedMappings = new EntityMapping(this.EntityType)
+            var clonedMappings = new EntityRegistration(this.EntityType)
                                  {
                                      Dialect = this.Dialect,
                                      SchemaName = this.SchemaName,

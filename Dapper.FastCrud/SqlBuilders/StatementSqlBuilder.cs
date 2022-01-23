@@ -12,6 +12,7 @@
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System.Reflection;
 
@@ -44,7 +45,7 @@
 
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
-            EntityMapping entityMapping,
+            EntityRegistration entityMapping,
             SqlDialect dialect)
         {
             var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(dialect);
@@ -102,16 +103,16 @@
 
 
         public EntityDescriptor EntityDescriptor { get; }
-        public EntityMapping EntityMapping { get; }
-        public PropertyMapping[] SelectProperties { get; }
+        public EntityRegistration EntityMapping { get; }
+        public PropertyRegistration[] SelectProperties { get; }
         //public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
         //public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
-        public PropertyMapping[] KeyProperties { get; }
-        public PropertyMapping[] InsertProperties { get; }
-        public PropertyMapping[] UpdateProperties { get; }
-        public PropertyMapping[] InsertKeyDatabaseGeneratedProperties { get; }
-        public PropertyMapping[] RefreshOnInsertProperties { get; }
-        public PropertyMapping[] RefreshOnUpdateProperties { get; }
+        public PropertyRegistration[] KeyProperties { get; }
+        public PropertyRegistration[] InsertProperties { get; }
+        public PropertyRegistration[] UpdateProperties { get; }
+        public PropertyRegistration[] InsertKeyDatabaseGeneratedProperties { get; }
+        public PropertyRegistration[] RefreshOnInsertProperties { get; }
+        public PropertyRegistration[] RefreshOnUpdateProperties { get; }
         protected string IdentifierStartDelimiter { get; }
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
@@ -145,7 +146,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnNameForSelect(string propertyName, string tableAlias = null)
         {
-            PropertyMapping targetPropertyMapping;
+            PropertyRegistration targetPropertyMapping;
             if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
             {
                 throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
@@ -160,7 +161,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string tableAlias = null)
         {
-            PropertyMapping targetPropertyMapping;
+            PropertyRegistration targetPropertyMapping;
             if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
             {
                 throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
@@ -176,7 +177,7 @@
         /// <param name="tableAlias">Table alias</param>
         /// <param name="performColumnAliasNormalization">If true and the database column name differs from the property name, an AS clause will be added</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetColumnName(PropertyMapping propMapping, string tableAlias, bool performColumnAliasNormalization)
+        public string GetColumnName(PropertyRegistration propMapping, string tableAlias, bool performColumnAliasNormalization)
         {
             var sqlTableAlias = tableAlias == null ? string.Empty : $"{this.GetDelimitedIdentifier(tableAlias)}.";
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
@@ -468,8 +469,8 @@
                         var firstEntitySqlBuilder = firstEntitySqlInstruction.SqlBuilder;
 
                         // discover the relationship, if any
-                        PropertyMapping[] firstEntityPropertyMappings;
-                        PropertyMapping[] secondEntityPropertyMappings;
+                        PropertyRegistration[] firstEntityPropertyMappings;
+                        PropertyRegistration[] secondEntityPropertyMappings;
                         this.FindRelationship(firstEntitySqlBuilder, secondEntitySqlBuilder, out firstEntityPropertyMappings, out secondEntityPropertyMappings, ref secondEntityFinalJoinType);
 
                         if (firstEntityPropertyMappings == null || secondEntityPropertyMappings == null)
@@ -774,8 +775,8 @@
         private void FindRelationship(
             GenericStatementSqlBuilder firstEntitySqlBuilder,
             GenericStatementSqlBuilder secondEntitySqlBuilder, 
-            out PropertyMapping[] firstEntityRelationshipPropertyMappings, 
-            out PropertyMapping[] secondEntityRelationshipPropertyMappings, 
+            out PropertyRegistration[] firstEntityRelationshipPropertyMappings, 
+            out PropertyRegistration[] secondEntityRelationshipPropertyMappings, 
             ref SqlJoinType secondEntityJoinType)
         {
             var firstEntityMapping = firstEntitySqlBuilder.EntityMapping;
@@ -855,7 +856,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void FindRelationship(EntityMapping targetEntityMapping, EntityMapping entityMappingToDiscover, out EntityMappingRelationship targetRelationship, out bool targetParentChildRelationship)
+        private void FindRelationship(EntityRegistration targetEntityMapping, EntityRegistration entityMappingToDiscover, out EntityMappingRelationship targetRelationship, out bool targetParentChildRelationship)
         {
             if (targetEntityMapping.ChildParentRelationships.TryGetValue(entityMappingToDiscover.EntityType, out targetRelationship))
             {

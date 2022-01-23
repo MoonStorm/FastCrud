@@ -1,13 +1,13 @@
-﻿namespace Dapper.FastCrud.Mappings
+﻿namespace Dapper.FastCrud.Mappings.Registrations
 {
+    using Dapper.FastCrud.Validations;
     using System;
     using System.ComponentModel;
-    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Holds mapping information for a property.
     /// </summary>
-    internal class PropertyMapping
+    internal class PropertyRegistration
     {
         private PropertyMappingOptions _options;
         private string _databaseColumnName;
@@ -17,7 +17,7 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal PropertyMapping(EntityMapping entityMapping, PropertyDescriptor descriptor)
+        internal PropertyRegistration(EntityRegistration entityMapping, PropertyDescriptor descriptor)
         {
             _options = PropertyMappingOptions.None;
             _databaseColumnName = descriptor.Name;
@@ -44,7 +44,7 @@
         /// <summary>
         /// Gets the entity mapping this property mapping is attached to.
         /// </summary>
-        public EntityMapping EntityMapping { get; }
+        public EntityRegistration EntityMapping { get; }
 
         /// <summary>
         /// Gets or sets a flag indicating the property is mapped to a primary key.
@@ -193,7 +193,7 @@
         /// <summary>
         /// Gets the property name.
         /// </summary>
-        public string PropertyName => Descriptor.Name;
+        public string PropertyName => this.Descriptor.Name;
 
         /// <summary>
         /// Gets or sets the full set of options.
@@ -223,9 +223,9 @@
             }
         }
 
-        internal PropertyMapping Clone(EntityMapping newEntityMapping)
+        internal PropertyRegistration Clone(EntityRegistration newEntityMapping)
         {
-            var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
+            var clonedPropertyMapping = new PropertyRegistration(newEntityMapping, this.Descriptor)
                 {
                     _options = _options,
                     _childParentRelationship = _childParentRelationship == null 
@@ -244,7 +244,7 @@
         /// <summary>
         /// Checks if two property mappings are equal.
         /// </summary>
-        protected bool Equals(PropertyMapping other)
+        protected bool Equals(PropertyRegistration other)
         {
             return this.EntityMapping.Equals(other.EntityMapping) && this.PropertyName.Equals(other.PropertyName);
         }
@@ -270,7 +270,7 @@
             {
                 return false;
             }
-            return Equals((PropertyMapping)obj);
+            return this.Equals((PropertyRegistration)obj);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@
         /// <summary>
         /// Equality operator
         /// </summary>
-        public static bool operator ==(PropertyMapping left, PropertyMapping right)
+        public static bool operator ==(PropertyRegistration left, PropertyRegistration right)
         {
             return Equals(left, right);
         }
@@ -295,7 +295,7 @@
         /// <summary>
         /// Inequality operator
         /// </summary>
-        public static bool operator !=(PropertyMapping left, PropertyMapping right)
+        public static bool operator !=(PropertyRegistration left, PropertyRegistration right)
         {
             return !Equals(left, right);
         }
