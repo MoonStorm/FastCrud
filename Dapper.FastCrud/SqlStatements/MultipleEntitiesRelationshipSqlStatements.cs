@@ -1,31 +1,31 @@
 ﻿namespace Dapper.FastCrud.SqlStatements
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Threading.Tasks;
     using Dapper.FastCrud.SqlBuilders;
 
     /// <summary>
     /// SQL statement factory targeting relationships.
     /// </summary>
-    /// <typeparam name="TMainEntity">Main entity type</typeparam>
-    /// <typeparam name="TFirstJoinedEntity">Joined entity type</typeparam>
-    internal class TwoEntitiesRelationshipSqlStatements<TMainEntity, TFirstJoinedEntity> :RelationshipSqlStatements<TMainEntity>
+    internal class MultipleEntitiesRelationshipSqlStatements<TMainEntity> : RelationshipSqlStatements<TMainEntity>
     {
         /// <summary>
         /// Default constructor
         /// </summary>
-        /// <param name="mainEntitySqlStatements">Main entity SQL statement builder</param>
+        /// <param name="relationshipSqlStatements">Main entity SQL statement builder</param>
         /// <param name="joinedEntitySqlStatements">Joined entity SQL statement builder</param>
-        public TwoEntitiesRelationshipSqlStatements(ISqlStatements<TMainEntity> mainEntitySqlStatements, GenericStatementSqlBuilder joinedEntitySqlStatements)
-            : base(mainEntitySqlStatements, joinedEntitySqlStatements)
+        public MultipleEntitiesRelationshipSqlStatements(RelationshipSqlStatements<TMainEntity> relationshipSqlStatements, GenericStatementSqlBuilder joinedEntitySqlStatements)
+            : base(relationshipSqlStatements, joinedEntitySqlStatements)
         {
         }
 
         /// <summary>
         /// Combines the current instance with a joined entity.
         /// </summary>
-        public override ISqlStatements<TMainEntity> CombineWith<TSecondJoinedEntity>(ISqlStatements<TSecondJoinedEntity> joinedEntitySqlStatements)
+        public override ISqlStatements<TMainEntity> CombineWith<TJoinedEntity>(ISqlStatements<TJoinedEntity> joinedEntitySqlStatements)
         {
             return new MultipleEntitiesRelationshipSqlStatements<TMainEntity>(this, joinedEntitySqlStatements.SqlBuilder);
         }
@@ -40,18 +40,29 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.Query<TMainEntity, TFirstJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
-                statement,
-                (mainEntity, joinedEntity) =>
+
+            var types = new[] { typeof(TMainEntity) };
+            types = types.Concat(this._joinedEntitiesSqlBuilders.Select(x => x.EntityMapping.EntityType)).ToArray();
+
+            return connection.Query<RelationshipEntityInstanceIdentity<TMainEntity>>(statement, types,
+                (resultEntity) =>
                 {
-                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(joinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance((TMainEntity)resultEntity[0]);
+
+                    for (var i = 0; i < resultEntity.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            relationshipInstanceBuilder.RegisterResultSetRowInstance(resultEntity[i], types[i].FullName);
+                        }
+                    }
+
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntityIdentity;
                 },
                 parameters,
-                buffered:buffered,
+                buffered: buffered,
                 splitOn: splitOnCondition,
                 transaction: transaction,
                 commandTimeout: commandTimeout);
@@ -67,12 +78,22 @@
             int? commandTimeout,
             RelationshipEntityInstanceBuilder relationshipInstanceBuilder)
         {
-            return connection.QueryAsync<TMainEntity, TFirstJoinedEntity, RelationshipEntityInstanceIdentity<TMainEntity>>(
-                statement,
-                (mainEntity, joinedEntity) =>
+            var types = new[] { typeof(TMainEntity) };
+            types = types.Concat(this._joinedEntitiesSqlBuilders.Select(x => x.EntityMapping.EntityType)).ToArray();
+
+            return connection.QueryAsync<RelationshipEntityInstanceIdentity<TMainEntity>>(statement, types,
+                (resultEntity) =>
                 {
-                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance(mainEntity);
-                    relationshipInstanceBuilder.RegisterResultSetRowInstance(joinedEntity);
+                    var mainEntityIdentity = relationshipInstanceBuilder.RegisterResultSetRowInstance((TMainEntity)resultEntity[0]);
+
+                    for (var i = 0; i < resultEntity.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            relationshipInstanceBuilder.RegisterResultSetRowInstance(resultEntity[i], types[i].FullName);
+                        }
+                    }
+
                     relationshipInstanceBuilder.EndResultSetRow();
 
                     return mainEntityIdentity;
