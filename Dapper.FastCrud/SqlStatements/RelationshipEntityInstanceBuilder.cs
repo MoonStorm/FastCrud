@@ -69,6 +69,51 @@
         }
 
         /// <summary>
+        /// Registers a new entity instance for a row in the result set. Using class full name for checking entity because typeOf(TEntity) returning Object
+        /// Signal the end of the row in the result set with a call to <see cref="EndResultSetRow"/>.
+        /// </summary>
+        public RelationshipEntityInstanceIdentity<TEntity> RegisterResultSetRowInstance<TEntity>(TEntity entity, string className)
+        {
+            EntityInstanceContainer instanceContainer = default(EntityInstanceContainer);
+
+            foreach (var item in _entityInstanceContainers)
+            {
+                if (item.Key.FullName.Equals(className))
+                {
+                    instanceContainer = item.Value;
+                }
+            }
+            if (instanceContainer == null)
+            {
+                throw new InvalidOperationException($"Type '{className}' could not be found in the list of registered instance containers.");
+
+            }
+
+            var instanceIdentity = new RelationshipEntityInstanceIdentity<TEntity>(instanceContainer.EntityMapping, entity);
+            if (entity == null)
+            {
+                instanceIdentity.SetDuplicate(null);
+            }
+            else
+            {
+                object uniqueInstance;
+                if (instanceContainer.KnownInstances.TryGetValue(instanceIdentity, out uniqueInstance))
+                {
+                    instanceIdentity.SetDuplicate(uniqueInstance);
+                }
+                else
+                {
+                    InitializeRelationships(instanceIdentity.EntityMapping, entity);
+                    instanceContainer.KnownInstances.Add(instanceIdentity, entity);
+                }
+            }
+
+            _currentRowEntityInstances[_currentRowParticipatingEntityCount++] = instanceIdentity;
+
+            return instanceIdentity;
+        }
+
+        /// <summary>
         /// Ends a result row which has the effect of applying the necessary bindings.
         /// </summary>
         public void EndResultSetRow()
