@@ -40,19 +40,7 @@
         /// The resolver can be used as-is in a formattable string expression.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Table()
-        {
-            return new SqlParameterFormatter(SqlParameterElementType.Table, null, null);
-        }
-
-        /// <summary>
-        /// Returns a parameter formatter for the SQL table name of the provided entity.
-        /// If you wish to resolve the table name of the main entity, please use the non-generic overload instead.
-        /// The resolver can be used as-is in a formattable string expression.
-        /// </summary>
-        /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Table<TEntity>(EntityMapping<TEntity> entityMappingOverride)
+        public static IFormattable Table<TEntity>(EntityMapping<TEntity> entityMappingOverride = null)
         {
             return new SqlEntityFormattableParameter<TEntity>(SqlParameterElementType.Table, null, entityMappingOverride.Registration);
         }
@@ -76,7 +64,7 @@
         /// <param name="propertyName">Name of the property (e.g. <code>nameof(entity.propname)</code>)</param>
         /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Column<TEntity>(string propertyName, EntityMapping<TEntity> entityMappingOverride)
+        public static IFormattable Column<TEntity>(string propertyName, EntityMapping<TEntity> entityMappingOverride = null)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             return new SqlEntityFormattableParameter<TEntity>(SqlParameterElementType.Column, propertyName, entityMappingOverride.Registration);
@@ -101,7 +89,7 @@
         /// <param name="propertyName">Name of the property (e.g. <code>nameof(entity.propname)</code>)</param>
         /// <param name="entityMappingOverride">Overrides the entity mapping used in the query method.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable TableAndColumn<TEntity>(string propertyName, EntityMapping<TEntity> entityMappingOverride)
+        public static IFormattable TableAndColumn<TEntity>(string propertyName, EntityMapping<TEntity> entityMappingOverride = null)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             return new SqlParameterFormatter(SqlParameterElementType.TableAndColumn, propertyName, entityMappingOverride.Registration);

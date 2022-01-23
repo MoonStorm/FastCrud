@@ -4,6 +4,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Diagnostics;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -26,6 +27,11 @@
         /// Gets the underlying property registration.
         /// </summary>
         internal PropertyMapping Registration => _propertyRegistration;
+
+        /// <summary>
+        /// Gets the property name.
+        /// </summary>
+        public string PropertyName => _propertyRegistration.PropertyName;
 
         /// <summary>
         /// Marks the property as primary key.
@@ -109,48 +115,18 @@
         /// <summary>
         /// The property will be included in insert operations.
         /// </summary>
-        public PropertyMapping<TEntityType> IncludeInInserts()
+        public PropertyMapping<TEntityType> IncludeInInserts(bool includeInInserts = true)
         {
-            _propertyRegistration.IsExcludedFromInserts = false;
-            return this;
-        }
-
-        /// <summary>
-        /// The property will be excluded from update operations.
-        /// </summary>
-        public PropertyMapping<TEntityType> ExcludeFromInserts()
-        {
-            _propertyRegistration.IsExcludedFromInserts = true;
+            _propertyRegistration.IsExcludedFromInserts = !includeInInserts;
             return this;
         }
 
         /// <summary>
         /// The property will be included in update operations.
         /// </summary>
-        public PropertyMapping<TEntityType> IncludeInUpdates()
+        public PropertyMapping<TEntityType> IncludeInUpdates(bool includeInUpdates = true)
         {
-            _propertyRegistration.IsExcludedFromUpdates = false;
-            return this;
-        }
-
-        /// <summary>
-        /// The property will be excluded from update operations.
-        /// </summary>
-        public PropertyMapping<TEntityType> ExcludeFromUpdates()
-        {
-            _propertyRegistration.IsExcludedFromUpdates = true;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets up a foreign key relationship with another entity.
-        /// </summary>
-        /// <typeparam name="TParentEntityType">Foreign entity type.</typeparam>
-        /// <param name="referencingEntityPropertyName">The name of the property on the current entity that would hold the referenced entity when instructed to do so in a JOIN statement.</param>
-        [Obsolete(message: "Use the typed overload instead", error: false)]
-        public PropertyMapping<TEntityType> SetChildParentRelationship<TParentEntityType>(string referencingEntityPropertyName)
-        {
-            _propertyRegistration.ChildParentRelationship = new PropertyMappingRelationship(typeof(TParentEntityType), referencingEntityPropertyName, null);
+            _propertyRegistration.IsExcludedFromUpdates = !includeInUpdates;
             return this;
         }
 
@@ -183,5 +159,72 @@
             _propertyRegistration.ChildParentRelationship = null;
             return this;
         }
+
+        /// <summary>
+        /// Removes the current property mapping.
+        /// </summary>
+        public void Remove()
+        {
+            _propertyRegistration.EntityMapping.RemoveProperty(_propertyRegistration.PropertyName);
+        }
+
+        #region Obsolete methods and properties
+        [Obsolete("This method will be removed. Use IncludeInInserts(false) instead", error: false)]
+        public PropertyMapping<TEntityType> ExcludeFromInserts()
+        {
+            _propertyRegistration.IsExcludedFromInserts = true;
+            return this;
+        }
+
+        [Obsolete("This method will be removed. Use IncludeInUpdates(false) instead", error: false)]
+        public PropertyMapping<TEntityType> ExcludeFromUpdates()
+        {
+            _propertyRegistration.IsExcludedFromUpdates = true;
+            return this;
+        }
+
+        [Obsolete(message: "This method will be removed. Use the typed overload instead", error: false)]
+        public PropertyMapping<TEntityType> SetChildParentRelationship<TParentEntityType>(string referencingEntityPropertyName)
+        {
+            _propertyRegistration.ChildParentRelationship = new PropertyMappingRelationship(typeof(TParentEntityType), referencingEntityPropertyName, null);
+            return this;
+        }
+
+        [Obsolete(message:"This property will be removed. Use SetPrimaryKey instead.", error:false)]
+        public bool IsPrimaryKey
+        {
+            get => _propertyRegistration.IsPrimaryKey;
+            set => _propertyRegistration.IsPrimaryKey = value;
+        }
+
+        [Obsolete(message: "This property will be removed. Use RefreshOnInserts instead.", error: false)]
+        public bool IsRefreshedOnInserts
+        {
+            get => _propertyRegistration.IsRefreshedOnInserts;
+            set => _propertyRegistration.IsRefreshedOnInserts = value;
+        }
+
+        [Obsolete(message: "This property will be removed. Use RefreshOnUpdates instead.", error: false)]
+        public bool IsRefreshedOnUpdates
+        {
+            get => _propertyRegistration.IsRefreshedOnUpdates;
+            set => _propertyRegistration.IsRefreshedOnUpdates = value;
+        }
+
+        [Obsolete(message: "This property will be removed. Use IncludeInInserts(false) instead.", error: false)]
+        public bool IsExcludedFromInserts
+        {
+            get => _propertyRegistration.IsExcludedFromInserts;
+            set => _propertyRegistration.IsExcludedFromInserts = value;
+        }
+
+        [Obsolete(message: "This property will be removed. Use IncludeInUpdates(false) instead.", error: false)]
+        public bool IsExcludedFromUpdates
+        {
+            get => _propertyRegistration.IsExcludedFromUpdates;
+            set => _propertyRegistration.IsExcludedFromUpdates = value;
+        }
+
+        #endregion
     }
 }

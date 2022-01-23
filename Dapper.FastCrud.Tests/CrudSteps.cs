@@ -790,7 +790,7 @@
         {
             // prepare a new mapping
             var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>();
-            Assert.IsTrue(defaultMapping.IsFrozen);
+            Assert.IsTrue(defaultMapping.Registration.IsFrozen);
 
             try
             {

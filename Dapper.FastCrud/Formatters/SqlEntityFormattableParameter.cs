@@ -13,8 +13,8 @@
         /// </summary>
         public SqlEntityFormattableParameter(
             SqlParameterElementType elementType,
-            string parameterValue,
-            EntityMapping entityMappingOverride)
+            string? parameterValue,
+            EntityMapping? entityMappingOverride)
             : base(elementType, parameterValue, typeof(TEntity), entityMappingOverride)
         {
         }

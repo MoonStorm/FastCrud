@@ -223,16 +223,6 @@
             }
         }
 
-        /// <summary>
-        /// Removes the current property mapping.
-        /// </summary>
-        public void Remove()
-        {
-            this.ValidateState();
-
-            this.EntityMapping.RemoveProperty(this.PropertyName);
-        }
-
         internal PropertyMapping Clone(EntityMapping newEntityMapping)
         {
             var clonedPropertyMapping = new PropertyMapping(newEntityMapping, this.Descriptor)
