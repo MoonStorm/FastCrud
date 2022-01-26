@@ -133,9 +133,9 @@
         {
             return TypeDescriptor.GetProperties(entityType)
                 .OfType<PropertyDescriptor>()
-                .Where(propDesc => 
+                .Where(propDesc =>
                     !propDesc.Attributes.OfType<NotMappedAttribute>().Any()
-                    && !propDesc.IsReadOnly 
+                    && !propDesc.IsReadOnly
                     && propDesc.Attributes.OfType<EditableAttribute>().All(editableAttr => editableAttr.AllowEdit)
                     && this.IsSimpleSqlType(propDesc.PropertyType));
         }
@@ -146,7 +146,7 @@
         public virtual void ConfigureEntityPropertyMapping(PropertyMapping propertyMapping)
         {
             // set the Id property to be the primary database generated key in case we don't find any orm attributes on the entity or on the properties
-            if(string.Equals(propertyMapping.PropertyName, "id", StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(propertyMapping.PropertyName, "id", StringComparison.OrdinalIgnoreCase)
                 && this.GetEntityAttributes(propertyMapping.EntityMapping.EntityType).Length == 0
                 && !this.GetEntityProperties(propertyMapping.EntityMapping.EntityType).Any(
                     propDesc => this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propDesc).Any(
@@ -158,7 +158,7 @@
                 return;
             }
 
-             //|| (propDesc.PropertyType.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(propDesc.PropertyType.GetGenericTypeDefinition()))))
+            //|| (propDesc.PropertyType.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(propDesc.PropertyType.GetGenericTypeDefinition()))))
 
             // solve the parent child relationships
             //if (propertyMapping.Descriptor.PropertyType.IsGenericType
@@ -209,6 +209,16 @@
                 propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
             }
 
+            if (propertyAttributes.OfType<ConcurrencyCheckAttribute>().Any())
+            {
+                propertyMapping.SetConcurrencyProperty();
+            }
+
+            if (propertyAttributes.OfType<ExcludeUpdateAttribute>().Any())
+            {
+                propertyMapping.ExcludeFromUpdates();
+            }
+
             var foreignKeyAttribute = propertyAttributes.OfType<ForeignKeyAttribute>().FirstOrDefault();
             if (foreignKeyAttribute != null)
             {
@@ -230,7 +240,7 @@
 #if NETSTANDARD
                 propertyType.GetTypeInfo().IsEnum
 #else
-                propertyType.IsEnum 
+                propertyType.IsEnum
 #endif
             || _simpleSqlTypes.Contains(propertyType);
         }
@@ -284,7 +294,7 @@
                                                ? null
                                                : (TypeDescriptor
                                                     .GetProperties(entityMetadataAttribute.MetadataClassType).OfType<PropertyDescriptor>()
-                                                ).FirstOrDefault(propDescriptor => propDescriptor.Name==property.Name);
+                                                ).FirstOrDefault(propDescriptor => propDescriptor.Name == property.Name);
             var entityMetadataPropertyAttributes = entityMetadataProperty?.Attributes.OfType<Attribute>() ?? new Attribute[0];
 
             return entityMetadataPropertyAttributes.Concat(entityPropertyAttributes).ToArray();
