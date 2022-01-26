@@ -59,6 +59,9 @@
                 case SqlDialect.MsSql:
                     statementSqlBuilder = new MsSqlBuilder(this, entityMapping);
                     break;
+                case SqlDialect.MsSql2008:
+                    statementSqlBuilder = new MsSql2008Builder(this, entityMapping);
+                    break;
                 case SqlDialect.MySql:
                     statementSqlBuilder = new MySqlBuilder(this, entityMapping);
                     break;

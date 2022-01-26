@@ -7,9 +7,14 @@ namespace Dapper.FastCrud
     public enum SqlDialect
     {
         /// <summary>
-        /// MS SQL Server
+        /// MS SQL Server 2012 and later
         /// </summary>
         MsSql,
+
+        /// <summary>
+        /// MS SQL Server 2008
+        /// </summary>
+        MsSql2008,
 
         /// <summary>
         /// MySql

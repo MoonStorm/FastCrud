@@ -116,6 +116,7 @@
             switch (dialect)
             {
                 case SqlDialect.MsSql:
+                case SqlDialect.MsSql2008:
                     return _defaultMsSqlDatabaseOptions;
                 case SqlDialect.PostgreSql:
                     return _defaultPostgreSqlDatabaseOptions;
