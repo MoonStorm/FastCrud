@@ -8,6 +8,6 @@
         /// <summary>
         /// Sets the parameters to be used by the statement.
         /// </summary>
-        TStatementOptionsBuilder WithParameters(object parameters);
+        TStatementOptionsBuilder WithParameters(object? parameters);
     }
 }

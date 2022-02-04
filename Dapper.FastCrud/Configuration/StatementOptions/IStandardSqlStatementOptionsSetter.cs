@@ -17,11 +17,11 @@
         /// <summary>
         /// Attaches the current command to an existing transaction.
         /// </summary>
-        TStatementOptionsBuilder AttachToTransaction(IDbTransaction transaction);
+        TStatementOptionsBuilder AttachToTransaction(IDbTransaction? transaction);
 
         /// <summary>
         /// Overrides the entity mapping for the current statement.
         /// </summary>
-        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity> entityMapping);
+        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity>? entityMapping);
     }
 }

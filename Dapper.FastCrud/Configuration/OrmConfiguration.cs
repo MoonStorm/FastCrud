@@ -24,6 +24,33 @@ namespace Dapper.FastCrud
         private static volatile SqlStatementOptions _defaultStatementOptions = new SqlStatementOptions();
 
         /// <summary>
+        /// Gets the default command options. 
+        /// </summary>
+        public static SqlStatementOptions DefaultSqlStatementOptions => _defaultStatementOptions;
+
+        /// <summary>
+        /// Gets or sets the default dialect. 
+        /// </summary>
+        public static SqlDialect DefaultDialect
+        {
+            get => _currentDefaultDialect;
+            set => _currentDefaultDialect = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the conventions used by the library. Subclass <see cref="OrmConventions"/> to provide your own set of conventions.
+        /// </summary>
+        public static OrmConventions Conventions
+        {
+            get => _currentOrmConventions;
+            set
+            {
+                Requires.NotNull(value, nameof(Conventions));
+                _currentOrmConventions = value;
+            }
+        }
+
+        /// <summary>
         /// Clears all the recorded entity registrations and entity ORM mappings.
         /// </summary>
         public static void ClearEntityRegistrations()
@@ -82,50 +109,9 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <param name="entityMapping">If NULL, de default entity mapping will be used.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity> entityMapping = null)
+        public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity>? entityMapping = null)
         {
-            return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping.Registration).SqlBuilder;
-        }
-
-        /// <summary>
-        /// Gets the default command options. 
-        /// </summary>
-        public static SqlStatementOptions DefaultSqlStatementOptions
-        {
-            get
-            {
-                return _defaultStatementOptions;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default dialect. 
-        /// </summary>
-        public static SqlDialect DefaultDialect
-        {
-            get
-            {
-                return _currentDefaultDialect;
-            }
-            set
-            {
-                _currentDefaultDialect = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the conventions used by the library. Subclass <see cref="OrmConventions"/> to provide your own set of conventions.
-        /// </summary>
-        public static OrmConventions Conventions {
-            get
-            {
-                return _currentOrmConventions;
-            }
-            set
-            {
-                Requires.NotNull(value, nameof(Conventions));
-                _currentOrmConventions = value;
-            }
+            return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping?.Registration).SqlBuilder;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -149,10 +135,17 @@ namespace Dapper.FastCrud
             return typedEntityDescriptor;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ISqlStatements<TEntity> GetSqlStatements<TEntity>(EntityRegistration entityMapping = null)
-        {
-            return (ISqlStatements<TEntity>)GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping);
-        }
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //internal static ISqlStatements<TEntity> GetSqlStatements<TEntity>(EntityRegistration? entityMapping = null)
+        //{
+        //    return (ISqlStatements<TEntity>)GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping);
+        //}
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //internal static ISqlBuilder GetSqlBuilder<TEntity>(EntityRegistration? entityMapping = null)
+        //{
+        //    return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping).SqlBuilder;
+        //}
+
     }
 }

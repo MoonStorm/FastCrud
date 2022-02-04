@@ -3,42 +3,108 @@
     using System;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings;
+    using System.ComponentModel;
 
     /// <summary>
-    /// Common options builder for JOINs.
+    /// The full options builder for JOINs.
     /// </summary>
-    internal abstract class AggregatedRelationalSqlStatementOptionsBuilder<TReferredEntity, TStatementOptionsBuilder> : AggregatedRelationalSqlStatementOptions
+    internal abstract class AggregatedRelationalSqlStatementOptionsBuilder<TReferredEntity, TStatementOptionsBuilder> 
+        : AggregatedRelationalSqlStatementOptions
     {
         /// <summary>
-        /// Overrides the entity mapping for the current statement.
+        /// Default constructor.
         /// </summary>
-        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity> entityMapping)
+        protected AggregatedRelationalSqlStatementOptionsBuilder()
+            : base(OrmConfiguration.GetEntityDescriptor<TReferredEntity>())
         {
-            this.EntityMappingOverride = entityMapping.Registration;
+        }
+
+        /// <summary>
+        /// Provides the builder used in constructing the options.
+        /// </summary>
+        protected abstract TStatementOptionsBuilder Builder { get; }
+
+        /// <summary>
+        /// The entity mapping override to be used for the joined entity.
+        /// </summary>
+        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity>? entityMapping)
+        {
+            this.EntityRegistration = entityMapping?.Registration!;
             return this.Builder;
         }
 
         /// <summary>
-        /// Limits the result set with a where clause.
+        /// Sets or resets the navigation property to be used. If not set, the <seealso cref="On"/> condition needs to be provided.
         /// </summary>
-        public TStatementOptionsBuilder Where(FormattableString whereClause)
+        public TStatementOptionsBuilder UsingNavigationProperty(PropertyDescriptor? referencingNavigationProperty)
         {
-            this.WhereClause = whereClause;
+            this.ReferencingNavigationProperty = referencingNavigationProperty;
             return this.Builder;
         }
 
         /// <summary>
-        /// Adds an ORDER BY clause to the statement.
+        /// Sets the SQL join type.
         /// </summary>
-        public TStatementOptionsBuilder OrderBy(FormattableString orderByClause)
+        public TStatementOptionsBuilder OfType(SqlJoinType joinType)
         {
-            this.OrderClause = orderByClause;
+            this.JoinType = joinType;
             return this.Builder;
         }
 
         /// <summary>
-        /// A left outer join is desired.
+        /// Can be set to true or false in order to map or not the results onto the navigation property set through <seealso cref="UsingNavigationProperty"/>.
         /// </summary>
+        public TStatementOptionsBuilder MapResults(bool mapResults = true)
+        {
+            this.MapResultToNavigationProperty = mapResults;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Sets up an alias for the entity participating in the JOIN.
+        /// Remember to use this alias everywhere in the query.
+        /// </summary>
+        public TStatementOptionsBuilder WithAlias(string? tableAlias)
+        {
+            this.ReferencedEntityAlias = tableAlias;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="WithAlias"/>.
+        /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL you'd normally get for the JOIN.
+        /// However in this case it is recommended to use the final WHERE clause on the main query.
+        /// </summary>
+        public TStatementOptionsBuilder On(FormattableString? onClause)
+        {
+            this.JoinOnClause = onClause;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Extra filter for an ON clause in a JOIN.
+        /// </summary>
+        [Obsolete(message: "Will be removed in a future version.", error: false)]
+        public TStatementOptionsBuilder Where(FormattableString? whereClause)
+        {
+            this.JoinExtraOnClause = whereClause;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Adds an ORDER BY clause to the main statement.
+        /// </summary>
+        [Obsolete(message: "Will be removed in a future version.", error: false)]
+        public TStatementOptionsBuilder OrderBy(FormattableString? orderByClause)
+        {
+            this.ExtraOrderClause = orderByClause;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Sets the type of the JOIN to a LEFT OUTER JOIN.
+        /// </summary>
+        [Obsolete(message: "Will be removed in a future version.", error: false)]
         public TStatementOptionsBuilder LeftOuterJoin()
         { 
                 this.JoinType = SqlJoinType.LeftOuterJoin;
@@ -46,14 +112,13 @@
         }
 
         /// <summary>
-        /// An inner join is desired.
+        /// Sets the type of the JOIN to an INNER JOIN.
         /// </summary>
+        [Obsolete(message: "Will be removed in a future version.", error: false)]
         public TStatementOptionsBuilder InnerJoin()
         {
             this.JoinType = SqlJoinType.InnerJoin;
             return this.Builder;
         }
-
-        protected abstract TStatementOptionsBuilder Builder { get; }
     }
 }

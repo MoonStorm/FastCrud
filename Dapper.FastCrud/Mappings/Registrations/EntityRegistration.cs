@@ -1,13 +1,11 @@
 ﻿namespace Dapper.FastCrud.Mappings.Registrations
 {
+    using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Validations;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
-    using System.Reflection;
 
     /// <summary>
     /// Holds information about table mapped properties for a particular entity type.
@@ -21,10 +19,11 @@
         private string? _databaseName;
         private SqlDialect _dialect;
 
-        private readonly Dictionary<string, PropertyRegistration> _propertyNameMappingsMap;
         private readonly List<PropertyRegistration> _propertyMappings;
-        private Dictionary<Type, EntityMappingRelationship> _childParentRelationships;
-        private Dictionary<Type, EntityMappingRelationship> _parentChildRelationships;
+        private readonly List<EntityRelationshipRegistration> _entityRelationships;
+
+        private PropertyRegistration[]? _frozenOrderedPropertyMappings;
+        private Dictionary<string, PropertyRegistration>? _frozenPropertyMappingsMap;
 
         /// <summary>
         /// Default constructor.
@@ -36,7 +35,7 @@
             _dialect = OrmConfiguration.DefaultDialect;
             _tableName = entityType.Name;
             _propertyMappings = new List<PropertyRegistration>();
-            _propertyNameMappingsMap = new Dictionary<string, PropertyRegistration>();
+            _entityRelationships = new List<EntityRelationshipRegistration>();
         }
 
         /// <summary>
@@ -103,31 +102,108 @@
         public Type EntityType { get; }
 
         /// <summary>
-        /// Gets the property mapping asscoiated with the entity.
+        /// Adds a new entity relationship or updates an existing one.
         /// </summary>
-        internal IReadOnlyDictionary<string, PropertyRegistration> PropertyMappings => _propertyNameMappingsMap;
+        public EntityRelationshipRegistration SetRelationship(
+            EntityRelationshipType relationshipType,
+            Type referencedEntity,
+            string[] referencedColumnProperties,
+            string[] referencingColumnProperties,
+            PropertyDescriptor? referencingNavigationProperty)
+        {
+            Requires.NotNull(referencedEntity, nameof(referencedEntity));
+            Requires.NotNull(referencedColumnProperties, nameof(referencedColumnProperties));
+            Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
+
+            this.ValidateState();
+            
+            // try to locate an existing relationship to update or create a new one in case none was found
+            var relationshipRegistration = this.TryLocateRelationshipThrowWhenMultipleAreFound(
+                relationshipType,
+                referencedEntity,
+                referencedColumnProperties,
+                referencingColumnProperties,
+                referencingNavigationProperty);
+
+            if (relationshipRegistration != null)
+            {
+                _entityRelationships.Remove(relationshipRegistration);
+                relationshipRegistration = new EntityRelationshipRegistration(
+                    relationshipType,
+                    referencedEntity,
+                    (referencedColumnProperties ?? Array.Empty<string>())
+                        .Concat(relationshipRegistration.ReferencedColumnProperties ?? Array.Empty<string>())
+                        .Distinct()
+                        .ToArray(),
+                    (referencingColumnProperties ?? Array.Empty<string>())
+                        .Concat(relationshipRegistration.ReferencingColumnProperties ?? Array.Empty<string>())
+                        .Distinct()
+                        .ToArray(),
+                    referencingNavigationProperty ?? relationshipRegistration.ReferencingNavigationProperty);
+            }
+            else
+            {
+                relationshipRegistration = new EntityRelationshipRegistration(
+                    relationshipType,
+                    referencedEntity,
+                    referencedColumnProperties,
+                    referencingColumnProperties,
+                    referencingNavigationProperty);
+            }
+
+            _entityRelationships.Add(relationshipRegistration);
+
+            return relationshipRegistration;
+        }
 
         /// <summary>
-        /// Gets all the child-parent relationships.
+        /// Removes an existing relationship.
         /// </summary>
-        internal IReadOnlyDictionary<Type, EntityMappingRelationship> ChildParentRelationships => _childParentRelationships;
+        /// <exception cref="InvalidOperationException">Unable to locate the requested relationship.</exception>
+        public EntityRelationshipRegistration RemoveRelationship(
+            EntityRelationshipType relationshipType,
+            Type referencedEntity,
+            string[] referencedColumnProperties,
+            string[] referencingColumnProperties,
+            PropertyDescriptor? referencingNavigationProperty)
+        {
+            Requires.NotNull(referencedEntity, nameof(referencedEntity));
+            this.ValidateState();
 
-        /// <summary>
-        /// Gets all the parent-child relationships.
-        /// </summary>
-        internal IReadOnlyDictionary<Type, EntityMappingRelationship> ParentChildRelationships => _parentChildRelationships;
+            // try to locate an existing relationship to update or create a new one in case none was found
+            var relationshipRegistration = this.TryLocateRelationshipThrowWhenMultipleAreFound(
+                relationshipType,
+                referencedEntity,
+                referencedColumnProperties,
+                referencingColumnProperties,
+                referencingNavigationProperty);
+
+            if (relationshipRegistration == null)
+            {
+                throw new InvalidOperationException("Unable to locate the requested relationship");
+            }
+
+            _entityRelationships.Remove(relationshipRegistration);
+            return relationshipRegistration;
+        }
+
 
         /// <summary>
         /// Removes a set of property mappings.
         /// </summary>
-        internal void RemoveProperties(IEnumerable<string> paramNames, bool exclude)
+        public void RemoveProperties(IEnumerable<string> paramNames, bool exclude)
         {
+            Requires.NotNull(paramNames, nameof(paramNames));
             this.ValidateState();
 
-            var propNamesMappingsToRemove = new List<string>(_propertyMappings.Count);
-            propNamesMappingsToRemove.AddRange(from propMapping in this.PropertyMappings where (exclude && !paramNames.Contains(propMapping.Value.PropertyName)) || (!exclude && paramNames.Contains(propMapping.Value.PropertyName)) select propMapping.Key);
+            var propNamesToRemove = _propertyMappings
+                .Where(propMapping => 
+                           (exclude && !paramNames.Contains(propMapping.PropertyName))
+                            || (!exclude && paramNames.Contains(propMapping.PropertyName)))
+                .Select(propMapping => propMapping.PropertyName)
+                .ToArray();
 
-            foreach (var propName in propNamesMappingsToRemove)
+            foreach (var propName in propNamesToRemove)
             {
                 this.RemoveProperty(propName);
             }
@@ -136,24 +212,21 @@
         /// <summary>
         /// Removes a property mapping.
         /// </summary>
-        internal void RemoveProperty(string propertyName)
+        /// <exception cref="InvalidOperationException">Thrown when no properties having the name were found</exception>
+        public void RemoveProperty(string propertyName)
         {
             this.ValidateState();
 
-            PropertyRegistration propertyMapping;
-            if (_propertyNameMappingsMap.TryGetValue(propertyName, out propertyMapping))
+            if (_propertyMappings.RemoveAll(propMapping => propMapping.PropertyName == propertyName) == 0)
             {
-                if (!_propertyNameMappingsMap.Remove(propertyName) || !_propertyMappings.Remove(propertyMapping))
-                {
-                    throw new InvalidOperationException($"Failure removing property '{propertyName}'");
-                }
-            } 
+                throw new InvalidOperationException($"The mapping for the property name '{propertyName}' could not be found");
+            }
         }
 
         /// <summary>
         /// Prepares a new property mapping. 
         /// </summary>
-        internal PropertyRegistration SetProperty(string propertyName)
+        public PropertyRegistration SetProperty(string propertyName)
         {
             this.ValidateState();
 
@@ -164,7 +237,7 @@
         /// <summary>
         /// Registers a property mapping. 
         /// </summary>
-        internal PropertyRegistration SetProperty(PropertyDescriptor property)
+        public PropertyRegistration SetProperty(PropertyDescriptor property)
         {
             this.ValidateState();
 
@@ -174,14 +247,13 @@
         /// <summary>
         /// Registers a property mapping.
         /// </summary>
-        internal PropertyRegistration SetProperty(PropertyRegistration propertyMapping)
+        public PropertyRegistration SetProperty(PropertyRegistration propertyMapping)
         {
             Requires.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
             this.ValidateState();
 
             _propertyMappings.Remove(propertyMapping);
             _propertyMappings.Add(propertyMapping);
-            _propertyNameMappingsMap[propertyMapping.PropertyName] = propertyMapping;
 
             return propertyMapping;
         }
@@ -191,25 +263,115 @@
         /// </summary>
         public EntityRegistration Clone()
         {
-            var clonedMappings = new EntityRegistration(this.EntityType)
+            var clonedEntityRegistration = new EntityRegistration(this.EntityType)
                                  {
                                      Dialect = this.Dialect,
                                      SchemaName = this.SchemaName,
                                      TableName = this.TableName,
                                      DatabaseName = this.DatabaseName
                                  };
-            foreach (var clonedPropMapping in this.PropertyMappings.Select(propNameMapping => propNameMapping.Value.Clone(clonedMappings)))
+            foreach (var clonedPropMapping in this._propertyMappings.Select(propMapping => propMapping.Clone(clonedEntityRegistration)))
             {
-                clonedMappings.SetProperty(clonedPropMapping);
+                clonedEntityRegistration.SetProperty(clonedPropMapping);
             }
 
-            return clonedMappings;
+            foreach (var relationship in _entityRelationships)
+            {
+                clonedEntityRegistration.SetRelationship(
+                    relationship.RelationshipType,
+                    relationship.ReferencedEntity,
+                    relationship.ReferencedColumnProperties,
+                    relationship.ReferencingColumnProperties,
+                    relationship.ReferencingNavigationProperty);
+            }
+
+            return clonedEntityRegistration;
         }
+
+        /// <summary>
+        /// Gets the frozen property registration, ordered by <seealso cref="PropertyRegistration.ColumnOrder"/>.
+        /// </summary>
+        public PropertyRegistration[] GetAllOrderedFrozenPropertyRegistrations()
+        {
+            this.EnsureMappingsFrozen();
+            return _frozenOrderedPropertyMappings;
+        }
+
+        /// <summary>
+        /// Attempts to locate a frozen property registration by property name.
+        /// </summary>
+        public PropertyRegistration? TryGetFrozenPropertyRegistrationByPropertyName(string propertyName)
+        {
+            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+
+            this.EnsureMappingsFrozen();
+            if (_frozenPropertyMappingsMap.TryGetValue(propertyName, out PropertyRegistration propertyRegistration))
+            {
+                return propertyRegistration;
+            }
+
+            return null;
+
+        }
+
+        /// <summary>
+        /// Tries to locate an entity relationship.
+        /// </summary>
+        public EntityRelationshipRegistration? TryLocateRelationshipThrowWhenMultipleAreFound(
+            EntityRelationshipType relationshipTypeToFind,
+            Type referencedEntityToFind,
+            string[] referencedColumnPropertiesToFind,
+            string[] referencingColumnPropertiesToFind,
+            PropertyDescriptor? referencingNavigationPropertyToFind)
+        {
+            var locatedRelationships = _entityRelationships
+                                       .Where(existingRelationship =>
+                                                  existingRelationship.RelationshipType == relationshipTypeToFind
+                                                  && existingRelationship.ReferencedEntity == referencedEntityToFind)
+                                       .ToArray();
+
+            if (locatedRelationships.Length > 1 && referencingNavigationPropertyToFind != null)
+            {
+                locatedRelationships = locatedRelationships
+                                       .Where(existingRelationship => existingRelationship.ReferencingNavigationProperty == existingRelationship.ReferencingNavigationProperty)
+                                       .ToArray();
+            }
+
+            if (locatedRelationships.Length > 1 && referencedColumnPropertiesToFind != null)
+            {
+                locatedRelationships = locatedRelationships
+                                       .Where(existingRelationship => existingRelationship.ReferencedColumnProperties != null
+                                                                      && referencedColumnPropertiesToFind.All(
+                                                                          propertyToFind => existingRelationship.ReferencedColumnProperties.Any(existingProperty => existingProperty == propertyToFind)))
+                                       .ToArray();
+            }
+
+            if (locatedRelationships.Length > 1 && referencingColumnPropertiesToFind != null)
+            {
+                locatedRelationships = locatedRelationships
+                                       .Where(existingRelationship => existingRelationship.ReferencingColumnProperties != null
+                                                                      && referencingColumnPropertiesToFind.All(
+                                                                          propertyToFind => existingRelationship.ReferencingColumnProperties.Any(existingProperty => existingProperty == propertyToFind)))
+                                       .ToArray();
+            }
+
+            if (locatedRelationships.Length > 1)
+            {
+                // nothing to do
+                var entityRelationshipsDesc = string.Join(
+                    "; ",
+                    locatedRelationships.Select(rel => $"relationship of type {rel.RelationshipType} with referencing navigation property '{rel.ReferencingNavigationProperty}' and referencing column properties {string.Join(", ", rel.ReferencingColumnProperties??Array.Empty<string>())} to '{rel.ReferencedEntity}' and referenced column properties {string.Join(", ", rel.ReferencedColumnProperties ?? Array.Empty<string>())}"));
+                throw new InvalidOperationException($"More than one relationship has been found ({entityRelationshipsDesc})");
+            }
+
+            return locatedRelationships.SingleOrDefault();
+        }
+
 
         /// <summary>
         /// Freezes changes to the property mappings.
         /// </summary>
-        internal void FreezeMapping()
+        private void EnsureMappingsFrozen()
         {
             if (!_isFrozen)
             {
@@ -218,6 +380,7 @@
                 {
                     if (!_isFrozen)
                     {
+                        // sort out the column order
                         var maxColumnOrder = _propertyMappings.Select(propMapping => propMapping.ColumnOrder).Max();
                         foreach (var propMapping in _propertyMappings)
                         {
@@ -227,92 +390,16 @@
                             }
                         }
 
-                        this.ConstructChildParentEntityRelationships();
-                        this.ConstructParentChildEntityRelationships();
+                        // now set up the collections
+                        _frozenOrderedPropertyMappings = _propertyMappings
+                                                         .OrderBy(propMapping => propMapping.ColumnOrder, RelationshipOrderComparer.Default)
+                                                         .ToArray();
+                        _frozenPropertyMappingsMap = _propertyMappings.ToDictionary(propMapping => propMapping.PropertyName, propMapping => propMapping);
 
                         _isFrozen = true;
                     }
                 }
             }
-        }
-
-        private void ConstructChildParentEntityRelationships()
-        {
-            //_childParentRelationships = _propertyMappings
-            //    .Where(propertyMapping => propertyMapping.ChildParentRelationship!=null)
-            //    .GroupBy(propertyMapping => propertyMapping.ChildParentRelationship.ReferencedEntityType)
-            //    .ToDictionary(
-            //        groupedRelMappings => groupedRelMappings.Key,
-            //        groupedRelMappings =>
-            //        {
-            //            var referencingEntityPropertyNames = groupedRelMappings
-            //                .Select(propMapping => propMapping.ChildParentRelationship.ReferencingPropertyName)
-            //                .Where(propName => !string.IsNullOrEmpty(propName))
-            //                .Distinct()
-            //                .ToArray();
-
-            //            if (referencingEntityPropertyNames.Length > 1)
-            //            {
-            //                // Check for NotMapped attributes on the related Names
-            //                // and remove all the properties with NotMapped Attributes.
-            //                var finalprops = new List<String>();
-            //                foreach (var name in referencingEntityPropertyNames)
-            //                {
-            //                    var prop = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>().FirstOrDefault(x => x.Name == name);
-
-            //                    var attr = prop?.Attributes.OfType<NotMappedAttribute>().FirstOrDefault();
-            //                    if (attr==null) 
-            //                    {
-            //                        // Only add properties names which do not have NotMappedAttribute Set
-            //                        finalprops.Add(name);
-            //                    }
-            //                }
-            //                referencingEntityPropertyNames = finalprops.ToArray();
-            //                if (referencingEntityPropertyNames.Length > 1)
-            //                {
-            //                    throw new InvalidOperationException($"Multiple entity referencing properties were registered for the '{this.EntityType}' - '{groupedRelMappings.Key}' relationship");
-            //                }
-            //            }
-
-            //            var referencingEntityPropertyName = referencingEntityPropertyNames.Length == 0
-            //                                                    ? null
-            //                                                    : referencingEntityPropertyNames[0];
-            //            var referencingEntityPropertyDescriptor = referencingEntityPropertyName == null
-            //                                                          ? null
-            //                                                          : TypeDescriptor.GetProperties(this.EntityType)
-            //                                                                          .OfType<PropertyDescriptor>()
-            //                                                                          .SingleOrDefault(propDescriptor => propDescriptor.Name == referencingEntityPropertyName);
-
-
-            //            return new EntityMappingRelationship(groupedRelMappings.Key,groupedRelMappings.OrderBy(propMapping => propMapping.ColumnOrder).ToArray(), referencingEntityPropertyDescriptor);
-            //        });
-        }
-
-        private void ConstructParentChildEntityRelationships()
-        {
-            var selectedProps = TypeDescriptor.GetProperties(this.EntityType).OfType<PropertyDescriptor>()
-                .Where(propDescriptor =>
-                       {
-                           var propInfo =
-#if NETSTANDARD
-                           propDescriptor.PropertyType.GetTypeInfo();
-#else
-                           propDescriptor.PropertyType;
-#endif
-                                    return propInfo.IsGenericType 
-                                            && typeof(IEnumerable).IsAssignableFrom(propDescriptor.PropertyType)
-                                            && propDescriptor.PropertyType.GetGenericArguments().Length == 1 
-                                            && !propDescriptor.Attributes.OfType<NotMappedAttribute>().Any(); ;
-                                });
-                //.GroupBy(propDescriptor => propDescriptor.PropertyType)
-            _parentChildRelationships = selectedProps.ToDictionary(
-                    propDescriptor => propDescriptor.PropertyType.GetGenericArguments()[0],
-                    propDescriptor =>
-                    {
-                        // get the keys and order them
-                        var keyPropMappings = _propertyMappings.Where(propMapping => propMapping.IsPrimaryKey).OrderBy(propMapping => propMapping.ColumnOrder).ToArray();
-                        return new EntityMappingRelationship(propDescriptor.PropertyType, keyPropMappings, propDescriptor);
-                    });
         }
 
         /// <summary>

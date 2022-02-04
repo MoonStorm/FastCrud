@@ -29,7 +29,7 @@ namespace Dapper.FastCrud
         {
             var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().SelectById(connection, entityKeys, options);
+            return options.SqlStatementsFactory().SelectById(connection, entityKeys, options);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Dapper.FastCrud
         {
             var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().SelectByIdAsync(connection, entityKeys, options);
+            return options.SqlStatementsFactory().SelectByIdAsync(connection, entityKeys, options);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            options.SqlStatementsFactoryChain().Insert(connection, entityToInsert, options);
+            options.SqlStatementsFactory().Insert(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().InsertAsync(connection, entityToInsert, options);
+            return options.SqlStatementsFactory().InsertAsync(connection, entityToInsert, options);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().UpdateById(connection, entityToUpdate, options);
+            return options.SqlStatementsFactory().UpdateById(connection, entityToUpdate, options);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().UpdateByIdAsync(connection, entityToUpdate, options);
+            return options.SqlStatementsFactory().UpdateByIdAsync(connection, entityToUpdate, options);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BulkUpdate(connection, updateData, options);
+            return options.SqlStatementsFactory().BulkUpdate(connection, updateData, options);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BulkUpdateAsync(connection, updateData, options);
+            return options.SqlStatementsFactory().BulkUpdateAsync(connection, updateData, options);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().DeleteById(connection, entityToDelete, options);
+            return options.SqlStatementsFactory().DeleteById(connection, entityToDelete, options);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace Dapper.FastCrud
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().DeleteByIdAsync(connection, entityToDelete, options);
+            return options.SqlStatementsFactory().DeleteByIdAsync(connection, entityToDelete, options);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BulkDelete(connection, options);
+            return options.SqlStatementsFactory().BulkDelete(connection, options);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BulkDeleteAsync(connection, options);
+            return options.SqlStatementsFactory().BulkDeleteAsync(connection, options);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().Count(connection, options);
+            return options.SqlStatementsFactory().Count(connection, options);
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Dapper.FastCrud
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().CountAsync(connection, options);
+            return options.SqlStatementsFactory().CountAsync(connection, options);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace Dapper.FastCrud
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BatchSelect(connection, options);
+            return options.SqlStatementsFactory().BatchSelect(connection, options);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace Dapper.FastCrud
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
-            return options.SqlStatementsFactoryChain().BatchSelectAsync(connection, options);
+            return options.SqlStatementsFactory().BatchSelectAsync(connection, options);
         }
     }
 }

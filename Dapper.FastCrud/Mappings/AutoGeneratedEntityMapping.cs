@@ -2,6 +2,11 @@
 {
     using Dapper.FastCrud.Mappings.Registrations;
     using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using System.Threading;
 
     /// <summary>
@@ -34,13 +39,147 @@
             entityRegistration.SchemaName = currentConventions.GetSchemaName(entityType);
             entityRegistration.DatabaseName = currentConventions.GetDatabaseName(entityType);
 
-            foreach (var propDescriptor in currentConventions.GetEntityProperties(entityType))
+            var entityColumnProperties = currentConventions.GetEntityProperties(entityType).ToArray();
+            foreach (var propDescriptor in entityColumnProperties)
             {
                 var propMapping = entityRegistration.SetProperty(propDescriptor);
                 currentConventions.ConfigureEntityPropertyMapping(new PropertyMapping<TEntity>(propMapping));
             }
 
+            // now set up relationships
+            var childParentRelationships = this.DiscoverChildParentRelationships(entityType);
+            var parentChildrenRelationships = this.DiscoverParentChildrenRelationships(entityType);
+            foreach (var relationship in childParentRelationships.Concat(parentChildrenRelationships))
+            {
+                entityRegistration.SetRelationship(
+                    relationship.RelationshipType, 
+                    relationship.ReferencedEntity, 
+                    relationship.ReferencedColumnProperties, 
+                    relationship.ReferencingColumnProperties, 
+                    relationship.ReferencingNavigationProperty);
+            }
+
             return entityRegistration;
+        }
+
+        /// <summary>
+        /// Not assuming entities got registered, attempts to discover child-parent relationships.
+        /// </summary>
+        private IEnumerable<EntityRelationshipRegistration> DiscoverChildParentRelationships(Type entityType)
+        {
+            var entityColumnProperties = OrmConfiguration.Conventions.GetEntityProperties(entityType);
+
+
+            // look for foreign keys set up on column properties pointing to a property holding the parent entity
+            foreach (var childPropInfo in entityColumnProperties
+                                                  .Select(prop => new { columnProperty = prop, referencingNavPropertyName = prop.Attributes.OfType<ForeignKeyAttribute>().SingleOrDefault()?.Name })
+                                                  .Where(propInfo => !string.IsNullOrEmpty(propInfo.referencingNavPropertyName))
+                                                  .GroupBy(propInfo => propInfo.referencingNavPropertyName))
+            {
+                // some validations are in order
+                var childParentNavProperty = TypeDescriptor
+                                                    .GetProperties(entityType)
+                                                    .OfType<PropertyDescriptor>()
+                                                    .SingleOrDefault(prop => prop.Name == childPropInfo.Key);
+                if (childParentNavProperty == null)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt to locate property '{childPropInfo.Key}' on type '{entityType}', as referenced by the ForeignKey attribute, has failed.");
+                }
+
+                // find the referenced parent entity type
+                var parentEntityType = childParentNavProperty.PropertyType;
+                if (typeof(IEnumerable).IsAssignableFrom(parentEntityType))
+                {
+                    throw new InvalidOperationException(
+                        $"Expecting to locate a parent type on the '{childPropInfo.Key}' on type '{entityType}', as referenced by the ForeignKey attribute, but found a collection instead.");
+                }
+
+                // got everything we were looking for
+                yield return new EntityRelationshipRegistration(
+                    EntityRelationshipType.ChildToParent,
+                    parentEntityType,
+                    Array.Empty<string>(), // these are gonna get picked up later, when the entity gets "frozen"
+                    childPropInfo.Select(prop => prop.columnProperty.Name).ToArray(),
+                    childParentNavProperty);
+            }
+
+        }
+
+        /// <summary>
+        /// Not assuming entities got registered, attempts to discover parent-children relationships.
+        /// </summary>
+        private IEnumerable<EntityRelationshipRegistration> DiscoverParentChildrenRelationships(Type entityType)
+        {
+            // this can be in the form of:
+            //     1. as a marked property of the same type decorated with an InversePropertyAttribute pointing back to our nav property
+            //     2. an unmarked property of type IEnumerable<> OR
+            var parentChildrenPropGroups = TypeDescriptor.GetProperties(entityType)
+                                            .OfType<PropertyDescriptor>()
+                                            .Where(prop => !prop.Attributes.OfType<NotMappedAttribute>().Any()
+                                                           && typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
+                                                           && prop.PropertyType.IsGenericType
+                                                           && prop.PropertyType.GetGenericArguments().Length == 1)
+                                            .Select(prop =>
+                                            {
+                                                var inverseAttributes = prop.Attributes.OfType<InversePropertyAttribute>().ToArray();
+                                                if (inverseAttributes.Length > 1)
+                                                {
+                                                    throw new InvalidOperationException($"The property '{prop.Name}' on the type '{entityType}' has {inverseAttributes.Length} InverseProperty attributes");
+                                                }
+                                                return new
+                                                {
+                                                    prop = prop,
+                                                    childType = prop.PropertyType.GetGenericArguments()[0],
+                                                    inverseNavPropertyName = inverseAttributes.Select(attr => attr.Property).SingleOrDefault()
+                                                };
+                                            })
+                                            .GroupBy(prop => $"{prop.childType.AssemblyQualifiedName}_{prop.inverseNavPropertyName}")
+                                            .ToArray();
+
+            foreach (var parentChildrenPropGroup in parentChildrenPropGroups)
+            {
+                if (parentChildrenPropGroup.Count() > 1)
+                {
+                    throw new InvalidOperationException(
+                        $"Too many children entity navigation properties ({string.Join(", ", parentChildrenPropGroup.Select(propInfo => propInfo.prop.Name))}) were found on the parent type '{entityType}'. Use the InverseProperty attribute pointing to the navigation property on the child entity or the NotMapped attribute to exclude properties.");
+                }
+
+                var parentChildrenPropInfo = parentChildrenPropGroup.Single();
+
+                var parentChildrenNavigationProperty = parentChildrenPropInfo.prop;
+                var childEntityType = parentChildrenPropInfo.childType;
+                var optionalChildParentNavigationPropertyName = parentChildrenPropInfo.inverseNavPropertyName;
+
+                // now we need to locate the parent-child relationship on the other side
+                var childParentRelationships = this.DiscoverChildParentRelationships(childEntityType)
+                                                   .Where(rel => rel.ReferencedEntity == entityType
+                                                                 && (optionalChildParentNavigationPropertyName == null || optionalChildParentNavigationPropertyName == rel.ReferencingNavigationProperty?.Name))
+                                                   .ToArray();
+
+                if (childParentRelationships.Length > 1)
+                {
+                    throw new InvalidOperationException(
+                        $"Too many child-parent relationships were found on the child type '{childEntityType}' for the parent '{entityType}'. Use the InverseProperty attribute on the navigation property '{parentChildrenNavigationProperty.Name}' of the parent type '{entityType}' pointing to the navigation property on the child entity holding the parent.");
+                }
+
+                if (childParentRelationships.Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Unable to find any child-parent relationship for the child type '{childEntityType}' and the parent '{entityType}' when analyzing the navigation property '{parentChildrenNavigationProperty.Name}' on the parent entity.");
+                }
+
+                var childParentRelationship = childParentRelationships[0];
+
+                // now we have everything we need
+                yield return new EntityRelationshipRegistration(
+                    EntityRelationshipType.ParentToChildren,
+                    childEntityType,
+                    childParentRelationship.ReferencingColumnProperties,
+                    Array.Empty<string>(), // these will be added later, when the entity gets "frozen"
+                    parentChildrenNavigationProperty);
+
+            }
         }
     }
 }

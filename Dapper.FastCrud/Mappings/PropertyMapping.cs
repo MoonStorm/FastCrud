@@ -3,10 +3,7 @@
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Diagnostics;
-    using System.Linq.Expressions;
 
     /// <summary>
     /// Used to easily set up mappings for entity properties.
@@ -131,35 +128,6 @@
             return this;
         }
 
-        /// <summary>
-        /// Sets up a foreign key relationship with another entity.
-        /// </summary>
-        /// <param name="referencingParentPropertyOnCurrentEntity">
-        /// The property on the current entity that can hold a reference to the parent.
-        /// </param>
-        /// <param name="referencingChildrenPropertyOnParentEntity">
-        /// The property on the parent entity that can hold a collection of children entities.
-        /// This information is useful for multiple relationships to the same entity.
-        /// </param>
-        public PropertyMapping<TEntityType> SetChildParentRelationship<TParentEntityType>(
-            Expression<Func<TParentEntityType>>? referencingParentPropertyOnCurrentEntity, 
-            Expression<Func<IEnumerable<TEntityType>>>? referencingChildrenPropertyOnParentEntity = null)
-        {
-            var referencingParentPropertyName = (referencingParentPropertyOnCurrentEntity?.Body as MemberExpression)?.Member?.Name;
-            var referencingChildrenPropertyName = (referencingChildrenPropertyOnParentEntity?.Body as MemberExpression)?.Member?.Name;
-
-            _propertyRegistration.ChildParentRelationship = new PropertyMappingRelationship(typeof(TParentEntityType), referencingParentPropertyName, referencingChildrenPropertyName);
-            return this;
-        }
-
-        /// <summary>
-        /// Removes a child-parent relationship. 
-        /// </summary>
-        public PropertyMapping<TEntityType> RemoveChildParentRelationship()
-        {
-            _propertyRegistration.ChildParentRelationship = null;
-            return this;
-        }
 
         /// <summary>
         /// Removes the current property mapping.
@@ -184,11 +152,11 @@
             return this;
         }
 
-        [Obsolete(message: "This method will be removed. Use the typed overload instead", error: false)]
+        [Obsolete(message: "This method will be removed in a future version. Please use the relationship setup methods on the entity mapping instead.", error: false)]
         public PropertyMapping<TEntityType> SetChildParentRelationship<TParentEntityType>(string referencingEntityPropertyName)
         {
-            _propertyRegistration.ChildParentRelationship = new PropertyMappingRelationship(typeof(TParentEntityType), referencingEntityPropertyName, null);
-            return this;
+            //TODO: restore the functionality of this method for the full release
+            throw new NotSupportedException();
         }
 
         [Obsolete(message:"This property will be removed. Use SetPrimaryKey instead.", error:false)]
@@ -227,5 +195,6 @@
         }
 
         #endregion
+
     }
 }

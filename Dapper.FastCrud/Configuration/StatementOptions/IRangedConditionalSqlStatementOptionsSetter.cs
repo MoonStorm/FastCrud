@@ -15,12 +15,12 @@
         /// <summary>
         /// Adds an ORDER BY clause to the statement.
         /// </summary>
-        TStatementOptionsBuilder OrderBy(FormattableString orderByClause);
+        TStatementOptionsBuilder OrderBy(FormattableString? orderByClause);
 
         /// <summary>
         /// Causes the result set to be streamed.
         /// </summary>
-        TStatementOptionsBuilder StreamResults();
+        TStatementOptionsBuilder StreamResults(bool streamResults = true);
 
         /// <summary>
         /// Skips the initial set of results.

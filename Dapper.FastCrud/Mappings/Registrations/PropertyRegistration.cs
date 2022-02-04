@@ -12,7 +12,6 @@
         private PropertyMappingOptions _options;
         private string _databaseColumnName;
         private int _columnOrder = -1;
-        private PropertyMappingRelationship? _childParentRelationship;
 
         /// <summary>
         /// Default constructor.
@@ -25,22 +24,6 @@
             this.Descriptor = descriptor;
         }
 
-        /// <summary>
-        /// Gets or sets a child-parent relationship.
-        /// </summary>
-        public PropertyMappingRelationship? ChildParentRelationship
-        {
-            get
-            {
-                return _childParentRelationship;
-            }
-            set
-            {
-                this.ValidateState();
-                this._childParentRelationship = value;
-            }
-        }
-        
         /// <summary>
         /// Gets the entity mapping this property mapping is attached to.
         /// </summary>
@@ -228,12 +211,6 @@
             var clonedPropertyMapping = new PropertyRegistration(newEntityMapping, this.Descriptor)
                 {
                     _options = _options,
-                    _childParentRelationship = _childParentRelationship == null 
-                                                   ? null 
-                                                   : new PropertyMappingRelationship(
-                                                       _childParentRelationship.ReferencedEntityType, 
-                                                       _childParentRelationship.ReferencingParentEntityPropertyName, 
-                                                       _childParentRelationship.ReferencingChildrenCollectionPropertyName),
                     _databaseColumnName = this._databaseColumnName,
                     _columnOrder =  _columnOrder
 

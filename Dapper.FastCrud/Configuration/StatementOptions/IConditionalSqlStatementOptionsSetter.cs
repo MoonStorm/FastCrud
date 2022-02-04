@@ -10,6 +10,6 @@
         /// <summary>
         /// Limits the result set with a where clause.
         /// </summary>
-        TStatementOptionsBuilder Where(FormattableString whereClause);
+        TStatementOptionsBuilder Where(FormattableString? whereClause);
     }
 }

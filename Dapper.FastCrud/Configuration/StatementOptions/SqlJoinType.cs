@@ -18,6 +18,11 @@
         /// <summary>
         /// Inner join
         /// </summary>
-        InnerJoin
+        InnerJoin,
+
+        /// <summary>
+        /// Cross join
+        /// </summary>
+        CrossJoin
     }
 }

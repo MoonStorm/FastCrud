@@ -11,33 +11,26 @@
     public interface ISqlRelationOptionsSetter<TReferredEntity, TStatementOptionsBuilder>
     {
         /// <summary>
-        /// Overrides the entity mapping for the current statement.
+        /// Overrides the mapping for the entity participating in the JOIN.
         /// </summary>
-        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity> entityMapping);
+        TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity>? entityMapping);
 
         /// <summary>
-        /// Limits the result set with a where clause.
+        /// Sets up an alias for the entity participating in the JOIN.
+        /// Remember to use this alias everywhere in the query.
         /// </summary>
-        TStatementOptionsBuilder Where(FormattableString whereClause);
+        TStatementOptionsBuilder WithAlias(string? tableAlias);
 
         /// <summary>
-        /// Adds an ORDER BY clause to the statement.
+        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="WithAlias"/>.
+        /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL you'd normally get for the JOIN.
+        /// However in this case it is recommended to use the final WHERE clause on the main query.
         /// </summary>
-        TStatementOptionsBuilder OrderBy(FormattableString orderByClause);
+        TStatementOptionsBuilder On(FormattableString? onClause);
 
         /// <summary>
-        /// A left outer join is desired.
+        /// Either maps or not the result of the query onto the navigation property, if one was provided.
         /// </summary>
-        TStatementOptionsBuilder LeftOuterJoin();
-
-        /// <summary>
-        /// An inner join is desired.
-        /// </summary>
-        TStatementOptionsBuilder InnerJoin();
-
-        ///// <summary>
-        ///// A right outer join is desired.
-        ///// </summary>
-        //TStatementOptionsBuilder RightOuterJoin { get; }
+        TStatementOptionsBuilder MapResults(bool mapResults = true);
     }
 }

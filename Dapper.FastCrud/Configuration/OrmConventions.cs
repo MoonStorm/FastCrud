@@ -10,6 +10,7 @@
     using System.Text.RegularExpressions;
     using Dapper.FastCrud.Configuration.DialectOptions;
     using Dapper.FastCrud.Mappings;
+    using Dapper.FastCrud.Mappings.Registrations;
 
     /// <summary>
     /// Default conventions used by the library.
@@ -154,17 +155,17 @@
         /// </summary>
         public virtual void ConfigureEntityPropertyMapping<TEntity>(PropertyMapping<TEntity> propertyMapping)
         {
-            /*
+            var propertyRegistration = propertyMapping.Registration;
+            var entityRegistration = propertyMapping.Registration.EntityMapping;
+
             // set the Id property to be the primary database generated key in case we don't find any orm attributes on the entity or on the properties
             if(string.Equals(propertyMapping.PropertyName, "id", StringComparison.OrdinalIgnoreCase)
-                && this.GetEntityAttributes(propertyMapping.EntityMapping.EntityType).Length == 0
-                && !this.GetEntityProperties(propertyMapping.EntityMapping.EntityType).Any(
-                    propDesc => this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propDesc).Any(
+                && this.GetEntityAttributes(entityRegistration.EntityType).Length == 0
+                && !this.GetEntityProperties(entityRegistration.EntityType).Any(
+                    propDesc => this.GetEntityPropertyAttributes(entityRegistration.EntityType, propDesc).Any(
                         propAttr => propAttr is ColumnAttribute || propAttr is KeyAttribute || propAttr is DatabaseGeneratedAttribute)))
             {
-                propertyMapping.SetPrimaryKey();
-                propertyMapping.ExcludeFromInserts();
-                propertyMapping.RefreshOnInserts();
+                propertyMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity);
                 return;
             }
 
@@ -179,7 +180,7 @@
             //    return;
             //}
 
-            var propertyAttributes = this.GetEntityPropertyAttributes(propertyMapping.EntityMapping.EntityType, propertyMapping.Descriptor);
+            var propertyAttributes = this.GetEntityPropertyAttributes(entityRegistration.EntityType, propertyRegistration.Descriptor);
 
             var columnAttribute = propertyAttributes.OfType<ColumnAttribute>().FirstOrDefault();
 
@@ -193,7 +194,7 @@
             var databaseColumnOrder = columnAttribute?.Order;
             if (databaseColumnOrder.HasValue)
             {
-                propertyMapping.ColumnOrder = databaseColumnOrder.Value;
+                propertyMapping.SetColumnOrder(databaseColumnOrder.Value);
             }
 
             if (propertyAttributes.OfType<KeyAttribute>().Any())
@@ -203,8 +204,7 @@
 
             if (propertyAttributes.OfType<DatabaseGeneratedDefaultValueAttribute>().Any())
             {
-                propertyMapping.ExcludeFromInserts();
-                propertyMapping.RefreshOnInserts();
+                propertyMapping.IncludeInInserts(false).RefreshOnInserts(true);
             }
 
             var databaseGeneratedAttributes = propertyAttributes.OfType<DatabaseGeneratedAttribute>();
@@ -218,29 +218,6 @@
             {
                 propertyMapping.SetDatabaseGenerated(DatabaseGeneratedOption.Computed);
             }
-
-            // the foreign key attribute could be placed:
-            // 1. on the property already holding the parent entity, targeting to the property identifying the column or
-            // 2. on the property denoting the column, targeting the property holding the parent entity
-            var foreignKeyAttribute = propertyAttributes.OfType<ForeignKeyAttribute>().FirstOrDefault();
-            if (foreignKeyAttribute != null)
-            {
-                var targetProperty = TypeDescriptor.GetProperties(propertyMapping.Descriptor.ComponentType)
-                                                                                      .OfType<PropertyDescriptor>()
-                                                                                      .Single(propDescriptor => propDescriptor.Name == foreignKeyAttribute.Name);
-
-                if (this.IsSimpleSqlType(propertyMapping.Descriptor.PropertyType))
-                {
-                    // we've identified scenario no. 2
-                    propertyMapping.SetChildParentRelationship(targetProperty.PropertyType, targetProperty.Name);
-                }
-                else
-                {
-                    // we've identified scenario no. 1
-                    propertyMapping.SetChildParentRelationship(propertyMapping.Descriptor.PropertyType, propertyMapping.Descriptor.Name);
-                }
-            }
-            */
         }
 
         /// <summary>

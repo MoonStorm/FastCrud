@@ -22,6 +22,12 @@ Code first entities are also supported which can either be decorated with attrib
     - Extended support for the MetadataType attribute in .NET Standard 2.1
     - Bulk update can now be used with parameters.
     - Formatter :P added for SQL parameters.
+    - Methods adjusted for nullable support.
+    - Added support for multiple references to the same target using the InverseProperty attribute.
+    - [Breaking change] The fluent mapping setup has changed for setting up relationships.
+    - Support for self referenced entities.
+    - Support for multiple references to the same target.
+    - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.

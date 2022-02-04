@@ -1,43 +1,52 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
 {
+    using Dapper.FastCrud.EntityDescriptors;
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
-    using Dapper.FastCrud.SqlStatements;
+    using Dapper.FastCrud.Validations;
 
     /// <summary>
     /// Aggregates all the options passed on through the exposed extension methods.
     /// </summary>
-    internal abstract class AggregatedSqlStatementOptions<TEntity>
+    internal abstract class AggregatedSqlStatementOptions
     {
-        protected AggregatedSqlStatementOptions()
+        private EntityRegistration? _entityRegistrationOverride;
+        
+        protected AggregatedSqlStatementOptions(EntityDescriptor entityDescriptor)
         {
+            Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
+
+            this.EntityDescriptor = entityDescriptor;
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
-            this.RelationshipOptions = new Dictionary<Type, AggregatedRelationalSqlStatementOptions>();
-            this.SqlStatementsFactoryChain = () => OrmConfiguration.GetSqlStatements<TEntity>(this.EntityMappingOverride);
+            this.RelationshipOptions = new List<AggregatedRelationalSqlStatementOptions>();
         }
 
         /// <summary>
         /// Gets the map of related entity types and their relationships.
         /// </summary>
-        public Dictionary<Type, AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
+        public List<AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
 
         /// <summary>
-        /// The factory used to create the sql statement factories.
+        /// Returns the entity descriptor.
         /// </summary>
-        public Func<ISqlStatements<TEntity>> SqlStatementsFactoryChain { get; protected set; }
+        public EntityDescriptor EntityDescriptor { get; }
 
         /// <summary>
         /// The transaction to be used by the statement.
         /// </summary>
-        public IDbTransaction Transaction { get; protected set; }
+        public IDbTransaction? Transaction { get; protected set; }
 
         /// <summary>
-        /// The entity mapping override to be used for the main entity.
+        /// When setting this value, you're overriding the default entity used for the entity.
+        /// When an override is not set, the default registration is returned.
         /// </summary>
-        public EntityRegistration EntityMappingOverride { get; protected set; }
+        public EntityRegistration EntityRegistration
+        {
+            set => _entityRegistrationOverride = value; // can be null
+            get => _entityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration;
+        }
 
         /// <summary>
         /// Gets a timeout for the command being executed.
@@ -47,17 +56,17 @@
         /// <summary>
         /// Parameters used by the statement.
         /// </summary>
-        public object Parameters { get; protected set; }
+        public object? Parameters { get; protected set; }
 
         /// <summary>
         /// Gets or sets a where clause.
         /// </summary>
-        public FormattableString WhereClause { get; protected set; }
+        public FormattableString? WhereClause { get; protected set; }
 
         /// <summary>
         /// Gets or sets a where clause.
         /// </summary>
-        public FormattableString OrderClause { get; protected set; }
+        public FormattableString? OrderClause { get; protected set; }
 
         /// <summary>
         /// Gets or sets a limit on the number of rows returned.

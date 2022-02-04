@@ -29,7 +29,7 @@
 
         protected override ISqlStatements ConstructSqlStatements(EntityRegistration entityMapping)
         {
-            entityMapping.FreezeMapping();
+            // entityMapping.FreezeMapping();
 
             ISqlStatements sqlStatements;
             GenericStatementSqlBuilder statementSqlBuilder;
