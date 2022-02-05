@@ -5,6 +5,7 @@
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
+    using Dapper.FastCrud.SqlBuilders.Dialects;
     using Dapper.FastCrud.SqlStatements;
 
     /// <summary>
@@ -25,36 +26,48 @@
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
-        protected override EntityRegistration DefaultEntityMappingRegistration => _defaultEntityMapping.Value;
-
-        protected override ISqlStatements ConstructSqlStatements(EntityRegistration entityMapping)
+        /// <summary>
+        /// Returns the sql statements for a single entity, attached to the default entity registration or an overriden entity registration if provided.
+        /// </summary>
+        public ISqlStatements<TEntity> GetSqlStatements(EntityRegistration? entityRegistration = null)
         {
-            // entityMapping.FreezeMapping();
-
-            ISqlStatements sqlStatements;
-            GenericStatementSqlBuilder statementSqlBuilder;
-
-            switch (entityMapping.Dialect)
-            {
-                case SqlDialect.MsSql:
-                    statementSqlBuilder = new MsSqlBuilder(this, entityMapping);
-                    break;
-                case SqlDialect.MySql:
-                    statementSqlBuilder = new MySqlBuilder(this, entityMapping);
-                    break;
-                case SqlDialect.PostgreSql:
-                    statementSqlBuilder = new PostgreSqlBuilder(this, entityMapping);
-                    break;
-                case SqlDialect.SqLite:
-                    statementSqlBuilder = new SqLiteBuilder(this, entityMapping);
-                    break;
-                default:
-                    throw new NotSupportedException($"Dialect {entityMapping.Dialect} is not supported");
-            }
-
-            sqlStatements = new GenericSqlStatements<TEntity>(statementSqlBuilder);
-            return sqlStatements;
+            return (ISqlStatements<TEntity>)base.GetSqlStatements(entityRegistration);
         }
 
+        /// <summary>
+        /// Returns the default entity mapping registration.
+        /// </summary>
+        protected override EntityRegistration DefaultEntityMappingRegistration => _defaultEntityMapping.Value;
+
+        protected override ISqlBuilder ConstructSqlBuilder(EntityRegistration entityRegistration)
+        {
+            GenericStatementSqlBuilder statementSqlBuilder;
+
+            switch (entityRegistration.Dialect)
+            {
+                case SqlDialect.MsSql:
+                    statementSqlBuilder = new MsSqlBuilder(this, entityRegistration);
+                    break;
+                case SqlDialect.MySql:
+                    statementSqlBuilder = new MySqlBuilder(this, entityRegistration);
+                    break;
+                case SqlDialect.PostgreSql:
+                    statementSqlBuilder = new PostgreSqlBuilder(this, entityRegistration);
+                    break;
+                case SqlDialect.SqLite:
+                    statementSqlBuilder = new SqLiteBuilder(this, entityRegistration);
+                    break;
+                default:
+                    throw new NotSupportedException($"Dialect {entityRegistration.Dialect} is not supported");
+            }
+
+            return statementSqlBuilder;
+        }
+
+        protected override ISqlStatements ConstructSqlStatements(EntityRegistration entityRegistration)
+        {
+            var sqlBuilder = this.GetSqlBuilder(entityRegistration);
+            return new SingleEntitySqlStatements<TEntity>((GenericStatementSqlBuilder)sqlBuilder);
+        }
     }
 }

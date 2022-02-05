@@ -111,7 +111,7 @@ namespace Dapper.FastCrud
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ISqlBuilder GetSqlBuilder<TEntity>(EntityMapping<TEntity>? entityMapping = null)
         {
-            return GetEntityDescriptor<TEntity>().GetSqlStatements(entityMapping?.Registration).SqlBuilder;
+            return GetEntityDescriptor<TEntity>().GetSqlBuilder(entityMapping?.Registration);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

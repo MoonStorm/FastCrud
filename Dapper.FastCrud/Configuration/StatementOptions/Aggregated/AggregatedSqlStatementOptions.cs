@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
 {
     using Dapper.FastCrud.EntityDescriptors;
+    using Dapper.FastCrud.Formatters;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -27,6 +28,11 @@
         /// Gets the map of related entity types and their relationships.
         /// </summary>
         public List<AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
+
+        /// <summary>
+        /// The shared relationship formatter. This is null in case of no JOINS.
+        /// </summary>
+        public MultiResolverSqlStatementFormatter? RelationshipFormatter { get; set; }
 
         /// <summary>
         /// Returns the entity descriptor.

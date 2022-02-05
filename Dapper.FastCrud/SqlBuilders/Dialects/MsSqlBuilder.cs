@@ -1,11 +1,13 @@
-﻿namespace Dapper.FastCrud.SqlBuilders
+﻿namespace Dapper.FastCrud.SqlBuilders.Dialects
 {
+    using Dapper.FastCrud.EntityDescriptors;
+    using Dapper.FastCrud.Mappings.Registrations;
     using System;
     using System.Linq;
-    using Dapper.FastCrud.EntityDescriptors;
-    using Dapper.FastCrud.Mappings;
-    using Dapper.FastCrud.Mappings.Registrations;
 
+    /// <summary>
+    /// Statement builder for the <seealso cref="SqlDialect.MsSql"/>.
+    /// </summary>
     internal class MsSqlBuilder : GenericStatementSqlBuilder
     {
         public MsSqlBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityMapping)
@@ -99,14 +101,17 @@
             {
                 sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause, forceTableColumnResolution);
             }
+
             if (orderClause != null)
             {
                 sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause, forceTableColumnResolution);
             }
+
             if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {
                 sql += this.ResolveWithCultureInvariantFormatter($" OFFSET {skipRowsCount ?? 0} ROWS");
             }
+
             if (limitRowsCount.HasValue)
             {
                 sql += this.ResolveWithCultureInvariantFormatter($" FETCH NEXT {limitRowsCount} ROWS ONLY");

@@ -3,11 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Dapper.FastCrud.Tests.Common;
     using Dapper.FastCrud.Tests.Contexts;
-    using Dapper.FastCrud.Tests.Models;
     using Dapper.FastCrud.Tests.Models.CodeFirst;
     using Dapper.FastCrud.Tests.Models.Metadata;
     using Dapper.FastCrud.Tests.Models.Poco;

@@ -16,7 +16,8 @@
         /// <summary>
         /// Standard constructor.
         /// </summary>
-        protected AggregatedRelationalSqlStatementOptions(EntityDescriptor entityDescriptor)
+        protected AggregatedRelationalSqlStatementOptions(
+            EntityDescriptor entityDescriptor)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
 

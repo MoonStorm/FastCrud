@@ -11,16 +11,11 @@
     using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
-    using System.Reflection;
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
-        //private static readonly RelationshipOrderComparer _relationshipOrderComparer = new RelationshipOrderComparer();
-
-        //private readonly ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship> _entityRelationships;
         private readonly Lazy<string> _noAliasKeysWhereClause;
         private readonly Lazy<string> _noAliasTableName;
         private readonly Lazy<string> _noAliasKeyColumnEnumeration;
@@ -36,16 +31,13 @@
         private readonly Lazy<string> _noConditionFullCountStatement;
         private readonly Lazy<string> _fullSingleSelectStatement;
 
-        // regular statement formatter to be used for parameter resolution.
-        private readonly SqlStatementFormatter _regularStatementFormatter;
-
-        // statement formatter that would treat the C identifier as TC
-        private readonly SqlStatementFormatter _forcedTableResolutionStatementFormatter;
-
+        // fixed sql statement formatter
+        // keep in mind that you can't use a dynamic one since this entire sql builder is being cached
+        private readonly SingleResolverSqlStatementFormatter _currentEntityFormatter;
 
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
-            EntityRegistration entityMapping,
+            EntityRegistration entityregistration,
             SqlDialect dialect)
         {
             var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(dialect);
@@ -55,19 +47,17 @@
             this.ParameterPrefix = databaseOptions.ParameterPrefix;
 
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
-            _regularStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, false);
-            _forcedTableResolutionStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, true);
+            //_regularStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, false);
+            //_forcedTableResolutionStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, true);
+            _currentEntityFormatter = new SingleResolverSqlStatementFormatter(entityregistration, this);
 
             this.EntityDescriptor = entityDescriptor;
-            this.EntityMapping = entityMapping;
+            this.EntityMapping = entityregistration;
 
-            this.SelectProperties = this.EntityMapping.PropertyMappings
-                .Select(propMapping => propMapping.Value)
+            this.SelectProperties = this.EntityMapping.GetAllOrderedFrozenPropertyRegistrations()
                 .ToArray();
-            this.KeyProperties = this.EntityMapping.PropertyMappings
-                .Where(propMapping => propMapping.Value.IsPrimaryKey)
-                .Select(propMapping => propMapping.Value)
-                .OrderBy(propMapping => propMapping.ColumnOrder)
+            this.KeyProperties = this.EntityMapping.GetAllOrderedFrozenPropertyRegistrations()
+                .Where(propMapping => propMapping.IsPrimaryKey)
                 .ToArray();
             this.RefreshOnInsertProperties = this.SelectProperties
                 .Where(propInfo => propInfo.IsRefreshedOnInserts)
@@ -123,7 +113,7 @@
         /// </summary>
         /// <param name="tableAlias">Optional table alias using AS.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetTableName(string tableAlias = null)
+        public string GetTableName(string? tableAlias = null)
         {
             return tableAlias == null ? _noAliasTableName.Value : this.GetTableNameInternal(tableAlias);
         }
@@ -132,8 +122,10 @@
         /// Returns the name of the database column attached to the specified property.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetColumnName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> property, string tableAlias = null)
+        public string GetColumnName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> property, string? tableAlias = null)
         {
+            Requires.NotNull(property, nameof(property));
+
             var propName = ((MemberExpression)property.Body).Member.Name;
             return this.GetColumnName(propName, tableAlias);
         }
@@ -144,15 +136,17 @@
         ///   so that the deserialization performed by Dapper would succeed.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetColumnNameForSelect(string propertyName, string tableAlias = null)
+        public string GetColumnNameForSelect(string propertyName, string? tableAlias = null)
         {
-            PropertyRegistration targetPropertyMapping;
-            if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
+            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+
+            var targetPropertyRegistration = this.EntityMapping.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
+            if (targetPropertyRegistration == null)
             {
                 throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
             }
 
-            return this.GetColumnName(targetPropertyMapping, tableAlias, true);
+            return this.GetColumnName(targetPropertyRegistration, tableAlias, true);
         }
 
         /// <summary>
@@ -161,8 +155,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string tableAlias = null)
         {
-            PropertyRegistration targetPropertyMapping;
-            if (!this.EntityMapping.PropertyMappings.TryGetValue(propertyName, out targetPropertyMapping))
+            var targetPropertyMapping = this.EntityMapping.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
+            if(targetPropertyMapping == null)
             {
                 throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
             }
@@ -177,7 +171,7 @@
         /// <param name="tableAlias">Table alias</param>
         /// <param name="performColumnAliasNormalization">If true and the database column name differs from the property name, an AS clause will be added</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetColumnName(PropertyRegistration propMapping, string tableAlias, bool performColumnAliasNormalization)
+        public string GetColumnName(PropertyRegistration propMapping, string? tableAlias, bool performColumnAliasNormalization)
         {
             var sqlTableAlias = tableAlias == null ? string.Empty : $"{this.GetDelimitedIdentifier(tableAlias)}.";
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
@@ -191,7 +185,7 @@
         /// </summary>
         /// <param name="tableAlias">Optional table alias.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructKeysWhereClause(string tableAlias = null)
+        public string ConstructKeysWhereClause(string? tableAlias = null)
         {
             return tableAlias == null ? _noAliasKeysWhereClause.Value : this.ConstructKeysWhereClauseInternal(tableAlias);
         }
@@ -200,7 +194,7 @@
         /// Constructs an enumeration of the key values.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructKeyColumnEnumeration(string tableAlias = null)
+        public string ConstructKeyColumnEnumeration(string? tableAlias = null)
         {
             return tableAlias == null ? _noAliasKeyColumnEnumeration.Value : this.ConstructKeyColumnEnumerationInternal(tableAlias);
         }
@@ -211,7 +205,7 @@
         /// </summary>
         /// <param name="tableAlias">Optional table alias.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructColumnEnumerationForSelect(string tableAlias = null)
+        public string ConstructColumnEnumerationForSelect(string? tableAlias = null)
         {
             return tableAlias == null ? _noAliasColumnEnumerationForSelect.Value : this.ConstructColumnEnumerationForSelectInternal(tableAlias);
         }
@@ -241,7 +235,7 @@
         /// </summary>
         /// <param name="tableAlias">Optional table alias.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructUpdateClause(string tableAlias = null)
+        public string ConstructUpdateClause(string? tableAlias = null)
         {
             return tableAlias == null ? _noAliasUpdateClause.Value : this.ConstructUpdateClauseInternal(tableAlias);
         }
@@ -268,7 +262,7 @@
         /// Constructs a batch select statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullBatchUpdateStatement(FormattableString whereClause = null)
+        public string ConstructFullBatchUpdateStatement(FormattableString? whereClause = null)
         {
             return whereClause == null ? _noConditionFullBatchUpdateStatement.Value : this.ConstructFullBatchUpdateStatementInternal(whereClause);
         }
@@ -286,7 +280,7 @@
         /// Constructs a batch delete statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullBatchDeleteStatement(FormattableString whereClause = null)
+        public string ConstructFullBatchDeleteStatement(FormattableString? whereClause = null)
         {
             return whereClause == null ? _noConditionFullBatchDeleteStatement.Value : this.ConstructFullBatchDeleteStatementInternal(whereClause);
         }
@@ -305,7 +299,7 @@
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullCountStatement(FormattableString whereClause = null)
+        public string ConstructFullCountStatement(FormattableString? whereClause = null)
         {
             return whereClause == null ? _noConditionFullCountStatement.Value : this.ConstructFullCountStatementInternal(whereClause);
         }
@@ -324,11 +318,11 @@
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructFullBatchSelectStatement(
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
+            FormattableString? whereClause = null,
+            FormattableString? orderClause = null,
             long? skipRowsCount = null,
             long? limitRowsCount = null,
-            object queryParameters = null)
+            object? queryParameters = null)
         {
             return this.ConstructFullSelectStatementInternal(
                 this.ConstructColumnEnumerationForSelect(),
@@ -378,9 +372,9 @@
             out string fullStatement,
             out string splitOnExpression,
             IEnumerable<StatementSqlBuilderJoinInstruction> joinInstructions,
-            string selectClause = null,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
+            string? selectClause = null,
+            FormattableString? whereClause = null,
+            FormattableString? orderClause = null,
             long? skipRowsCount = null,
             long? limitRowsCount = null)
         {

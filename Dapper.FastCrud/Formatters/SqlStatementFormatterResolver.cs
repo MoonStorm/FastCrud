@@ -6,12 +6,12 @@
     /// <summary>
     /// Holds information about an entity participating in a statement.
     /// </summary>
-    internal class SqlStatementFormatterEntityAttendant
+    internal class SqlStatementFormatterResolver
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public SqlStatementFormatterEntityAttendant(
+        public SqlStatementFormatterResolver(
             EntityRegistration entityRegistration,
             ISqlBuilder sqlBuilder,
             string? alias = null)

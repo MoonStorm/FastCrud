@@ -2,6 +2,7 @@
 {
     using System;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
+    using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
     using System.ComponentModel;
 

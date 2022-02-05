@@ -1,13 +1,13 @@
-﻿namespace Dapper.FastCrud.SqlBuilders
+﻿namespace Dapper.FastCrud.SqlBuilders.Dialects
 {
-    using System;
-    using System.Globalization;
-    using System.Linq;
     using Dapper.FastCrud.EntityDescriptors;
-    using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
+    using System;
 
-    internal class SqLiteBuilder:GenericStatementSqlBuilder
+    /// <summary>
+    /// Statement builder for the <seealso cref="SqlDialect.SqLite"/>.
+    /// </summary>
+    internal class SqLiteBuilder : GenericStatementSqlBuilder
     {
         public SqLiteBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityMapping)
             : base(entityDescriptor, entityMapping, SqlDialect.SqLite)
@@ -65,6 +65,7 @@
             {
                 sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause, forceTableColumnResolution);
             }
+
             if (orderClause != null)
             {
                 sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause, forceTableColumnResolution);
@@ -74,6 +75,7 @@
             {
                 sql += this.ResolveWithCultureInvariantFormatter($" LIMIT {limitRowsCount ?? -1}");
             }
+
             if (skipRowsCount.HasValue)
             {
                 sql += this.ResolveWithCultureInvariantFormatter($" OFFSET {skipRowsCount}");

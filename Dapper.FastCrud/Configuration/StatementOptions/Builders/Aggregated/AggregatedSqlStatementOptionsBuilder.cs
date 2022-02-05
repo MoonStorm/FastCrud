@@ -4,10 +4,10 @@
     using System.Data;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Extensions;
+    using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -110,6 +110,8 @@
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity>? entityMapping)
         {
+            Requires.ValidState(this.RelationshipFormatter == null, "Set up the entity override before adding a JOIN");
+            
             this.EntityRegistration = entityMapping?.Registration!;
             return this.Builder;
         }
@@ -286,15 +288,24 @@
 
         private void ValidateAndAddJoin(AggregatedRelationalSqlStatementOptions joinOptions)
         {
-            var existingJoinWithSameAliasOrTableName = this.RelationshipOptions
-                                                           .FirstOrDefault(existingRelationship =>
-                                                                               (existingRelationship.ReferencedEntityAlias ?? existingRelationship.EntityDescriptor.CurrentEntityMappingRegistration.TableName)
-                                                                               == (joinOptions.ReferencedEntityAlias ?? joinOptions.EntityDescriptor.CurrentEntityMappingRegistration.TableName));
-            if (existingJoinWithSameAliasOrTableName != null)
+            // activate the shared formatter as that will fail in case JOINs with the same type are being added
+            if (this.RelationshipFormatter == null)
             {
-                throw new ArgumentException(
-                    $"A unique alias needs to be specified for the JOIN. '{existingJoinWithSameAliasOrTableName.ReferencedEntityAlias ?? existingJoinWithSameAliasOrTableName.EntityRegistration.TableName}' was already used in a previous JOIN.");
+                this.RelationshipFormatter = new MultiResolverSqlStatementFormatter();
+
+                // add the current entity
+                this.RelationshipFormatter.AddAsKnownReference(
+                    this.EntityRegistration, 
+                    this.EntityDescriptor.GetSqlBuilder(this.EntityRegistration));
+
             }
+
+            // now it's safe to add and register the join to the current statement
+            this.RelationshipFormatter.AddAsKnownReference(
+                joinOptions.EntityRegistration, 
+                joinOptions.EntityDescriptor.GetSqlBuilder(joinOptions.EntityRegistration));
+
+            this.RelationshipOptions.Add(joinOptions);
         }
     }
 }

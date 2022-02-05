@@ -19,6 +19,7 @@
     internal class LegacySqlRelationOptionsBuilder<TReferencedEntity> 
         : AggregatedRelationalSqlStatementOptionsBuilder<TReferencedEntity, ILegacySqlRelationOptionsBuilder<TReferencedEntity>>, ILegacySqlRelationOptionsBuilder<TReferencedEntity>
     {
+
         protected override ILegacySqlRelationOptionsBuilder<TReferencedEntity> Builder => this;
     }
 }
