@@ -7,6 +7,7 @@
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.SqlBuilders.Dialects;
     using Dapper.FastCrud.SqlStatements;
+    using Dapper.FastCrud.SqlStatements.SingleEntity;
 
     /// <summary>
     /// Typed entity descriptor, capable of producing statement builders associated with default entity mappings.
@@ -67,7 +68,7 @@
         protected override ISqlStatements ConstructSqlStatements(EntityRegistration entityRegistration)
         {
             var sqlBuilder = this.GetSqlBuilder(entityRegistration);
-            return new SingleEntitySqlStatements<TEntity>((GenericStatementSqlBuilder)sqlBuilder);
+            return new GenericSqlStatements<TEntity>((GenericStatementSqlBuilder)sqlBuilder);
         }
     }
 }

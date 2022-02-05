@@ -8,17 +8,29 @@
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
+    using Dapper.FastCrud.SqlStatements.MultiEntity;
+    using Dapper.FastCrud.SqlStatements.SingleEntity;
+    using Dapper.FastCrud.Validations;
 
+    /// <summary>
+    /// Holds the main statement implementations.
+    /// </summary>
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
         private readonly GenericStatementSqlBuilder _sqlBuilder;
+        private readonly SingleEntitySqlStatements<TEntity> _singleEntityOnlySqlStatements;
+        private readonly MultiEntitySqlStatements<TEntity> _multiEntitiesOnlySqlStatements;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public GenericSqlStatements(GenericStatementSqlBuilder sqlBuilder)
         {
+            Requires.NotNull(sqlBuilder, nameof(sqlBuilder));
+
             _sqlBuilder = sqlBuilder;
+            _singleEntityOnlySqlStatements = new SingleEntitySqlStatements<TEntity>(_sqlBuilder);
+            _multiEntitiesOnlySqlStatements = new MultiEntitySqlStatements<TEntity>(_sqlBuilder);
         }
         
         /// <summary>

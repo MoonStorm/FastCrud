@@ -28,6 +28,7 @@ Code first entities are also supported which can either be decorated with attrib
     - Support for self referenced entities.
     - Support for multiple references to the same target.
     - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
+    - Extended the functionality of the SQL builder shortcuts to allow for easy access to column/table name in raw or qualified and wrapped in delimiters.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.

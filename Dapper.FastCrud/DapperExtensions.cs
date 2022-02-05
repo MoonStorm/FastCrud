@@ -315,18 +315,7 @@ namespace Dapper.FastCrud
         private static ISqlStatements<TEntity> GetStatements<TEntity>(AggregatedSqlStatementOptions statementOptions)
         {
             ISqlStatements<TEntity> sqlStatements;
-
-            if (statementOptions.RelationshipOptions.Any())
-            {
-                sqlStatements = OrmConfiguration.GetEntityDescriptor<TEntity>()
-                                                .GetMultiEntitySqlStatements(statementOptions.EntityRegistration);
-            }
-            else
-            {
-                sqlStatements = OrmConfiguration.GetEntityDescriptor<TEntity>()
-                                                .GetSingleEntitySqlStatements(statementOptions.EntityRegistration);
-            }
-
+            sqlStatements = OrmConfiguration.GetEntityDescriptor<TEntity>().GetSqlStatements(statementOptions.EntityRegistration);
             return sqlStatements;
         }
     }
