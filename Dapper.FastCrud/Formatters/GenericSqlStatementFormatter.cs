@@ -1,15 +1,77 @@
 ﻿namespace Dapper.FastCrud.Formatters
 {
+    using Dapper.FastCrud.EntityDescriptors;
+    using Dapper.FastCrud.Formatters.Contexts;
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
 
     /// <summary>
     /// Offers SQL basic formatting capabilities.
     /// </summary>
-    internal abstract class GenericSqlStatementFormatter: IFormatProvider, ICustomFormatter
+    internal class GenericSqlStatementFormatter: IFormatProvider, ICustomFormatter
     {
         private static readonly Type _customFormatterType = typeof(ICustomFormatter);
+        private readonly SqlStatementFormatterResolverMap _resolverMap = new SqlStatementFormatterResolverMap();
+        private readonly Stack<SqlStatementFormatterResolver> _activeResolverStack = new Stack<SqlStatementFormatterResolver>();
+        private readonly Stack<bool> _activeResolverRequiresFullyQualifiedColumns = new Stack<bool>();
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public GenericSqlStatementFormatter()
+        {
+        }
+
+        /// <summary>
+        /// Replaces one resolver with another. Note that this won't affect the active resolver.
+        /// <exception cref="InvalidOperationException">The old registration could not be found or the new one is invalid.</exception>
+        /// </summary>
+        public SqlStatementFormatterResolver ReplaceRegisteredResolver(
+            EntityDescriptor entityDescriptor,
+            EntityRegistration oldRegistration, 
+            string? oldAlias, 
+            EntityRegistration newRegistration, 
+            string? newAlias)
+        {
+            var oldResolver = new SqlStatementFormatterResolver(entityDescriptor, oldRegistration, oldAlias);
+            if (!_resolverMap.RemoveResolver(oldResolver))
+            {
+                throw new InvalidOperationException("An old resolver could not be located");
+            }
+
+            var newResolver = new SqlStatementFormatterResolver(entityDescriptor, newRegistration, newAlias);
+            _resolverMap.AddResolver(newResolver);
+            return newResolver;
+        }
+
+        /// <summary>
+        /// Registers a new resolver. Note that this is not gonna replace the existing active main resolver. 
+        /// </summary>
+        public SqlStatementFormatterResolver RegisterResolver(EntityDescriptor entityDescriptor,
+                                                              EntityRegistration registration,
+                                                              string? alias)
+        {
+            var newResolver = new SqlStatementFormatterResolver(entityDescriptor, registration, alias);
+            _resolverMap.AddResolver(newResolver);
+            return newResolver;
+        }
+
+        /// <summary>
+        /// Sets the main resolver used for incomplete column resolutions.
+        /// The resolver MUST be registered first with <seealso cref="RegisterResolver"/>.
+        /// Call the result's <seealso cref="IDisposable.Dispose"/> to restore the previous main resolver.
+        /// </summary>
+        public IDisposable SetActiveMainResolver(SqlStatementFormatterResolver resolver, bool forceFullyQualifiedColumns)
+        {
+            Requires.NotNull(resolver, nameof(resolver));
+
+            _activeResolverStack.Push(resolver);
+            _activeResolverRequiresFullyQualifiedColumns.Push(forceFullyQualifiedColumns);
+            return new MainResolverRestoreHelper(this, resolver);
+        }
 
         /// <summary>Returns an object that provides formatting services for the specified type.</summary>
         /// <param name="formatType">An object that specifies the type of format object to return.</param>
@@ -34,15 +96,12 @@
             Requires.NotNull(formatProvider, nameof(formatProvider));
             Requires.Argument(formatProvider == this, nameof(formatProvider), "Invalid format provider provided to Dapper.FastCrud");
 
-            if (this.ActiveResolver == null)
-            {
-                throw new InvalidOperationException("No valid attendant present to satisfy the Dapper.FastCrud formatting request");
-            }
-
             switch (arg)
             {
+                // take care of formattables (see the Formattables folder)
                 case IFormattable formattableArg:
                     return formattableArg.ToString(format, formatProvider);
+                // anything that's a string
                 case string stringArg:
                     if (string.IsNullOrEmpty(stringArg))
                     {
@@ -59,9 +118,9 @@
                             // output: "[anything]"
                             return this.FormatIdentifier(stringArg);
                         case "T":
-                            // input: "alias"|""
-                            // output: "[alias_or_current]"
-                            return this.FormatAliasOrNothing(stringArg);
+                            // input: "alias"|"type"|""
+                            // output: "[alias_or_table_or_current]"
+                            return this.FormatTypeOrAliasOrNothing(stringArg);
                         case "TC":
                             // input: "typeOrAlias.prop" OR "prop"
                             // output: "[tableOrAlias].[column]"
@@ -74,25 +133,17 @@
                         default:
                             throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a string argument to Dapper.FastCrud");
                     }
-                // disabled, needs to be reviewed
-                //case Type typeArg:
-                //    if (typeArg == null)
-                //    {
-                //        throw new InvalidOperationException("Null argument passed as an argument to the Dapper.FastCrud formatter");
-                //    }
-
-                //    switch (format)
-                //    {
-                //        case "T":
-                //            // input: EntityType
-                //            // output: "[alias_or_table]"
-                //            return this.FormatType(typeArg);
-                //        default:
-                //            throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a Type argument to Dapper.FastCrud");
-                //    }
-
-                //    return this.Format(format, typeArg.Name.ToString(CultureInfo.InvariantCulture), formatProvider);
-                // TODO: implement support for formattable types and properties
+                    break;
+                case Type typeArg:
+                    switch (format)
+                    {
+                        case "T":
+                            // input: "type"
+                            // output: "[alias_or_table]"
+                            return this.FormatTypeOrAliasOrNothing(typeArg.Name);
+                        default:
+                            throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a type argument to Dapper.FastCrud");
+                    }
                 default:
                     // try again, but this time with the object converted to a string
                     return this.Format(format, arg?.ToString() ?? string.Empty, formatProvider);
@@ -100,14 +151,20 @@
         }
 
         /// <summary>
-        /// Gets the currently active resolver, if one is present.
+        /// Gets the currently active resolver.
         /// </summary>
-        protected abstract SqlStatementFormatterResolver? ActiveResolver { get; }
+        public SqlStatementFormatterResolver MainActiveResolver => _activeResolverStack.Peek();
 
+        /// <summary>
+        /// If true, simple column names will never show up in the formatted string.
+        /// They will always be prepended with the table name or alias.
+        /// </summary>
+        public bool ForceFullyQualifiedColumns => _activeResolverRequiresFullyQualifiedColumns.Peek();
+        
         /// <summary>
         /// Formats a regular parameter.
         /// </summary>
-        protected virtual string FormatParameter(string parameter)
+        protected string FormatParameter(string parameter)
         {
             return string.Format(CultureInfo.InvariantCulture, "@{0}", parameter);
         }
@@ -115,9 +172,9 @@
         /// <summary>
         /// Formats an identifier.
         /// </summary>
-        protected virtual string FormatIdentifier(string identifier)
+        protected string FormatIdentifier(string identifier)
         {
-            return this.ActiveResolver!.SqlBuilder.GetDelimitedIdentifier(identifier);
+            return this.MainActiveResolver.SqlBuilder.GetDelimitedIdentifier(identifier);
         }
 
         /// <summary>
@@ -125,62 +182,42 @@
         /// </summary>
         protected virtual string FormatColumn(string propName)
         {
-            return this.ActiveResolver!.SqlBuilder.GetColumnName(propName);
-        }
+            if (this.ForceFullyQualifiedColumns)
+            {
+                return this.FormatQualifiedColumn(null, propName);
+            }
 
-        /// <summary>
-        /// Formats an entity type.
-        /// </summary>
-        //protected virtual string FormatType(Type type)
-        //{
-        //    if (this.ActiveResolver!.EntityRegistration.EntityType == type)
-        //    {
-        //        return this.ActiveResolver.Alias ?? this.ActiveResolver.SqlBuilder.GetTableName();
-        //    }
-        //    throw new InvalidOperationException($"Unable to resolve type '{type}'. It is not known as part of this conversation.");
-        //}
+            return this.MainActiveResolver.SqlBuilder.GetColumnName(propName);
+        }
 
         /// <summary>
         /// Formats an alias.
         /// </summary>
-        protected virtual string FormatAliasOrNothing(string? aliasOrNothing)
+        protected virtual string FormatTypeOrAliasOrNothing(string? typeOrAliasOrNothing)
         {
-            if (aliasOrNothing != null)
+            SqlStatementFormatterResolver resolverToUse = this.MainActiveResolver;
+
+            if (typeOrAliasOrNothing != null)
             {
-                return this.FormatIdentifier(aliasOrNothing);
+                resolverToUse = _resolverMap[typeOrAliasOrNothing];
             }
 
-            if (this.ActiveResolver!.Alias != null)
-            {
-                return this.FormatIdentifier(this.ActiveResolver!.Alias);
-            }
-
-            return this.ActiveResolver.SqlBuilder.GetTableName();
+            return this.FormatIdentifier(resolverToUse.Alias??resolverToUse.EntityRegistration.TableName);
         }
 
         /// <summary>
         /// Formats an aliased qualified column, or in case the alias is not provided, the currently active resolver's table or alias.
         /// </summary>
-        protected virtual string FormatQualifiedColumn(string? aliasOrNothing, string propName)
+        protected virtual string FormatQualifiedColumn(string? typeOrAliasOrNothing, string propName)
         {
-            string formattedAliasOrTable;
-            if (aliasOrNothing != null)
-            {
-                formattedAliasOrTable = this.FormatIdentifier(aliasOrNothing);
-            }
-            else if (this.ActiveResolver!.Alias != null)
-            {
-                formattedAliasOrTable = this.FormatIdentifier(this.ActiveResolver!.Alias);
-            }
-            else
-            {
-                formattedAliasOrTable = this.ActiveResolver.SqlBuilder.GetTableName();
-            }
+            SqlStatementFormatterResolver resolverToUse = this.MainActiveResolver;
 
-            string formattedColumnName;
-            formattedColumnName = this.ActiveResolver.SqlBuilder.GetColumnName(propName);
-
-            return FormattableString.Invariant($"{formattedAliasOrTable}.{formattedColumnName}");
+            if (typeOrAliasOrNothing != null)
+            {
+                resolverToUse = this._resolverMap[typeOrAliasOrNothing];
+                typeOrAliasOrNothing = resolverToUse.Alias ?? resolverToUse.EntityRegistration.TableName;
+            }
+            return  this.MainActiveResolver.SqlBuilder.GetColumnName(propName, typeOrAliasOrNothing);
         }
 
         private string FormatQualifiedColumn(string qualifiedColumn)
@@ -205,5 +242,29 @@
             return this.FormatQualifiedColumn(alias, column);
         }
 
+        private sealed class MainResolverRestoreHelper:IDisposable
+        {
+            private readonly SqlStatementFormatterResolver _expectedLastResolver;
+            private readonly GenericSqlStatementFormatter _formatter;
+
+            public MainResolverRestoreHelper(
+                GenericSqlStatementFormatter formatter,
+                SqlStatementFormatterResolver expectedLastResolver)
+            {
+                _formatter = formatter;
+                _expectedLastResolver = expectedLastResolver;
+            }
+
+            public void Dispose()
+            {
+                if (_formatter._activeResolverStack.Count == 0 || _formatter._activeResolverStack.Peek() != _expectedLastResolver)
+                {
+                    throw new InvalidOperationException("The main resolver stack was found to be in an inconsistent state");
+                }
+
+                _formatter._activeResolverStack.Pop();
+                _formatter._activeResolverRequiresFullyQualifiedColumns.Pop();
+            }
+        }
     }
 }

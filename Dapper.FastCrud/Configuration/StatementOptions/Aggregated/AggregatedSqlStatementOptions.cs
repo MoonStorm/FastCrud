@@ -2,6 +2,7 @@
 {
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters;
+    using Dapper.FastCrud.Formatters.Contexts;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -22,6 +23,7 @@
             this.EntityDescriptor = entityDescriptor;
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
             this.RelationshipOptions = new List<AggregatedRelationalSqlStatementOptions>();
+            this.StatementFormatter = new GenericSqlStatementFormatter();
         }
 
         /// <summary>
@@ -30,14 +32,19 @@
         public List<AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
 
         /// <summary>
-        /// The shared relationship formatter. This is null in case of no JOINS.
-        /// </summary>
-        public MultiResolverSqlStatementFormatter? RelationshipFormatter { get; set; }
-
-        /// <summary>
         /// Returns the entity descriptor.
         /// </summary>
         public EntityDescriptor EntityDescriptor { get; }
+
+        /// <summary>
+        /// Returns the statement formatter. This is shared with all the related entities as well.
+        /// </summary>
+        public GenericSqlStatementFormatter StatementFormatter { get; }
+
+        /// <summary>
+        /// Returns the main statement formatter.
+        /// </summary>
+        public SqlStatementFormatterResolver MainEntityFormatterResolver { get; protected set; }
 
         /// <summary>
         /// The transaction to be used by the statement.

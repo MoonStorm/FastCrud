@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
 {
     using Dapper.FastCrud.EntityDescriptors;
+    using Dapper.FastCrud.Formatters.Contexts;
     using System;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
@@ -12,7 +13,7 @@
     internal abstract class AggregatedRelationalSqlStatementOptions
     {
         private EntityRegistration? _entityRegistrationOverride;
-
+        
         /// <summary>
         /// Standard constructor.
         /// </summary>
@@ -39,6 +40,11 @@
             set => _entityRegistrationOverride = value; // can be null
             get => _entityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration;
         }
+
+        /// <summary>
+        /// The formatter resolver associated with the current entity.
+        /// </summary>
+        public SqlStatementFormatterResolver EntityFormatterResolver { get; set; }
 
         /// <summary>
         /// An alias to be used for the referenced entity.

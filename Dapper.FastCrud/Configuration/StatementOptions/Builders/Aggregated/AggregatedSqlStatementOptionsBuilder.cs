@@ -4,7 +4,6 @@
     using System.Data;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Extensions;
-    using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
     using System.Collections.Generic;
@@ -22,6 +21,9 @@
         protected AggregatedSqlStatementOptionsBuilder()
         :base(OrmConfiguration.GetEntityDescriptor<TEntity>())
         {
+            // change these lines and you might want to check AggregatedSqlStatementOptionsBuilder.WithEntityMappingOverride as well
+            this.MainEntityFormatterResolver = this.StatementFormatter.RegisterResolver(this.EntityDescriptor, this.EntityRegistration, null);
+            this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
         }
 
         /// <summary>
@@ -110,9 +112,11 @@
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity>? entityMapping)
         {
-            Requires.ValidState(this.RelationshipFormatter == null, "Set up the entity override before adding a JOIN");
-            
+            // change these lines and you might want to check the constructor of AggregatedSqlStatementOptions
+            var oldRegistration = this.EntityRegistration;
             this.EntityRegistration = entityMapping?.Registration!;
+            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(this.EntityDescriptor, oldRegistration, null, this.EntityRegistration, null);
+            this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
             return this.Builder;
         }
 
@@ -264,7 +268,7 @@
         /// Includes a referred entity into the query. The relationship and the associated mappings must be set up prior to calling this method.
         /// </summary>
         [Obsolete(message: "This method will be removed in a future version. Please use the Join methods instead.", error: false)]
-        public TStatementOptionsBuilder Include<TReferencedEntity>(Action<ILegacySqlRelationOptionsBuilder<TReferencedEntity>>? relationshipOptions = null)
+        public TStatementOptionsBuilder Include<TReferencedEntity>(Action<ILegacySqlRelationOptionsBuilder<TReferencedEntity>>? join = null)
         {
             // TODO: restore the functionality of this method for the full release
             throw new NotSupportedException();
@@ -288,23 +292,8 @@
 
         private void ValidateAndAddJoin(AggregatedRelationalSqlStatementOptions joinOptions)
         {
-            // activate the shared formatter as that will fail in case JOINs with the same type are being added
-            if (this.RelationshipFormatter == null)
-            {
-                this.RelationshipFormatter = new MultiResolverSqlStatementFormatter();
-
-                // add the current entity
-                this.RelationshipFormatter.AddAsKnownReference(
-                    this.EntityRegistration, 
-                    this.EntityDescriptor.GetSqlBuilder(this.EntityRegistration));
-
-            }
-
-            // now it's safe to add and register the join to the current statement
-            this.RelationshipFormatter.AddAsKnownReference(
-                joinOptions.EntityRegistration, 
-                joinOptions.EntityDescriptor.GetSqlBuilder(joinOptions.EntityRegistration));
-
+            // for an early warning, perform the validation now
+            joinOptions.EntityFormatterResolver = this.StatementFormatter.RegisterResolver(joinOptions.EntityDescriptor, joinOptions.EntityRegistration, joinOptions.ReferencedEntityAlias);
             this.RelationshipOptions.Add(joinOptions);
         }
     }

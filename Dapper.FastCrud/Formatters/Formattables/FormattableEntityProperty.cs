@@ -56,6 +56,10 @@
             switch (format)
             {
                 case "C":
+                    if (formatProvider is GenericSqlStatementFormatter fastCrudFormatter && fastCrudFormatter.ForceFullyQualifiedColumns)
+                    {
+                        return this.ToString("TC", formatProvider);
+                    }
                     return sqlBuilder.GetColumnName(this.PropertyName);
                 case "TC":
                     return sqlBuilder.GetColumnName(this.PropertyName, this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName);
