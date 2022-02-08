@@ -13,7 +13,11 @@
         /// <summary>
         /// Default constructor
         /// </summary>
-        public FormattableParameter(EntityDescriptor entityDescriptor, EntityRegistration? registrationOverride, string parameter)
+        public FormattableParameter(
+            EntityDescriptor entityDescriptor, 
+            EntityRegistration? registrationOverride, 
+            string parameter,
+            string defaultFormatSpecifier)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
             Requires.NotNullOrEmpty(parameter, nameof(parameter));
@@ -21,6 +25,7 @@
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Parameter = parameter;
+            this.DefaultFormatSpecifier = defaultFormatSpecifier;
         }
 
         /// <summary>
@@ -32,6 +37,11 @@
         /// An optional entity registration override.
         /// </summary>
         public EntityRegistration? EntityRegistrationOverride { get; }
+
+        /// <summary>
+        /// The default format specifier to use.
+        /// </summary>
+        public string? DefaultFormatSpecifier { get; }
 
         /// <summary>
         /// The provided identifier.
@@ -48,10 +58,18 @@
         /// <returns>The value of the current instance in the specified format.</returns>
         public string ToString(string format, IFormatProvider formatProvider)
         {
+            var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
+            if (formatProvider is GenericSqlStatementFormatter
+                && string.IsNullOrEmpty(format)
+                && this.DefaultFormatSpecifier != null)
+            {
+                format = this.DefaultFormatSpecifier;
+            }
+
             switch (format)
             {
-                case "P":
-                    return FormattableString.Invariant($"@{this.Parameter}");
+                case FormatSpecifiers.Parameter:
+                    return sqlBuilder.GetPrefixedParameter(this.Parameter);
                 default:
                     // for generic usage we'll return what we have, without delimiters
                     return this.Parameter;

@@ -36,12 +36,12 @@
         /// </summary>
         public virtual int InventoryIndex { get; set; }
 
+        [ForeignKey(nameof(Building))]
         public int? BuildingId { get; set; }
 
         /// <summary>
         /// Parent entity, referenced by <see cref="BuildingId"/>.
         /// </summary>
-        [ForeignKey(nameof(BuildingId))]
         public Building Building { get; set; }
 
         /// <summary>

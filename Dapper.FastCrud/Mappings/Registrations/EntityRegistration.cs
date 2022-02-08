@@ -289,6 +289,15 @@
         }
 
         /// <summary>
+        /// Gets the frozen property registration, before the entity mapping gets frozen.
+        /// </summary>
+        public PropertyRegistration[] GetAllPropertyRegistrationsBeforeFreezing()
+        {
+            this.ValidateState();
+            return this._propertyMappings.ToArray();
+        }
+
+        /// <summary>
         /// Gets the frozen property registration, ordered by <seealso cref="PropertyRegistration.ColumnOrder"/>.
         /// </summary>
         public PropertyRegistration[] GetAllOrderedFrozenPropertyRegistrations()
@@ -380,13 +389,17 @@
                 {
                     if (!_isFrozen)
                     {
-                        // sort out the column order
-                        var maxColumnOrder = _propertyMappings.Select(propMapping => propMapping.ColumnOrder).Max();
-                        foreach (var propMapping in _propertyMappings)
+                        // if we have any columns, otherwise max will fail
+                        if (_propertyMappings.Any())
                         {
-                            if (propMapping.ColumnOrder < 0)
+                            // sort out the column order
+                            var maxColumnOrder = _propertyMappings.Select(propMapping => propMapping.ColumnOrder).Max();
+                            foreach (var propMapping in _propertyMappings)
                             {
-                                propMapping.ColumnOrder = ++maxColumnOrder;
+                                if (propMapping.ColumnOrder < 0)
+                                {
+                                    propMapping.ColumnOrder = ++maxColumnOrder;
+                                }
                             }
                         }
 

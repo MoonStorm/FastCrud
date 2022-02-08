@@ -66,7 +66,8 @@
                 {
                     BuildingName = "Belfry Tower"
                 };
-            _buildingRawJoinQueryStatement = _currentSqlBuilder.Format(
+            //  _currentSqlBuilder.Format no longer supported
+            _buildingRawJoinQueryStatement = Sql.Format<Workstation>(
                 $@" SELECT {nameof(Workstation):T}.{nameof(Workstation.WorkstationId):C}, {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))}
                     FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
                     WHERE {nameof(Workstation):T}.{nameof(Workstation.BuildingId):C} = {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}" );
@@ -79,7 +80,8 @@
                 {
                     BuildingName = "Belfry Tower"
                 };
-            _buildingRawJoinQueryStatement = _currentSqlBuilder.Format(
+            //  _currentSqlBuilder.Format no longer supported
+            _buildingRawJoinQueryStatement = Sql.Format<Workstation>(
                 $@" SELECT {nameof(Workstation.WorkstationId):TC}, {Sql.TableAndColumn<Building>(nameof(Building.BuildingId))}
                     FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
                     WHERE {nameof(Workstation.BuildingId):TC} = {Sql.TableAndColumn<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}");

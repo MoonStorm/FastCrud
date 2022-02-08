@@ -18,12 +18,11 @@
             EntityRegistration? registrationOverride, 
             string propertyName, 
             string? alias,
-            string defaultLegacyFormatSpecifier = null)
-            : base(entityDescriptor, registrationOverride, alias, defaultLegacyFormatSpecifier)
+            string? defaultFormatSpecifier)
+            : base(entityDescriptor, registrationOverride, alias, defaultFormatSpecifier)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
 
-            this.DefaultFormatSpecifier = defaultLegacyFormatSpecifier;
             this.PropertyName = propertyName;
         }
 
@@ -31,11 +30,6 @@
         /// Represents a property name.
         /// </summary>
         public string PropertyName { get; }
-
-        /// <summary>
-        /// The default format specifier to use for a legacy behavior.
-        /// </summary>
-        public string? DefaultFormatSpecifier { get; }
 
         /// <summary>Formats the value of the current instance using the specified format.</summary>
         /// <param name="format">The format to use.
@@ -48,20 +42,22 @@
         public override string ToString(string? format, IFormatProvider? formatProvider)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
-            if (string.IsNullOrEmpty(format) && this.DefaultFormatSpecifier != null)
+            if (formatProvider is GenericSqlStatementFormatter 
+                && string.IsNullOrEmpty(format) 
+                && this.DefaultFormatSpecifier != null)
             {
                 format = this.DefaultFormatSpecifier;
             }
 
             switch (format)
             {
-                case "C":
+                case FormatSpecifiers.SingleColumn:
                     if (formatProvider is GenericSqlStatementFormatter fastCrudFormatter && fastCrudFormatter.ForceFullyQualifiedColumns)
                     {
-                        return this.ToString("TC", formatProvider);
+                        return this.ToString(FormatSpecifiers.TableOrAliasWithColumn, formatProvider);
                     }
                     return sqlBuilder.GetColumnName(this.PropertyName);
-                case "TC":
+                case FormatSpecifiers.TableOrAliasWithColumn:
                     return sqlBuilder.GetColumnName(this.PropertyName, this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName);
                 default:
                     // by default we'll return the column name in clear

@@ -13,15 +13,25 @@
         /// <summary>
         /// Default constructor
         /// </summary>
-        public FormattableIdentifier(EntityDescriptor entityDescriptor, EntityRegistration? registrationOverride, string identifier)
+        public FormattableIdentifier(
+            EntityDescriptor entityDescriptor, 
+            EntityRegistration? registrationOverride, 
+            string identifier,
+            string? defaultFormatSpecifier = null)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
             Requires.NotNullOrEmpty(identifier, nameof(identifier));
 
+            this.DefaultFormatSpecifier = defaultFormatSpecifier;
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Identifier = identifier;
         }
+
+        /// <summary>
+        /// The default format specifier to use.
+        /// </summary>
+        public string? DefaultFormatSpecifier { get; }
 
         /// <summary>
         /// Entity descriptor.
@@ -46,13 +56,20 @@
         /// -or-
         /// A null reference (<see langword="Nothing" /> in Visual Basic) to obtain the numeric format information from the current locale setting of the operating system.</param>
         /// <returns>The value of the current instance in the specified format.</returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
 
+            if (formatProvider is GenericSqlStatementFormatter
+                && string.IsNullOrEmpty(format)
+                && this.DefaultFormatSpecifier != null)
+            {
+                format = this.DefaultFormatSpecifier;
+            }
+
             switch (format)
             {
-                case "I":
+                case FormatSpecifiers.Identifier:
                     return sqlBuilder.GetDelimitedIdentifier(this.Identifier);
                 default:
                     // for generic usage we'll return what we have, without delimiters

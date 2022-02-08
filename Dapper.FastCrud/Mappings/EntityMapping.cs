@@ -108,7 +108,7 @@
         /// </summary>
         public PropertyMapping<TEntity>[] GetProperties(params PropertyMappingOptions[] includeFilter)
         {
-            return _entityRegistration.GetAllOrderedFrozenPropertyRegistrations()
+            return _entityRegistration.GetAllPropertyRegistrationsBeforeFreezing()
                 .Where(propInfo => (includeFilter.Length == 0 || includeFilter.Any(options => (options & propInfo.Options) == options)))
                 //.OrderBy(propInfo => propInfo.Order)
                 .Select(propMapping => new PropertyMapping<TEntity>(propMapping))
@@ -133,7 +133,7 @@
         /// </summary>
         public PropertyMapping<TEntity>[] GetPropertiesExcluding(params PropertyMappingOptions[] excludeFilter)
         {
-            return _entityRegistration.GetAllOrderedFrozenPropertyRegistrations()
+            return _entityRegistration.GetAllPropertyRegistrationsBeforeFreezing()
                 .Where(propInfo => (excludeFilter.Length == 0 || excludeFilter.All(options => (options & propInfo.Options) != options)))
                 //.OrderBy(propInfo => propInfo.Order)
                 .Select(propMapping => new PropertyMapping<TEntity>(propMapping))
@@ -158,7 +158,7 @@
         /// </summary>
         public PropertyMapping<TEntity>[] GetPropertiesExcluding(params string[] propNames)
         {
-            return _entityRegistration.GetAllOrderedFrozenPropertyRegistrations()
+            return _entityRegistration.GetAllPropertyRegistrationsBeforeFreezing()
                 .Where(propInfo => (propNames.Length == 0 || !propNames.Contains(propInfo.PropertyName)))
                 //.OrderBy(propInfo => propInfo.Order)
                 .Select(propMapping => new PropertyMapping<TEntity>(propMapping))
@@ -232,59 +232,63 @@
         }
 
         /// <summary>
-        /// Sets a parent-child relationship.
+        /// Sets a parent-child relationship when a navigation property is present.
         /// </summary>
         /// <param name="referencingChildrenNavigationProperty">
         ///  The property holding the children entities.
-        /// public class Course
+        ///  <br/>
+        /// <code>
+        /// Example:
+        ///  .SetParentChildrenRelationship(teacher => teacher.OnlineCourses, course => course.OnlineTeacherId)
+        /// 
+        /// public class Course (TChildEntity)
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; }
         ///        public Teacher OnlineTeacher { get; set; }
-        ///        [ForeignKey("ClassRoomTeacher")]
         ///        public int ClassRoomTeacherId { get;set; } 
         ///        public Teacher ClassRoomTeacher { get; set; }
         ///    }
-        /// public class Teacher
+        /// public class Teacher (TEntity, current)
         ///    {
         ///        public int TeacherId { get; set; }
         ///        public string Name { get; set; }
-        ///        [InverseProperty("OnlineTeacher")]
         ///        public IEnumerable&lt;Course&gt; OnlineCourses { get; set; } &lt;--
-        ///        [InverseProperty("ClassRoomTeacher")]
-        ///        public IEnumerable&lt;Course&gt; ClassRoomCourses { get; set; } &lt;--
+        ///        public IEnumerable&lt;Course&gt; ClassRoomCourses { get; set; }
         ///    }
+        /// </code>
         /// </param>
         /// <param name="referencedChildrenColumnProperties">
         ///  The property or properties representing the columns on the referenced entity which represent the foreign key(s).
-        /// public class Course
+        /// <br/>
+        /// <code>
+        /// Example:
+        ///  .SetParentChildrenRelationship(teacher => teacher.OnlineCourses, course => course.OnlineTeacherId)
+        /// 
+        /// public class Course (TChildEntity)
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; } &lt;--
         ///        public Teacher OnlineTeacher { get; set; }
-        ///        [ForeignKey("ClassRoomTeacher")]
-        ///        public int ClassRoomTeacherId { get;set; } &lt;--
+        ///        public int ClassRoomTeacherId { get;set; }
         ///        public Teacher ClassRoomTeacher { get; set; }
         ///    }
-        /// public class Teacher
+        /// public class Teacher (TEntity, current)
         ///    {
         ///        public int TeacherId { get; set; }
         ///        public string Name { get; set; }
-        ///        [InverseProperty("OnlineTeacher")]
         ///        public IEnumerable&lt;Course&gt; OnlineCourses { get; set; }
-        ///        [InverseProperty("ClassRoomTeacher")]
         ///        public IEnumerable&lt;Course&gt; ClassRoomCourses { get; set; }
         ///    }
+        /// </code>
         /// </param>
         public EntityMapping<TEntity> SetParentChildrenRelationship<TChildEntity>(
-            Expression<Func<TEntity, IEnumerable<TChildEntity>>> referencingChildrenNavigationProperty,
-            params Expression<Func<TChildEntity, object>>[] referencedChildrenColumnProperties)
+            Expression<Func<TEntity, IEnumerable<TChildEntity>?>> referencingChildrenNavigationProperty,
+            params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
             Requires.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
             Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
@@ -294,34 +298,32 @@
         }
 
         /// <summary>
-        /// Sets a parent-child relationship.
+        /// Sets a parent-child relationship when a navigation property is not present.
         /// </summary>
         /// <param name="referencedChildrenColumnProperties">
         ///  The property or properties representing the columns on the referenced entity which represent the foreign key(s).
-        /// public class Course
+        ///  <br/>
+        /// <code>
+        /// Example:
+        ///  .SetParentChildrenRelationship&lt;Course&gt;(course => course.OnlineTeacherId)
+        /// 
+        /// public class Course (TChildEntity)
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; } &lt;--
-        ///        public Teacher OnlineTeacher { get; set; }
-        ///        [ForeignKey("ClassRoomTeacher")]
-        ///        public int ClassRoomTeacherId { get;set; } &lt;--
-        ///        public Teacher ClassRoomTeacher { get; set; }
+        ///        public int ClassRoomTeacherId { get;set; }
         ///    }
-        /// public class Teacher
+        /// public class Teacher (TEntity, current)
         ///    {
         ///        public int TeacherId { get; set; }
         ///        public string Name { get; set; }
-        ///        [InverseProperty("OnlineTeacher")]
-        ///        public IEnumerable&lt;Course&gt; OnlineCourses { get; set; }
-        ///        [InverseProperty("ClassRoomTeacher")]
-        ///        public IEnumerable&lt;Course&gt; ClassRoomCourses { get; set; }
         ///    }
+        /// </code>
         /// </param>
         public EntityMapping<TEntity> SetParentChildrenRelationship<TChildEntity>(
-                params Expression<Func<TChildEntity, object>>[] referencedChildrenColumnProperties)
+                params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
             Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
             this.SetParentChildrenRelationshipInternal<TChildEntity>(null, referencedChildrenColumnProperties);
@@ -330,41 +332,49 @@
         }
 
         /// <summary>
-        /// Sets a parent-child relationship.
+        /// Sets a child-parent relationship when a navigation property is present.
         /// </summary>
         /// <param name="referencingParentNavigationProperty">
         ///  The property holding the parent entity.
+        /// <br/>
+        /// <code>
+        /// Example:
+        ///  .SetChildParentRelationship(course -> course.OnlineTeacher, course => course.OnlineTeacherId)
+        /// 
         /// public class Course
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; } 
         ///        public Teacher OnlineTeacher { get; set; } &lt;--
-        ///        [ForeignKey("ClassRoomTeacher")]
         ///        public int ClassRoomTeacherId { get;set; } 
-        ///        public Teacher ClassRoomTeacher { get; set; } &lt;--
+        ///        public Teacher ClassRoomTeacher { get; set; }
         ///    }
+        /// </code>
         /// </param>
         /// <param name="referencingColumnProperties">
-        ///  The property or properties representing the columns on the referenced entity which represent the foreign key(s).
+        ///  The property or properties representing the columns on the current entity that are used as foreign keys to the parent entity.
+        /// <br/>
+        /// <code>
+        /// Example:
+        ///  .SetChildParentRelationship(course -> course.OnlineTeacher, course => course.OnlineTeacherId)
+        /// 
         /// public class Course
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; } &lt;--
         ///        public Teacher OnlineTeacher { get; set; }
-        ///        [ForeignKey("ClassRoomTeacher")]
-        ///        public int ClassRoomTeacherId { get;set; } &lt;--
+        ///        public int ClassRoomTeacherId { get;set; }
         ///        public Teacher ClassRoomTeacher { get; set; }
         ///    }
+        /// </code>
         /// </param>
         public EntityMapping<TEntity> SetChildParentRelationship<TParentEntity>(
-            Expression<Func<TEntity, TParentEntity>> referencingParentNavigationProperty,
-            params Expression<Func<TEntity, object>>[] referencingColumnProperties)
+            Expression<Func<TEntity, TParentEntity?>> referencingParentNavigationProperty,
+            params Expression<Func<TEntity, object?>>[] referencingColumnProperties)
         {
             Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
             Requires.NotNull(referencingParentNavigationProperty, nameof(referencingParentNavigationProperty));
@@ -374,25 +384,27 @@
         }
 
         /// <summary>
-        /// Sets a child-parent relationship.
+        /// Sets a child-parent relationship when a navigation property is not present.
         /// </summary>
         /// <param name="referencingColumnProperties">
         ///  The property or properties representing the columns on the referenced entity which represent the foreign key(s).
+        /// <code>
+        /// Example:
+        /// Example:
+        ///  .SetChildParentRelationship(course => course.OnlineTeacherId)
+        /// 
         /// public class Course
         ///    {
         ///        public int CourseId { get; set; }
         ///        public string CourseName { get; set; }
         ///        public string Description { get; set; }
-        ///        [ForeignKey("OnlineTeacher")]
         ///        public int OnlineTeacherId { get;set; } &lt;--
-        ///        public Teacher OnlineTeacher { get; set; }
-        ///        [ForeignKey("ClassRoomTeacher")]
-        ///        public int ClassRoomTeacherId { get;set; } &lt;--
-        ///        public Teacher ClassRoomTeacher { get; set; }
+        ///        public int ClassRoomTeacherId { get;set; }
         ///    }
+        /// </code>
         /// </param>
         public EntityMapping<TEntity> SetChildParentRelationship<TParentEntity>(
-                params Expression<Func<TEntity, object>>[] referencingColumnProperties)
+                params Expression<Func<TEntity, object?>>[] referencingColumnProperties)
         {
             Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
             this.SetChildParentRelationshipInternal<TParentEntity>(null, referencingColumnProperties);
@@ -401,8 +413,8 @@
         }
 
         private void SetParentChildrenRelationshipInternal<TChildEntity>(
-            Expression<Func<TEntity, IEnumerable<TChildEntity>>>? referencingChildrenNavigationProperty,
-            Expression<Func<TChildEntity, object>>[] referencedColumnProperties)
+            Expression<Func<TEntity, IEnumerable<TChildEntity>?>>? referencingChildrenNavigationProperty,
+            Expression<Func<TChildEntity, object?>>[] referencedColumnProperties)
         {
             // we're gonna set the referencing properties later, when we're gonna freeze the mapping
             var referencingNavigationPropDescriptor = referencingChildrenNavigationProperty?.GetPropertyDescriptor();
@@ -419,8 +431,8 @@
         }
 
         private void SetChildParentRelationshipInternal<TParentEntity>(
-            Expression<Func<TEntity, TParentEntity>>? referencingParentNavigationProperty,
-            Expression<Func<TEntity, object>>[] referencingColumnProperties)
+            Expression<Func<TEntity, TParentEntity?>>? referencingParentNavigationProperty,
+            Expression<Func<TEntity, object?>>[] referencingColumnProperties)
         {
             // we're gonna set the referenced properties later, when we're gonna freeze the mapping
             var referencingNavigationPropDescriptor = referencingParentNavigationProperty?.GetPropertyDescriptor();

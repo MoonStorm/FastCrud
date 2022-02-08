@@ -1,16 +1,12 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
-    using System.Text;
     using System.Threading;
-    using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.EntityDescriptors;
-    using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
 
@@ -31,10 +27,6 @@
         private readonly Lazy<string> _noConditionFullCountStatement;
         private readonly Lazy<string> _fullSingleSelectStatement;
 
-        // fixed sql statement formatter
-        // keep in mind that you can't use a dynamic one since this entire sql builder is being cached
-        private readonly SingleResolverSqlStatementFormatter _currentEntityFormatter;
-
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
             EntityRegistration entityregistration,
@@ -49,7 +41,6 @@
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
             //_regularStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, false);
             //_forcedTableResolutionStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, true);
-            _currentEntityFormatter = new SingleResolverSqlStatementFormatter(entityregistration, this);
 
             this.EntityDescriptor = entityDescriptor;
             this.EntityMapping = entityregistration;
@@ -95,8 +86,6 @@
         public EntityDescriptor EntityDescriptor { get; }
         public EntityRegistration EntityMapping { get; }
         public PropertyRegistration[] SelectProperties { get; }
-        //public Dictionary<Type, PropertyMapping[]> ParentChildRelationshipProperties { get; }
-        //public Dictionary<Type, PropertyMapping[]> ChildParentRelationshipProperties { get; }
         public PropertyRegistration[] KeyProperties { get; }
         public PropertyRegistration[] InsertProperties { get; }
         public PropertyRegistration[] UpdateProperties { get; }
@@ -107,6 +96,18 @@
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
         protected string ParameterPrefix { get; }
+
+        /// <summary>
+        /// Returns a SQL parameter, prefixed as set in the database dialect options.
+        /// <param name="parameterName">The name of the parameter. It is recommended to use nameof.</param>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetPrefixedParameter(string parameterName)
+        {
+            Requires.NotNullOrEmpty(parameterName, nameof(parameterName));
+
+            return FormattableString.Invariant($"{this.ParameterPrefix}{parameterName}");
+        }
 
         /// <summary>
         /// Returns the table name associated with the current entity.
@@ -190,7 +191,7 @@
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
                                      ? $" AS {this.GetDelimitedIdentifier(propMapping.PropertyName)}"
                                      : string.Empty;
-            return this.ResolveWithCultureInvariantFormatter($"{sqlTableAlias}{this.GetDelimitedIdentifier(propMapping.DatabaseColumnName)}{sqlColumnAlias}");
+            return FormattableString.Invariant($"{sqlTableAlias}{this.GetDelimitedIdentifier(propMapping.DatabaseColumnName)}{sqlColumnAlias}");
         }
 
         /// <summary>
@@ -275,7 +276,7 @@
         /// Constructs a batch select statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullBatchUpdateStatement(FormattableString? whereClause = null)
+        public string ConstructFullBatchUpdateStatement(string? whereClause = null)
         {
             return whereClause == null ? _noConditionFullBatchUpdateStatement.Value : this.ConstructFullBatchUpdateStatementInternal(whereClause);
         }
@@ -293,7 +294,7 @@
         /// Constructs a batch delete statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullBatchDeleteStatement(FormattableString? whereClause = null)
+        public string ConstructFullBatchDeleteStatement(string? whereClause = null)
         {
             return whereClause == null ? _noConditionFullBatchDeleteStatement.Value : this.ConstructFullBatchDeleteStatementInternal(whereClause);
         }
@@ -312,7 +313,7 @@
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullCountStatement(FormattableString? whereClause = null)
+        public string ConstructFullCountStatement(string? whereClause = null)
         {
             return whereClause == null ? _noConditionFullCountStatement.Value : this.ConstructFullCountStatementInternal(whereClause);
         }
@@ -331,11 +332,10 @@
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructFullBatchSelectStatement(
-            FormattableString? whereClause = null,
-            FormattableString? orderClause = null,
+            string? whereClause = null,
+            string? orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            object? queryParameters = null)
+            long? limitRowsCount = null)
         {
             return this.ConstructFullSelectStatementInternal(
                 this.ConstructColumnEnumerationForSelect(),
@@ -352,10 +352,13 @@
         /// </summary>
         /// <param name="rawSql">The raw sql to format</param>
         /// <returns>Properly formatted SQL statement</returns>
+        [Obsolete("This method is no longer supported. Use Sql.Format instead.", error:true)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string Format(FormattableString rawSql)
         {
-            return this.ResolveWithSqlFormatter(rawSql);
+            // TODO: review this method
+            throw new NotSupportedException();
+            //return this.ResolveWithSqlFormatter(rawSql);
         }
 
         /// <summary>
@@ -584,7 +587,7 @@
                 fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.DatabaseName)}.{fullTableName}";
             }
 
-            return this.ResolveWithCultureInvariantFormatter($"{fullTableName}{sqlAlias}");
+            return FormattableString.Invariant($"{fullTableName}{sqlAlias}");
         }
 
         /// <summary>
@@ -672,28 +675,27 @@
                 throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. UPDATE is not possible.");
             }
 
-            var sql = this.ResolveWithCultureInvariantFormatter(
-                    $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}");
+            FormattableString sql = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}";
             if (this.RefreshOnUpdateProperties.Length > 0)
             {
-                sql += this.ResolveWithCultureInvariantFormatter($";SELECT {this.ConstructRefreshOnUpdateColumnSelection()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};");
+                sql = $"{sql};SELECT {this.ConstructRefreshOnUpdateColumnSelection()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()};";
             }
 
-            return sql;
+            return FormattableString.Invariant(sql);
         }
 
         /// <summary>
         /// Constructs a batch select statement.
         /// </summary>
-        protected virtual string ConstructFullBatchUpdateStatementInternal(FormattableString whereClause = null)
+        protected virtual string ConstructFullBatchUpdateStatementInternal(string? whereClause = null)
         {
             FormattableString updateStatement = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()}";
             if (whereClause != null)
             {
-                return this.ResolveWithSqlFormatter($"{updateStatement} WHERE {whereClause}");
+                return FormattableString.Invariant($"{updateStatement} WHERE {whereClause}");
             }
 
-            return this.ResolveWithCultureInvariantFormatter(updateStatement);
+            return FormattableString.Invariant(updateStatement);
         }
 
         /// <summary>
@@ -706,32 +708,31 @@
                 throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. DELETE is not possible.");
             }
 
-            return this.ResolveWithCultureInvariantFormatter(
-                $"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
+            return FormattableString.Invariant($"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
         /// <summary>
         /// Constructs a batch delete statement.
         /// </summary>
-        protected virtual string ConstructFullBatchDeleteStatementInternal(FormattableString whereClause = null)
+        protected virtual string ConstructFullBatchDeleteStatementInternal(string? whereClause = null)
         {
             FormattableString deleteStatement = $"DELETE FROM {this.GetTableName()}";
             if (whereClause != null)
             {
-                return this.ResolveWithSqlFormatter($"{deleteStatement} WHERE {whereClause}");
+                return FormattableString.Invariant($"{deleteStatement} WHERE {whereClause}");
             }
 
-            return this.ResolveWithCultureInvariantFormatter(deleteStatement);
+            return FormattableString.Invariant(deleteStatement);
         }
 
         /// <summary>
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
-        protected virtual string ConstructFullCountStatementInternal(FormattableString whereClause = null)
+        protected virtual string ConstructFullCountStatementInternal(string? whereClause = null)
         {
             return (whereClause == null)
-                       ? this.ResolveWithCultureInvariantFormatter($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()}")
-                       : this.ResolveWithSqlFormatter($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()} WHERE {whereClause}");
+                       ? FormattableString.Invariant($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()}")
+                       : FormattableString.Invariant($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()} WHERE {whereClause}");
         }
 
         /// <summary>
@@ -744,39 +745,36 @@
                 throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. SELECT is not possible.");
             }
 
-            return this.ResolveWithCultureInvariantFormatter(
-                    $"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
+            return FormattableString.Invariant($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
         protected abstract string ConstructFullSelectStatementInternal(
             string selectClause,
             string fromClause,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
+            string? whereClause = null,
+            string? orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            bool forceTableColumnResolution = false);
+            long? limitRowsCount = null);
 
-        /// <summary>
-        /// Resolves a formattable string using the invariant culture, ignoring any special identifiers.
-        /// </summary>
-        /// <param name="formattableString">Raw formattable string</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected string ResolveWithCultureInvariantFormatter(FormattableString formattableString)
-        {
-            return formattableString.ToString(CultureInfo.InvariantCulture);
-        }
+        ///// <summary>
+        ///// Resolves a formattable string using the invariant culture, ignoring any special identifiers.
+        ///// </summary>
+        ///// <param name="formattableString">Raw formattable string</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //protected string ResolveWithCultureInvariantFormatter(FormattableString formattableString)
+        //{
+        //    return formattableString.ToString(CultureInfo.InvariantCulture);
+        //}
 
-        /// <summary>
-        /// Resolves a formattable string using the SQL formatter
-        /// </summary>
-        /// <param name="formattableString">Raw formattable string</param>
-        /// <param name="forceTableColumnResolution">If true, the table is always going to be used as alias for column identifiers</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected string ResolveWithSqlFormatter(FormattableString formattableString)
-        {
-            return formattableString.ToString(_currentEntityFormatter);
-        }
+        ///// <summary>
+        ///// Resolves a formattable string using the SQL formatter
+        ///// </summary>
+        ///// <param name="formattableString">Raw formattable string</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //protected string ResolveWithSqlFormatter( FormattableString formattableString)
+        //{
+        //    return formattableString.ToString(_currentEntityFormatter);
+        //}
 
 //        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 //        private void FindRelationship(

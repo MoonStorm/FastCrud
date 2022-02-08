@@ -22,7 +22,7 @@
         {
             if (this.RefreshOnInsertProperties.Length == 0)
             {
-                return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})");
+                return FormattableString.Invariant($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})");
             }
 
             // one database generated field to be inserted, and that alone is the primary key
@@ -33,11 +33,9 @@
 
                 if (keyPropertyType == typeof(int) || keyPropertyType == typeof(long))
                 {
-                    return
-                        this.ResolveWithCultureInvariantFormatter(
-                            $@"INSERT 
-                                    INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
-                                    VALUES ({this.ConstructParamEnumerationForInsert()});
+                    return FormattableString.Invariant($@"
+                           INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+                                                             VALUES ({this.ConstructParamEnumerationForInsert()});
                            SELECT SCOPE_IDENTITY() AS {this.GetDelimitedIdentifier(keyProperty.PropertyName)}");
                 }
             }
@@ -46,7 +44,7 @@
             var dbGeneratedColumns = this.ConstructRefreshOnInsertColumnSelection();
 
             // the union will make the constraints be ignored
-            return this.ResolveWithCultureInvariantFormatter($@"
+            return FormattableString.Invariant($@"
                 SELECT *
                     INTO #temp 
                     FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
@@ -73,7 +71,7 @@
             var dbGeneratedColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
 
             // the union will make the constraints be ignored
-            return this.ResolveWithCultureInvariantFormatter($@"
+            return FormattableString.Invariant($@"
                 SELECT *
                     INTO #temp 
                     FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
@@ -90,34 +88,33 @@
         protected override string ConstructFullSelectStatementInternal(
             string selectClause,
             string fromClause,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
+            string? whereClause = null,
+            string? orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            bool forceTableColumnResolution = false)
+            long? limitRowsCount = null)
         {
-            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectClause} FROM {fromClause}");
+            FormattableString sql = $"SELECT {selectClause} FROM {fromClause}";
             if (whereClause != null)
             {
-                sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause, forceTableColumnResolution);
+                sql = $"{sql} WHERE {whereClause}";
             }
 
             if (orderClause != null)
             {
-                sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause, forceTableColumnResolution);
+                sql = $"{sql} ORDER BY {orderClause}";
             }
 
             if (skipRowsCount.HasValue || limitRowsCount.HasValue)
             {
-                sql += this.ResolveWithCultureInvariantFormatter($" OFFSET {skipRowsCount ?? 0} ROWS");
+                sql = $"{sql}  OFFSET {skipRowsCount ?? 0} ROWS";
             }
 
             if (limitRowsCount.HasValue)
             {
-                sql += this.ResolveWithCultureInvariantFormatter($" FETCH NEXT {limitRowsCount} ROWS ONLY");
+                sql = $"{sql} FETCH NEXT {limitRowsCount} ROWS ONLY";
             }
 
-            return sql;
+            return FormattableString.Invariant(sql);
         }
     }
 }

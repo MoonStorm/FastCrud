@@ -19,7 +19,16 @@
             Requires.NotNull(expr, nameof(expr));
 
             var type = typeof(TType);
-            var propertyName = ((MemberExpression)expr.Body).Member.Name;
+            var propertyName = expr.Body switch
+            {
+                MemberExpression memberExpression => memberExpression.Member.Name,
+                UnaryExpression unaryExpression => unaryExpression.Operand switch
+                {
+                    MemberExpression memberExpression => memberExpression.Member.Name,
+                    _ => throw new InvalidOperationException($"Unable to extract the property descriptor from the unary expression operand {unaryExpression?.Operand}")
+                },
+                _ => throw new InvalidOperationException($"Unable to extract the property descriptor from the expression body {expr?.Body}")
+            };
             var properties = TypeDescriptor.GetProperties(type)
                                            .OfType<PropertyDescriptor>()
                                            .Where(propDesc => propDesc.Name == propertyName)

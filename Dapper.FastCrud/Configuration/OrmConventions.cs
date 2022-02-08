@@ -221,6 +221,54 @@
         }
 
         /// <summary>
+        /// Gets the attributes exposed directly on a type or indirectly through the <see cref="MetadataTypeAttribute"/> attribute.
+        /// </summary>
+        public Attribute[] GetEntityAttributes(Type entityType)
+        {
+            var entityAttributes = TypeDescriptor.GetAttributes(entityType).OfType<Attribute>().ToArray();
+#if NETSTANDARD2_0
+            return entityAttributes;
+#else
+            var attributesViaMetadataTypes = TypeDescriptor
+                                             .GetAttributes(entityType)
+                                             .OfType<MetadataTypeAttribute>()
+                                             .SelectMany(metadataTypeAttr =>
+                                             {
+                                                 var metadataTypeAttributes = TypeDescriptor
+                                                                              .GetAttributes(metadataTypeAttr.MetadataClassType)
+                                                                              .OfType<Attribute>();
+                                                 return metadataTypeAttributes;
+                                             });
+            return entityAttributes.Concat(attributesViaMetadataTypes).ToArray();
+#endif
+        }
+
+        /// <summary>
+        /// Gets the attributes exposed directly on a property on a type or indirectly through the <see cref="MetadataTypeAttribute"/> attribute.
+        /// </summary>
+        public Attribute[] GetEntityPropertyAttributes(Type entityType, PropertyDescriptor property)
+        {
+            var entityPropertyAttributes = property.Attributes.OfType<Attribute>().ToArray();
+#if NETSTANDARD2_0
+            return entityPropertyAttributes;
+#else
+            var attributesViaMetadataTypes = TypeDescriptor
+                                             .GetAttributes(entityType)
+                                             .OfType<MetadataTypeAttribute>()
+                                             .SelectMany(metadataTypeAttr =>
+                                             {
+                                                 var metadataTypeAttributes = TypeDescriptor.GetProperties(metadataTypeAttr.MetadataClassType)
+                                                                                            .OfType<PropertyDescriptor>()
+                                                                                            .Where(metadataProp => metadataProp.Name == property.Name)
+                                                                                            .SelectMany(metadataProp => metadataProp.Attributes.OfType<Attribute>());
+                                                 return metadataTypeAttributes;
+                                             });
+
+            return entityPropertyAttributes.Concat(attributesViaMetadataTypes).ToArray();
+#endif
+        }
+
+        /// <summary>
         /// Return true if an entity property of the given type should be considered for a database mapping.
         /// </summary>
         protected virtual bool IsSimpleSqlType(Type propertyType)
@@ -259,37 +307,5 @@
                     sqlTableNameMatchReplacement));
         }
 
-        private Attribute[] GetEntityAttributes(Type entityType)
-        {
-            var entityAttributes = TypeDescriptor.GetAttributes(entityType).OfType<Attribute>().ToArray();
-#if NETSTANDARD2_0
-            return entityAttributes;
-#else
-            var entityMetadataAttribute = entityAttributes.OfType<MetadataTypeAttribute>().FirstOrDefault();
-            var entityMetadataAttributes = entityMetadataAttribute == null
-                                               ? new Attribute[0]
-                                               : TypeDescriptor.GetAttributes(entityMetadataAttribute.MetadataClassType).OfType<Attribute>();
-            return entityMetadataAttributes.Concat(entityAttributes).ToArray();
-#endif
-        }
-
-        private Attribute[] GetEntityPropertyAttributes(Type entityType, PropertyDescriptor property)
-        {
-            var entityPropertyAttributes = property.Attributes.OfType<Attribute>().ToArray();
-#if NETSTANDARD2_0
-            return entityPropertyAttributes;
-#else
-
-            var entityMetadataAttribute = TypeDescriptor.GetAttributes(entityType).OfType<MetadataTypeAttribute>().FirstOrDefault();
-            var entityMetadataProperty = entityMetadataAttribute == null
-                                               ? null
-                                               : (TypeDescriptor
-                                                    .GetProperties(entityMetadataAttribute.MetadataClassType).OfType<PropertyDescriptor>()
-                                                ).FirstOrDefault(propDescriptor => propDescriptor.Name==property.Name);
-            var entityMetadataPropertyAttributes = entityMetadataProperty?.Attributes.OfType<Attribute>() ?? new Attribute[0];
-
-            return entityMetadataPropertyAttributes.Concat(entityPropertyAttributes).ToArray();
-#endif
-        }
     }
 }

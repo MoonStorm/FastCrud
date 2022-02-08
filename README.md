@@ -16,7 +16,7 @@ Code first entities are also supported which can either be decorated with attrib
 
 
 #### Release Notes
-- 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
+- [WIP] 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
   - Main library:
     - Added support for .NET Standard 2.1
     - Extended support for the MetadataType attribute in .NET Standard 2.1
@@ -24,11 +24,12 @@ Code first entities are also supported which can either be decorated with attrib
     - Formatter :P added for SQL parameters.
     - Methods adjusted for nullable support.
     - Added support for multiple references to the same target using the InverseProperty attribute.
-    - [Breaking change] The fluent mapping setup has changed for setting up relationships.
+    - [Breaking change] The fluent mapping setup has changed for setting up relationships. Please check the wiki for more details.
     - Support for self referenced entities.
     - Support for multiple references to the same target.
     - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
-    - Extended the functionality of the SQL builder shortcuts to allow for easy access to column/table name in raw or qualified and wrapped in delimiters.
+    - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
+    - [Breaking change] Clean separation of the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.
@@ -36,7 +37,7 @@ Code first entities are also supported which can either be decorated with attrib
     - Support for new csproj style projects.
     - Fixed a problem preventing it from being used in VS2019 and later.
   - Tests:
-    - All the tests have been reviewed and most were refactored.
+    - All the tests have been reviewed and most got refactored.
     - Workaround added for the badly implemented serialization context in Specflow.
     - Better model registration samples in the test project for:
       - POCO/fluent mapping

@@ -187,7 +187,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkUpdate(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
         {
-            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(whereClause);
             var combinedParameters = new DynamicParameters();
             combinedParameters.AddDynamicParams(entity);
             if (statementOptions.Parameters != null)
@@ -207,7 +208,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
         {
-            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(whereClause);
             var combinedParameters = new DynamicParameters();
             combinedParameters.AddDynamicParams(entity);
             if (statementOptions.Parameters != null)
@@ -255,7 +257,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkDelete(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(whereClause);
             return connection.Execute(
                 bulkDeleteStatement,
                 statementOptions.Parameters,
@@ -269,7 +272,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkDeleteAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(whereClause);
             return connection.ExecuteAsync(
                 bulkDeleteStatement,
                 statementOptions.Parameters,
@@ -283,7 +287,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var countStatement = _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var countStatement = _sqlBuilder.ConstructFullCountStatement(whereClause);
             return connection.ExecuteScalar<int>(
                 countStatement,
                 statementOptions.Parameters,
@@ -297,7 +302,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var countStatement = _sqlBuilder.ConstructFullCountStatement(statementOptions.WhereClause);
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var countStatement = _sqlBuilder.ConstructFullCountStatement(whereClause);
             return connection.ExecuteScalarAsync<int>(
                 countStatement,
                 statementOptions.Parameters,
@@ -316,9 +322,12 @@
             //    (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
             //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var orderClause = statementOptions.OrderClause?.ToString(statementOptions.StatementFormatter);
+
             var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
-                whereClause: statementOptions.WhereClause,
-                orderClause: statementOptions.OrderClause,
+                whereClause: whereClause,
+                orderClause: orderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
             return connection.Query<TEntity>(
@@ -340,9 +349,12 @@
             //    (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
             //    || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
+            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var orderClause = statementOptions.OrderClause?.ToString(statementOptions.StatementFormatter);
+
             var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
-                whereClause: statementOptions.WhereClause,
-                orderClause: statementOptions.OrderClause,
+                whereClause: whereClause,
+                orderClause: orderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
             return connection.QueryAsync<TEntity>(

@@ -17,11 +17,11 @@
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
             string? alias,
-            string? defaultLegacyFormatSpecifier = null)
+            string? defaultFormatSpecifier = null)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
 
-            this.DefaultFormatSpecifier = defaultLegacyFormatSpecifier;
+            this.DefaultFormatSpecifier = defaultFormatSpecifier;
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Alias = alias;
@@ -43,7 +43,7 @@
         public EntityDescriptor EntityDescriptor { get; }
 
         /// <summary>
-        /// The default format specifier to use for a legacy behavior.
+        /// The default format specifier to use.
         /// </summary>
         public string? DefaultFormatSpecifier { get; }
 
@@ -59,14 +59,16 @@
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
 
-            if (string.IsNullOrEmpty(format) && this.DefaultFormatSpecifier != null)
+            if (formatProvider is GenericSqlStatementFormatter 
+                && string.IsNullOrEmpty(format) 
+                && this.DefaultFormatSpecifier != null)
             {
                 format = this.DefaultFormatSpecifier;
             }
 
             switch (format)
             {
-                case "T":
+                case FormatSpecifiers.TableOrAlias:
                     return sqlBuilder.GetTableName(this.Alias);
                 default:
                     // for generic usage, we'll return the table name or alias if provided, without delimiters

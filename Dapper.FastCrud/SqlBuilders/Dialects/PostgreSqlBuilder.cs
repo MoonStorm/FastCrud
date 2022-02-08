@@ -20,44 +20,43 @@
         protected override string ConstructFullInsertStatementInternal()
         {
             string outputQuery = this.RefreshOnInsertProperties.Length > 0
-                                     ? this.ResolveWithCultureInvariantFormatter($"RETURNING {this.ConstructRefreshOnInsertColumnSelection()}")
+                                     ? FormattableString.Invariant($"RETURNING {this.ConstructRefreshOnInsertColumnSelection()}")
                                      : string.Empty;
 
-            return this.ResolveWithCultureInvariantFormatter($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}");
+            return FormattableString.Invariant($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()}) {outputQuery}");
         }
 
         protected override string ConstructFullSelectStatementInternal(
             string selectClause,
             string fromClause,
-            FormattableString whereClause = null,
-            FormattableString orderClause = null,
+            string? whereClause = null,
+            string? orderClause = null,
             long? skipRowsCount = null,
-            long? limitRowsCount = null,
-            bool forceTableColumnResolution = false)
+            long? limitRowsCount = null)
         {
-            var sql = this.ResolveWithCultureInvariantFormatter($"SELECT {selectClause} FROM {fromClause}");
+            FormattableString sql = $"SELECT {selectClause} FROM {fromClause}";
 
             if (whereClause != null)
             {
-                sql += " WHERE " + this.ResolveWithSqlFormatter(whereClause, forceTableColumnResolution);
+                sql = $"{sql} WHERE {whereClause}";
             }
 
             if (orderClause != null)
             {
-                sql += " ORDER BY " + this.ResolveWithSqlFormatter(orderClause, forceTableColumnResolution);
+                sql = $"{sql} ORDER BY {orderClause}";
             }
 
             if (limitRowsCount.HasValue)
             {
-                sql += this.ResolveWithCultureInvariantFormatter($" LIMIT {limitRowsCount}");
+                sql = $"{sql} LIMIT {limitRowsCount}";
             }
 
             if (skipRowsCount.HasValue)
             {
-                sql += this.ResolveWithCultureInvariantFormatter($" OFFSET {skipRowsCount}");
+                sql = $"{sql} OFFSET {skipRowsCount}";
             }
 
-            return sql;
+            return FormattableString.Invariant(sql);
         }
     }
 }

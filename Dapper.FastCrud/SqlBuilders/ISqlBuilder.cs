@@ -10,6 +10,12 @@ namespace Dapper.FastCrud
     public interface ISqlBuilder
     {
         /// <summary>
+        /// Returns a SQL parameter, prefixed as set in the database dialect options.
+        /// <param name="parameterName">The name of the parameter. It is recommended to use nameof.</param>
+        /// </summary>
+        string GetPrefixedParameter(string parameterName);
+
+        /// <summary>
         /// Returns a delimited SQL identifier.
         /// </summary>
         /// <param name="sqlIdentifier">Non-delimited SQL identifier</param>
@@ -82,6 +88,7 @@ namespace Dapper.FastCrud
         /// </summary>
         /// <param name="rawSql">The raw sql to format</param>
         /// <returns>Properly formatted SQL statement</returns>
+        [Obsolete("This method is no longer supported. Use Sql.Format instead.", error: true)]
         string Format(FormattableString rawSql);
     }
 }

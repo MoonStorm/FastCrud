@@ -72,7 +72,11 @@
 
             // look for foreign keys set up on column properties pointing to a property holding the parent entity
             foreach (var childPropInfo in entityColumnProperties
-                                                  .Select(prop => new { columnProperty = prop, referencingNavPropertyName = prop.Attributes.OfType<ForeignKeyAttribute>().SingleOrDefault()?.Name })
+                                                  .Select(prop => new
+                                                  {
+                                                      columnProperty = prop, 
+                                                      referencingNavPropertyName = OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop).OfType<ForeignKeyAttribute>().SingleOrDefault()?.Name
+                                                  })
                                                   .Where(propInfo => !string.IsNullOrEmpty(propInfo.referencingNavPropertyName))
                                                   .GroupBy(propInfo => propInfo.referencingNavPropertyName))
             {
@@ -116,13 +120,15 @@
             //     2. an unmarked property of type IEnumerable<> OR
             var parentChildrenPropGroups = TypeDescriptor.GetProperties(entityType)
                                             .OfType<PropertyDescriptor>()
-                                            .Where(prop => !prop.Attributes.OfType<NotMappedAttribute>().Any()
+                                            .Where(prop => !OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop).OfType<NotMappedAttribute>().Any()
                                                            && typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
                                                            && prop.PropertyType.IsGenericType
                                                            && prop.PropertyType.GetGenericArguments().Length == 1)
                                             .Select(prop =>
                                             {
-                                                var inverseAttributes = prop.Attributes.OfType<InversePropertyAttribute>().ToArray();
+                                                var inverseAttributes = OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop)
+                                                                                        .OfType<InversePropertyAttribute>()
+                                                                                        .ToArray();
                                                 if (inverseAttributes.Length > 1)
                                                 {
                                                     throw new InvalidOperationException($"The property '{prop.Name}' on the type '{entityType}' has {inverseAttributes.Length} InverseProperty attributes");

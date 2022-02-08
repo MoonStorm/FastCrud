@@ -51,10 +51,10 @@
         /// Registers a new resolver. Note that this is not gonna replace the existing active main resolver. 
         /// </summary>
         public SqlStatementFormatterResolver RegisterResolver(EntityDescriptor entityDescriptor,
-                                                              EntityRegistration registration,
+                                                              EntityRegistration? registrationOverride,
                                                               string? alias)
         {
-            var newResolver = new SqlStatementFormatterResolver(entityDescriptor, registration, alias);
+            var newResolver = new SqlStatementFormatterResolver(entityDescriptor, registrationOverride??entityDescriptor.CurrentEntityMappingRegistration, alias);
             _resolverMap.AddResolver(newResolver);
             return newResolver;
         }
@@ -109,23 +109,23 @@
                     }
                     switch (format)
                     {
-                        case "P":
+                        case FormatSpecifiers.Parameter:
                             // input: "param"
                             // output: "@param"
                             return this.FormatParameter(stringArg);
-                        case "I":
+                        case FormatSpecifiers.Identifier:
                             // input: "anything"
                             // output: "[anything]"
                             return this.FormatIdentifier(stringArg);
-                        case "T":
+                        case FormatSpecifiers.TableOrAlias:
                             // input: "alias"|"type"|""
                             // output: "[alias_or_table_or_current]"
                             return this.FormatTypeOrAliasOrNothing(stringArg);
-                        case "TC":
+                        case FormatSpecifiers.TableOrAliasWithColumn:
                             // input: "typeOrAlias.prop" OR "prop"
                             // output: "[tableOrAlias].[column]"
                             return this.FormatQualifiedColumn(stringArg);
-                        case "C":
+                        case FormatSpecifiers.SingleColumn:
                             // input: "prop"
                             // output: "[column]"
                             // just a column (note: sometimes this is being forced with a table in certain circumstances)
@@ -137,7 +137,7 @@
                 case Type typeArg:
                     switch (format)
                     {
-                        case "T":
+                        case FormatSpecifiers.TableOrAlias:
                             // input: "type"
                             // output: "[alias_or_table]"
                             return this.FormatTypeOrAliasOrNothing(typeArg.Name);
@@ -166,7 +166,7 @@
         /// </summary>
         protected string FormatParameter(string parameter)
         {
-            return string.Format(CultureInfo.InvariantCulture, "@{0}", parameter);
+            return this.MainActiveResolver.SqlBuilder.GetPrefixedParameter(parameter);
         }
 
         /// <summary>
@@ -215,9 +215,10 @@
             if (typeOrAliasOrNothing != null)
             {
                 resolverToUse = this._resolverMap[typeOrAliasOrNothing];
-                typeOrAliasOrNothing = resolverToUse.Alias ?? resolverToUse.EntityRegistration.TableName;
             }
-            return  this.MainActiveResolver.SqlBuilder.GetColumnName(propName, typeOrAliasOrNothing);
+            typeOrAliasOrNothing = resolverToUse.Alias ?? resolverToUse.EntityRegistration.TableName;
+
+            return resolverToUse.SqlBuilder.GetColumnName(propName, typeOrAliasOrNothing);
         }
 
         private string FormatQualifiedColumn(string qualifiedColumn)

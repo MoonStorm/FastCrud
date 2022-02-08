@@ -27,7 +27,10 @@
                             .SetTableName("Buildings")
                             .SetProperty(building => building.BuildingId, propMapping => propMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity).SetDatabaseColumnName("Id"))
                             .SetProperty(building => building.Name, propMapping => propMapping.SetDatabaseColumnName("BuildingName"))
-                            .SetProperty(building => building.Description); // test mapping w/o name
+                            .SetProperty(building => building.Description) // test mapping w/o name
+                            .SetParentChildrenRelationship(
+                                building => building.Workstations,
+                                workstation => workstation.BuildingId);
         }
 
     }

@@ -26,13 +26,24 @@
         {
             Requires.NotNull(resolver, nameof(resolver));
 
+            var removed = false;
+
             // if you change these line, change the other methods as well
             if (resolver.Alias != null)
             {
-                return _resolverMap.Remove(resolver.Alias);
+                removed = _resolverMap.Remove(resolver.Alias);
+            }
+            else
+            {
+                removed = _resolverMap.Remove(resolver.EntityRegistration.EntityType.Name);
+                if (resolver.EntityRegistration.TableName != resolver.EntityRegistration.EntityType.Name)
+                {
+                    removed &= _resolverMap.Remove(resolver.EntityRegistration.TableName);
+                }
+
             }
 
-            return _resolverMap.Remove(resolver.EntityRegistration.EntityType.Name) && _resolverMap.Remove(resolver.EntityRegistration.TableName);
+            return removed;
         }
 
         /// <summary>
@@ -68,7 +79,10 @@
                 }
 
                 _resolverMap.Add(resolver.EntityRegistration.EntityType.Name, resolver);
-                _resolverMap.Add(resolver.EntityRegistration.TableName, resolver);
+                if (resolver.EntityRegistration.TableName != resolver.EntityRegistration.EntityType.Name)
+                {
+                    _resolverMap.Add(resolver.EntityRegistration.TableName, resolver);
+                }
             }
         }
 

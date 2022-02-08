@@ -23,7 +23,7 @@
         [Dapper.FastCrud.DatabaseGeneratedDefaultValue]
         public virtual Guid KeyPass { get; set; }
 
-        [ForeignKey("Workstation")]
+        [ForeignKey(nameof(Employee.Workstation))]
         public virtual long? WorkstationId { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
