@@ -26,7 +26,7 @@
         /// </summary>
         /// <param name="sqlParameterName">A SQL parameter name. It is recommended to be passed as nameof(params.Param).</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Parameter(string sqlParameterName)
+        public static Formattable Parameter(string sqlParameterName)
         {
             Requires.NotNullOrEmpty(sqlParameterName, nameof(sqlParameterName));
 
@@ -45,7 +45,7 @@
         /// </summary>
         /// <param name="sqlIdentifier">An SQL identifier that is not a table or a column name. It is recommended to be passed using nameof.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Identifier(string sqlIdentifier)
+        public static Formattable Identifier(string sqlIdentifier)
         {
             Requires.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
@@ -65,10 +65,10 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Entity<TEntity>(string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable Entity<TEntity>(string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
-            return new FormattableEntity(entityDescriptor, entityMappingOverride?.Registration, alias);
+            return new FormattableEntity(entityDescriptor, entityMappingOverride?.Registration, alias, null);
         }
 
         /// <summary>
@@ -77,13 +77,14 @@
         ///   the "T" specifier for table or alias or
         ///   the "C" specifier for the single column name or
         ///   the "TC" specifier for a fully qualified SQL column.
+        ///   the alias notation
         /// When used with any other formatter, it defaults to the raw column name associated with the provided property
-        ///   but the "C", "T" and "TC" specifiers still work in this mode.
+        ///   but the "C", "T" and "TC" specifiers, together with the alias notation, still work in this mode.
         /// </summary>
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable EntityProperty<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable EntityProperty<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             Requires.NotNull(property, nameof(property));
             var propertyDescriptor = property.GetPropertyDescriptor();
@@ -101,7 +102,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Table<TEntity>(string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable Table<TEntity>(string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntity(
@@ -124,7 +125,7 @@
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [Obsolete(message:"Use the typed method instead. This method will be removed in a future version.", error:false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Column<TEntity>(string propertyName, string alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable Column<TEntity>(string propertyName, string alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             return EntityProperty<TEntity>(propertyName, alias, entityMappingOverride, FormatSpecifiers.SingleColumn);
@@ -143,7 +144,7 @@
         /// <param name="property">The property of the entity mapped to a column.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable Column<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable Column<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             Requires.NotNull(property, nameof(property));
             return EntityProperty<TEntity>(property.GetPropertyDescriptor().Name, alias, entityMappingOverride, FormatSpecifiers.SingleColumn);
@@ -163,12 +164,12 @@
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [Obsolete(message: "Use the typed method instead. This method will be removed in a future version.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable TableAndColumn<TEntity>(string propertyName, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
+        public static Formattable TableAndColumn<TEntity>(string propertyName, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
-            return new FormattableEntityProperty(entityDescriptor, entityMappingOverride?.Registration, propertyName, alias, FormatSpecifiers.TableOrAliasWithColumn);
+            return new FormattableEntityProperty(entityDescriptor, entityMappingOverride?.Registration, propertyName, alias, FormatSpecifiers.FullyQualifiedColumn);
         }
 
         /// <summary>
@@ -184,7 +185,7 @@
         /// <param name="property">The property of the entity mapped to a column.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IFormattable TableAndColumn<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
+        public static Formattable TableAndColumn<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
             Requires.NotNull(property, nameof(property));
 
@@ -194,7 +195,7 @@
                 entityMappingOverride?.Registration,
                 property.GetPropertyDescriptor().Name,
                 alias,
-                FormatSpecifiers.TableOrAliasWithColumn);
+                FormatSpecifiers.FullyQualifiedColumn);
         }
 
         /// <summary>
@@ -214,7 +215,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IFormattable EntityProperty<TEntity>(string propertyName, string? alias, EntityMapping<TEntity>? entityMappingOverride, string? defaultSpecifier)
+        private static Formattable EntityProperty<TEntity>(string propertyName, string? alias, EntityMapping<TEntity>? entityMappingOverride, string? defaultSpecifier)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();

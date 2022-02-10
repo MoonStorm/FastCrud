@@ -11,6 +11,12 @@
     public interface IRelationalSqlStatementOptionsSetter<TStatementOptionsBuilder>
     {
         /// <summary>
+        /// Sets up an alias for the main entity to be used in a relationship.
+        /// It is recommended to add aliases to the joined entities as well.
+        /// </summary>
+        public TStatementOptionsBuilder WithAlias(string? mainEntityAlias);
+        
+        /// <summary>
         /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.
         /// </summary>
         [Obsolete(message:"This method will be removed in a future version. Please use the Join methods instead.", error:false)]

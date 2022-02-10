@@ -28,12 +28,12 @@
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
-        TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions);
+        TEntity? SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions);
 
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
-        Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions);
+        Task<TEntity?> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions);
 
         /// <summary>
         /// Performs an INSERT operation

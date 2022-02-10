@@ -8,7 +8,7 @@
     /// <summary>
     /// Formattable parameter.
     /// </summary>
-    internal class FormattableParameter : IFormattable
+    internal class FormattableParameter : Formattable
     {
         /// <summary>
         /// Default constructor
@@ -19,6 +19,7 @@
             string parameter,
             string defaultFormatSpecifier)
         {
+            Requires.NotNullOrEmpty(defaultFormatSpecifier, nameof(defaultFormatSpecifier));
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
             Requires.NotNullOrEmpty(parameter, nameof(parameter));
 
@@ -41,27 +42,24 @@
         /// <summary>
         /// The default format specifier to use.
         /// </summary>
-        public string? DefaultFormatSpecifier { get; }
+        public string DefaultFormatSpecifier { get; }
 
         /// <summary>
         /// The provided identifier.
         /// </summary>
         public string Parameter { get; }
 
-        /// <summary>Formats the value of the current instance using the specified format.</summary>
-        /// <param name="format">The format to use.
-        /// -or-
-        /// A null reference (<see langword="Nothing" /> in Visual Basic) to use the default format defined for the type of the <see cref="T:System.IFormattable" /> implementation.</param>
-        /// <param name="formatProvider">The provider to use to format the value.
-        /// -or-
-        /// A null reference (<see langword="Nothing" /> in Visual Basic) to obtain the numeric format information from the current locale setting of the operating system.</param>
+        /// <summary>
+        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Parameter"/>.
+        /// </summary>
+        /// <param name="format"> An optional format specifier.</param>
+        /// <param name="formatProvider">The provider to use to format the value.</param>
         /// <returns>The value of the current instance in the specified format.</returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public override string ToString(string? format, IFormatProvider? formatProvider = null)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
             if (formatProvider is GenericSqlStatementFormatter
-                && string.IsNullOrEmpty(format)
-                && this.DefaultFormatSpecifier != null)
+                && string.IsNullOrEmpty(format))
             {
                 format = this.DefaultFormatSpecifier;
             }

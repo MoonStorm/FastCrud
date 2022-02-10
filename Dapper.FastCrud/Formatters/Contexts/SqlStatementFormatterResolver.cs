@@ -8,6 +8,7 @@
 
     /// <summary>
     /// Holds information about an entity participating in a statement.
+    /// A resolver mainly identifies itself with the alias, but it can also identify itself by type name (and table name in case the table and the type names are different)
     /// </summary>
     internal sealed class SqlStatementFormatterResolver
     {

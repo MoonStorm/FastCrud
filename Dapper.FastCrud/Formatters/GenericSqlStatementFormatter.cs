@@ -6,10 +6,11 @@
     using Dapper.FastCrud.Validations;
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
 
     /// <summary>
-    /// Offers SQL basic formatting capabilities.
+    /// The central point for all the formatting capabilities.
+    /// Only one instance exists for the duration of a statement.
+    /// Every participant in the statement, including the main entity, will register themselves with the formatter and receive a unique resolver.
     /// </summary>
     internal class GenericSqlStatementFormatter: IFormatProvider, ICustomFormatter
     {
@@ -36,8 +37,7 @@
             EntityRegistration newRegistration, 
             string? newAlias)
         {
-            var oldResolver = new SqlStatementFormatterResolver(entityDescriptor, oldRegistration, oldAlias);
-            if (!_resolverMap.RemoveResolver(oldResolver))
+            if (!_resolverMap.RemoveResolver(oldRegistration, oldAlias))
             {
                 throw new InvalidOperationException("An old resolver could not be located");
             }
@@ -45,6 +45,17 @@
             var newResolver = new SqlStatementFormatterResolver(entityDescriptor, newRegistration, newAlias);
             _resolverMap.AddResolver(newResolver);
             return newResolver;
+        }
+
+        /// <summary>
+        /// Locates a resolver.
+        /// <exception cref="InvalidOperationException">The resolver could not be located.</exception>
+        /// </summary>
+        public SqlStatementFormatterResolver LocateResolver(
+            Type entityType,
+            string? alias)
+        {
+            return _resolverMap.LocateResolver(entityType, alias);
         }
 
         /// <summary>
@@ -91,14 +102,19 @@
         /// <param name="arg">An object to format.</param>
         /// <param name="formatProvider">An object that supplies format information about the current instance.</param>
         /// <returns>The string representation of the value of <paramref name="arg" />, formatted as specified by <paramref name="format" /> and <paramref name="formatProvider" />.</returns>
-        public string Format(string format, object arg, IFormatProvider formatProvider)
+        public string? Format(string? format, object? arg, IFormatProvider? formatProvider)
         {
-            Requires.NotNull(formatProvider, nameof(formatProvider));
-            Requires.Argument(formatProvider == this, nameof(formatProvider), "Invalid format provider provided to Dapper.FastCrud");
+            // Check whether this is an appropriate callback
+            if (!this.Equals(formatProvider))
+            {
+                return null;
+            }
+
+            ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
 
             switch (arg)
             {
-                // take care of formattables (see the Formattables folder)
+                // take care of formattables, either ours or others (see the Formattables folder)
                 case IFormattable formattableArg:
                     return formattableArg.ToString(format, formatProvider);
                 // anything that's a string
@@ -107,7 +123,14 @@
                     {
                         throw new InvalidOperationException("Empty argument passed as an argument to the Dapper.FastCrud formatter");
                     }
-                    switch (format)
+
+                    // if we got no format but we got an alias, we'll default to fully qualified column
+                    if (parsedAlias != null && parsedFormat == null)
+                    {
+                        parsedFormat = FormatSpecifiers.FullyQualifiedColumn;
+                    }
+
+                    switch (parsedFormat)
                     {
                         case FormatSpecifiers.Parameter:
                             // input: "param"
@@ -120,22 +143,30 @@
                         case FormatSpecifiers.TableOrAlias:
                             // input: "alias"|"type"|""
                             // output: "[alias_or_table_or_current]"
-                            return this.FormatTypeOrAliasOrNothing(stringArg);
-                        case FormatSpecifiers.TableOrAliasWithColumn:
-                            // input: "typeOrAlias.prop" OR "prop"
+                            return this.FormatTypeOrAliasOrNothing(parsedAlias ?? stringArg);
+                        case FormatSpecifiers.FullyQualifiedColumn:
+                            // input: "prop"
                             // output: "[tableOrAlias].[column]"
-                            return this.FormatQualifiedColumn(stringArg);
+                            return this.FormatQualifiedColumn(parsedAlias, stringArg);
                         case FormatSpecifiers.SingleColumn:
                             // input: "prop"
                             // output: "[column]"
-                            // just a column (note: sometimes this is being forced with a table in certain circumstances)
+                            // just a column (note: legacy extra where/order conditions are forcing this with the current table or alias)
                             return this.FormatColumn(stringArg);
+                        case null:
+                            return stringArg;
                         default:
                             throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a string argument to Dapper.FastCrud");
                     }
                     break;
                 case Type typeArg:
-                    switch (format)
+
+                    if (parsedFormat == null)
+                    {
+                        parsedFormat = FormatSpecifiers.TableOrAlias;
+                    }
+
+                    switch (parsedFormat)
                     {
                         case FormatSpecifiers.TableOrAlias:
                             // input: "type"
@@ -160,7 +191,49 @@
         /// They will always be prepended with the table name or alias.
         /// </summary>
         public bool ForceFullyQualifiedColumns => _activeResolverRequiresFullyQualifiedColumns.Peek();
-        
+
+        /// <summary>
+        /// Resolves a format that might contain alias information.
+        /// </summary>
+        public static void ParseFormat(string? format, out string? parsedFormat, out string? parsedAlias)
+        {
+            parsedFormat = format;
+            parsedAlias = null;
+
+            var aliasWithFormat = format?.Split(':');
+            switch (aliasWithFormat?.Length)
+            {
+                case 2:
+                    if (aliasWithFormat[0].StartsWith(FormatSpecifiers.BelongsToAliasPrefix))
+                    {
+                        parsedAlias = aliasWithFormat[0].Substring(FormatSpecifiers.BelongsToAliasPrefix.Length);
+                        parsedFormat = aliasWithFormat[1];
+                    }
+                    else
+                    {
+                        // we don't know what it is, it will likely error later
+                    }
+                    break;
+                case 1:
+                    if (format.StartsWith(FormatSpecifiers.BelongsToAliasPrefix))
+                    {
+                        parsedAlias = format.Substring(FormatSpecifiers.BelongsToAliasPrefix.Length);
+                        parsedFormat = null;
+                    }
+                    break;
+            }
+
+            if (string.IsNullOrWhiteSpace(parsedFormat))
+            {
+                parsedFormat = null;
+            }
+
+            if (string.IsNullOrWhiteSpace(parsedAlias))
+            {
+                parsedAlias = null;
+            }
+        }
+
         /// <summary>
         /// Formats a regular parameter.
         /// </summary>
@@ -219,28 +292,6 @@
             typeOrAliasOrNothing = resolverToUse.Alias ?? resolverToUse.EntityRegistration.TableName;
 
             return resolverToUse.SqlBuilder.GetColumnName(propName, typeOrAliasOrNothing);
-        }
-
-        private string FormatQualifiedColumn(string qualifiedColumn)
-        {
-            // multiple dots should not be present in here!
-            var dotIndex = qualifiedColumn.IndexOf('.');
-            string column;
-            string? alias;
-            if (dotIndex >= 0)
-            {
-                // we were given both a alias AND a column
-                alias = qualifiedColumn.Substring(0, dotIndex);
-                column = qualifiedColumn.Substring(dotIndex + 1);
-            }
-            else
-            {
-                // we were given no table/alias but it's expected of us to return one
-                alias = null;
-                column = qualifiedColumn;
-            }
-
-            return this.FormatQualifiedColumn(alias, column);
         }
 
         private sealed class MainResolverRestoreHelper:IDisposable

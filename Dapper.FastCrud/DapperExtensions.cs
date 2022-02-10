@@ -11,7 +11,6 @@ namespace Dapper.FastCrud
     using System.Threading.Tasks;
     using Dapper.FastCrud.Configuration.StatementOptions.Builders;
     using Dapper.FastCrud.SqlStatements;
-    using System.Linq;
 
     /// <summary>
     /// Class for Dapper extensions
@@ -25,7 +24,7 @@ namespace Dapper.FastCrud
         /// <param name="connection">Database connection.</param>
         /// <param name="entityKeys">The entity from which the primary keys will be extracted and used for filtering.</param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
-        public static TEntity Get<TEntity>(
+        public static TEntity? Get<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
             Action<ISelectSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
@@ -44,7 +43,7 @@ namespace Dapper.FastCrud
         /// <param name="entityKeys">The entity from which the primary keys will be extracted and used for filtering.</param>
         /// <param name="statementOptions">Optional statement options (usage: statement => statement.SetTimeout().AttachToTransaction()...)</param>
         /// <returns>Returns a single entity by a single id from table or NULL if none could be found.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(
+        public static Task<TEntity?> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
             Action<ISelectSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)

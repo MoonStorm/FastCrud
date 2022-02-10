@@ -39,6 +39,11 @@
         /// </summary>
         public EntityInstanceWrapper GetOrAdd(EntityInstanceWrapper entityInstance)
         {
+            if (entityInstance == null || ReferenceEquals(null, entityInstance.EntityInstance))
+            {
+                return entityInstance;
+            }
+
             if (!_globalEntityInstanceWrappers.TryGetValue(entityInstance, out EntityInstanceWrapper actualEntityInstance))
             {
                 _globalEntityInstanceWrappers.Add(entityInstance, entityInstance);

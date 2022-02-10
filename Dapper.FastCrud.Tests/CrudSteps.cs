@@ -291,18 +291,30 @@
             if (useAsyncMethods)
             {
                 // we have to escape Specflow's bad synchronization context
-                queriedEntities = await Task.Run(async()=>
-                {
-                    return await _testContext.DatabaseConnection.FindAsync<Employee>(options => options
-                                                                                                .Include<Workstation>()
-                                                                                                .Include<Building>());
-                });
+                queriedEntities = await Task.Run(async () =>
+                                      {
+                                          return await _testContext.DatabaseConnection
+                                                                   .FindAsync<Employee>(options => options
+                                                                                                   .WithAlias("e")
+                                                                                                   .LeftJoin<Employee, Workstation>(
+                                                                                                       join => join
+                                                                                                               .FromAlias("e")
+                                                                                                               .ToAlias("ws")
+                                                                                                               .MapResults()
+                                                                                                       )
+                                                                                                   .LeftJoin<Workstation, Building>(
+                                                                                                       join => join
+                                                                                                               .FromAlias("ws")
+                                                                                                               .ToAlias("b")
+                                                                                                               .MapResults()));
+                                      }
+                                  );
             }
             else
             {
                 queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
-                                                                                            .Include<Workstation>()
-                                                                                            .Include<Building>());
+                                                                                            .LeftJoin<Employee, Workstation>(join => join.MapResults())
+                                                                                            .LeftJoin<Workstation, Building>(join => join.MapResults()));
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -392,21 +404,24 @@
         [When(@"I query for the count of all the inserted building entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            FormattableString whereClause = $"charindex(',' + cast({nameof(Building.BuildingId):C} as varchar(10)) + ',', ',' + @BuildingIds + ',') > 0";
-            var buildingIds = string.Join(",", _testContext.GetInsertedEntitiesOfType<Building>()
+            FormattableString whereClause = $"charindex(cast({nameof(Building.BuildingId):of b} as varchar(10)), @BuildingIds) > 4";
+
+            var buildingIds = "ids:" + string.Join(",", _testContext.GetInsertedEntitiesOfType<Building>()
                                                            .Select(building => building.BuildingId));
 
             _testContext.LastCountQueryResult = useAsyncMethods
-                                          ? await _testContext
-                                                .DatabaseConnection
-                                                .CountAsync<Building>(statement => statement
-                                                    .Where(whereClause)
-                                                    .WithParameters(new {BuildingIds = buildingIds}))
-                                          : _testContext
-                                                .DatabaseConnection
-                                                .Count<Building>(statement => statement
-                                                    .Where(whereClause)
-                                                    .WithParameters(new {BuildingIds = buildingIds}));
+                                                    ? await _testContext
+                                                            .DatabaseConnection
+                                                            .CountAsync<Building>(statement => statement
+                                                                                               .WithAlias("b")
+                                                                                               .Where(whereClause)
+                                                                                               .WithParameters(new { BuildingIds = buildingIds }))
+                                                    : _testContext
+                                                      .DatabaseConnection
+                                                      .Count<Building>(statement => statement
+                                                                                    .WithAlias("b")
+                                                                                    .Where(whereClause)
+                                                                                    .WithParameters(new { BuildingIds = buildingIds }));
         }
 
         [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]

@@ -39,8 +39,16 @@
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TEntity SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public TEntity? SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
         {
+            if (statementOptions.MainEntityAlias != null || statementOptions.JoinOptions.Count > 0)
+            {
+                // this is no longer a simple entity selection, turn it into a full blown batch select
+                statementOptions.WhereClause = $"{_sqlBuilder.ConstructKeysWhereClause(statementOptions.MainEntityAlias??statementOptions.EntityRegistration.TableName)}";
+                statementOptions.Parameters = keyEntity;
+                return this.BatchSelect(connection, statementOptions).SingleOrDefault();
+            }
+
             return connection.Query<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
                 keyEntity,
@@ -52,8 +60,16 @@
         /// Performs an async SELECT operation on a single entity, using its keys
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<TEntity> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
+        public async Task<TEntity?> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
         {
+            if (statementOptions.MainEntityAlias != null || statementOptions.JoinOptions.Count > 0)
+            {
+                // this is no longer a simple entity selection, turn it into a full blown batch select
+                statementOptions.WhereClause = $"{_sqlBuilder.ConstructKeysWhereClause(statementOptions.MainEntityAlias??statementOptions.EntityRegistration.TableName)}";
+                statementOptions.Parameters = keyEntity;
+                return (await this.BatchSelectAsync(connection, statementOptions)).SingleOrDefault();
+            }
+
             return (await connection.QueryAsync<TEntity>(
                 _sqlBuilder.ConstructFullSingleSelectStatement(),
                 keyEntity,
@@ -290,10 +306,10 @@
         public int Count(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
             var joins = this.AnalyzeStatementJoins(statementOptions);
-            var countStatement = (joins == null && statementOptions.WhereClause == null)
+            var countStatement = (joins == null && statementOptions.WhereClause == null && statementOptions.MainEntityAlias == null)
                                      ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
                                      : _sqlBuilder.ConstructFullCountStatement(
-                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins),
+                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins),
                                          _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
             return connection.ExecuteScalar<int>(
                 countStatement,
@@ -309,10 +325,10 @@
         public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
             var joins = this.AnalyzeStatementJoins(statementOptions);
-            var countStatement = (joins == null && statementOptions.WhereClause == null)
+            var countStatement = (joins == null && statementOptions.WhereClause == null && statementOptions.MainEntityAlias == null)
                                      ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
                                      : _sqlBuilder.ConstructFullCountStatement(
-                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins),
+                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins),
                                          _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
 
             return connection.ExecuteScalarAsync<int>(
@@ -334,8 +350,8 @@
             //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
             var joins = this.AnalyzeStatementJoins(statementOptions);
-            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(null, joins);
-            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins);
+            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(statementOptions.MainEntityAlias, joins);
+            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins);
             var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins);
             var orderClause = _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
             IEnumerable<TEntity> results;
@@ -365,7 +381,7 @@
                 var mainEntityJoinParser = new MainEntityResultSetParserStage<TEntity>(joinsWithResultSetMappings);
                 var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
 
-                results = (connection.Query<MainEntityResultSetParserStage<TEntity>>(
+                connection.Query<MainEntityResultSetParserStage<TEntity>>(
                     selectStatement,
                     new[]{statementOptions.EntityRegistration.EntityType}
                         .Concat(joinsWithResultSetMappings.Select(join => join.ReferencedEntityRegistration.EntityType))
@@ -386,7 +402,9 @@
                     buffered: true, //TODO: look into allowing streaming results with this method
                     transaction: statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds,
-                    splitOn: splitOn).LastOrDefault()?.EntityCollection as IEnumerable<TEntity>)??Array.Empty<TEntity>();
+                    splitOn: splitOn);
+
+                    return mainEntityJoinParser.EntityCollection;
             }
 
             return results;
@@ -396,43 +414,71 @@
         /// Performs a common SELECT 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
+        public async Task<IEnumerable<TEntity>> BatchSelectAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            //validation removed, let to the engine to fail
+            //validation removed, up to the engine to fail
             //Requires.Argument(
-            //    (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
-            //    || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
+            //    (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
+            //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
             var joins = this.AnalyzeStatementJoins(statementOptions);
-            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(null, joins);
-            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins);
+            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(statementOptions.MainEntityAlias, joins);
+            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins);
             var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins);
             var orderClause = _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
+            IEnumerable<TEntity> results;
 
             var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
                 selectClause: selectClause,
-                fromClause:fromClause,
+                fromClause: fromClause,
                 whereClause: whereClause,
                 orderClause: orderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
-            return connection.QueryAsync<TEntity>(
-                selectStatement,
-                statementOptions.Parameters,
-                transaction: statementOptions.Transaction,
-                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+
+            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray();
+            if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
+            {
+                results = await connection.QueryAsync<TEntity>(
+                    selectStatement,
+                    statementOptions.Parameters,
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+            }
+            else
+            {
+                var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
+                var mainEntityJoinParser = new MainEntityResultSetParserStage<TEntity>(joinsWithResultSetMappings);
+                var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
+
+                await connection.QueryAsync<MainEntityResultSetParserStage<TEntity>>(
+                    selectStatement,
+                    new[] { statementOptions.EntityRegistration.EntityType }
+                        .Concat(joinsWithResultSetMappings.Select(join => join.ReferencedEntityRegistration.EntityType))
+                        .ToArray(),
+                    (object[] rowInstances) =>
+                    {
+                        for (var rowInstanceIndex = 0; rowInstanceIndex < rowInstances.Length; rowInstanceIndex++)
+                        {
+                            var rowInstanceRegistration = rowInstanceIndex == 0
+                                                              ? statementOptions.EntityRegistration
+                                                              : joinsWithResultSetMappings[rowInstanceIndex - 1].ReferencedEntityRegistration;
+                            rowInstanceWrappers[rowInstanceIndex] = new EntityInstanceWrapper(rowInstanceRegistration, rowInstances[rowInstanceIndex]);
+                        }
+                        mainEntityJoinParser.Execute(null, rowInstanceWrappers);
+                        return mainEntityJoinParser;
+                    },
+                    statementOptions.Parameters,
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds,
+                    splitOn: splitOn);
+
+                return mainEntityJoinParser.EntityCollection;
+            }
+
+            return results;
         }
 
-        /// <summary>
-        /// Resolves the ORDER BY clause, taking into account all the extra options found in the JOINs.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private string? GetOrderClause(AggregatedSqlStatementOptions statementOptions)
-        {
-            var joins = this.AnalyzeStatementJoins(statementOptions);
-            return _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
-        }
-        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyEntity(TEntity source, TEntity destination, PropertyRegistration[] properties)
         {

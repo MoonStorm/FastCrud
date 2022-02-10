@@ -16,21 +16,23 @@ Code first entities are also supported which can either be decorated with attrib
 
 
 #### Release Notes
-- [WIP] 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
+- 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
   - Main library:
     - Added support for .NET Standard 2.1
     - Extended support for the MetadataType attribute in .NET Standard 2.1
     - Bulk update can now be used with parameters.
     - Format specifier ":P" added for SQL parameters.
-    - Format specifiers extended to support resolution via aliases in JOINs (e.g. "nameof(prop):alias:TC").
+    - Format specifiers extended to support resolution via aliases in JOINs (e.g. "nameof(prop):of alias").
     - Methods adjusted for nullable support.
     - Added support for multiple references to the same target using the InverseProperty attribute.
-    - [Breaking change] The fluent mapping setup has changed for setting up relationships. Please check the wiki for more details.
+    - [Breaking change] The fluent mapping setup has changed for setting up relationships.
     - Support for self referenced entities.
     - Support for multiple references to the same target.
     - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
     - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
     - [Breaking change] Clean separation for the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
+    - The GET method supports joins.
+    - The main entity can now be aliased. It is now recommended to alias every entity in a JOIN for easy targeting in the WHERE clause.
     - The limit of 7 entities in a JOIN was removed.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
@@ -46,6 +48,8 @@ Code first entities are also supported which can either be decorated with attrib
       - code first
       - metadata classes
       - database first
+  - Wiki:
+    - Still to be updated
 - 2.6 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
   - Upgraded the Dapper dependency.
   - Added support for .NET Standard 2.0 and .NET Framework 4.6.1

@@ -8,7 +8,7 @@
     /// <summary>
     /// A formattable representing a database entity.
     /// </summary>
-    internal class FormattableEntity: IFormattable
+    internal class FormattableEntity: Formattable
     {
         /// <summary>
         /// Default constructor.
@@ -17,7 +17,7 @@
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
             string? alias,
-            string? defaultFormatSpecifier = null)
+            string? defaultFormatSpecifier)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
 
@@ -47,40 +47,36 @@
         /// </summary>
         public string? DefaultFormatSpecifier { get; }
 
-        /// <summary>Formats the value of the current instance using the specified format.</summary>
-        /// <param name="format">The format to use.
-        /// -or-
-        /// A null reference (<see langword="Nothing" /> in Visual Basic) to use the default format defined for the type of the <see cref="T:System.IFormattable" /> implementation.</param>
-        /// <param name="formatProvider">The provider to use to format the value.
-        /// -or-
-        /// A null reference (<see langword="Nothing" /> in Visual Basic) to obtain the numeric format information from the current locale setting of the operating system.</param>
+        /// <summary>
+        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}"/>.
+        /// </summary>
+        /// <param name="format"> An optional format specifier.</param>
+        /// <param name="formatProvider">The provider to use to format the value.</param>
         /// <returns>The value of the current instance in the specified format.</returns>
-        public virtual string ToString(string? format, IFormatProvider? formatProvider)
+        public override string ToString(string? format, IFormatProvider? formatProvider = null)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
 
-            if (formatProvider is GenericSqlStatementFormatter 
-                && string.IsNullOrEmpty(format) 
-                && this.DefaultFormatSpecifier != null)
+            GenericSqlStatementFormatter.ParseFormat(format, out string parsedFormat, out string parsedAlias);
+
+            if (parsedFormat == null && parsedAlias != null)
             {
-                format = this.DefaultFormatSpecifier;
+                parsedFormat = FormatSpecifiers.TableOrAlias;
             }
 
-            switch (format)
+            if (parsedFormat == null && formatProvider is GenericSqlStatementFormatter)
+            {
+                parsedFormat = this.DefaultFormatSpecifier;
+            }
+
+            switch (parsedFormat)
             {
                 case FormatSpecifiers.TableOrAlias:
-                    return sqlBuilder.GetTableName(this.Alias);
+                    return sqlBuilder.GetTableName(parsedAlias ?? this.Alias);
                 default:
                     // for generic usage, we'll return the table name or alias if provided, without delimiters
                     return this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName;
             }
-        }
-
-        /// <summary>Returns a string that represents the current object.</summary>
-        /// <returns>A string that represents the current object.</returns>
-        public override string ToString()
-        {
-            return this.ToString(null, null);
         }
     }
 }

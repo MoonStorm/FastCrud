@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.Formatters.Contexts
 {
+    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
     using System.Collections.Generic;
@@ -20,25 +21,57 @@
         }
 
         /// <summary>
+        /// Locates a resolver. In case it can't be found, it will throe an exception.
+        /// </summary>
+        public SqlStatementFormatterResolver LocateResolver(Type entityType, string? alias)
+        {
+            Requires.NotNull(entityType, nameof(entityType));
+
+            SqlStatementFormatterResolver? locatedResolver;
+            // if you change these line, change the other methods as well
+            if (alias != null)
+            {
+                if (!_resolverMap.TryGetValue(alias, out locatedResolver))
+                {
+                    throw new InvalidOperationException($"The alias '{alias}' was not registered");
+                }
+            }
+            else
+            {
+                if (!_resolverMap.TryGetValue(entityType.Name, out locatedResolver))
+                {
+                    throw new InvalidOperationException($"The type '{entityType}' was not registered");
+                }
+            }
+
+            if (locatedResolver.EntityRegistration.EntityType != entityType)
+            {
+                throw new InvalidOperationException($"Mismatched entity registration type located in the resolver map");
+            }
+
+            return locatedResolver;
+        }
+
+        /// <summary>
         /// Removes a resolver from the map.
         /// </summary>
-        public bool RemoveResolver(SqlStatementFormatterResolver resolver)
+        public bool RemoveResolver(EntityRegistration registration, string? alias)
         {
-            Requires.NotNull(resolver, nameof(resolver));
+            Requires.NotNull(registration, nameof(registration));
 
             var removed = false;
 
             // if you change these line, change the other methods as well
-            if (resolver.Alias != null)
+            if (alias != null)
             {
-                removed = _resolverMap.Remove(resolver.Alias);
+                removed = _resolverMap.Remove(alias);
             }
             else
             {
-                removed = _resolverMap.Remove(resolver.EntityRegistration.EntityType.Name);
-                if (resolver.EntityRegistration.TableName != resolver.EntityRegistration.EntityType.Name)
+                removed = _resolverMap.Remove(registration.EntityType.Name);
+                if (registration.TableName != registration.EntityType.Name)
                 {
-                    removed &= _resolverMap.Remove(resolver.EntityRegistration.TableName);
+                    removed &= _resolverMap.Remove(registration.TableName);
                 }
 
             }

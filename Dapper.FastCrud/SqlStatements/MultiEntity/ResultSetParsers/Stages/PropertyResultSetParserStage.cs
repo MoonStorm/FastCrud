@@ -75,23 +75,35 @@
             EntityInstanceWrapper target,
             PropertyDescriptor targetCollectionProperty)
         {
-            var targetCollectionOfSources = targetCollectionProperty.GetValue(target.EntityInstance) as IList;
-            if (targetCollectionOfSources == null)
+            EntityInstanceWrapper actualSourceUsed;
+            if (ReferenceEquals(null, target.EntityInstance))
             {
-                targetCollectionOfSources = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(source.EntityRegistration.EntityType));
-                targetCollectionProperty.SetValue(target.EntityInstance, targetCollectionOfSources);
+                actualSourceUsed = source;
             }
+            else
+            {
+                var targetCollectionOfSources = targetCollectionProperty.GetValue(target.EntityInstance) as IList;
+                if (targetCollectionOfSources == null)
+                {
+                    targetCollectionOfSources = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(source.EntityRegistration.EntityType));
+                    targetCollectionProperty.SetValue(target.EntityInstance, targetCollectionOfSources);
+                }
 
-            // TODO: check if the local collections need to be checked for uniqueness with the current algorithm
-            //    by uncommenting the following lines
-            //var actualSourceUsed = this.EntityContainer.GetOrAdd(
-            //    target.EntityInstance,
-            //    targetCollectionProperty,
-            //    targetCollectionOfSources,
-            //    source);
-            // until then, we add it ourselves here
-            targetCollectionOfSources.Add(source.EntityInstance);
-            var actualSourceUsed = source;
+                if (!ReferenceEquals(null, source.EntityInstance))
+                {
+                    // TODO: check if the local collections need to be checked for uniqueness with the current algorithm
+                    //    by uncommenting the following lines
+                    //var actualSourceUsed = this.EntityContainer.GetOrAdd(
+                    //    target.EntityInstance,
+                    //    targetCollectionProperty,
+                    //    targetCollectionOfSources,
+                    //    source);
+                    // until then, we add it ourselves here
+                    targetCollectionOfSources.Add(source.EntityInstance);
+                }
+
+                actualSourceUsed = source;
+            }
 
             return actualSourceUsed;
         }
@@ -102,7 +114,10 @@
             EntityInstanceWrapper target,
             PropertyDescriptor targetSimpleProperty)
         {
-            targetSimpleProperty.SetValue(target.EntityInstance, source.EntityInstance);
+            if (!ReferenceEquals(null, target.EntityInstance) && !ReferenceEquals(null, source.EntityInstance))
+            {
+                targetSimpleProperty.SetValue(target.EntityInstance, source.EntityInstance);
+            }
         }
     }
 }

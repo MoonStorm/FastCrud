@@ -9,6 +9,7 @@
         public const string Parameter = "P";
         public const string TableOrAlias = "T";
         public const string SingleColumn = "C";
-        public const string TableOrAliasWithColumn = "TC";
+        public const string FullyQualifiedColumn = "TC";
+        public const string BelongsToAliasPrefix = "of ";
     }
 }

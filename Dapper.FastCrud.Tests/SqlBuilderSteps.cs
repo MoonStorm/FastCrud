@@ -68,9 +68,9 @@
                 };
             //  _currentSqlBuilder.Format no longer supported
             _buildingRawJoinQueryStatement = Sql.Format<Workstation>(
-                $@" SELECT {nameof(Workstation):T}.{nameof(Workstation.WorkstationId):C}, {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))}
+                $@" SELECT {nameof(Workstation):T}.{nameof(Workstation.WorkstationId):C}, {Sql.Table<Building>()}.{Sql.Column<Building>(building => building.BuildingId)}
                     FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
-                    WHERE {nameof(Workstation):T}.{nameof(Workstation.BuildingId):C} = {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}" );
+                    WHERE {nameof(Workstation):T}.{nameof(Workstation.BuildingId):C} = {Sql.Table<Building>():T}.{Sql.Column<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}" );
         }
 
         [When(@"I construct a complex join query for workstation using combined table and column identifier resolvers")]

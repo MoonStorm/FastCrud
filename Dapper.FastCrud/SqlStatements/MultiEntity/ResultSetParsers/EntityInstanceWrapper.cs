@@ -18,7 +18,7 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public EntityInstanceWrapper(EntityRegistration entityRegistration, object entityInstance)
+        public EntityInstanceWrapper(EntityRegistration entityRegistration, object? entityInstance)
         {
             Requires.NotNull(entityRegistration, nameof(entityRegistration));
 
@@ -37,7 +37,7 @@
         /// <summary>
         /// Gets the underlying instance.
         /// </summary>
-        public object EntityInstance { get; }
+        public object? EntityInstance { get; }
 
         /// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
         /// <param name="other">An object to compare with this object.</param>
@@ -134,7 +134,9 @@
 
         private object[] DiscoverKeyPropertyValues()
         {
-            return this.EntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations()
+            return this.EntityInstance == null
+                       ? Array.Empty<object>() 
+                       : this.EntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations()
                        .Select(propRegistration =>
                        {
                            var propDescriptor = propRegistration.Descriptor;

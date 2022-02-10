@@ -46,6 +46,20 @@
         }
 
         /// <summary>
+        /// Sets up an alias for the main entity to be used in a relationship.
+        /// It is recommended to add aliases to the joined entities as well.
+        /// </summary>
+        public TStatementOptionsBuilder WithAlias(string? mainEntityAlias)
+        {
+            var oldAlias = this.MainEntityAlias;
+            this.MainEntityAlias = mainEntityAlias;
+
+            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(this.EntityDescriptor, this.EntityRegistration, oldAlias, this.EntityRegistration, this.MainEntityAlias);
+            this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
+            return this.Builder;
+        }
+
+        /// <summary>
         /// Adds an ORDER BY clause to the statement.
         /// </summary>
         public TStatementOptionsBuilder OrderBy(FormattableString? orderByClause)
@@ -325,10 +339,14 @@
         private void ValidateAndAddJoin(AggregatedRelationalSqlStatementOptions joinOptions)
         {
             // for an early warning, perform the validation now
+            joinOptions.ReferencingEntityFormatterResolver = this.StatementFormatter.LocateResolver(
+                joinOptions.ReferencingEntityDescriptor.EntityType,
+                joinOptions.ReferencingEntityAlias);
             joinOptions.ReferencedEntityFormatterResolver = this.StatementFormatter.RegisterResolver(
                 joinOptions.ReferencedEntityDescriptor, 
                 joinOptions.ReferencedEntityRegistration, 
                 joinOptions.ReferencedEntityAlias);
+
             this.JoinOptions.Add(joinOptions);
         }
 

@@ -15,7 +15,10 @@
     using System.Threading;
 
     /// <summary>
-    /// Defines a relationship suitable for the SQL statements.
+    /// This is mainly used by <seealso cref="GenericSqlStatements{TEntity}"/> class to
+    ///   analyze the join options passed in via <seealso cref="AggregatedRelationalSqlStatementOptions"/>
+    ///   and entities having the information stored in <seealso cref="GenericSqlStatementFormatter"/> for the duration of the request.
+    /// The analysis goes all the way to identify even the individual columns used in joining two entities.
     /// </summary>
     internal class SqlStatementJoin
     {
@@ -194,17 +197,13 @@
             EntityRelationshipType? referencingToReferencedRelationshipType = null;
             EntityRelationshipType? referencedToReferencingRelationshipType = null;
 
-            EntityRelationshipRegistration? matchedReferencedToReferencingRelationship = null;
-            EntityRelationshipRegistration? matchedReferencingToReferencedRelationship = null;
-
-            EntityRegistration? referencingEntityRegistration = null;
+            EntityRegistration referencingEntityRegistration = referencedJoinOptions.ReferencingEntityFormatterResolver.EntityRegistration;
+            EntityRegistration referencedEntityRegistration = referencedJoinOptions.ReferencedEntityRegistration;
 
             PropertyDescriptor? referencingNavigationProperty = referencedJoinOptions.ReferencingNavigationProperty;
             PropertyDescriptor? referencedNavigationProperty = referencedJoinOptions.ReferencedNavigationProperty;
             PropertyRegistration[]? referencingColumnProperties = null;
             PropertyRegistration[]? referencedColumnProperties = null;
-
-            SqlStatementFormatterResolver? referencingEntityFormatterResolver = null;
 
             // UPDATE: the following was disabled as we could be very wrong
             // try to guess the type of relationships we're dealing with here
@@ -237,8 +236,8 @@
             //}
 
             // try to locate the referenced -> referencing relationship
-            matchedReferencedToReferencingRelationship = referencedJoinOptions.ReferencedEntityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(
-                referencedJoinOptions.ReferencingEntityDescriptor.EntityType,
+            EntityRelationshipRegistration? matchedReferencedToReferencingRelationship = referencedEntityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(
+                referencingEntityRegistration.EntityType,
                 relationshipTypeToFind: referencedToReferencingRelationshipType,
                 referencingNavigationPropertyToFind: referencedNavigationProperty);
 
@@ -250,82 +249,43 @@
             }
 
             // now try to locate the referencing -> referenced relationship
-            var matchedReferencingToReferencedRelationshipInfos = statementOptions.JoinOptions
-                                                                             .Select(rel =>
-                                                                             {
-                                                                                 return new
-                                                                                 {
-                                                                                     entityRegistration = rel.ReferencedEntityRegistration,
-                                                                                     formatterResolver = rel.ReferencedEntityFormatterResolver,
-                                                                                     alias = rel.ReferencingEntityAlias,
-                                                                                 };
-                                                                             })
-                                                                             .Concat(new[] { new
-                                                                                     {
-                                                                                         entityRegistration = statementOptions.EntityRegistration,
-                                                                                         formatterResolver = statementOptions.MainEntityFormatterResolver,
-                                                                                         alias = (string?)null
-                                                                                     } })
-                                                                             .Where(info =>
-                                                                             {
-                                                                                 return info.entityRegistration.EntityType == referencedJoinOptions.ReferencingEntityDescriptor.EntityType
-                                                                                        && (referencedJoinOptions.ReferencingEntityAlias == null || referencedJoinOptions.ReferencingEntityAlias == info.alias);
-                                                                             })
-                                                                             .Select(info =>
-                                                                             {
-                                                                                 return new
-                                                                                 {
-                                                                                     entityRegistration = info.entityRegistration,
-                                                                                     formatterResolver = info.formatterResolver,
-                                                                                     matchedRelationShip = info.entityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(
-                                                                                         referencedJoinOptions.ReferencedEntityRegistration.EntityType,
-                                                                                         relationshipTypeToFind: referencingToReferencedRelationshipType,
-                                                                                         referencedColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
-                                                                                         {
-                                                                                             EntityRelationshipType.ChildToParent => matchedReferencedToReferencingRelationship.ReferencingColumnProperties,
-                                                                                             _ => Array.Empty<string>()
-                                                                                         },
-                                                                                         referencingColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
-                                                                                         {
-                                                                                             EntityRelationshipType.ParentToChildren => matchedReferencedToReferencingRelationship.ReferencedColumnProperties,
-                                                                                             _ => Array.Empty<string>()
-                                                                                         }
-                                                                                     )
-                                                                                 };
-                                                                             })
-                                                                             .Where(info => info.matchedRelationShip != null)
-                                                                             .ToArray();
+            var matchedReferencingToReferencedRelationship =
+                referencingEntityRegistration
+                    .TryLocateRelationshipThrowWhenMultipleAreFound(
+                        referencedEntityRegistration.EntityType,
+                        relationshipTypeToFind: referencingToReferencedRelationshipType,
+                        referencedColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
+                        {
+                            EntityRelationshipType.ChildToParent => matchedReferencedToReferencingRelationship.ReferencingColumnProperties,
+                            _ => Array.Empty<string>()
+                        },
+                        referencingColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
+                        {
+                            EntityRelationshipType.ParentToChildren => matchedReferencedToReferencingRelationship.ReferencedColumnProperties,
+                            _ => Array.Empty<string>()
+                        });
 
-            if (matchedReferencingToReferencedRelationshipInfos.Length > 1)
+            if (matchedReferencingToReferencedRelationship != null)
             {
-                throw new InvalidOperationException($"Found {matchedReferencingToReferencedRelationshipInfos.Length} relationships between '{referencedJoinOptions.ReferencingEntityDescriptor.EntityType}' and '{referencedJoinOptions.ReferencedEntityRegistration.EntityType}'. More information is required in the JOIN.");
+                referencingNavigationProperty ??= matchedReferencingToReferencedRelationship.ReferencingNavigationProperty;
+                referencingToReferencedRelationshipType = matchedReferencingToReferencedRelationship.RelationshipType;
             }
 
-            var matchedReferencingToReferencedRelationshipInfo = matchedReferencingToReferencedRelationshipInfos.SingleOrDefault();
-
-            if (matchedReferencingToReferencedRelationshipInfo != null)
-            {
-                matchedReferencingToReferencedRelationship = matchedReferencingToReferencedRelationshipInfo.matchedRelationShip;
-                referencingNavigationProperty ??= matchedReferencingToReferencedRelationship!.ReferencingNavigationProperty;
-                referencingEntityFormatterResolver = matchedReferencingToReferencedRelationshipInfo.formatterResolver;
-                referencingEntityRegistration = referencingEntityFormatterResolver.EntityRegistration;
-                referencingToReferencedRelationshipType = matchedReferencingToReferencedRelationship!.RelationshipType;
-            }
-
-            if (referencingEntityRegistration != null)
+            if (matchedReferencingToReferencedRelationship != null)
             {
                 switch (referencingToReferencedRelationshipType)
                 {
                     case EntityRelationshipType.ChildToParent:
                         referencingColumnProperties = matchedReferencingToReferencedRelationship!.ReferencingColumnProperties
-                                                                                                 .Select(prop => referencingEntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
+                                                                                                 .Select(prop => referencingEntityRegistration
+                                                                                                                 .GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
                                                                                                  .ToArray();
-                        referencedColumnProperties = referencedJoinOptions.ReferencedEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
+                        referencedColumnProperties = referencedEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
                         break;
                     case EntityRelationshipType.ParentToChildren:
                         referencingColumnProperties = referencingEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
                         referencedColumnProperties = matchedReferencingToReferencedRelationship!.ReferencedColumnProperties
-                                                                                                .Select(prop => referencedJoinOptions.ReferencedEntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
+                                                                                                .Select(prop => referencedEntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
                                                                                                 .ToArray();
                         break;
                     default:
@@ -338,12 +298,12 @@
                 // we have to come up with the join condition ourselves, for which we need a set of columns to match
                 if (referencedColumnProperties == null || referencedColumnProperties.Length == 0)
                 {
-                    throw new InvalidOperationException($"Found no columns on the referenced entity '{referencedJoinOptions.ReferencedEntityRegistration.EntityType})' that can participate in the JOIN.");
+                    throw new InvalidOperationException($"Found no columns on the referenced entity '{referencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias}) that can participate in the JOIN with the referencing entity '{referencingEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}).");
                 }
 
                 if (referencingColumnProperties == null || referencingColumnProperties.Length == 0)
                 {
-                    throw new InvalidOperationException($"Found no columns on the referencing entity '{referencedJoinOptions.ReferencingEntityDescriptor.EntityType}' that can participate in the JOIN.");
+                    throw new InvalidOperationException($"Found no columns on the referencing entity '{referencingEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}) that can participate in the JOIN with the referenced entity '{referencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias}).");
                 }
 
                 if (referencingColumnProperties.Length != referencedColumnProperties.Length)
@@ -362,7 +322,7 @@
                 referencingToReferencedRelationshipType,
                 referencedJoinOptions.ReferencingEntityDescriptor,
                 referencingEntityRegistration,
-                referencingEntityFormatterResolver,
+                referencedJoinOptions.ReferencingEntityFormatterResolver,
                 referencingNavigationProperty,
                 referencingNavigationProperty?.IsEntityCollectionProperty() == true,
                 referencingColumnProperties,

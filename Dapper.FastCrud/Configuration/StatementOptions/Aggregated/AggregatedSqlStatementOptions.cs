@@ -42,14 +42,19 @@
         public GenericSqlStatementFormatter StatementFormatter { get; }
 
         /// <summary>
+        /// Gets or sets the main entity alias.
+        /// </summary>
+        public string? MainEntityAlias { get; set; }
+
+        /// <summary>
         /// Returns the main statement formatter.
         /// </summary>
-        public SqlStatementFormatterResolver MainEntityFormatterResolver { get; protected set; }
+        public SqlStatementFormatterResolver MainEntityFormatterResolver { get; set; }
 
         /// <summary>
         /// The transaction to be used by the statement.
         /// </summary>
-        public IDbTransaction? Transaction { get; protected set; }
+        public IDbTransaction? Transaction { get; set; }
 
         /// <summary>
         /// When setting this value, you're overriding the default entity used for the entity.
@@ -64,36 +69,36 @@
         /// <summary>
         /// Gets a timeout for the command being executed.
         /// </summary>
-        public TimeSpan? CommandTimeout { get; protected set; }
+        public TimeSpan? CommandTimeout { get; set; }
 
         /// <summary>
         /// Parameters used by the statement.
         /// </summary>
-        public object? Parameters { get; protected set; }
+        public object? Parameters { get; set; }
 
         /// <summary>
         /// Gets or sets a where clause.
         /// </summary>
-        public FormattableString? WhereClause { get; protected set; }
+        public FormattableString? WhereClause { get; set; }
 
         /// <summary>
         /// Gets or sets a where clause.
         /// </summary>
-        public FormattableString? OrderClause { get; protected set; }
+        public FormattableString? OrderClause { get; set; }
 
         /// <summary>
         /// Gets or sets a limit on the number of rows returned.
         /// </summary>
-        public long? LimitResults { get; protected set; }
+        public long? LimitResults { get; set; }
 
         /// <summary>
         /// Gets or sets a number of rows to be skipped.
         /// </summary>
-        public long? SkipResults { get; protected set; }
+        public long? SkipResults { get; set; }
 
         /// <summary>
         /// Gets or sets a flag indicating the results should be streamed.
         /// </summary>
-        public bool ForceStreamResults { get; protected set; }
+        public bool ForceStreamResults { get; set; }
     }
 }

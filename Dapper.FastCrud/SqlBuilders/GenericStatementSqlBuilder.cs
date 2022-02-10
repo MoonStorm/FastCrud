@@ -235,6 +235,13 @@
         internal string ConstructColumnEnumerationForSelect(string? tableAlias, SqlStatementJoin[]? joins)
         {
             var joinsRequiringColumnEnumeration = joins?.Where(join => join.RequiresResultMapping).ToArray();
+
+            // we might not return columns from the join, but we need to qualify the columns in case joins with other tables are still present
+            if ((joinsRequiringColumnEnumeration?.Length ?? 0) == 0 && joins?.Length > 0 && tableAlias==null)
+            {
+                tableAlias = this.EntityRegistration.TableName;
+            }
+
             return tableAlias == null && (joinsRequiringColumnEnumeration == null || joinsRequiringColumnEnumeration.Length == 0)
                        ? _noAliasColumnEnumerationForSelect.Value : 
                        this.ConstructColumnEnumerationForSelectInternal(tableAlias, joins);
@@ -814,9 +821,9 @@
         /// <summary>
         /// Constructs a condition of form <code>ColumnName=@PropertyName and ...</code> with all the key columns (e.g. <code>Id=@Id and EmployeeId=@EmployeeId</code>)
         /// </summary>
-        protected virtual string ConstructKeysWhereClauseInternal(string tableAlias = null)
+        protected virtual string ConstructKeysWhereClauseInternal(string? tableAlias = null)
         {
-            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
+            return string.Join(" AND ", this.KeyProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.GetPrefixedParameter(propInfo.PropertyName)}"));
         }
 
         /// <summary>

@@ -52,19 +52,18 @@
         public void Execute(EntityInstanceWrapper? _, EntityInstanceWrapper[] dataRow)
         {
             // get unique entities in the row
-            var uniqueDataRow = new EntityInstanceWrapper[dataRow.Length];
             for (var dataRowIndex = 0; dataRowIndex < dataRow.Length; dataRowIndex++)
             {
                 var entityInstance = dataRow[dataRowIndex];
                 var uniqueEntityInstance = this.EnsureEntityContainerCreated(entityInstance.EntityRegistration.EntityType)
                                      .GetOrAdd(entityInstance);
-                uniqueDataRow[dataRowIndex] = uniqueEntityInstance;
+                dataRow[dataRowIndex] = uniqueEntityInstance;
             }
 
-            var mainEntity = uniqueDataRow[0];
+            var mainEntity = dataRow[0];
             foreach (var followingStage in _registeredStages)
             {
-                followingStage.Execute(mainEntity, uniqueDataRow);
+                followingStage.Execute(mainEntity, dataRow);
             }
         }
 
