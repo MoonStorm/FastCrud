@@ -158,7 +158,8 @@
                 return true;
             }
 
-            if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntityCollection!, expectedEntityCollection!), out bool? perhapsDecision) == true)
+            bool? perhapsDecision = null;
+            if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntityCollection!, expectedEntityCollection!), out perhapsDecision) == true)
             {
                 // if we're already testing ourselves, and we're asked to do it again, pretend we've passed
                 return perhapsDecision??true;
@@ -249,7 +250,8 @@
                 return false;
             }
 
-            if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntity, expectedEntity), out bool? perhapsDecision) == true)
+            bool? perhapsDecision = null;
+            if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntity, expectedEntity), out perhapsDecision) == true)
             {
                 // if we're already testing ourselves, and we're asked to do it again, pretend we've passed
                 return perhapsDecision ?? true;
