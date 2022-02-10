@@ -2,6 +2,7 @@
 {
     using System;
     using Dapper.FastCrud.Mappings.Registrations;
+    using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.SqlStatements;
     using System.Runtime.CompilerServices;
 
@@ -17,7 +18,7 @@
         // entity mappings should have a very long timespan if used correctly (they should be stored by the developer and reused), however we can't make that assumption
         // hence we'll have to keep them for the duration of their lifespan and attach precomputed sql statements
         private readonly ConditionalWeakTable<EntityRegistration, ISqlStatements> _historicSqlStatements;
-        private readonly ConditionalWeakTable<EntityRegistration, ISqlBuilder> _historicSqlBuilder;
+        private readonly ConditionalWeakTable<EntityRegistration, GenericStatementSqlBuilder> _historicSqlBuilder;
 
         /// <summary>
         /// Default constructor
@@ -26,7 +27,7 @@
         {
             this.EntityType = entityType;
             _historicSqlStatements = new ConditionalWeakTable<EntityRegistration, ISqlStatements>();
-            _historicSqlBuilder = new ConditionalWeakTable<EntityRegistration, ISqlBuilder>();
+            _historicSqlBuilder = new ConditionalWeakTable<EntityRegistration, GenericStatementSqlBuilder>();
         }
 
         /// <summary>
@@ -62,7 +63,7 @@
         /// <summary>
         /// Returns the sql builder for an entity mapping, or the current one if the argument is null.
         /// </summary>
-        public ISqlBuilder GetSqlBuilder(EntityRegistration? entityRegistration = null)
+        public GenericStatementSqlBuilder GetSqlBuilder(EntityRegistration? entityRegistration = null)
         {
             var sqlStatements = _historicSqlBuilder.GetValue(
                 entityRegistration ?? this.CurrentEntityMappingRegistration,
@@ -83,6 +84,6 @@
             return sqlStatements;
         }
         protected abstract ISqlStatements ConstructSqlStatements(EntityRegistration entityRegistration);
-        protected abstract ISqlBuilder ConstructSqlBuilder(EntityRegistration entityRegistration);
+        protected abstract GenericStatementSqlBuilder ConstructSqlBuilder(EntityRegistration entityRegistration);
     }
 }

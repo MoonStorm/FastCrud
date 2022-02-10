@@ -26,7 +26,7 @@
                 // we have to bring some column values back
                 if (this.KeyProperties.Length == 0)
                 {
-                    throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has database generated fields but no primary key to retrieve them with after insertion.");
+                    throw new NotSupportedException($"Entity '{this.EntityRegistration.EntityType.Name}' has database generated fields but no primary key to retrieve them with after insertion.");
                 }
 
                 // we have an identity column, so we can fetch the rest of them

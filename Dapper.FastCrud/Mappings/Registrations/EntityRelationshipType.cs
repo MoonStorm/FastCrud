@@ -1,9 +1,5 @@
 ﻿namespace Dapper.FastCrud.Mappings.Registrations
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Type of relationship between two entities.
     /// </summary>

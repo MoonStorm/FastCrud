@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.SqlBuilders
 {
+    using Dapper.FastCrud.Configuration.StatementOptions;
     using System;
     using System.Globalization;
     using System.Linq;
@@ -7,8 +8,11 @@
     using System.Runtime.CompilerServices;
     using System.Threading;
     using Dapper.FastCrud.EntityDescriptors;
+    using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Mappings.Registrations;
+    using Dapper.FastCrud.SqlStatements.MultiEntity;
     using Dapper.FastCrud.Validations;
+    using System.Text;
 
     internal abstract class GenericStatementSqlBuilder:ISqlBuilder
     {
@@ -29,7 +33,7 @@
 
         protected GenericStatementSqlBuilder(
             EntityDescriptor entityDescriptor,
-            EntityRegistration entityregistration,
+            EntityRegistration entityRegistration,
             SqlDialect dialect)
         {
             var databaseOptions = OrmConfiguration.Conventions.GetDatabaseOptions(dialect);
@@ -43,12 +47,11 @@
             //_forcedTableResolutionStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, true);
 
             this.EntityDescriptor = entityDescriptor;
-            this.EntityMapping = entityregistration;
+            this.EntityRegistration = entityRegistration;
 
-            this.SelectProperties = this.EntityMapping.GetAllOrderedFrozenPropertyRegistrations()
+            this.SelectProperties = this.EntityRegistration.GetAllOrderedFrozenPropertyRegistrations()
                 .ToArray();
-            this.KeyProperties = this.EntityMapping.GetAllOrderedFrozenPropertyRegistrations()
-                .Where(propMapping => propMapping.IsPrimaryKey)
+            this.KeyProperties = this.EntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations()
                 .ToArray();
             this.RefreshOnInsertProperties = this.SelectProperties
                 .Where(propInfo => propInfo.IsRefreshedOnInserts)
@@ -81,10 +84,9 @@
             _noConditionFullCountStatement = new Lazy<string>(()=>this.ConstructFullCountStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
             _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
         }
-
-
+        
         public EntityDescriptor EntityDescriptor { get; }
-        public EntityRegistration EntityMapping { get; }
+        public EntityRegistration EntityRegistration { get; }
         public PropertyRegistration[] SelectProperties { get; }
         public PropertyRegistration[] KeyProperties { get; }
         public PropertyRegistration[] InsertProperties { get; }
@@ -96,6 +98,8 @@
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
         protected string ParameterPrefix { get; }
+
+        #region section for all the methods exposed both publicly and internally
 
         /// <summary>
         /// Returns a SQL parameter, prefixed as set in the database dialect options.
@@ -152,10 +156,10 @@
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
 
-            var targetPropertyRegistration = this.EntityMapping.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
+            var targetPropertyRegistration = this.EntityRegistration.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
             if (targetPropertyRegistration == null)
             {
-                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
+                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityRegistration.EntityType}'");
             }
 
             return this.GetColumnName(targetPropertyRegistration, tableAlias, true);
@@ -169,10 +173,10 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName(string propertyName, string? tableAlias = null)
         {
-            var targetPropertyMapping = this.EntityMapping.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
+            var targetPropertyMapping = this.EntityRegistration.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
             if(targetPropertyMapping == null)
             {
-                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityMapping.EntityType}'");
+                throw new ArgumentException($"Property '{propertyName}' was not found on '{this.EntityRegistration.EntityType}'");
             }
 
             return this.GetColumnName(targetPropertyMapping, tableAlias, false);
@@ -185,7 +189,7 @@
         /// <param name="tableAlias">Table alias</param>
         /// <param name="performColumnAliasNormalization">If true and the database column name differs from the property name, an AS clause will be added</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string GetColumnName(PropertyRegistration propMapping, string? tableAlias = null, bool performColumnAliasNormalization = false)
+        internal string GetColumnName(PropertyRegistration propMapping, string? tableAlias = null, bool performColumnAliasNormalization = false)
         {
             var sqlTableAlias = tableAlias == null ? string.Empty : $"{this.GetDelimitedIdentifier(tableAlias)}.";
             var sqlColumnAlias = (performColumnAliasNormalization && propMapping.DatabaseColumnName != propMapping.PropertyName)
@@ -221,7 +225,19 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructColumnEnumerationForSelect(string? tableAlias = null)
         {
-            return tableAlias == null ? _noAliasColumnEnumerationForSelect.Value : this.ConstructColumnEnumerationForSelectInternal(tableAlias);
+            return this.ConstructColumnEnumerationForSelect(tableAlias, null);
+        }
+
+        /// <summary>
+        /// Constructs an enumeration of all the selectable columns, including the ones of the entities participating in JOINs.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal string ConstructColumnEnumerationForSelect(string? tableAlias, SqlStatementJoin[]? joins)
+        {
+            var joinsRequiringColumnEnumeration = joins?.Where(join => join.RequiresResultMapping).ToArray();
+            return tableAlias == null && (joinsRequiringColumnEnumeration == null || joinsRequiringColumnEnumeration.Length == 0)
+                       ? _noAliasColumnEnumerationForSelect.Value : 
+                       this.ConstructColumnEnumerationForSelectInternal(tableAlias, joins);
         }
 
         /// <summary>
@@ -303,7 +319,7 @@
         /// Constructs the count part of the select statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructCountSelectClause()
+        internal string ConstructCountSelectClause()
         {
             //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
             return "COUNT(*)";
@@ -313,9 +329,13 @@
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ConstructFullCountStatement(string? whereClause = null)
+        internal string ConstructFullCountStatement(
+            string? fromClause = null,
+            string? whereClause = null)
         {
-            return whereClause == null ? _noConditionFullCountStatement.Value : this.ConstructFullCountStatementInternal(whereClause);
+            return whereClause == null && fromClause == null
+                       ? _noConditionFullCountStatement.Value 
+                       : this.ConstructFullCountStatementInternal(fromClause, whereClause);
         }
 
         /// <summary>
@@ -332,14 +352,16 @@
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConstructFullBatchSelectStatement(
-            string? whereClause = null,
-            string? orderClause = null,
-            long? skipRowsCount = null,
-            long? limitRowsCount = null)
+            string selectClause,
+            string fromClause,
+            string? whereClause,
+            string? orderClause,
+            long? skipRowsCount,
+            long? limitRowsCount)
         {
             return this.ConstructFullSelectStatementInternal(
-                this.ConstructColumnEnumerationForSelect(),
-                this.GetTableName(),
+                selectClause,
+                fromClause,
                 whereClause,
                 orderClause,
                 skipRowsCount,
@@ -356,7 +378,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string Format(FormattableString rawSql)
         {
-            // TODO: review this method
+            // we can't support this method since the SQL builder is completely isolated from the formatter
             throw new NotSupportedException();
             //return this.ResolveWithSqlFormatter(rawSql);
         }
@@ -380,6 +402,7 @@
                 sqlIdentifier,
                 endsWithIdentifier ? string.Empty : this.IdentifierEndDelimiter);
         }
+
 
         ///// <summary>
         ///// Constructs a select statement containing joined entities.
@@ -563,6 +586,204 @@
         //}
 
         /// <summary>
+        /// Constructs a split-on expression for a statement containing joins.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal string ConstructSplitOnExpression(SqlStatementJoin[] joins)
+        {
+            return string.Join(
+                    ",", 
+                    joins.Where(join => join.RequiresResultMapping)
+                         .Select(join => join.ReferencedEntitySqlBuilder.SelectProperties[0].PropertyName));
+        }
+
+        /// <summary>
+        /// Returns a WHERE clause.
+        /// </summary>
+        internal virtual string? ConstructWhereClause(GenericSqlStatementFormatter formatter, FormattableString? mainWhere, SqlStatementJoin[]? joins = null)
+        {
+            string? mainWhereClause = mainWhere?.ToString(formatter);
+
+            var joinsWithLegacyExtraWhereClauses = joins?.Where(join => join.JoinExtraWhereClause != null).ToArray();
+            if (joinsWithLegacyExtraWhereClauses == null || joinsWithLegacyExtraWhereClauses.Length == 0)
+            {
+                return mainWhereClause;
+            }
+
+            FormattableString finalWhereClause;
+            var requiresFirstAnd = false;
+            if (mainWhereClause != null)
+            {
+                finalWhereClause = $"{mainWhereClause}";
+                requiresFirstAnd = true;
+            }
+            else
+            {
+                finalWhereClause = $"";
+            }
+
+            var firstJoin = true;
+            foreach (var join in joinsWithLegacyExtraWhereClauses)
+            {
+                if (!firstJoin || requiresFirstAnd)
+                {
+                    finalWhereClause = $"{finalWhereClause} AND";
+                }
+
+                firstJoin = false;
+                using (formatter.SetActiveMainResolver(join.ReferencedEntityFormatterResolver, true))
+                {
+                    finalWhereClause = $"{finalWhereClause} {join.JoinExtraWhereClause!.ToString(formatter)}";
+                }
+            }
+
+            return FormattableString.Invariant(finalWhereClause);
+        }
+
+        /// <summary>
+        /// Returns an ORDER BY clause.
+        /// </summary>
+        internal virtual string? ConstructOrderClause(GenericSqlStatementFormatter formatter, FormattableString? mainOrder, SqlStatementJoin[]? joins = null)
+        {
+            string? mainOrderClause = mainOrder?.ToString(formatter);
+
+            var joinsWithLegacyOrderClauses = joins?.Where(join => join.JoinExtraOrderByClause != null).ToArray();
+            if (joinsWithLegacyOrderClauses == null || joinsWithLegacyOrderClauses.Length == 0)
+            {
+                return mainOrderClause;
+            }
+
+            FormattableString finalOrderClause;
+            var requiresFirstComma = false;
+            if (mainOrderClause != null)
+            {
+                finalOrderClause = $"{mainOrderClause}";
+                requiresFirstComma = true;
+            }
+            else
+            {
+                finalOrderClause = $"";
+            }
+
+            var firstJoin = true;
+            foreach (var join in joinsWithLegacyOrderClauses)
+            {
+                if (!firstJoin || requiresFirstComma)
+                {
+                    finalOrderClause = $"{finalOrderClause},";
+                }
+
+                firstJoin = false;
+                using (formatter.SetActiveMainResolver(join.ReferencedEntityFormatterResolver, true))
+                {
+                    finalOrderClause = $"{finalOrderClause} {join.JoinExtraOrderByClause!.ToString(formatter)}";
+                }
+            }
+
+            return FormattableString.Invariant(finalOrderClause);
+        }
+
+        /// <summary>
+        /// Returns a FROM clause.
+        /// </summary>
+        internal virtual string ConstructFromClause(GenericSqlStatementFormatter formatter, string? tableAlias = null, SqlStatementJoin[]? joins = null)
+        {
+            Requires.NotNull(formatter, nameof(formatter));
+
+            var mainTableFromClause = this.GetTableNameInternal(tableAlias);
+
+            if (joins == null || joins.Length == 0)
+            {
+                return mainTableFromClause;
+            }
+
+            FormattableString finalFromClause = $"{mainTableFromClause}";
+            foreach (var join in joins)
+            {
+                // mainTable JOIN refTableOrAlias
+                finalFromClause = $"{finalFromClause} {this.ResolveSqlJoinType(join.JoinType)} {join.ReferencedEntitySqlBuilder.GetTableNameInternal(join.ReferencedEntityFormatterResolver?.Alias)}";
+
+                // use the join condition, if provided
+                if (join.JoinOnClause != null)
+                {
+                    using (formatter.SetActiveMainResolver(join.ReferencedEntityFormatterResolver, true))
+                    {
+                        finalFromClause = $"{finalFromClause} ON {join.JoinOnClause.ToString(formatter)}";
+                    }
+                }
+                else
+                {
+                    finalFromClause = $"{finalFromClause} ON ";
+
+                    var firstColumnMatching = true;
+                    for (var joinColumnIndex = 0; joinColumnIndex < join.ReferencingColumnProperties!.Length; joinColumnIndex++)
+                    {
+                        if (firstColumnMatching)
+                        {
+                            firstColumnMatching = false;
+                        }
+                        else
+                        {
+                            finalFromClause = $"{finalFromClause} AND";
+                        }
+
+                        var referencingFullyQualifiedColumn = join.ReferencingEntitySqlBuilder.GetColumnName(
+                            join.ReferencingColumnProperties[joinColumnIndex],
+                            join.ReferencingEntityFormatterResolver!.Alias ?? join.ReferencingEntityRegistration!.TableName,
+                            false);
+                        var referencedFullyQualifiedColumn = join.ReferencedEntitySqlBuilder.GetColumnName(
+                            join.ReferencedColumnProperties![joinColumnIndex],
+                            join.ReferencedEntityFormatterResolver!.Alias ?? join.ReferencedEntityRegistration.TableName,
+                            false);
+
+                        finalFromClause = $"{finalFromClause} {referencingFullyQualifiedColumn} = {referencedFullyQualifiedColumn}";
+                    }
+                }
+            }
+
+            return FormattableString.Invariant(finalFromClause);
+        }
+
+        #endregion
+
+        #region section for all the virtual methods visible only by the sql builder implementations
+
+        /// <summary>
+        /// Constructs an enumeration of all the selectable columns.
+        /// </summary>
+        protected virtual string ConstructColumnEnumerationForSelectInternal(string? mainTableAlias = null, SqlStatementJoin[]? joins = null)
+        {
+            if (joins?.Length > 0)
+            {
+                mainTableAlias ??= this.EntityRegistration.TableName;
+            }
+
+            var mainEntityColumnEnumeration = string.Join(",", this.SelectProperties
+                                                                   .Select(propInfo => this.GetColumnName(propInfo, mainTableAlias, true)));
+
+            var joinEntityColumnEnumerations = joins?.Select(join => join.ReferencedEntitySqlBuilder.ConstructColumnEnumerationForSelect(join.ReferencedEntityFormatterResolver?.Alias ?? join.ReferencedEntityRegistration.TableName));
+
+            var finalEntityColumnEnumerations = (joins == null || joins.Length == 0)
+                                                    ? mainEntityColumnEnumeration
+                                                    : string.Join(", ", new[] { mainEntityColumnEnumeration }.Concat(joinEntityColumnEnumerations!));
+
+            return finalEntityColumnEnumerations;
+        }
+
+        /// <summary>
+        /// Resolves a SQL join type.
+        /// </summary>
+        protected virtual string ResolveSqlJoinType(SqlJoinType joinType)
+        {
+            return joinType switch
+            {
+                SqlJoinType.LeftOuterJoin => "LEFT JOIN",
+                SqlJoinType.InnerJoin => "JOIN",
+                _ => throw new InvalidOperationException($"Unable to resolve the relationship {joinType}")
+            };
+        }
+
+        /// <summary>
         /// Returns the table name associated with the current entity.
         /// </summary>
         protected virtual string GetTableNameInternal(string? tableAliasToNormalize = null)
@@ -572,19 +793,19 @@
                 : $" AS {this.GetDelimitedIdentifier(tableAliasToNormalize)}";
 
             FormattableString fullTableName;
-            fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.TableName)}";
-            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+            fullTableName = $"{this.GetDelimitedIdentifier(this.EntityRegistration.TableName)}";
+            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityRegistration.SchemaName))
             {
-                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.SchemaName)}.{fullTableName}";
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityRegistration.SchemaName)}.{fullTableName}";
             }
 
-            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityMapping.DatabaseName))
+            if (this.UsesSchemaForTableNames && !string.IsNullOrEmpty(this.EntityRegistration.DatabaseName))
             {
-                if (string.IsNullOrEmpty(this.EntityMapping.SchemaName))
+                if (string.IsNullOrEmpty(this.EntityRegistration.SchemaName))
                 {
                     fullTableName = $".{fullTableName}";
                 }
-                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityMapping.DatabaseName)}.{fullTableName}";
+                fullTableName = $"{this.GetDelimitedIdentifier(this.EntityRegistration.DatabaseName)}.{fullTableName}";
             }
 
             return FormattableString.Invariant($"{fullTableName}{sqlAlias}");
@@ -619,18 +840,9 @@
         /// <summary>
         /// Constructs an enumeration of the key values.
         /// </summary>
-        protected virtual string ConstructKeyColumnEnumerationInternal(string tableAlias = null)
+        protected virtual string ConstructKeyColumnEnumerationInternal(string? tableAlias = null)
         {
             return string.Join(",", this.KeyProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
-        }
-
-        /// <summary>
-        /// Constructs an enumeration of all the selectable columns (i.e. all the columns corresponding to entity properties which are not part of a relationship).
-        /// (e.g. Id, HouseNo, AptNo)
-        /// </summary>
-        protected virtual string ConstructColumnEnumerationForSelectInternal(string tableAlias = null)
-        {
-            return string.Join(",", this.SelectProperties.Select(propInfo => this.GetColumnName(propInfo, tableAlias, true)));
         }
 
         /// <summary>
@@ -672,7 +884,7 @@
         {
             if (this.KeyProperties.Length == 0)
             {
-                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. UPDATE is not possible.");
+                throw new NotSupportedException($"Entity '{this.EntityRegistration.EntityType.Name}' has no primary key. UPDATE is not possible.");
             }
 
             FormattableString sql = $"UPDATE {this.GetTableName()} SET {this.ConstructUpdateClause()} WHERE {this.ConstructKeysWhereClause()}";
@@ -705,7 +917,7 @@
         {
             if (this.KeyProperties.Length == 0)
             {
-                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. DELETE is not possible.");
+                throw new NotSupportedException($"Entity '{this.EntityRegistration.EntityType.Name}' has no primary key. DELETE is not possible.");
             }
 
             return FormattableString.Invariant($"DELETE FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
@@ -728,11 +940,15 @@
         /// <summary>
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
-        protected virtual string ConstructFullCountStatementInternal(string? whereClause = null)
+        protected virtual string ConstructFullCountStatementInternal(string? fromClause = null, string? whereClause = null)
         {
-            return (whereClause == null)
-                       ? FormattableString.Invariant($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()}")
-                       : FormattableString.Invariant($"SELECT {this.ConstructCountSelectClause()} FROM {this.GetTableName()} WHERE {whereClause}");
+            FormattableString statement = $"SELECT {this.ConstructCountSelectClause()} FROM {fromClause??this.GetTableName()}";
+            if (whereClause != null)
+            {
+                statement = $"{statement} WHERE {whereClause}";
+            }
+
+            return FormattableString.Invariant(statement);
         }
 
         /// <summary>
@@ -742,7 +958,7 @@
         {
             if (this.KeyProperties.Length == 0)
             {
-                throw new NotSupportedException($"Entity '{this.EntityMapping.EntityType.Name}' has no primary key. SELECT is not possible.");
+                throw new NotSupportedException($"Entity '{this.EntityRegistration.EntityType.Name}' has no primary key. SELECT is not possible.");
             }
 
             return FormattableString.Invariant($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
@@ -877,5 +1093,6 @@
 //                targetRelationship = null;
 //            }
 //        }
+    #endregion
     }
 }

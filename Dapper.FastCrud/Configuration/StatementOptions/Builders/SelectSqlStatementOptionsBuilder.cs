@@ -6,7 +6,7 @@
     /// Single statement options builder for a single record select.
     /// </summary>
     public interface ISelectSqlStatementOptionsBuilder<TEntity>
-        : IRelationalSqlStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>, 
+        : IRelationalSqlStatementOptionsSetter<ISelectSqlStatementOptionsBuilder<TEntity>>, 
         IStandardSqlStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
     {
     }

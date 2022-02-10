@@ -9,7 +9,7 @@
         : IStandardSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
         IConditionalSqlStatementOptionsOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
         IRangedConditionalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
-        IRelationalSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
+        IRelationalSqlStatementOptionsSetter<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
         IParameterizedSqlStatementOptionsSetter<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>
     {
     }

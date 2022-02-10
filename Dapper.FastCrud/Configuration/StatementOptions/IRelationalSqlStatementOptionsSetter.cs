@@ -8,7 +8,7 @@
     /// <summary>
     /// Statement options for entity relationships
     /// </summary>
-    public interface IRelationalSqlStatementOptionsSetter<TReferencingEntity, TStatementOptionsBuilder>
+    public interface IRelationalSqlStatementOptionsSetter<TStatementOptionsBuilder>
     {
         /// <summary>
         /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.
@@ -18,80 +18,60 @@
 
         /// <summary>
         /// Performs an INNER JOIN with a related entity.
-        /// The relationship does not need to be registered via mappings when used in this manner,
-        ///   but in this case you're required to provide the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition.
+        /// If the relationship can't be inferred from the entity relationship mappings,
+        ///   either use one of the other overloads through which you can provide the navigation properties,
+        ///   or pass the JOIN clause manually in <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/>.
         /// </summary>
-        TStatementOptionsBuilder InnerJoinWith<TReferencedEntity>(
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
-        /// Performs an INNER JOIN with a related entity, using a navigation property.
+        /// Performs an INNER JOIN with a related entity using navigation properties.
         /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
         ///   if the relationship was properly registered.
         /// </summary>
-        TStatementOptionsBuilder InnerJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> navigationProperty, 
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
+            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
-        /// Performs an INNER JOIN with a related entity, using a navigation property.
+        /// Performs an INNER JOIN with a related entity using navigation properties.
         /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
         ///   if the relationship was properly registered.
         /// </summary>
-        TStatementOptionsBuilder InnerJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> navigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
+            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
-        /// Performs a LEFT JOIN with a related entity.
-        /// The relationship does not need to be predefined via mappings when used in this manner,
-        ///   but in this case you're required to provide the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition.
+        /// Performs a LEFT OUTER JOIN with a related entity.
+        /// If the relationship can't be inferred from the entity relationship mappings,
+        ///   either use one of the other overloads through which you can provide the navigation properties,
+        ///   or pass the JOIN clause manually in <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/>.
         /// </summary>
-        TStatementOptionsBuilder LeftJoinWith<TReferencedEntity>(
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
-        /// Performs a LEFT JOIN with a related entity, using a navigation property.
+        /// Performs a LEFT OUTER JOIN with a related entity using navigation properties.
         /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
         ///   if the relationship was properly registered.
         /// </summary>
-        TStatementOptionsBuilder LeftJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> navigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
+            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
-        /// Performs a LEFT JOIN with a related entity, using a navigation property.
+        /// Performs an LEFT OUTER JOIN with a related entity using navigation properties.
         /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
         ///   if the relationship was properly registered.
         /// </summary>
-        TStatementOptionsBuilder LeftJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> navigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
-
-        /// <summary>
-        /// Performs a CROSS JOIN with a related entity.
-        /// The relationship does not need to be predefined via mappings when used in this manner,
-        ///   but in this case you're required to provide the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition.
-        /// </summary>
-        TStatementOptionsBuilder CrossJoinWith<TReferencedEntity>(
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
-
-        /// <summary>
-        /// Performs a CROSS JOIN with a related entity, using a navigation property.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
-        /// </summary>
-        TStatementOptionsBuilder CrossJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> navigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
-
-        /// <summary>
-        /// Performs a CROSS JOIN with a related entity, using a navigation property.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
-        /// </summary>
-        TStatementOptionsBuilder CrossJoinWith<TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> navigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencedEntity>>? join = null);
+        public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
+            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
+            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
     }
 }

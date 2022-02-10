@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud.Mappings
 {
+    using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Mappings.Registrations;
     using System;
     using System.Collections;
@@ -121,9 +122,7 @@
             var parentChildrenPropGroups = TypeDescriptor.GetProperties(entityType)
                                             .OfType<PropertyDescriptor>()
                                             .Where(prop => !OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop).OfType<NotMappedAttribute>().Any()
-                                                           && typeof(IEnumerable).IsAssignableFrom(prop.PropertyType)
-                                                           && prop.PropertyType.IsGenericType
-                                                           && prop.PropertyType.GetGenericArguments().Length == 1)
+                                                                            &&prop.IsEntityCollectionProperty())
                                             .Select(prop =>
                                             {
                                                 var inverseAttributes = OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop)

@@ -7,7 +7,6 @@ namespace Dapper.FastCrud
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
-    using Dapper.FastCrud.SqlStatements;
     using Dapper.FastCrud.Validations;
     using System.Collections.Generic;
 

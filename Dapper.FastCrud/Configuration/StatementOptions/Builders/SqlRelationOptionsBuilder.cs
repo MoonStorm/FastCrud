@@ -5,17 +5,26 @@
     /// <summary>
     /// SQL statement options builder used in JOINs.
     /// </summary>
-    public interface ISqlRelationOptionsBuilder<TReferencedEntity>
-        : ISqlRelationOptionsSetter<TReferencedEntity, ISqlRelationOptionsBuilder<TReferencedEntity>>
+    public interface ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>
+        : ISqlRelationOptionsSetter<TReferencedEntity, ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>
     {
     }
 
     /// <summary>
     /// SQL statement options builder used in JOINs.
     /// </summary>
-    internal class SqlRelationOptionsBuilder<TReferencedEntity> 
-        : AggregatedRelationalSqlStatementOptionsBuilder<TReferencedEntity, ISqlRelationOptionsBuilder<TReferencedEntity>>, ISqlRelationOptionsBuilder<TReferencedEntity>
+    internal class SqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity> 
+        : AggregatedRelationalSqlStatementOptionsBuilder<TReferencedEntity, ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>, 
+          ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>
     {
-        protected override ISqlRelationOptionsBuilder<TReferencedEntity> Builder => this;
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public SqlRelationOptionsBuilder()
+            : base(OrmConfiguration.GetEntityDescriptor<TReferencingEntity>())
+        {
+        }
+
+        protected override ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity> Builder => this;
     }
 }

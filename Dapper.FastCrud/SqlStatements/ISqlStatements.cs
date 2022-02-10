@@ -9,9 +9,9 @@
     internal interface ISqlStatements
     {
         ///// <summary>
-        ///// Gets the publicly accessible SQL builder.
+        ///// Gets the SQL Builder.
         ///// </summary>
-        //GenericStatementSqlBuilder SqlBuilder { get; }
+        GenericStatementSqlBuilder SqlBuilder { get; }
     }
 
     /// <summary>

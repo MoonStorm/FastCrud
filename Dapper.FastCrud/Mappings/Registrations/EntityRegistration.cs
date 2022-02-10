@@ -23,6 +23,7 @@
         private readonly List<EntityRelationshipRegistration> _entityRelationships;
 
         private PropertyRegistration[]? _frozenOrderedPropertyMappings;
+        private PropertyRegistration[]? _frozenOrderedPrimaryKeysPropertyMappings;
         private Dictionary<string, PropertyRegistration>? _frozenPropertyMappingsMap;
 
         /// <summary>
@@ -119,8 +120,8 @@
             
             // try to locate an existing relationship to update or create a new one in case none was found
             var relationshipRegistration = this.TryLocateRelationshipThrowWhenMultipleAreFound(
-                relationshipType,
                 referencedEntity,
+                relationshipType,
                 referencedColumnProperties,
                 referencingColumnProperties,
                 referencingNavigationProperty);
@@ -172,8 +173,8 @@
 
             // try to locate an existing relationship to update or create a new one in case none was found
             var relationshipRegistration = this.TryLocateRelationshipThrowWhenMultipleAreFound(
-                relationshipType,
                 referencedEntity,
+                relationshipType,
                 referencedColumnProperties,
                 referencingColumnProperties,
                 referencingNavigationProperty);
@@ -303,7 +304,32 @@
         public PropertyRegistration[] GetAllOrderedFrozenPropertyRegistrations()
         {
             this.EnsureMappingsFrozen();
-            return _frozenOrderedPropertyMappings;
+            return _frozenOrderedPropertyMappings!;
+        }
+
+        /// <summary>
+        /// Gets the frozen primary key property registration, ordered by <seealso cref="PropertyRegistration.ColumnOrder"/>.
+        /// </summary>
+        public PropertyRegistration[] GetAllOrderedFrozenPrimaryKeyRegistrations()
+        {
+            this.EnsureMappingsFrozen();
+            return _frozenOrderedPrimaryKeysPropertyMappings!;
+        }
+
+        /// <summary>
+        /// Attempts to locate a frozen property registration by property name and throws an exception if one was not found
+        /// </summary>
+        public PropertyRegistration GetOrThrowFrozenPropertyRegistrationByPropertyName(string propertyName)
+        {
+            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+
+            var propertyRegistration = this.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
+            if (propertyRegistration == null)
+            {
+                throw new InvalidOperationException($"Unable to locate the property '{propertyName}' on the entity '{this.EntityType}'");
+            }
+
+            return propertyRegistration;
         }
 
         /// <summary>
@@ -314,7 +340,7 @@
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             this.EnsureMappingsFrozen();
-            if (_frozenPropertyMappingsMap.TryGetValue(propertyName, out PropertyRegistration propertyRegistration))
+            if (_frozenPropertyMappingsMap!.TryGetValue(propertyName, out PropertyRegistration propertyRegistration))
             {
                 return propertyRegistration;
             }
@@ -327,26 +353,26 @@
         /// Tries to locate an entity relationship.
         /// </summary>
         public EntityRelationshipRegistration? TryLocateRelationshipThrowWhenMultipleAreFound(
-            EntityRelationshipType relationshipTypeToFind,
             Type referencedEntityToFind,
-            string[] referencedColumnPropertiesToFind,
-            string[] referencingColumnPropertiesToFind,
-            PropertyDescriptor? referencingNavigationPropertyToFind)
+            EntityRelationshipType? relationshipTypeToFind = null,
+            string[]? referencedColumnPropertiesToFind = null,
+            string[]? referencingColumnPropertiesToFind = null,
+            PropertyDescriptor? referencingNavigationPropertyToFind = null)
         {
             var locatedRelationships = _entityRelationships
-                                       .Where(existingRelationship =>
-                                                  existingRelationship.RelationshipType == relationshipTypeToFind
-                                                  && existingRelationship.ReferencedEntity == referencedEntityToFind)
+                                       .Where(existingRelationship => (relationshipTypeToFind == null
+                                                                       || existingRelationship.RelationshipType == relationshipTypeToFind.Value)
+                                                                      && existingRelationship.ReferencedEntity == referencedEntityToFind)
                                        .ToArray();
 
-            if (locatedRelationships.Length > 1 && referencingNavigationPropertyToFind != null)
+            if (locatedRelationships.Length > 0 && referencingNavigationPropertyToFind != null)
             {
                 locatedRelationships = locatedRelationships
                                        .Where(existingRelationship => existingRelationship.ReferencingNavigationProperty == existingRelationship.ReferencingNavigationProperty)
                                        .ToArray();
             }
 
-            if (locatedRelationships.Length > 1 && referencedColumnPropertiesToFind != null)
+            if (locatedRelationships.Length > 0 && referencedColumnPropertiesToFind != null && referencedColumnPropertiesToFind.Length > 0)
             {
                 locatedRelationships = locatedRelationships
                                        .Where(existingRelationship => existingRelationship.ReferencedColumnProperties != null
@@ -355,7 +381,7 @@
                                        .ToArray();
             }
 
-            if (locatedRelationships.Length > 1 && referencingColumnPropertiesToFind != null)
+            if (locatedRelationships.Length > 0 && referencingColumnPropertiesToFind != null && referencingColumnPropertiesToFind.Length > 0)
             {
                 locatedRelationships = locatedRelationships
                                        .Where(existingRelationship => existingRelationship.ReferencingColumnProperties != null
@@ -407,7 +433,11 @@
                         _frozenOrderedPropertyMappings = _propertyMappings
                                                          .OrderBy(propMapping => propMapping.ColumnOrder, RelationshipOrderComparer.Default)
                                                          .ToArray();
-                        _frozenPropertyMappingsMap = _propertyMappings.ToDictionary(propMapping => propMapping.PropertyName, propMapping => propMapping);
+                        _frozenOrderedPrimaryKeysPropertyMappings = _frozenOrderedPropertyMappings
+                                                                    .Where(prop => prop.IsPrimaryKey)
+                                                                    .ToArray();
+                        _frozenPropertyMappingsMap = _propertyMappings
+                            .ToDictionary(propMapping => propMapping.PropertyName, propMapping => propMapping);
 
                         _isFrozen = true;
                     }

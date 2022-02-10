@@ -18,33 +18,47 @@
         /// Standard constructor.
         /// </summary>
         protected AggregatedRelationalSqlStatementOptions(
-            EntityDescriptor entityDescriptor)
+            EntityDescriptor referencingEntityDescriptor,
+            EntityDescriptor referencedEntityDescriptor
+            )
         {
-            Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
+            Requires.NotNull(referencingEntityDescriptor, nameof(referencingEntityDescriptor));
+            Requires.NotNull(referencedEntityDescriptor, nameof(referencedEntityDescriptor));
 
-            this.EntityDescriptor = entityDescriptor;
+            this.ReferencingEntityDescriptor = referencingEntityDescriptor;
+            this.ReferencedEntityDescriptor = referencedEntityDescriptor;
             this.JoinType = SqlJoinType.NotSpecified;
         }
 
         /// <summary>
-        /// Returns the entity descriptor.
+        /// Returns the entity descriptor for the referencing entity.
         /// </summary>
-        public EntityDescriptor EntityDescriptor { get; }
+        public EntityDescriptor ReferencingEntityDescriptor { get; }
+
+        /// <summary>
+        /// Returns the entity descriptor for the referenced entity.
+        /// </summary>
+        public EntityDescriptor ReferencedEntityDescriptor { get; }
 
         /// <summary>
         /// When setting this value, you're overriding the default entity used for the entity.
         /// When an override is not set, the default registration is returned.
         /// </summary>
-        public EntityRegistration EntityRegistration
+        public EntityRegistration ReferencedEntityRegistration
         {
             set => _entityRegistrationOverride = value; // can be null
-            get => _entityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration;
+            get => _entityRegistrationOverride ?? this.ReferencedEntityDescriptor.CurrentEntityMappingRegistration;
         }
 
         /// <summary>
         /// The formatter resolver associated with the current entity.
         /// </summary>
-        public SqlStatementFormatterResolver EntityFormatterResolver { get; set; }
+        public SqlStatementFormatterResolver ReferencedEntityFormatterResolver { get; set; }
+
+        /// <summary>
+        /// An alias the referencing entity is known by in the current statement.
+        /// </summary>
+        public string? ReferencingEntityAlias { get; protected set; }
 
         /// <summary>
         /// An alias to be used for the referenced entity.
@@ -52,15 +66,22 @@
         public string? ReferencedEntityAlias { get; protected set; }
 
         /// <summary>
-        /// An optional navigation property to be set.
-        /// If this is not set, the <seealso cref="JoinOnClause"/> becomes mandatory.
+        /// An optional navigation property to be set that represents the navigation property on the referenced entity side (either a collection or an entity type property).
+        /// Note that if not enough information is provided, the <seealso cref="JoinOnClause"/> becomes mandatory.
+        /// </summary>
+        public PropertyDescriptor? ReferencedNavigationProperty { get; protected set; }
+
+        /// <summary>
+        /// An optional navigation property to be set that represents the navigation property on the referencing entity side (either a collection or an entity type property).
+        /// Note that if not enough information is provided, the <seealso cref="JoinOnClause"/> becomes mandatory.
         /// </summary>
         public PropertyDescriptor? ReferencingNavigationProperty { get; protected set; }
 
         /// <summary>
-        /// If set to true, it will map the result onto the navigation property <seealso cref="ReferencingNavigationProperty"/>, if one was provided.
+        /// If set to true, it will map the result onto both the navigation property <seealso cref="ReferencedNavigationProperty"/>,
+        ///   if one was provided, but also on the corresponding referencing navigation property.
         /// </summary>
-        public bool MapResultToNavigationProperty { get; protected set; }
+        public bool MapResultToNavigationProperties { get; protected set; }
 
         /// <summary>
         /// Gets or sets the SQL join type.
@@ -78,7 +99,7 @@
         /// For resolving the string, a formatter linked to the JOINed entity must be used.
         /// </summary>
         [Obsolete(message:"This is here strictly for legacy purposes.", error:false)]
-        public FormattableString? JoinExtraOnClause { get; protected set; }
+        public FormattableString? ExtraWhereClause { get; protected set; }
 
         /// <summary>
         /// Gets or sets an extra condition for the ORDER BY clause.

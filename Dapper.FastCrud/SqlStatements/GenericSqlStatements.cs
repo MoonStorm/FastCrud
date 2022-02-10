@@ -9,8 +9,9 @@
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.SqlStatements.MultiEntity;
-    using Dapper.FastCrud.SqlStatements.SingleEntity;
+    using Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Stages;
     using Dapper.FastCrud.Validations;
+    using System;
 
     /// <summary>
     /// Holds the main statement implementations.
@@ -18,8 +19,6 @@
     internal class GenericSqlStatements<TEntity>: ISqlStatements<TEntity>
     {
         private readonly GenericStatementSqlBuilder _sqlBuilder;
-        private readonly SingleEntitySqlStatements<TEntity> _singleEntityOnlySqlStatements;
-        private readonly MultiEntitySqlStatements<TEntity> _multiEntitiesOnlySqlStatements;
 
         /// <summary>
         /// Default constructor.
@@ -29,10 +28,13 @@
             Requires.NotNull(sqlBuilder, nameof(sqlBuilder));
 
             _sqlBuilder = sqlBuilder;
-            _singleEntityOnlySqlStatements = new SingleEntitySqlStatements<TEntity>(_sqlBuilder);
-            _multiEntitiesOnlySqlStatements = new MultiEntitySqlStatements<TEntity>(_sqlBuilder);
         }
-        
+
+        /// <summary>
+        /// Gets the SQL builder.
+        /// </summary>
+        public GenericStatementSqlBuilder SqlBuilder => _sqlBuilder;
+
         /// <summary>
         /// Performs a SELECT operation on a single entity, using its keys
         /// </summary>
@@ -187,7 +189,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkUpdate(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause);
             var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(whereClause);
             var combinedParameters = new DynamicParameters();
             combinedParameters.AddDynamicParams(entity);
@@ -208,7 +210,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkUpdateAsync(IDbConnection connection, TEntity entity, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause);
             var batchUpdateStatement = _sqlBuilder.ConstructFullBatchUpdateStatement(whereClause);
             var combinedParameters = new DynamicParameters();
             combinedParameters.AddDynamicParams(entity);
@@ -257,7 +259,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BulkDelete(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause);
             var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(whereClause);
             return connection.Execute(
                 bulkDeleteStatement,
@@ -272,7 +274,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> BulkDeleteAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause);
             var bulkDeleteStatement = _sqlBuilder.ConstructFullBatchDeleteStatement(whereClause);
             return connection.ExecuteAsync(
                 bulkDeleteStatement,
@@ -287,8 +289,12 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
-            var countStatement = _sqlBuilder.ConstructFullCountStatement(whereClause);
+            var joins = this.AnalyzeStatementJoins(statementOptions);
+            var countStatement = (joins == null && statementOptions.WhereClause == null)
+                                     ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
+                                     : _sqlBuilder.ConstructFullCountStatement(
+                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins),
+                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
             return connection.ExecuteScalar<int>(
                 countStatement,
                 statementOptions.Parameters,
@@ -302,8 +308,13 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<int> CountAsync(IDbConnection connection, AggregatedSqlStatementOptions statementOptions)
         {
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
-            var countStatement = _sqlBuilder.ConstructFullCountStatement(whereClause);
+            var joins = this.AnalyzeStatementJoins(statementOptions);
+            var countStatement = (joins == null && statementOptions.WhereClause == null)
+                                     ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
+                                     : _sqlBuilder.ConstructFullCountStatement(
+                                         _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins),
+                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
+
             return connection.ExecuteScalarAsync<int>(
                 countStatement,
                 statementOptions.Parameters,
@@ -322,20 +333,63 @@
             //    (statementOptions.LimitResults==null && statementOptions.SkipResults==null)
             //    ||(statementOptions.OrderClause!=null),nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
-            var orderClause = statementOptions.OrderClause?.ToString(statementOptions.StatementFormatter);
+            var joins = this.AnalyzeStatementJoins(statementOptions);
+            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(null, joins);
+            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins);
+            var orderClause = _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
+            IEnumerable<TEntity> results;
 
             var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
+                selectClause: selectClause,
+                fromClause: fromClause,
                 whereClause: whereClause,
                 orderClause: orderClause,
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
-            return connection.Query<TEntity>(
-                selectStatement,
-                statementOptions.Parameters,
-                buffered: !statementOptions.ForceStreamResults,
-                transaction: statementOptions.Transaction,
-                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+
+            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray();
+            if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
+            {
+                results = connection.Query<TEntity>(
+                    selectStatement,
+                    statementOptions.Parameters,
+                    buffered: !statementOptions.ForceStreamResults,
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
+
+            }
+            else
+            {
+                var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
+                var mainEntityJoinParser = new MainEntityResultSetParserStage<TEntity>(joinsWithResultSetMappings);
+                var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
+
+                results = (connection.Query<MainEntityResultSetParserStage<TEntity>>(
+                    selectStatement,
+                    new[]{statementOptions.EntityRegistration.EntityType}
+                        .Concat(joinsWithResultSetMappings.Select(join => join.ReferencedEntityRegistration.EntityType))
+                        .ToArray(),
+                    (object[] rowInstances) =>
+                    {
+                        for (var rowInstanceIndex = 0; rowInstanceIndex < rowInstances.Length; rowInstanceIndex++)
+                        {
+                            var rowInstanceRegistration = rowInstanceIndex == 0
+                                                              ? statementOptions.EntityRegistration
+                                                              : joinsWithResultSetMappings[rowInstanceIndex - 1].ReferencedEntityRegistration;
+                            rowInstanceWrappers[rowInstanceIndex] = new EntityInstanceWrapper(rowInstanceRegistration, rowInstances[rowInstanceIndex]);
+                        }
+                        mainEntityJoinParser.Execute(null, rowInstanceWrappers);
+                        return mainEntityJoinParser;
+                    },
+                    statementOptions.Parameters,
+                    buffered: true, //TODO: look into allowing streaming results with this method
+                    transaction: statementOptions.Transaction,
+                    commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds,
+                    splitOn: splitOn).LastOrDefault()?.EntityCollection as IEnumerable<TEntity>)??Array.Empty<TEntity>();
+            }
+
+            return results;
         }
 
         /// <summary>
@@ -349,10 +403,15 @@
             //    (statementOptions.LimitResults == null && statementOptions.SkipResults == null)
             //    || (statementOptions.OrderClause != null), nameof(statementOptions), "When using Top or Skip, you must provide an OrderBy clause.");
 
-            var whereClause = statementOptions.WhereClause?.ToString(statementOptions.StatementFormatter);
-            var orderClause = statementOptions.OrderClause?.ToString(statementOptions.StatementFormatter);
+            var joins = this.AnalyzeStatementJoins(statementOptions);
+            var selectClause = _sqlBuilder.ConstructColumnEnumerationForSelect(null, joins);
+            var fromClause = _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, null, joins);
+            var whereClause = _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins);
+            var orderClause = _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
 
             var selectStatement = _sqlBuilder.ConstructFullBatchSelectStatement(
+                selectClause: selectClause,
+                fromClause:fromClause,
                 whereClause: whereClause,
                 orderClause: orderClause,
                 skipRowsCount: statementOptions.SkipResults,
@@ -364,6 +423,16 @@
                 commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
         }
 
+        /// <summary>
+        /// Resolves the ORDER BY clause, taking into account all the extra options found in the JOINs.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private string? GetOrderClause(AggregatedSqlStatementOptions statementOptions)
+        {
+            var joins = this.AnalyzeStatementJoins(statementOptions);
+            return _sqlBuilder.ConstructOrderClause(statementOptions.StatementFormatter, statementOptions.OrderClause, joins);
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyEntity(TEntity source, TEntity destination, PropertyRegistration[] properties)
         {
@@ -374,5 +443,17 @@
                 propDescriptor.SetValue(destination, updatedKeyValue);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SqlStatementJoin[]? AnalyzeStatementJoins(AggregatedSqlStatementOptions statementOptions)
+        {
+            if (statementOptions?.JoinOptions?.Count > 0)
+            {
+                return statementOptions.JoinOptions.Select(joinOptions => SqlStatementJoin.From(statementOptions, joinOptions)).ToArray();
+            }
+
+            return null;
+        }
+
     }
 }

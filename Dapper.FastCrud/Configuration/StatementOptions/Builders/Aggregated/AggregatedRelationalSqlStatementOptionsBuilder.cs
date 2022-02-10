@@ -2,20 +2,23 @@
 {
     using System;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
+    using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Mappings;
     using System.ComponentModel;
 
     /// <summary>
     /// The full options builder for JOINs.
     /// </summary>
-    internal abstract class AggregatedRelationalSqlStatementOptionsBuilder<TReferredEntity, TStatementOptionsBuilder> 
+    internal abstract class AggregatedRelationalSqlStatementOptionsBuilder<
+            TReferencedEntity, 
+            TStatementOptionsBuilder> 
         : AggregatedRelationalSqlStatementOptions
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        protected AggregatedRelationalSqlStatementOptionsBuilder()
-            : base(OrmConfiguration.GetEntityDescriptor<TReferredEntity>())
+        protected AggregatedRelationalSqlStatementOptionsBuilder(EntityDescriptor referencingEntityDescriptor)
+            : base(referencingEntityDescriptor, OrmConfiguration.GetEntityDescriptor<TReferencedEntity>())
         {
         }
 
@@ -27,16 +30,27 @@
         /// <summary>
         /// The entity mapping override to be used for the joined entity.
         /// </summary>
-        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity>? entityMapping)
+        public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferencedEntity>? entityMapping)
         {
-            this.EntityRegistration = entityMapping?.Registration!;
+            this.ReferencedEntityRegistration = entityMapping?.Registration!;
             return this.Builder;
         }
 
         /// <summary>
-        /// Sets or resets the navigation property to be used. If not set, the <seealso cref="On"/> condition needs to be provided.
+        /// Sets or resets the navigation property to be used on the referenced entity.
+        /// Note that if not enough information is provided, the <seealso cref="On"/> becomes mandatory.
         /// </summary>
-        public TStatementOptionsBuilder UsingNavigationProperty(PropertyDescriptor? referencingNavigationProperty)
+        public TStatementOptionsBuilder UsingReferencedEntityNavigationProperty(PropertyDescriptor? referencedNavigationProperty)
+        {
+            this.ReferencedNavigationProperty = referencedNavigationProperty;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Sets or resets the navigation property to be used on the referencing entity.
+        /// Note that if not enough information is provided, the <seealso cref="On"/> becomes mandatory.
+        /// </summary>
+        public TStatementOptionsBuilder UsingReferencingEntityNavigationProperty(PropertyDescriptor? referencingNavigationProperty)
         {
             this.ReferencingNavigationProperty = referencingNavigationProperty;
             return this.Builder;
@@ -52,26 +66,35 @@
         }
 
         /// <summary>
-        /// Can be set to true or false in order to map or not the results onto the navigation property set through <seealso cref="UsingNavigationProperty"/>.
+        /// Can be set to true or false in order to map or not the results onto the navigation property set through <seealso cref="UsingReferencedEntityNavigationProperty"/>.
         /// </summary>
         public TStatementOptionsBuilder MapResults(bool mapResults = true)
         {
-            this.MapResultToNavigationProperty = mapResults;
+            this.MapResultToNavigationProperties = mapResults;
             return this.Builder;
         }
 
         /// <summary>
-        /// Sets up an alias for the entity participating in the JOIN.
+        /// Provides the alias the referencing entity is known as  throughout the statement.
+        /// </summary>
+        public TStatementOptionsBuilder FromAlias(string? referencingEntityAlias)
+        {
+            this.ReferencingEntityAlias = referencingEntityAlias;
+            return this.Builder;
+        }
+
+        /// <summary>
+        /// Sets up an alias for the new referenced entity participating in the JOIN.
         /// Remember to use this alias everywhere in the query.
         /// </summary>
-        public TStatementOptionsBuilder WithAlias(string? tableAlias)
+        public TStatementOptionsBuilder ToAlias(string? referencedEntityAlias)
         {
-            this.ReferencedEntityAlias = tableAlias;
+            this.ReferencedEntityAlias = referencedEntityAlias;
             return this.Builder;
         }
 
         /// <summary>
-        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="WithAlias"/>.
+        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="ToAlias"/>.
         /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL you'd normally get for the JOIN.
         /// However in this case it is recommended to use the final WHERE clause on the main query.
         /// </summary>
@@ -82,17 +105,19 @@
         }
 
         /// <summary>
-        /// Extra filter for an ON clause in a JOIN.
+        /// Extra conditions to be used for the joined entity. These will be added to the main WHERE clause.
+        /// The formatter used to resolve the formattable string defaults to the JOINed entity, hence all the single columns become fully qualified.
         /// </summary>
         [Obsolete(message: "Will be removed in a future version.", error: false)]
         public TStatementOptionsBuilder Where(FormattableString? whereClause)
         {
-            this.JoinExtraOnClause = whereClause;
+            this.ExtraWhereClause = whereClause;
             return this.Builder;
         }
 
         /// <summary>
-        /// Adds an ORDER BY clause to the main statement.
+        /// Adds an extra ORDER BY clause to the main statement.
+        /// The formatter used to resolve the formattable string defaults to the JOINed entity, hence all the single columns become fully qualified.
         /// </summary>
         [Obsolete(message: "Will be removed in a future version.", error: false)]
         public TStatementOptionsBuilder OrderBy(FormattableString? orderByClause)

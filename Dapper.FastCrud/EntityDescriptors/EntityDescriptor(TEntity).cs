@@ -7,7 +7,6 @@
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.SqlBuilders.Dialects;
     using Dapper.FastCrud.SqlStatements;
-    using Dapper.FastCrud.SqlStatements.SingleEntity;
 
     /// <summary>
     /// Typed entity descriptor, capable of producing statement builders associated with default entity mappings.
@@ -30,7 +29,7 @@
         /// <summary>
         /// Returns the sql statements for a single entity, attached to the default entity registration or an overriden entity registration if provided.
         /// </summary>
-        public ISqlStatements<TEntity> GetSqlStatements(EntityRegistration? entityRegistration = null)
+        public new ISqlStatements<TEntity> GetSqlStatements(EntityRegistration? entityRegistration = null)
         {
             return (ISqlStatements<TEntity>)base.GetSqlStatements(entityRegistration);
         }
@@ -40,7 +39,7 @@
         /// </summary>
         protected override EntityRegistration DefaultEntityMappingRegistration => _defaultEntityMapping.Value;
 
-        protected override ISqlBuilder ConstructSqlBuilder(EntityRegistration entityRegistration)
+        protected override GenericStatementSqlBuilder ConstructSqlBuilder(EntityRegistration entityRegistration)
         {
             GenericStatementSqlBuilder statementSqlBuilder;
 
@@ -68,7 +67,7 @@
         protected override ISqlStatements ConstructSqlStatements(EntityRegistration entityRegistration)
         {
             var sqlBuilder = this.GetSqlBuilder(entityRegistration);
-            return new GenericSqlStatements<TEntity>((GenericStatementSqlBuilder)sqlBuilder);
+            return new GenericSqlStatements<TEntity>(sqlBuilder);
         }
     }
 }

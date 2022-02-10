@@ -21,7 +21,8 @@ Code first entities are also supported which can either be decorated with attrib
     - Added support for .NET Standard 2.1
     - Extended support for the MetadataType attribute in .NET Standard 2.1
     - Bulk update can now be used with parameters.
-    - Formatter :P added for SQL parameters.
+    - Format specifier ":P" added for SQL parameters.
+    - Format specifiers extended to support resolution via aliases in JOINs (e.g. "nameof(prop):alias:TC").
     - Methods adjusted for nullable support.
     - Added support for multiple references to the same target using the InverseProperty attribute.
     - [Breaking change] The fluent mapping setup has changed for setting up relationships. Please check the wiki for more details.
@@ -29,7 +30,8 @@ Code first entities are also supported which can either be decorated with attrib
     - Support for multiple references to the same target.
     - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
     - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
-    - [Breaking change] Clean separation of the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
+    - [Breaking change] Clean separation for the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
+    - The limit of 7 entities in a JOIN was removed.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.

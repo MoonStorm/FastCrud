@@ -1,5 +1,6 @@
 ﻿namespace Dapper.FastCrud
 {
+    using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Formatters;
@@ -218,13 +219,6 @@
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntityProperty(entityDescriptor, entityMappingOverride?.Registration, propertyName, alias, defaultSpecifier);
-        }
-
-        /// <summary>
-        /// Used in cases where we don't really need an entity, just a random SQL builder.
-        /// </summary>
-        private class FakeEntity
-        {
         }
     }
 }

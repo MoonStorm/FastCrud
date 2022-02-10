@@ -16,15 +16,20 @@
         TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferredEntity>? entityMapping);
 
         /// <summary>
-        /// Sets up an alias for the entity participating in the JOIN.
-        /// Remember to use this alias everywhere in the query.
+        /// Provides the alias the referencing entity is known as  throughout the statement.
         /// </summary>
-        TStatementOptionsBuilder WithAlias(string? tableAlias);
+        TStatementOptionsBuilder FromAlias(string? referencingEntityAlias);
 
         /// <summary>
-        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="WithAlias"/>.
-        /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL you'd normally get for the JOIN.
-        /// However in this case it is recommended to use the final WHERE clause on the main query.
+        /// Sets up an alias for the new referenced entity participating in the JOIN.
+        /// Remember to use this alias everywhere in the query.
+        /// </summary>
+        TStatementOptionsBuilder ToAlias(string? referencedEntityAlias);
+
+        /// <summary>
+        /// Sets up the ON clause on the query.
+        /// Remember to use aliases instead of the entities in case you called <seealso cref="ToAlias"/> and <seealso cref="FromAlias"/>.
+        /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL ON clause you'd normally get automatically for the relationship.
         /// </summary>
         TStatementOptionsBuilder On(FormattableString? onClause);
 

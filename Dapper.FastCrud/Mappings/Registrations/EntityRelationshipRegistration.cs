@@ -42,11 +42,15 @@
 
         /// <summary>
         /// The property or properties on the current entity involved in referencing the other entity.
+        /// This property is valid for <see cref="EntityRelationshipType.ChildToParent"/> relationships.
+        /// This property is NOT valid for <see cref="EntityRelationshipType.ParentToChildren"/> relationship.
         /// </summary>
         public string[] ReferencingColumnProperties { get; }
 
         /// <summary>
         /// The property or properties on the referenced entity involved in referencing the current entity.
+        /// This property is valid for <see cref="EntityRelationshipType.ParentToChildren"/> relationships.
+        /// This property is NOT valid for <see cref="EntityRelationshipType.ChildToParent"/> relationship.
         /// </summary>
         public string[] ReferencedColumnProperties { get; }
 

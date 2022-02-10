@@ -22,14 +22,14 @@
 
             this.EntityDescriptor = entityDescriptor;
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;
-            this.RelationshipOptions = new List<AggregatedRelationalSqlStatementOptions>();
+            this.JoinOptions = new List<AggregatedRelationalSqlStatementOptions>();
             this.StatementFormatter = new GenericSqlStatementFormatter();
         }
 
         /// <summary>
         /// Gets the map of related entity types and their relationships.
         /// </summary>
-        public List<AggregatedRelationalSqlStatementOptions> RelationshipOptions { get; }
+        public List<AggregatedRelationalSqlStatementOptions> JoinOptions { get; }
 
         /// <summary>
         /// Returns the entity descriptor.

@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders
 {
     using Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated;
+    using Dapper.FastCrud.EntityDescriptors;
     using System;
 
     /// <summary>
@@ -19,6 +20,13 @@
     internal class LegacySqlRelationOptionsBuilder<TReferencedEntity> 
         : AggregatedRelationalSqlStatementOptionsBuilder<TReferencedEntity, ILegacySqlRelationOptionsBuilder<TReferencedEntity>>, ILegacySqlRelationOptionsBuilder<TReferencedEntity>
     {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public LegacySqlRelationOptionsBuilder(EntityDescriptor referencingEntityDescriptor)
+            : base(referencingEntityDescriptor)
+        {
+        }
 
         protected override ILegacySqlRelationOptionsBuilder<TReferencedEntity> Builder => this;
     }

@@ -8,7 +8,7 @@
     public interface IConditionalSqlStatementOptionsBuilder<TEntity>
         : IStandardSqlStatementOptionsSetter<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>,
         IConditionalSqlStatementOptionsOptionsSetter<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>,
-        IRelationalSqlStatementOptionsSetter<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>,
+        IRelationalSqlStatementOptionsSetter<IConditionalSqlStatementOptionsBuilder<TEntity>>,
         IParameterizedSqlStatementOptionsSetter<TEntity, IConditionalSqlStatementOptionsBuilder<TEntity>>
     {
     }
