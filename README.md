@@ -17,8 +17,7 @@ Visual Studio 2019 and above is recommended.
   - Fluent validation for POCO objects
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.
-- What to expect when working with Dapper.FastCrud in the DAL? Type safety, clean code, less mistakes, more peace of mind... SHOW ME THE CODE!!!
-Alright, here's a sample:
+- What to expect when working with Dapper.FastCrud in the DAL? Type safety, clean code, less mistakes, more peace of mind... ummm, here's a sample:
 ```
     var queryParams = new 
     {
@@ -32,7 +31,7 @@ Alright, here's a sample:
                                             .FromAlias("person")
                                             .ToAlias("address")
                                             .MapResults())
-        .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstNameParam):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
+        .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
         .OrderBy($"{nameof(Person.LastName):of person} DESC")  
         .Skip(10)  
         .Top(20)  
