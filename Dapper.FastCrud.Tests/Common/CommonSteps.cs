@@ -79,8 +79,8 @@
             _testContext.Stopwatch.Stop();
         }
 
-        [Then(@"I should have queried (\d+) (.+) ")]
-        public void ThenIShouldHaveQueriedEntities(Type entityType, int queryEntitiesCount)
+        [Then(@"I should have queried (\d+) (.+) entities")]
+        public void ThenIShouldHaveQueriedEntities(int queryEntitiesCount, Type entityType)
         {
             var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
             Assert.That(queriedEntities.Length, Is.EqualTo(queryEntitiesCount));
@@ -91,6 +91,20 @@
         {
             var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
             var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType);
+
+            this.CompareCollections(
+                queriedEntities,
+                insertedEntities,
+                true,
+                false,
+                true);
+        }
+
+        [Then(@"the queried (.+) entities should be the same as the last (\d+) inserted ones")]
+        public void ThenTheQueriedEntitiesShouldBeTheSameAsTheLastInsertedOnes(Type entityType, int lastEntityCount)
+        {
+            var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
+            var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType).TakeLast(lastEntityCount);
 
             this.CompareCollections(
                 queriedEntities,
@@ -130,116 +144,127 @@
                 true);
         }
 
-        /// <summary>
-        /// TODO: 
-        /// </summary>
-        private bool CompareCollections(IEnumerable<object> actualEntityCollection,
-                                        IEnumerable<object> expectedEntityCollection,
-                                        bool compareComplexTypedProperties,
-                                        bool enforceOrder,
-                                        bool assertOnMismatch,
-                                        Dictionary<Tuple<object, object>, bool?>? alreadyChecked = null)
+        private ObjectMatchResult CompareCollections(IEnumerable<object> actualEntityCollection,
+                                                     IEnumerable<object> expectedEntityCollection,
+                                                     bool compareComplexTypedProperties,
+                                                     bool enforceOrder,
+                                                     bool assertOnMismatch,
+                                                     int maxLevelToCheck = int.MaxValue,
+                                                     int currentLevel = 1,
+                                                     Dictionary<Tuple<object, object>, ObjectMatchResult?>? alreadyChecked = null)
         {
+            var finalMatchResult = new ObjectMatchResult(expectedEntityCollection, actualEntityCollection);
+            if (currentLevel > maxLevelToCheck)
+            {
+                return finalMatchResult;
+            }
+
             // some of the tests that join to entities that don't exist will create null IEnumerables
             // we'll consider them identical to empty IEnumerables
             var actualCollectionLength = actualEntityCollection?.Count() ?? 0;
             var expectedCollectionLength = expectedEntityCollection?.Count() ?? 0;
             if (actualCollectionLength != expectedCollectionLength)
             {
+                finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionLength, "", expectedCollectionLength, actualEntityCollection);
                 if (assertOnMismatch)
                 {
                     Assert.Fail($"Expected a collection with {expectedCollectionLength} entities, but found {actualCollectionLength} entities.");
                 }
 
-                return false;
-            }
-            if (expectedCollectionLength == 0)
-            {
-                return true;
+                return finalMatchResult;
             }
 
-            bool? perhapsDecision = null;
+            if (expectedCollectionLength == 0)
+            {
+                return finalMatchResult;
+            }
+
+            ObjectMatchResult? perhapsDecision = null;
             if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntityCollection!, expectedEntityCollection!), out perhapsDecision) == true)
             {
                 // if we're already testing ourselves, and we're asked to do it again, pretend we've passed
-                return perhapsDecision??true;
+                return perhapsDecision ?? finalMatchResult;
             }
 
-            alreadyChecked ??= new Dictionary<Tuple<object, object>, bool?>();
+            alreadyChecked ??= new Dictionary<Tuple<object, object>, ObjectMatchResult?>();
             alreadyChecked[new Tuple<object, object>(actualEntityCollection!, expectedEntityCollection!)] = null;
-            bool decision = true;
-            try
+
+            var expectedEntityIndex = 0;
+            foreach (var expectedEntity in expectedEntityCollection!)
             {
-
-                var expectedEntityIndex = 0;
-                foreach (var expectedEntity in expectedEntityCollection!)
+                var mismatchedExpectedEncounters = new List<ObjectMatchResult>();
+                var actualEntityIndex = 0;
+                var expectedEntityFound = false;
+                foreach (var actualEntity in actualEntityCollection!)
                 {
-                    var matchFound = false;
-                    var actualEntityIndex = 0;
-                    foreach (var actualEntity in actualEntityCollection!)
+                    var expectedToActualEntityMatchResult = this.CompareObjects(
+                        actualEntity, 
+                        expectedEntity, 
+                        compareComplexTypedProperties, 
+                        maxLevelToCheck,
+                        currentLevel + 1,
+                        alreadyChecked);
+                    if (expectedToActualEntityMatchResult.IsMatch)
                     {
-                        if (this.CompareObjects(actualEntity, expectedEntity, compareComplexTypedProperties, alreadyChecked))
+                        if (enforceOrder && (actualEntityIndex != expectedEntityIndex))
                         {
-                            matchFound = true;
-                            if (enforceOrder)
+                            finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElementOrder, "", expectedEntityIndex, actualEntityIndex, mismatchedExpectedEncounters);
+                            if (assertOnMismatch)
                             {
-                                if (actualEntityIndex != expectedEntityIndex)
-                                {
-                                    decision = false;
-                                    if (assertOnMismatch)
-                                    {
-                                        Assert.Fail($"Expected entity to be located at index {expectedEntityIndex} but it was found in index {actualEntityIndex}");
-                                    }
-
-                                    return decision;
-                                }
+                                Assert.Fail($"[Level: {currentLevel}] Expected entity to be located at index {expectedEntityIndex} but it was found in index {actualEntityIndex}");
                             }
-
-                            break;
                         }
 
-                        actualEntityIndex++;
+                        expectedEntityFound = true;
+                        break;
                     }
-
-                    if (!matchFound)
+                    else
                     {
-                        decision = false;
-                        if (assertOnMismatch)
-                        {
-                            Assert.Fail($"The entity at index {expectedEntityIndex} could not be located");
-                        }
-
-                        return decision;
+                        mismatchedExpectedEncounters.Add(expectedToActualEntityMatchResult);
                     }
 
-                    expectedEntityIndex++;
+                    actualEntityIndex++;
                 }
 
-                decision = true;
-                return decision;
+                if (!expectedEntityFound)
+                {
+                    finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElement, "", expectedEntity, null, mismatchedExpectedEncounters);
+                    if (assertOnMismatch)
+                    {
+                        Assert.Fail($"[Level: {currentLevel}] Could not locate the expect entity at the index {expectedEntityIndex} (Final match result: {finalMatchResult})");
+                    }
+                }
+
+
+                expectedEntityIndex++;
             }
-            catch
-            {
-                decision = false;
-                throw;
-            }
-            finally
-            {
-                alreadyChecked[new Tuple<object, object>(actualEntityCollection, expectedEntityCollection)] = decision;
-            }
+
+            alreadyChecked[new Tuple<object, object>(actualEntityCollection!, expectedEntityCollection!)] = finalMatchResult;
+            return finalMatchResult;
         }
 
-
-        private bool CompareObjects(object actualEntity, object expectedEntity, bool compareComplexTypedProperties, Dictionary<Tuple<object, object>, bool?>? alreadyChecked = null)
+        private ObjectMatchResult CompareObjects(
+            object actualEntity,
+            object expectedEntity,
+            bool compareComplexTypedProperties,
+            int maxLevelToCheck = int.MaxValue,
+            int currentLevel = 1,
+            Dictionary<Tuple<object, object>, ObjectMatchResult?>? alreadyChecked = null)
         {
+            ObjectMatchResult matchResult = new ObjectMatchResult(actualEntity, expectedEntity);
+            if (currentLevel > maxLevelToCheck)
+            {
+                return matchResult;
+            }
+
             if (ReferenceEquals(actualEntity, null) && ReferenceEquals(expectedEntity, null))
             {
-                return true;
+                return matchResult;
             }
 
             if (ReferenceEquals(actualEntity, null) || ReferenceEquals(expectedEntity, null))
             {
-                return false;
+                return matchResult;
             }
 
             var actualEntityType = actualEntity.GetType();
@@ -247,92 +272,96 @@
 
             if (!expectedEntityType.IsAssignableFrom(actualEntityType))
             {
-                return false;
+                matchResult.RegisterMismatch(ObjectMatchMismatchType.Type, "", expectedEntityType, actualEntityType);
+                return matchResult;
             }
 
-            bool? perhapsDecision = null;
+            ObjectMatchResult? perhapsDecision = null;
             if (alreadyChecked?.TryGetValue(new Tuple<object, object>(actualEntity, expectedEntity), out perhapsDecision) == true)
             {
                 // if we're already testing ourselves, and we're asked to do it again, pretend we've passed
-                return perhapsDecision ?? true;
+                return perhapsDecision ?? matchResult;
             }
 
-            alreadyChecked ??= new Dictionary<Tuple<object, object>, bool?>();
+            alreadyChecked ??= new Dictionary<Tuple<object, object>, ObjectMatchResult?>();
             alreadyChecked[new Tuple<object, object>(actualEntity, expectedEntity)] = null;
-            bool decision = true;
 
-            try
+            foreach (var propDescriptor in expectedEntityType.GetProperties())
             {
-                foreach (var propDescriptor in expectedEntityType.GetProperties())
+                var propType = propDescriptor.PropertyType;
+                var actualEntityPropValue = propDescriptor.GetValue(actualEntity);
+                var expectedEntityPropValue = propDescriptor.GetValue(expectedEntity);
+
+                // for the time being, ignore the properties that are of complex type
+                // normally they are foreign key entities
+                if (propType.IsValueType || propType == typeof(string))
                 {
-                    var propType = propDescriptor.PropertyType;
-                    var actualEntityPropValue = propDescriptor.GetValue(actualEntity);
-                    var expectedEntityPropValue = propDescriptor.GetValue(expectedEntity);
+                    bool decision = (Comparer.Default.Compare(actualEntityPropValue, expectedEntityPropValue) == 0);
 
-                    // for the time being, ignore the properties that are of complex type
-                    // normally they are foreign key entities
-                    if (propType.IsValueType || propType == typeof(string))
+                    if (!decision)
                     {
-                        decision = (Comparer.Default.Compare(actualEntityPropValue, expectedEntityPropValue) == 0);
-
-                        if (!decision)
+                        // for dates, SQL Server only stores time to approximately 1/300th of a second or 3.33ms so we need to treat them differently
+                        var dateComparisonsMaxAllowedTicks = TimeSpan.FromMilliseconds(2 * 3.33).Ticks;
+                        if (propType == typeof(Nullable<DateTime>) || propType == typeof(DateTime))
                         {
-                            // for dates, SQL Server only stores time to approximately 1/300th of a second or 3.33ms so we need to treat them differently
-                            var dateComparisonsMaxAllowedTicks = TimeSpan.FromMilliseconds(2 * 3.33).Ticks;
-                            if (propType == typeof(Nullable<DateTime>) || propType == typeof(DateTime))
+                            if (Math.Abs(((DateTime)expectedEntityPropValue).Ticks - ((DateTime)actualEntityPropValue).Ticks) <= dateComparisonsMaxAllowedTicks)
                             {
-                                if (Math.Abs(((DateTime)expectedEntityPropValue).Ticks - ((DateTime)actualEntityPropValue).Ticks) <= dateComparisonsMaxAllowedTicks)
-                                {
-                                    decision = true;
-                                }
-                            }
-
-                            if (propType == typeof(Nullable<DateTimeOffset>) || propType == typeof(DateTimeOffset))
-                            {
-                                if (Math.Abs(((DateTimeOffset)expectedEntityPropValue).Ticks - ((DateTimeOffset)actualEntityPropValue).Ticks) <= dateComparisonsMaxAllowedTicks)
-                                {
-                                    decision = true;
-                                }
+                                decision = true;
                             }
                         }
-                    }
-                    else if (compareComplexTypedProperties && typeof(IEnumerable).IsAssignableFrom(propType))
-                    {
-                        // two collections
-                        var actualPropValueEnumeration = actualEntityPropValue as IEnumerable<object>;
-                        var expectedPropValueEnumeration = expectedEntityPropValue as IEnumerable<object>;
-                        decision = CompareCollections(
-                            actualPropValueEnumeration,
-                            expectedPropValueEnumeration,
-                            true,
-                            false,
-                            false,
-                            alreadyChecked);
-                    }
-                    else if (compareComplexTypedProperties)
-                    {
-                        // complex object
-                        decision = CompareObjects(actualEntityPropValue, expectedEntityPropValue, true, alreadyChecked);
+
+                        if (propType == typeof(Nullable<DateTimeOffset>) || propType == typeof(DateTimeOffset))
+                        {
+                            if (Math.Abs(((DateTimeOffset)expectedEntityPropValue).Ticks - ((DateTimeOffset)actualEntityPropValue).Ticks) <= dateComparisonsMaxAllowedTicks)
+                            {
+                                decision = true;
+                            }
+                        }
                     }
 
                     if (!decision)
                     {
-                        // no reason to continue
-                        return false;
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue);
                     }
                 }
+                else if (compareComplexTypedProperties && typeof(IEnumerable).IsAssignableFrom(propType))
+                {
+                    // two collections
+                    var actualPropValueEnumeration = actualEntityPropValue as IEnumerable<object>;
+                    var expectedPropValueEnumeration = expectedEntityPropValue as IEnumerable<object>;
+                    var decision = CompareCollections(
+                        actualPropValueEnumeration,
+                        expectedPropValueEnumeration,
+                        true,
+                        false,
+                        false,
+                        maxLevelToCheck,
+                        currentLevel + 1,
+                        alreadyChecked);
+                    if (!decision.IsMatch)
+                    {
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
+                    }
+                }
+                else if (compareComplexTypedProperties)
+                {
+                    // complex object
+                    var decision = CompareObjects(
+                        actualEntityPropValue,
+                        expectedEntityPropValue,
+                        true,
+                        maxLevelToCheck,
+                        currentLevel + 1,
+                        alreadyChecked);
+                    if (!decision.IsMatch)
+                    {
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
+                    }
+                }
+            }
 
-                return decision;
-            }
-            catch
-            {
-                decision = false;
-                throw;
-            }
-            finally
-            {
-                alreadyChecked[new Tuple<object, object>(actualEntity, expectedEntity)] = decision;
-            }
+            alreadyChecked[new Tuple<object, object>(actualEntity, expectedEntity)] = matchResult;
+            return matchResult;
         }
     }
 }

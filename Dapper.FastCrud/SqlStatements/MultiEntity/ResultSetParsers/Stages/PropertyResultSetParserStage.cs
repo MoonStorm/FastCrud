@@ -91,18 +91,17 @@
 
                 if (!ReferenceEquals(null, source.EntityInstance))
                 {
-                    // TODO: check if the local collections need to be checked for uniqueness with the current algorithm
-                    //    by uncommenting the following lines
-                    //var actualSourceUsed = this.EntityContainer.GetOrAdd(
-                    //    target.EntityInstance,
-                    //    targetCollectionProperty,
-                    //    targetCollectionOfSources,
-                    //    source);
-                    // until then, we add it ourselves here
-                    targetCollectionOfSources.Add(source.EntityInstance);
+                    actualSourceUsed = this.EntityContainer.GetOrAddToLocalCollection(
+                        target.EntityInstance,
+                        targetCollectionProperty,
+                        targetCollectionOfSources,
+                        source);
+                    // targetCollectionOfSources.Add(source.EntityInstance);
                 }
-
-                actualSourceUsed = source;
+                else
+                {
+                    actualSourceUsed = source;
+                }
             }
 
             return actualSourceUsed;

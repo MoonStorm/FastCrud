@@ -1,25 +1,28 @@
 ﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Stages
 {
+    using Dapper.FastCrud.Extensions;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
+    using System.Linq.Expressions;
 
     /// <summary>
     /// The main entry into the parser stages.
     /// </summary>
     internal class MainEntityResultSetParserStage<TMainEntity>: IResultSetParserStage
     {
-        private readonly Dictionary<Type, EntityContainer> _entityContainers = new Dictionary<Type, EntityContainer>();
-        private readonly List<TMainEntity> _mainEntityInstanceCollection = new List<TMainEntity>();
+        private readonly Dictionary<Type, EntityContainer> _globalStatementEntityContainers = new Dictionary<Type, EntityContainer>();
         private readonly Type _mainEntityType = typeof(TMainEntity);
+        private readonly List<TMainEntity> _mainEntityList = new List<TMainEntity>();
         private readonly List<IResultSetParserStage> _registeredStages = new List<IResultSetParserStage>();
+        private static readonly PropertyDescriptor _mainEntityListPropDesc = TypeDescriptor.GetProperties(typeof(ResultSetParserStage))[nameof(ResultSetParserStage.EntityContainer)]; // really doesn't matter what this points to
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public MainEntityResultSetParserStage(SqlStatementJoin[] joins)
         {
-            _entityContainers[_mainEntityType] = new EntityContainer(_mainEntityType, _mainEntityInstanceCollection);
             this.ConstructParserStages(joins);
         }
 
@@ -36,7 +39,7 @@
         /// <summary>
         /// Returns the parsed collection of main entities.
         /// </summary>
-        public ICollection<TMainEntity> EntityCollection => _mainEntityInstanceCollection;
+        public ICollection<TMainEntity> MainEntityCollection => _mainEntityList;
 
         /// <summary>
         /// Adds a new stage as a continuation of the current one.
@@ -51,16 +54,19 @@
         /// </summary>
         public void Execute(EntityInstanceWrapper? _, EntityInstanceWrapper[] dataRow)
         {
-            // get unique entities in the row
+            var mainEntityContainer = this.EnsureEntityContainerCreated(_mainEntityType);
+            // get unique entities in the row (the uniqueness is per entire statement, not just a particular row or join)
             for (var dataRowIndex = 0; dataRowIndex < dataRow.Length; dataRowIndex++)
             {
                 var entityInstance = dataRow[dataRowIndex];
-                var uniqueEntityInstance = this.EnsureEntityContainerCreated(entityInstance.EntityRegistration.EntityType)
-                                     .GetOrAdd(entityInstance);
+                var globalEntityContainer = dataRowIndex == 0
+                                                ? mainEntityContainer 
+                                                : this.EnsureEntityContainerCreated(entityInstance.EntityRegistration.EntityType);
+                var uniqueEntityInstance = globalEntityContainer.GetOrRegisterGlobally(entityInstance);
                 dataRow[dataRowIndex] = uniqueEntityInstance;
             }
 
-            var mainEntity = dataRow[0];
+            var mainEntity = mainEntityContainer.GetOrAddToLocalCollection(this, _mainEntityListPropDesc, _mainEntityList, dataRow[0]);
             foreach (var followingStage in _registeredStages)
             {
                 followingStage.Execute(mainEntity, dataRow);
@@ -69,10 +75,10 @@
 
         private EntityContainer EnsureEntityContainerCreated(Type entityType)
         {
-            if(!_entityContainers.TryGetValue(entityType, out EntityContainer entityContainer))
+            if(!_globalStatementEntityContainers.TryGetValue(entityType, out EntityContainer entityContainer))
             {
                 entityContainer = new EntityContainer(entityType);
-                _entityContainers.Add(entityType, entityContainer);
+                _globalStatementEntityContainers.Add(entityType, entityContainer);
             }
 
             return entityContainer;

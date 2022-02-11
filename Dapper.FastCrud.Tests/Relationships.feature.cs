@@ -1061,12 +1061,11 @@ this.ScenarioInitialize(scenarioInfo);
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Query two level relationship children with no parents or grandparents (build serv" +
-            "er test)")]
+        [NUnit.Framework.DescriptionAttribute("Query two relationships back to the same entity (build server test)")]
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "5", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "5", "asynchronous", null)]
+        public virtual void QueryTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1077,10 +1076,10 @@ this.ScenarioInitialize(scenarioInfo);
             string[] tagsOfScenario = @__tags;
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             argumentsOfScenario.Add("database type", databaseType);
-            argumentsOfScenario.Add("entity count", entityCount);
+            argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
+            argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with no parents or grandparents (build serv" +
-                    "er test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 213
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -1105,13 +1104,274 @@ this.ScenarioInitialize(scenarioInfo);
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
 #line 215
- testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", referencedEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 216
+ testRunner.And(string.Format("I insert {0} employee entities as children of promoted manager and supervisor emp" +
+                            "loyee entities using {1} methods", referencingEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 217
+ testRunner.And(string.Format("I query for all the employee entities combined with themselves as managers and su" +
+                            "pervisors using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 218
+ testRunner.Then("the queried employee entities should be the same as the inserted ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Query two relationships back to the same entity (external database)")]
+        [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "5", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "5", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "asynchronous", null)]
+        public virtual void QueryTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
+        {
+            string[] @__tags = new string[] {
+                    "ExternalDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("database type", databaseType);
+            argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
+            argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
+            argumentsOfScenario.Add("method type", methodType);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 225
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 226
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 227
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", referencedEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 228
+ testRunner.And(string.Format("I insert {0} employee entities as children of promoted manager and supervisor emp" +
+                            "loyee entities using {1} methods", referencingEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 229
+ testRunner.And(string.Format("I query for all the employee entities combined with themselves as managers and su" +
+                            "pervisors using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 230
+ testRunner.Then("the queried employee entities should be the same as the inserted ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Query a subset of entities having two relationships back to the same entity (buil" +
+            "d server test)")]
+        [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "5", "11", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "7", "13", "asynchronous", null)]
+        public virtual void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
+        {
+            string[] @__tags = new string[] {
+                    "AutomaticBuildServerTest"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("database type", databaseType);
+            argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
+            argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
+            argumentsOfScenario.Add("query count", queryCount);
+            argumentsOfScenario.Add("method type", methodType);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query a subset of entities having two relationships back to the same entity (buil" +
+                    "d server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 239
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 240
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 241
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", referencedEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 242
+ testRunner.And(string.Format("I insert {0} employee entities as children of promoted manager and supervisor emp" +
+                            "loyee entities using {1} methods", referencingEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 243
+ testRunner.And(string.Format("I query for the last {0} inserted employee entities combined with themselves as m" +
+                            "anagers and supervisors using {1} methods", queryCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 244
+ testRunner.Then(string.Format("I should have queried {0} employee entities", queryCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 245
+ testRunner.And(string.Format("the queried employee entities should be the same as the last {0} inserted ones", queryCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Query a subset of entities having two relationships back to the same entity (exte" +
+            "rnal database)")]
+        [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "5", "7", "10", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("PostgreSql", "5", "7", "6", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "7", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "4", "asynchronous", null)]
+        public virtual void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
+        {
+            string[] @__tags = new string[] {
+                    "ExternalDatabase"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("database type", databaseType);
+            argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
+            argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
+            argumentsOfScenario.Add("query count", queryCount);
+            argumentsOfScenario.Add("method type", methodType);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query a subset of entities having two relationships back to the same entity (exte" +
+                    "rnal database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 252
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 253
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 254
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", referencedEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 255
+ testRunner.And(string.Format("I insert {0} employee entities as children of promoted manager and supervisor emp" +
+                            "loyee entities using {1} methods", referencingEntityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 256
+ testRunner.And(string.Format("I query for the last {0} inserted employee entities combined with themselves as m" +
+                            "anagers and supervisors using {1} methods", queryCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 257
+ testRunner.Then(string.Format("I should have queried {0} employee entities", queryCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 258
+ testRunner.And(string.Format("the queried employee entities should be the same as the last {0} inserted ones", queryCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Query two level relationship children with no parents or grandparents (build serv" +
+            "er test)")]
+        [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
+        public virtual void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        {
+            string[] @__tags = new string[] {
+                    "AutomaticBuildServerTest"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("database type", databaseType);
+            argumentsOfScenario.Add("entity count", entityCount);
+            argumentsOfScenario.Add("method type", methodType);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with no parents or grandparents (build serv" +
+                    "er test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 267
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+#line 268
+ testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 269
+ testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 270
  testRunner.And(string.Format("I query for all the employee entities combined with workstation and building enti" +
                             "ties using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 217
+#line 271
  testRunner.Then("the queried employee entities should be the same as the inserted ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1141,7 +1401,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with no parents or grandparents (external d" +
                     "atabase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 224
+#line 278
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1161,17 +1421,17 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 225
+#line 279
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 226
+#line 280
  testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 227
+#line 281
  testRunner.And(string.Format("I query for all the employee entities combined with workstation and building enti" +
                             "ties using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 228
+#line 282
  testRunner.Then("the queried employee entities should be the same as the inserted ones", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1199,7 +1459,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count two level relationship children with no parents or grandparents (build serv" +
                     "er test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 237
+#line 291
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1219,17 +1479,17 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 238
+#line 292
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 239
+#line 293
  testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 240
+#line 294
  testRunner.And(string.Format("I query for the count of all the employee entities strictly linked to workstation" +
                             " and building entities using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 241
+#line 295
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1259,7 +1519,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count two level relationship children with no parents or grandparents (external d" +
                     "atabase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 248
+#line 302
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1279,17 +1539,17 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 249
+#line 303
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 250
+#line 304
  testRunner.When(string.Format("I insert {0} employee entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 251
+#line 305
  testRunner.And(string.Format("I query for the count of all the employee entities strictly linked to workstation" +
                             " and building entities using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 252
+#line 306
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }

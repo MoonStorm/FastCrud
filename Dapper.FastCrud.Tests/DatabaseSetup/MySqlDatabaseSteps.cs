@@ -64,7 +64,12 @@
 	                        FirstName nvarchar(100) NOT NULL,
                             FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
-                            WorkstationId int NULL,
+    	                    RecordIndex int NOT NULL,
+                            WorkstationId bigint NULL,
+	                        SupervisorUserId int NULL,
+                            SupervisorEmployeeId char(36) NULL,
+	                        ManagerUserId int NULL,
+	                        ManagerEmployeeId char(36) NULL,
 	                        PRIMARY KEY (Id, EmployeeId)
                         );
 

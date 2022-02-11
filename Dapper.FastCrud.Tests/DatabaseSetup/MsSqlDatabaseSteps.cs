@@ -164,7 +164,12 @@
 	                    [LastName] [nvarchar](100) NOT NULL,
 	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
+	                    [RecordIndex] [int] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
+	                    [SupervisorUserId] [int] NULL,
+                        [SupervisorEmployeeId] [uniqueidentifier] NULL,
+	                    [ManagerUserId] [int] NULL,
+	                    [ManagerEmployeeId] [uniqueidentifier] NULL,
                         [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (

@@ -404,7 +404,7 @@
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds,
                     splitOn: splitOn);
 
-                    return mainEntityJoinParser.EntityCollection;
+                    return mainEntityJoinParser.MainEntityCollection;
             }
 
             return results;
@@ -473,7 +473,7 @@
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds,
                     splitOn: splitOn);
 
-                return mainEntityJoinParser.EntityCollection;
+                return mainEntityJoinParser.MainEntityCollection;
             }
 
             return results;

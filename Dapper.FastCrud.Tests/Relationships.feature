@@ -210,6 +210,60 @@ Scenario Outline: Query two level relationship children with parents and grandpa
 	| MySql         | 10           | asynchronous |
 
 @AutomaticBuildServerTest
+Scenario Outline: Query two relationships back to the same entity (build server test)
+	Given I have initialized a <database type> database
+	When I insert <referenced entity count> employee entities using <method type> methods
+	And I insert <referencing entity count> employee entities as children of promoted manager and supervisor employee entities using <method type> methods
+	And I query for all the employee entities combined with themselves as managers and supervisors using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
+	Examples: 
+	| database type | referenced entity count | referencing entity count | method type  |
+	| LocalDb       | 10                      | 5                        | synchronous  |
+	| LocalDb       | 10                      | 5                        | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: Query two relationships back to the same entity (external database)
+	Given I have initialized a <database type> database
+	When I insert <referenced entity count> employee entities using <method type> methods
+	And I insert <referencing entity count> employee entities as children of promoted manager and supervisor employee entities using <method type> methods
+	And I query for all the employee entities combined with themselves as managers and supervisors using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
+	Examples: 
+	| database type | referenced entity count | referencing entity count | method type  |
+	| PostgreSql    | 5                       | 3                        | synchronous  |
+	| PostgreSql    | 5                       | 3                        | asynchronous |
+	| MySql         | 5                       | 3                        | synchronous  |
+	| MySql         | 5                       | 3                        | asynchronous |
+
+@AutomaticBuildServerTest
+Scenario Outline: Query a subset of entities having two relationships back to the same entity (build server test)
+	Given I have initialized a <database type> database
+	When I insert <referenced entity count> employee entities using <method type> methods
+	And I insert <referencing entity count> employee entities as children of promoted manager and supervisor employee entities using <method type> methods
+	And I query for the last <query count> inserted employee entities combined with themselves as managers and supervisors using <method type> methods
+	Then I should have queried <query count> employee entities
+	And the queried employee entities should be the same as the last <query count> inserted ones
+	Examples: 
+	| database type | referenced entity count | referencing entity count | query count | method type  |
+	| LocalDb       | 10                      | 5                        | 11          | synchronous  |
+	| LocalDb       | 10                      | 7                        | 13          | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: Query a subset of entities having two relationships back to the same entity (external database)
+	Given I have initialized a <database type> database
+	When I insert <referenced entity count> employee entities using <method type> methods
+	And I insert <referencing entity count> employee entities as children of promoted manager and supervisor employee entities using <method type> methods
+	And I query for the last <query count> inserted employee entities combined with themselves as managers and supervisors using <method type> methods
+	Then I should have queried <query count> employee entities
+	And the queried employee entities should be the same as the last <query count> inserted ones
+	Examples: 
+	| database type | referenced entity count | referencing entity count | query count | method type  |
+	| PostgreSql    | 5                       | 7                        | 10          | synchronous  |
+	| PostgreSql    | 5                       | 7                        | 6           | asynchronous |
+	| MySql         | 5                       | 3                        | 7          | synchronous  |
+	| MySql         | 5                       | 3                        | 4           | asynchronous |
+
+@AutomaticBuildServerTest
 Scenario Outline: Query two level relationship children with no parents or grandparents (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> employee entities using <method type> methods

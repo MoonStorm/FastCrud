@@ -37,8 +37,8 @@
         ///   if the relationship was properly registered.
         /// </summary>
         TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
+            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>?>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, TReferencingEntity?>> referencedNavigationProperty,
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
@@ -47,8 +47,8 @@
         ///   if the relationship was properly registered.
         /// </summary>
         TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
+            Expression<Func<TReferencingEntity, TReferencedEntity?>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>?>> referencedNavigationProperty,
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
@@ -66,8 +66,8 @@
         ///   if the relationship was properly registered.
         /// </summary>
         TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
+            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>?>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, TReferencingEntity?>> referencedNavigationProperty,
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
 
         /// <summary>
@@ -76,8 +76,8 @@
         ///   if the relationship was properly registered.
         /// </summary>
         public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
+            Expression<Func<TReferencingEntity, TReferencedEntity?>> referencingNavigationProperty,
+            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>?>> referencedNavigationProperty,
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
     }
 }

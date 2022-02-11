@@ -80,7 +80,12 @@
 	                        ""FirstName"" varchar(100) NOT NULL,
                             ""FullName"" varchar(200) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
+	                        ""RecordIndex"" int NOT NULL,
                             ""WorkstationId"" int NULL,
+	                        ""SupervisorUserId"" int NULL,
+                            ""SupervisorEmployeeId"" uuid NULL,
+	                        ""ManagerUserId"" int NULL,
+	                        ""ManagerEmployeeId"" uuid NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
 

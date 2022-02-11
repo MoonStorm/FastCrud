@@ -17,6 +17,7 @@
     {
         private readonly DatabaseTestContext _testContext;
         private readonly Random _rnd = new Random();
+        private volatile int _recordIndex = 0;
 
         public CrudSteps(DatabaseTestContext testContext)
         {
@@ -85,6 +86,7 @@
                     {
                         FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
                         LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
+                        RecordIndex = ++_recordIndex,
                         BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
                     };
             }
@@ -106,7 +108,7 @@
             {
                 var workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Skip(index).FirstOrDefault();
 
-                // in case we link more employees tan workstations available, use the last one there
+                // in case we link more employees than workstations available, use the last one there
                 if (workstation == null)
                 {
                     workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Last();
@@ -131,6 +133,60 @@
                 }
 
                 ((IList<Employee>)workstation.Employees).Add(employee);
+
+                return employee;
+            }
+        }
+
+        [When(@"I insert (.*) employee entities as children of promoted manager and supervisor employee entities using (.*) methods")]
+        public async Task WhenIInsertEmployeeEntitiesAsChildrenOfPromotedManagerAndSupervisorEmployeeEntitiesUsingMethods(int entitiesCount, bool makeAsyncCalls)
+        {
+            var rnd = new Random();
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+            }
+            else
+            {
+                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+            }
+
+            Employee CreateEmployee(int index)
+            {
+                var existingEmployees = _testContext.GetInsertedEntitiesOfType<Employee>().ToArray();
+                var manager = existingEmployees[rnd.Next(0, existingEmployees.Length - 1)];
+                var supervisor = existingEmployees[rnd.Next(0, existingEmployees.Length - 1)];
+
+                var employee = new Employee()
+                    {
+                        FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
+                        LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
+                        RecordIndex = ++_recordIndex,
+                        BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
+
+                        // assign a self referenced ids for the join tests
+                        ManagerUserId = manager.UserId,
+                        ManagerEmployeeId = manager.EmployeeId,
+                        SupervisorUserId = supervisor.UserId,
+                        SupervisorEmployeeId = supervisor.EmployeeId,
+
+                        // these are not going to get inserted in the db, but we need them for local comparisons
+                        Manager = manager,
+                        Supervisor = supervisor
+                    };
+
+                // these collections are not going to get inserted in the db either, but we need them for local comparisons
+                if (manager.ManagedEmployees == null)
+                {
+                    manager.ManagedEmployees = new List<Employee>();
+                }
+                ((List<Employee>)manager.ManagedEmployees).Add(employee);
+
+                if (supervisor.SupervisedEmployees == null)
+                {
+                    supervisor.SupervisedEmployees = new List<Employee>();
+                }
+                ((List<Employee>)supervisor.SupervisedEmployees).Add(employee);
 
                 return employee;
             }
@@ -315,6 +371,81 @@
                 queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
                                                                                             .LeftJoin<Employee, Workstation>(join => join.MapResults())
                                                                                             .LeftJoin<Workstation, Building>(join => join.MapResults()));
+            }
+
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
+        }
+
+        [When(@"I query for all the employee entities combined with themselves as managers and supervisors using (.*) methods")]
+        public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithThemselvesAsManagersAndSupervisorsUsingMethods(bool useAsyncMethods)
+        {
+            await this.WhenIQueryForTopEmployeeEntitiesCombinedWithThemselvesAsManagersAndSupervisorsSkippingEntitiesUsingMethods(null, useAsyncMethods);
+        }
+
+        [When(@"I query for the last (\d*) inserted employee entities combined with themselves as managers and supervisors using (.*) methods")]
+        public async Task WhenIQueryForTopEmployeeEntitiesCombinedWithThemselvesAsManagersAndSupervisorsSkippingEntitiesUsingMethods(int? lastInsertedRecordCount, bool useAsyncMethods)
+        {
+            IEnumerable<Employee> queriedEntities;
+
+            var queryParams = new
+                {
+                    MinRecordIndex = lastInsertedRecordCount.HasValue
+                                    ? _testContext.GetInsertedEntitiesOfType<Employee>().TakeLast(lastInsertedRecordCount.Value).First().RecordIndex
+                                    : 0
+                };
+
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection
+                                             .FindAsync<Employee>(options => options
+                                                                             .LeftJoin<Employee, Employee>(
+                                                                                 employee => employee.Manager,
+                                                                                 employee => employee.ManagedEmployees,
+                                                                                 join => join.ToAlias("manager").MapResults())
+                                                                             .LeftJoin<Employee, Employee>(
+                                                                                 employee => employee.Supervisor,
+                                                                                 employee => employee.SupervisedEmployees,
+                                                                                 join => join.ToAlias("supervisor").MapResults())
+                                                                             .Where(lastInsertedRecordCount.HasValue
+                                                                                        ? (FormattableString?)$"{nameof(Employee.RecordIndex):TC}>={nameof(queryParams.MinRecordIndex):P}"
+                                                                                        : (FormattableString?)null)
+                                                                             .OrderBy($"{nameof(Employee.UserId):TC} ASC")
+                                                                             .WithParameters(queryParams)
+
+                                             );
+                }
+                                  );
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
+                                                                                            .WithAlias("employee")
+                                                                                            .LeftJoin<Employee, Employee>(
+                                                                                                employee => employee.Manager,
+                                                                                                employee => employee.ManagedEmployees,
+                                                                                                join => join
+                                                                                                        .FromAlias("employee")
+                                                                                                        .ToAlias("manager")
+                                                                                                        .MapResults())
+                                                                                            .LeftJoin<Employee, Employee>(
+                                                                                                employee => employee.Supervisor,
+                                                                                                employee => employee.SupervisedEmployees,
+                                                                                                join => join
+                                                                                                        .FromAlias("employee")
+                                                                                                        .ToAlias("supervisor")
+                                                                                                        .MapResults())
+                                                                                            .Where(lastInsertedRecordCount.HasValue
+                                                                                                       ? (FormattableString?)$"{nameof(Employee.RecordIndex):of employee}>={nameof(queryParams.MinRecordIndex):P}"
+                                                                                                       : (FormattableString?)null)
+                                                                                            .OrderBy($"{nameof(Employee.UserId):of employee} ASC")
+                                                                                            .WithParameters(queryParams)
+                );
             }
 
             foreach (var queriedEntity in queriedEntities)

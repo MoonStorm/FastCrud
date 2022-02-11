@@ -6,6 +6,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Threading;
 
     /// <summary>
     /// Holds unique entities of a specific type.
@@ -35,9 +36,9 @@
         public Type EntityType { get; }
 
         /// <summary>
-        /// Gets or adds an entity to the unique collection of entities.
+        /// Gets or adds an entity to the global unique collection of entities.
         /// </summary>
-        public EntityInstanceWrapper GetOrAdd(EntityInstanceWrapper entityInstance)
+        public EntityInstanceWrapper GetOrRegisterGlobally(EntityInstanceWrapper entityInstance)
         {
             if (entityInstance == null || ReferenceEquals(null, entityInstance.EntityInstance))
             {
@@ -55,9 +56,9 @@
         }
 
         /// <summary>
-        /// Registers a new entity to the local collection of entities.
+        /// Adds a new unique entity to a list of entities or returns an existing entity.
         /// </summary>
-        public EntityInstanceWrapper GetOrAdd(
+        public EntityInstanceWrapper GetOrAddToLocalCollection(
             object realInstance, 
             PropertyDescriptor property, 
             IList propertyCollection,
@@ -73,7 +74,7 @@
             if (!localInstanceWrapperCollection.TryGetValue(entityInstance, out EntityInstanceWrapper actualEntityInstance))
             {
                 localInstanceWrapperCollection.Add(entityInstance, entityInstance);
-                propertyCollection?.Add(entityInstance.EntityInstance);
+                propertyCollection.Add(entityInstance.EntityInstance);
                 actualEntityInstance = entityInstance;
             }
 
@@ -84,11 +85,16 @@
         {
             private readonly object _instance;
             private readonly PropertyDescriptor _collectionPropertyDescriptor;
+            private readonly Lazy<int> _hashCode;
 
+            /// <summary>
+            /// Default constructor.
+            /// </summary>
             public LocalEntityCollectionKey(object instance, PropertyDescriptor collectionPropertyDescriptor)
             {
                 _instance = instance;
                 _collectionPropertyDescriptor = collectionPropertyDescriptor;
+                _hashCode = new Lazy<int>(() => this._instance.GetHashCode().CombineHash(_collectionPropertyDescriptor.GetHashCode()), LazyThreadSafetyMode.PublicationOnly);
             }
 
             /// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
@@ -124,7 +130,7 @@
             /// <returns>A hash code for the current object.</returns>
             public override int GetHashCode()
             {
-                return this._instance.GetHashCode().CombineHash(_collectionPropertyDescriptor.GetHashCode());
+                return _hashCode.Value;
             }
 
             /// <summary>Returns a value that indicates whether the values of two <see cref="T:Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.EntityContainer.LocalEntityCollectionKey" /> objects are equal.</summary>

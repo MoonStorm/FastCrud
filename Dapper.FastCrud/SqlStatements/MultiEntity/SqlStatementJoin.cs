@@ -308,7 +308,7 @@
 
                 if (referencingColumnProperties.Length != referencedColumnProperties.Length)
                 {
-                    throw new InvalidOperationException($"The columns used in the JOIN '{referencedJoinOptions.ReferencingEntityDescriptor.EntityType}' -> '{referencedJoinOptions.ReferencedEntityRegistration.EntityType}' do not match by count.");
+                    throw new InvalidOperationException($"The columns used in the JOIN '{referencedJoinOptions.ReferencingEntityDescriptor.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}) -> '{referencedJoinOptions.ReferencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias})  do not match by count.");
                 }
             }
 

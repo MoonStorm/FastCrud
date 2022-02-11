@@ -368,7 +368,7 @@
             if (locatedRelationships.Length > 0 && referencingNavigationPropertyToFind != null)
             {
                 locatedRelationships = locatedRelationships
-                                       .Where(existingRelationship => existingRelationship.ReferencingNavigationProperty == existingRelationship.ReferencingNavigationProperty)
+                                       .Where(existingRelationship => referencingNavigationPropertyToFind == existingRelationship.ReferencingNavigationProperty)
                                        .ToArray();
             }
 
@@ -395,7 +395,7 @@
                 // nothing to do
                 var entityRelationshipsDesc = string.Join(
                     "; ",
-                    locatedRelationships.Select(rel => $"relationship of type {rel.RelationshipType} with referencing navigation property '{rel.ReferencingNavigationProperty}' and referencing column properties {string.Join(", ", rel.ReferencingColumnProperties??Array.Empty<string>())} to '{rel.ReferencedEntity}' and referenced column properties {string.Join(", ", rel.ReferencedColumnProperties ?? Array.Empty<string>())}"));
+                    locatedRelationships.Select(rel => $"relationship of type {rel.RelationshipType} with referencing navigation property '{rel.ReferencingNavigationProperty?.Name}' and referencing column properties {string.Join(", ", rel.ReferencingColumnProperties?.Select(prop=> $"'{prop}'")??Array.Empty<string>())} to '{rel.ReferencedEntity}' and referenced column properties {string.Join(", ", rel.ReferencedColumnProperties?.Select(prop => $"'{prop}'") ?? Array.Empty<string>())}"));
                 throw new InvalidOperationException($"More than one relationship has been found ({entityRelationshipsDesc})");
             }
 
