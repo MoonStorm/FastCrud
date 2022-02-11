@@ -67,7 +67,7 @@ Visual Studio 2019 and above is recommended.
     - Pending NuGet publish.
   - Tests:
     - All the tests have been reviewed and most got refactored.
-    - Workaround added for the badly implemented serialization context in Specflow.
+    - Workaround added for the [badly implemented serialization context in Specflow](https://github.com/SpecFlowOSS/SpecFlow/issues/1534).
     - Better model registration samples in the test project for:
       - POCO/fluent mapping
       - code first
