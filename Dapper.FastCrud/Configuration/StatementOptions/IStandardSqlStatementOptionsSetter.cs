@@ -23,5 +23,11 @@
         /// Overrides the entity mapping for the current statement.
         /// </summary>
         TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TEntity>? entityMapping);
+
+        /// <summary>
+        /// Has no effect on the statement builder.
+        /// Provided in case you want to include conditional options.
+        /// </summary>
+        TStatementOptionsBuilder NoOp();
     }
 }

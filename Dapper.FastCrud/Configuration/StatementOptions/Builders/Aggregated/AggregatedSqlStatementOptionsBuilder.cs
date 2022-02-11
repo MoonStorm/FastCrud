@@ -102,6 +102,15 @@
         }
 
         /// <summary>
+        /// Has no effect on the statement builder.
+        /// Provided in case you want to include conditional options.
+        /// </summary>
+        public TStatementOptionsBuilder NoOp()
+        {
+            return this.Builder;
+        }
+
+        /// <summary>
         /// Enforces a maximum time span on the current command.
         /// </summary>
         public TStatementOptionsBuilder WithTimeout(TimeSpan? commandTimeout)
