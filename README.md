@@ -17,7 +17,7 @@ Visual Studio 2019 and above is recommended.
   - Fluent validation for POCO objects
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.
-- What to expect when working with Dapper.FastCrud in the DAL? Type safety, clean code, less mistakes, more peace of mind... ummm, here's a sample:
+- What to expect when working with Dapper.FastCrud in the DAL? Type safety, clean code, less mistakes, more peace of mind... ummm, here's a sample for 3.0:
 ```
     var queryParams = new 
     {
