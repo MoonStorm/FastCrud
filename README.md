@@ -3,16 +3,21 @@
 When using this library, a compiler equivalent to the one included inside Visual Studio 2015 is required. 
 
 #### Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql
-- Entities having composite primary keys are supported
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+- Entities having composite primary keys are supported, however note that the CRUD operations only support UNIQUE primary keys.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
-- Fast pre-computed entity queries
+- Fast pre-computed entity queries for simple CRUD operations.
 - Compatible with component model data annotations.
-- Opt-in relationships.
-- A useful SQL builder and statement formatter which can be used even if you don't need the CRUD features of this library.
+- Opt-in relationships. As of 3.0, self referenced entities and multiple joins to the same target are also supported via aliases.
+- A set of "formattables" are also included, which can be used even if you don't need the CRUD features of this library but you want to take advantage of the DB mappings.
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
-Code first entities are also supported which can either be decorated with attributes, have their mappings programmatically set, or using your own custom convention.
+- The following mapping styles are supported:
+  - Database first (limited to SQL Server)
+  - Code first, using model data annotations (preferred)
+  - Fluent validation for POCO objects
+  - Semi-POCO using metadata objects
+- Extensibility points are also provided.
 
 
 #### Release Notes
@@ -34,12 +39,14 @@ Code first entities are also supported which can either be decorated with attrib
     - The GET method supports joins.
     - The main entity can now be aliased. It is now recommended to alias every entity in a JOIN for easy targeting in the WHERE clause.
     - The limit of 7 entities in a JOIN was removed.
+    - A stable preview is available on NuGet (visible in VS when "Include preleleases" is checked in the Package Manager panel). 
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.
     - [Breaking change] Better handling of columns representing reserved keywords in C#.
     - Support for new csproj style projects.
     - Fixed a problem preventing it from being used in VS2019 and later.
+    - Pending NuGet publish.
   - Tests:
     - All the tests have been reviewed and most got refactored.
     - Workaround added for the badly implemented serialization context in Specflow.
@@ -49,7 +56,7 @@ Code first entities are also supported which can either be decorated with attrib
       - metadata classes
       - database first
   - Wiki:
-    - Still to be updated
+    - To be updated
 - 2.6 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
   - Upgraded the Dapper dependency.
   - Added support for .NET Standard 2.0 and .NET Framework 4.6.1
