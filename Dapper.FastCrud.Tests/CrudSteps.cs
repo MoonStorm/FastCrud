@@ -404,14 +404,18 @@
                 {
                     return await _testContext.DatabaseConnection
                                              .FindAsync<Employee>(options => options
+                                                                             .LeftJoin<Employee, Employee>( 
+                                                                                 join => join
+                                                                                         .FromNavigationProperty(employee => employee.Manager)
+                                                                                         .ToNavigationProperty(manager => manager.ManagedEmployees)
+                                                                                         .ToAlias("manager")
+                                                                                         .MapResults())
                                                                              .LeftJoin<Employee, Employee>(
-                                                                                 employee => employee.Manager,
-                                                                                 employee => employee.ManagedEmployees,
-                                                                                 join => join.ToAlias("manager").MapResults())
-                                                                             .LeftJoin<Employee, Employee>(
-                                                                                 employee => employee.Supervisor,
-                                                                                 employee => employee.SupervisedEmployees,
-                                                                                 join => join.ToAlias("supervisor").MapResults())
+                                                                                 join => join
+                                                                                             .FromNavigationProperty(employee => employee.Supervisor)
+                                                                                             .ToNavigationProperty(manager => manager.SupervisedEmployees)
+                                                                                             .ToAlias("supervisor")
+                                                                                             .MapResults())
                                                                              .Where(lastInsertedRecordCount.HasValue
                                                                                         ? (FormattableString?)$"{nameof(Employee.RecordIndex):TC}>={nameof(queryParams.MinRecordIndex):P}"
                                                                                         : (FormattableString?)null)
@@ -427,16 +431,16 @@
                 queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
                                                                                             .WithAlias("employee")
                                                                                             .LeftJoin<Employee, Employee>(
-                                                                                                employee => employee.Manager,
-                                                                                                employee => employee.ManagedEmployees,
                                                                                                 join => join
+                                                                                                        .FromNavigationProperty(employee => employee.Manager)
+                                                                                                        .ToNavigationProperty(manager => manager.ManagedEmployees)
                                                                                                         .FromAlias("employee")
                                                                                                         .ToAlias("manager")
                                                                                                         .MapResults())
                                                                                             .LeftJoin<Employee, Employee>(
-                                                                                                employee => employee.Supervisor,
-                                                                                                employee => employee.SupervisedEmployees,
                                                                                                 join => join
+                                                                                                        .FromNavigationProperty(employee => employee.Supervisor)
+                                                                                                        .ToNavigationProperty(manager => manager.SupervisedEmployees)
                                                                                                         .FromAlias("employee")
                                                                                                         .ToAlias("supervisor")
                                                                                                         .MapResults())

@@ -3,14 +3,9 @@
     using System;
     using System.Data;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
-    using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Mappings;
-    using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
-    using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
-    using System.Linq.Expressions;
 
     /// <summary>
     /// The full options builder for main queries.
@@ -138,120 +133,30 @@
         }
 
         /// <summary>
-        /// Performs an INNER JOIN with a related entity.
-        /// If the relationship can't be inferred from the entity relationship mappings,
-        ///   either use one of the other overloads through which you can provide the navigation properties,
-        ///   or pass the JOIN clause manually in <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/>.
+        /// Performs an INNER JOIN between the two entities provided.
+        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
+        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
+        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
         /// </summary>
+        /// <param name="join">Optional join options.</param>
         public TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
         {
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.InnerJoin,
-                null,
-                null,
-                join);
+            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(SqlJoinType.InnerJoin, join);
             return this.Builder;
         }
 
         /// <summary>
-        /// Performs an INNER JOIN with a related entity using navigation properties.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
+        /// Performs a LEFT OUTER JOIN between the two entities provided.
+        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
+        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
+        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
         /// </summary>
-        public TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            Requires.NotNull(referencedNavigationProperty, nameof(referencedNavigationProperty));
-            Requires.NotNull(referencingNavigationProperty, nameof(referencingNavigationProperty));
-
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.InnerJoin,
-                referencingNavigationProperty?.GetPropertyDescriptor(),
-                referencedNavigationProperty?.GetPropertyDescriptor(),
-                join);
-            return this.Builder;
-        }
-
-        /// <summary>
-        /// Performs an INNER JOIN with a related entity using navigation properties.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
-        /// </summary>
-        public TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            Requires.NotNull(referencedNavigationProperty, nameof(referencedNavigationProperty));
-            Requires.NotNull(referencingNavigationProperty, nameof(referencingNavigationProperty));
-
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.InnerJoin,
-                referencingNavigationProperty?.GetPropertyDescriptor(),
-                referencedNavigationProperty?.GetPropertyDescriptor(),
-                join);
-            return this.Builder;
-        }
-
-        /// <summary>
-        /// Performs a LEFT OUTER JOIN with a related entity.
-        /// If the relationship can't be inferred from the entity relationship mappings,
-        ///   either use one of the other overloads through which you can provide the navigation properties,
-        ///   or pass the JOIN clause manually in <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/>.
-        /// </summary>
+        /// <param name="join">Optional join options.</param>
         public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
         {
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.LeftOuterJoin,
-                null,
-                null,
-                join);
-            return this.Builder;
-        }
-
-        /// <summary>
-        /// Performs a LEFT OUTER JOIN with a related entity using navigation properties.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
-        /// </summary>
-        public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, IEnumerable<TReferencedEntity>>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, TReferencingEntity>> referencedNavigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            Requires.NotNull(referencedNavigationProperty, nameof(referencedNavigationProperty));
-            Requires.NotNull(referencingNavigationProperty, nameof(referencingNavigationProperty));
-
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.LeftOuterJoin,
-                referencingNavigationProperty?.GetPropertyDescriptor(),
-                referencedNavigationProperty?.GetPropertyDescriptor(),
-                join);
-            return this.Builder;
-        }
-
-        /// <summary>
-        /// Performs an LEFT OUTER JOIN with a related entity using navigation properties.
-        /// You do not need to specify the <seealso cref="ISqlRelationOptionsSetter{TReferredEntity,TStatementOptionsBuilder}.On"/> condition
-        ///   if the relationship was properly registered.
-        /// </summary>
-        public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
-            Expression<Func<TReferencingEntity, TReferencedEntity>> referencingNavigationProperty,
-            Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>>> referencedNavigationProperty,
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            Requires.NotNull(referencedNavigationProperty, nameof(referencedNavigationProperty));
-            Requires.NotNull(referencingNavigationProperty, nameof(referencingNavigationProperty));
-
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-                SqlJoinType.LeftOuterJoin,
-                referencingNavigationProperty?.GetPropertyDescriptor(),
-                referencedNavigationProperty?.GetPropertyDescriptor(),
-                join);
+            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(SqlJoinType.LeftOuterJoin, join);
             return this.Builder;
         }
 
@@ -323,14 +228,10 @@
 
         private void ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
             SqlJoinType joinType,
-            PropertyDescriptor? referencingEntityNavigationProperty,
-            PropertyDescriptor? referencedEntityNavigationProperty,
             Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? joinOptionsSetter)
         {
             var optionsBuilder = new SqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>();
             optionsBuilder.OfType(joinType);
-            optionsBuilder.UsingReferencingEntityNavigationProperty(referencingEntityNavigationProperty);
-            optionsBuilder.UsingReferencedEntityNavigationProperty(referencedEntityNavigationProperty);
             joinOptionsSetter?.Invoke(optionsBuilder);
 
             this.ValidateAndAddJoin(optionsBuilder);
