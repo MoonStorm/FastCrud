@@ -1,6 +1,5 @@
 ``Dapper.FastCrud`` is the fastest micro-orm extension for Dapper, built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings.
-
-When using this library, a compiler equivalent to the one included inside Visual Studio 2015 is required. 
+Visual Studio 2019 and above is recommended. 
 
 #### Features:
 - Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
@@ -18,7 +17,27 @@ When using this library, a compiler equivalent to the one included inside Visual
   - Fluent validation for POCO objects
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.
+- What to expect when working with Dapper.FastCrud in the DAL? Type safety, clean code, less mistakes, more peace of mind... SHOW ME THE CODE!!!
+Alright, here's a sample:
+```
+    var queryParams = new 
+    {
+        FirstName = "John",
+        Street = "Creek Street"
+    };
 
+    var persons = dbConnection.Find<Person>(statement => statement
+        .WithAlias("person")
+        .InnerJoin<Person, Address>(join => join
+                                            .FromAlias("person")
+                                            .ToAlias("address")
+                                            .MapResults())
+        .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstNameParam):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
+        .OrderBy($"{nameof(Person.LastName):of person} DESC")  
+        .Skip(10)  
+        .Top(20)  
+        .WithParameters(queryParams);
+```
 
 #### Release Notes
 - 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
