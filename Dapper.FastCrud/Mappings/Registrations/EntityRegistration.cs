@@ -158,14 +158,23 @@
         }
 
         /// <summary>
+        /// Removes all relationships.
+        /// </summary>
+        public void RemoveAllRelationships()
+        {
+            this.ValidateState();
+            _entityRelationships.Clear();
+        }
+
+        /// <summary>
         /// Removes an existing relationship.
         /// </summary>
         /// <exception cref="InvalidOperationException">Unable to locate the requested relationship.</exception>
         public EntityRelationshipRegistration RemoveRelationship(
-            EntityRelationshipType relationshipType,
             Type referencedEntity,
-            string[] referencedColumnProperties,
-            string[] referencingColumnProperties,
+            EntityRelationshipType? relationshipType,
+            string[]? referencedColumnProperties,
+            string[]? referencingColumnProperties,
             PropertyDescriptor? referencingNavigationProperty)
         {
             Requires.NotNull(referencedEntity, nameof(referencedEntity));

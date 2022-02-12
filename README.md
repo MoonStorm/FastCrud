@@ -49,16 +49,17 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
     - Format specifier ":P" added for SQL parameters.
     - Format specifiers extended to support resolution via aliases in JOINs (e.g. "nameof(prop):of alias").
     - Methods adjusted for nullable support.
-    - Added support for multiple references to the same target using the InverseProperty attribute.
-    - [Breaking change] The fluent mapping setup has changed for setting up relationships.
-    - Support for self referenced entities.
-    - Support for multiple references to the same target.
-    - Support for queries with JOINs that don't require the presence of a relationship set up in the mappings.
-    - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
     - [Breaking change] Clean separation for the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
-    - The GET method supports joins.
-    - The main entity can now be aliased. It is now recommended to alias every entity in a JOIN for easy targeting in the WHERE clause.
-    - The limit of 7 entities in a JOIN was removed.
+    - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
+    - Relationships have been reworked:
+        - [Breaking change] The fluent mapping setup has changed for setting up relationships.
+        - The limit of 7 entities in a JOIN was removed.
+        - The main entity and the JOINed entities can now be aliased. It is now recommended to do so when working with multiple entities in a statement for easy targeting in the WHERE clause.
+        - JOIN support has been extended to the GET and COUNT methods.
+        - SQL statements no longer require the presence of a relationship preset in the mappings. You can join with whatever you want, using whatever navigation properties you want (or none) and with any ON clause you desire.
+        - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
+        - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).
+        - Added support for multiple references to the same target (via InverseProperty attribute / fluent mappings / directly in the query).
     - A stable preview is available on NuGet (visible in VS when "Include preleleases" is checked in the Package Manager panel). 
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.

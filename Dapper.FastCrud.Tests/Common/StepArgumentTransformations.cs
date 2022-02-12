@@ -25,19 +25,25 @@
         [StepArgumentTransformation("workstation")]
         public Type WorkstationEntityToType()
         {
-            return typeof(Workstation);
+            return typeof(WorkstationDbEntity);
         }
 
         [StepArgumentTransformation("employee")]
         public Type EmployeeEntityToType()
         {
-            return typeof(Employee);
+            return typeof(EmployeeDbEntity);
         }
 
         [StepArgumentTransformation("building")]
         public Type BuildingEntityToType()
         {
-            return typeof(Building);
+            return typeof(BuildingDbEntity);
+        }
+
+        [StepArgumentTransformation("badge")]
+        public Type BadgeEntityToType()
+        {
+            return typeof(BadgeDbEntity);
         }
 
     }

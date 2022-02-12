@@ -109,6 +109,13 @@
                         FOR EACH ROW
                         EXECUTE PROCEDURE computed_full_name();
 
+                        CREATE TABLE ""Badges"" (
+	                        ""Id"" int NOT NULL,
+                            ""EmployeeId"" uuid NOT NULL,
+	                        ""Barcode"" varchar(100) NOT NULL,
+	                        PRIMARY KEY (""Id"", ""EmployeeId"")
+                        );
+
                         CREATE TABLE ""Workstations"" (
 	                        ""WorkstationId"" BIGSERIAL,
 	                        ""Name"" varchar(100) NOT NULL,

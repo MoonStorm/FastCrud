@@ -1,5 +1,5 @@
 ﻿Feature: Relationships
-	Tests for the relationship between the entities Workstation -> Employee (single relationship) and Building -> Workstation -> Employee (two level relationship)
+	Tests for the relationship between various entities
 
 @AutomaticBuildServerTest
 Scenario Outline: Query single relationship parent with children (build server test)
@@ -26,6 +26,31 @@ Scenario Outline: Query single relationship parent with children (external datab
 	| PostgreSql    | 10           | asynchronous |
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
+
+Scenario Outline: Query single relationship one-to-one (build server test)
+	Given I have initialized a <database type> database
+	When I insert <employee count> employee entities using <method type> methods
+	And I assign unique badges to the last inserted <badge count> employee entities using <method type> methods
+	And I query for all the employee entities combined with the assigned badge entities using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
+	Examples: 
+	| database type | employee count | badge count | method type  |
+	| LocalDb       | 10             | 2            | synchronous  |
+	| LocalDb       | 10             | 3            | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: Query single relationship one-to-one (external database)
+	Given I have initialized a <database type> database
+	When I insert <employee count> employee entities using <method type> methods
+	And I assign unique badges to the last inserted <badge count> employee entities using <method type> methods
+	And I query for all the employee entities combined with the assigned badge entities using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
+	Examples: 
+	| database type | employee count | badge count | method type  |
+	| PostgreSql    | 10             | 2           | synchronous  |
+	| PostgreSql    | 10             | 3           | asynchronous |
+	| MySql         | 10             | 4           | synchronous  |
+	| MySql         | 10             | 6           | asynchronous |
 
 @AutomaticBuildServerTest
 Scenario Outline: Query single relationship parents with children (build server test)
@@ -58,6 +83,7 @@ Scenario Outline: Count single relationship parents with children (build server 
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I insert 3 workstation entities using <method type> methods
 	And I query for the count of all the workstation entities combined with the employee entities using <method type> methods
 	Then the result of the last query count should be <entity count>
 	Examples: 
@@ -70,8 +96,63 @@ Scenario Outline: Count single relationship parents with children (external data
 	Given I have initialized a <database type> database
 	When I insert <entity count> workstation entities using <method type> methods
 	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I insert 3 workstation entities using <method type> methods
 	And I query for the count of all the workstation entities combined with the employee entities using <method type> methods
 	Then the result of the last query count should be <entity count>
+	Examples: 
+	| database type | entity count | method type  |
+	| PostgreSql    | 10           | synchronous  |
+	| PostgreSql    | 10           | asynchronous |
+	| MySql         | 10           | synchronous  |
+	| MySql         | 10           | asynchronous |
+
+@AutomaticBuildServerTest
+Scenario Outline: The manual ON clause can be used when relationships and navigation properties are not set up in the mapping (build server test)
+	Given I have initialized a <database type> database
+	When I insert <entity count> workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I insert 3 workstation entities using <method type> methods
+	And I query for the count of all the workstation entities combined with the employee entities when no relationships or navigation properties are set up using <method type> methods
+	Then the result of the last query count should be <entity count>
+	Examples: 
+	| database type | entity count | method type  |
+	| LocalDb       | 10           | synchronous  |
+	| LocalDb       | 10           | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: The manual ON clause can be used when relationships and navigation properties are not set up in the mapping (external database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I insert 3 workstation entities using <method type> methods
+	And I query for the count of all the workstation entities combined with the employee entities when no relationships or navigation properties are set up using <method type> methods
+	Then the result of the last query count should be <entity count>
+	Examples: 
+	| database type | entity count | method type  |
+	| PostgreSql    | 10           | synchronous  |
+	| PostgreSql    | 10           | asynchronous |
+	| MySql         | 10           | synchronous  |
+	| MySql         | 10           | asynchronous |
+
+@AutomaticBuildServerTest
+Scenario Outline: A custom join can be used even for navigation properties (build server test)
+	Given I have initialized a <database type> database
+	When I insert <entity count> workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I query for all the employee entities combined with the workstation entities when no relationships or navigation properties are set up using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
+	Examples: 
+	| database type | entity count | method type  |
+	| LocalDb       | 10           | synchronous  |
+	| LocalDb       | 10           | asynchronous |
+
+@ExternalDatabase
+Scenario Outline: A custom join can be used even for navigation properties (external database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> workstation entities using <method type> methods
+	And I insert <entity count> employee entities parented to existing workstation entities using <method type> methods
+	And I query for all the employee entities combined with the workstation entities when no relationships or navigation properties are set up using <method type> methods
+	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | entity count | method type  |
 	| PostgreSql    | 10           | synchronous  |
@@ -258,10 +339,10 @@ Scenario Outline: Query a subset of entities having two relationships back to th
 	And the queried employee entities should be the same as the last <query count> inserted ones
 	Examples: 
 	| database type | referenced entity count | referencing entity count | query count | method type  |
-	| PostgreSql    | 5                       | 7                        | 10          | synchronous  |
-	| PostgreSql    | 5                       | 7                        | 6           | asynchronous |
-	| MySql         | 5                       | 3                        | 7          | synchronous  |
-	| MySql         | 5                       | 3                        | 4           | asynchronous |
+	| PostgreSql    | 3                       | 2                        | 3           | synchronous  |
+	| PostgreSql    | 3                       | 2                        | 3           | asynchronous |
+	| MySql         | 20                      | 10                       | 12          | synchronous  |
+	| MySql         | 20                      | 10                       | 14          | asynchronous |
 
 @AutomaticBuildServerTest
 Scenario Outline: Query two level relationship children with no parents or grandparents (build server test)

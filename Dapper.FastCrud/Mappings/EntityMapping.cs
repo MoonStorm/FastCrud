@@ -293,7 +293,70 @@
             Requires.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
             Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
 
-            this.SetParentChildrenRelationshipInternal(referencingChildrenNavigationProperty, referencedChildrenColumnProperties);
+            this.SetParentChildOrChildrenRelationshipInternal(
+                typeof(TChildEntity),
+                referencingChildrenNavigationProperty?.GetPropertyDescriptor(), 
+                referencedChildrenColumnProperties?.Select(prop => prop.GetPropertyDescriptor())?.ToArray());
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a parent-child in a one-to-one relationship when a navigation property is present.
+        /// </summary>
+        /// <param name="referencingChildrenNavigationProperty">
+        ///  The property holding the child entity.
+        ///  <br/>
+        /// <code>
+        /// Example:
+        ///  .SetParentChildrenRelationship(teacher => teacher.TeacherBadge, badge => badge.TeacherId)
+        /// 
+        /// public class Badge (TChildEntity)
+        ///    {
+        ///        public int BadgeId {get; set;}
+        ///        public int TeacherId { get;set; }
+        ///        public Teacher Teacher { get; set; }
+        ///    }
+        /// public class Teacher (TEntity, current)
+        ///    {
+        ///        public int TeacherId { get; set; }
+        ///        public string Name { get; set; }
+        ///        public Badge TeacherBadge { get; set; } &lt;--
+        ///    }
+        /// </code>
+        /// </param>
+        /// <param name="referencedChildrenColumnProperties">
+        ///  The property or properties representing the columns on the referenced entity which represent the foreign key(s).
+        /// <br/>
+        /// <code>
+        /// Example:
+        ///  .SetParentChildrenRelationship(teacher => teacher.TeacherBadge, badge => badge.TeacherId)
+        /// 
+        /// public class Badge (TChildEntity)
+        ///    {
+        ///        public int BadgeId {get; set;}
+        ///        public int TeacherId { get;set; } &lt;-
+        ///        public Teacher Teacher { get; set; }
+        ///    }
+        /// public class Teacher (TEntity, current)
+        ///    {
+        ///        public int TeacherId { get; set; }
+        ///        public string Name { get; set; }
+        ///        public IEnumerable&lt;Course&gt; OnlineCourses { get; set; }
+        ///        public IEnumerable&lt;Course&gt; ClassRoomCourses { get; set; }
+        ///    }
+        /// </code>
+        /// </param>
+        public EntityMapping<TEntity> SetParentChildRelationship<TChildEntity>(
+            Expression<Func<TEntity, TChildEntity?>> referencingChildrenNavigationProperty,
+            params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
+        {
+            Requires.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
+            Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
+
+            this.SetParentChildOrChildrenRelationshipInternal(
+                typeof(TChildEntity),
+                referencingChildrenNavigationProperty?.GetPropertyDescriptor(),
+                referencedChildrenColumnProperties?.Select(prop => prop.GetPropertyDescriptor())?.ToArray());
             return this;
         }
 
@@ -326,7 +389,10 @@
                 params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
             Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
-            this.SetParentChildrenRelationshipInternal<TChildEntity>(null, referencedChildrenColumnProperties);
+            this.SetParentChildOrChildrenRelationshipInternal(
+                typeof(TChildEntity),
+                null,
+                referencedChildrenColumnProperties?.Select(prop => prop.GetPropertyDescriptor()).ToArray());
 
             return this;
         }
@@ -412,22 +478,78 @@
             return this;
         }
 
-        private void SetParentChildrenRelationshipInternal<TChildEntity>(
-            Expression<Func<TEntity, IEnumerable<TChildEntity>?>>? referencingChildrenNavigationProperty,
-            Expression<Func<TChildEntity, object?>>[] referencedColumnProperties)
+        /// <summary>
+        /// Removes all relationships
+        /// </summary>
+        public EntityMapping<TEntity> RemoveAllRelationships()
         {
-            // we're gonna set the referencing properties later, when we're gonna freeze the mapping
-            var referencingNavigationPropDescriptor = referencingChildrenNavigationProperty?.GetPropertyDescriptor();
+            _entityRegistration.RemoveAllRelationships();
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a specific parent-children relationship.
+        /// </summary>
+        public EntityMapping<TEntity> RemoveParentChildrenRelationship<TChildEntity>(
+            Expression<Func<TEntity, IEnumerable<TChildEntity>?>>? referencingChildOrChildrenNavigationProperty = null,
+            params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
+        {
+            _entityRegistration.RemoveRelationship(
+                typeof(TChildEntity),
+                EntityRelationshipType.ParentToChildren,
+                referencedChildrenColumnProperties?.Select(prop => prop.GetPropertyDescriptor().Name)?.ToArray(),
+                null,
+                referencingChildOrChildrenNavigationProperty?.GetPropertyDescriptor());
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a specific parent-child relationship.
+        /// </summary>
+        public EntityMapping<TEntity> RemoveParentChildRelationship<TChildEntity>(
+            Expression<Func<TEntity, TChildEntity?>>? referencingChildOrChildrenNavigationProperty = null,
+            params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
+        {
+            _entityRegistration.RemoveRelationship(
+                typeof(TChildEntity),
+                EntityRelationshipType.ParentToChildren,
+                referencedChildrenColumnProperties?.Select(prop => prop.GetPropertyDescriptor().Name)?.ToArray(),
+                null,
+                referencingChildOrChildrenNavigationProperty?.GetPropertyDescriptor());
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a specific child-parent relationship.
+        /// </summary>
+        public EntityMapping<TEntity> RemoveChildParentRelationship<TParentEntity>(
+            Expression<Func<TEntity, TParentEntity?>>? referencingParentNavigationProperty = null,
+            params Expression<Func<TEntity, object?>>[] referencingParentColumnProperties)
+        {
+            _entityRegistration.RemoveRelationship(
+                typeof(TParentEntity),
+                EntityRelationshipType.ChildToParent,
+                null,
+                referencingParentColumnProperties?.Select(prop => prop.GetPropertyDescriptor().Name)?.ToArray(),
+                referencingParentNavigationProperty?.GetPropertyDescriptor());
+            return this;
+        }
+
+        private void SetParentChildOrChildrenRelationshipInternal(
+            Type childEntity,
+            PropertyDescriptor? referencingChildrenNavigationProperty,
+            PropertyDescriptor[]? referencedColumnProperties)
+        {
             var referencedPropertyNames = referencedColumnProperties
-                                                            .Select(prop => prop.GetPropertyDescriptor().Name)
+                                                            .Select(prop => prop.Name)
                                                             .ToArray();
 
             _entityRegistration.SetRelationship(
                 EntityRelationshipType.ParentToChildren,
-                typeof(TChildEntity),
+                childEntity,
                 referencedPropertyNames,
-                Array.Empty<string>(), // this is gonna get updated later with the key property names
-                referencingNavigationPropDescriptor);
+                Array.Empty<string>(), // not used in this case
+                referencingChildrenNavigationProperty);
         }
 
         private void SetChildParentRelationshipInternal<TParentEntity>(

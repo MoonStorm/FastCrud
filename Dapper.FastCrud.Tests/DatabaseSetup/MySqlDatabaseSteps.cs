@@ -81,6 +81,13 @@
                             SET NEW.EmployeeId = UUID(),
                             New.KeyPass = UUID();
 
+                        CREATE TABLE `Badges` (
+	                        Id int NOT NULL,
+                            EmployeeId CHAR(36) NOT NULL,
+	                        Barcode nvarchar(100) NOT NULL,
+	                        PRIMARY KEY (Id, EmployeeId)
+                        );
+
                         CREATE TABLE `Workstations` (
 	                        WorkstationId bigint NOT NULL AUTO_INCREMENT,
 	                        Name nvarchar(100) NOT NULL,

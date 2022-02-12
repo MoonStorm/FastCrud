@@ -8,10 +8,10 @@
 
     /// <summary>
     /// A code first approach to mapping.
-    /// For a clean separation between the database entities and the mappings, see the <see cref="Employee"/> entity.
+    /// For a clean separation between the database entities and the mappings, see the <see cref="EmployeeDbEntity"/> entity.
     /// </summary>
     [Table("Workstations")]
-    public partial class Workstation
+    public partial class WorkstationDbEntity
     {
         /// <summary>
         /// WorkstationId Column
@@ -42,11 +42,11 @@
         /// <summary>
         /// Parent entity, referenced by <see cref="BuildingId"/>.
         /// </summary>
-        public Building Building { get; set; }
+        public BuildingDbEntity Building { get; set; }
 
         /// <summary>
         /// Children entities.
         /// </summary>
-        public virtual IEnumerable<Employee> Employees { get; set; }
+        public virtual IEnumerable<EmployeeDbEntity> Employees { get; set; }
     }
 }

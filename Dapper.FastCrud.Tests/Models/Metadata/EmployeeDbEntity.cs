@@ -9,10 +9,10 @@
     /// <summary>
     /// Metadata is set up in a separate class.
     /// In this case the entities are kept clean, with the exception of a metadata attribute.
-    /// For a pure POCO solution, check out the <see cref="Building"/> entity.
+    /// For a pure POCO solution, check out the <see cref="BuildingDbEntity"/> entity.
     /// </summary>
-    [MetadataType(typeof(EmployeeMetadata))]
-    public class Employee
+    [MetadataType(typeof(EmployeeDbEntityMetadata))]
+    public class EmployeeDbEntity
     {
         public int UserId { get; set; }
         public Guid EmployeeId { get; set; }
@@ -24,17 +24,18 @@
         public int RecordIndex { get; set; }
         
         public long? WorkstationId { get; set; }
-        public Workstation? Workstation { get; set; }
+        public WorkstationDbEntity? Workstation { get; set; }
 
         public int? ManagerUserId { get; set; }
         public Guid? ManagerEmployeeId { get; set; }
-        public Employee? Manager { get; set; }
-        public IEnumerable<Employee>? ManagedEmployees { get; set; }
+        public EmployeeDbEntity? Manager { get; set; }
+        public IEnumerable<EmployeeDbEntity>? ManagedEmployees { get; set; }
 
         public int? SupervisorUserId { get; set; }
         public Guid? SupervisorEmployeeId { get; set; }
-        public Employee? Supervisor { get; set; }
-        public IEnumerable<Employee>? SupervisedEmployees { get; set; }
+        public EmployeeDbEntity? Supervisor { get; set; }
+        public IEnumerable<EmployeeDbEntity>? SupervisedEmployees { get; set; }
+        public BadgeDbEntity? Badge { get; set; }
 
     }
 }

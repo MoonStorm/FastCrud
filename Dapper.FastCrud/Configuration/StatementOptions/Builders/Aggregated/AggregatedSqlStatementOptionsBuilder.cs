@@ -49,7 +49,12 @@
             var oldAlias = this.MainEntityAlias;
             this.MainEntityAlias = mainEntityAlias;
 
-            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(this.EntityDescriptor, this.EntityRegistration, oldAlias, this.EntityRegistration, this.MainEntityAlias);
+            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(
+                this.EntityDescriptor, 
+                this.EntityRegistration, 
+                oldAlias, 
+                this.EntityRegistration, 
+                this.MainEntityAlias);
             this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
             return this.Builder;
         }
@@ -136,7 +141,12 @@
             // change these lines and you might want to check the constructor of AggregatedSqlStatementOptions
             var oldRegistration = this.EntityRegistration;
             this.EntityRegistration = entityMapping?.Registration!;
-            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(this.EntityDescriptor, oldRegistration, null, this.EntityRegistration, null);
+            this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(
+                this.EntityDescriptor, 
+                oldRegistration, 
+                this.MainEntityAlias, 
+                this.EntityRegistration, 
+                this.MainEntityAlias);
             this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
             return this.Builder;
         }

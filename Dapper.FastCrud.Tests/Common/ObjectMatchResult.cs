@@ -1,6 +1,7 @@
 ﻿namespace Dapper.FastCrud.Tests.Common
 {
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     internal class ObjectMatchResult
     {
@@ -13,15 +14,18 @@
         }
 
         public void RegisterMismatch(ObjectMatchMismatchType mismatchType, 
+                                     int level,
                                      string mismatchLocation,
                                      object? expectedValue, 
-                                     object? actualValue, object? extraInfo = null)
+                                     object? actualValue,
+                                     params ObjectMatchResult[] deeperReason)
         {
             _mismatches.Add(new ObjectMatchMismatch()
                 {
+                    Level = level,
                     MismatchType = mismatchType,
                     MismatchLocation =  mismatchLocation,
-                    ExtraInfo =  extraInfo,
+                    DeeperReasons =  deeperReason,
                     ExpectedValue = expectedValue,
                     ActualValue = actualValue
                 });
@@ -29,23 +33,23 @@
 
         public object ExpectedObject { get; }
         public object ActualObject { get; }
-
         public ObjectMatchMismatch[] Mismatches => _mismatches.ToArray();
-
         public bool IsMatch => this.Mismatches.Length == 0;
+        public int MatchingScore { get; set; } // 10 for each prop simply matched, 1 for matched collections or complex objects
     }
 
-    public class ObjectMatchMismatch
+    internal class ObjectMatchMismatch
     {
+        public int Level;
         public ObjectMatchMismatchType MismatchType;
         public string MismatchLocation;
-        public object? ExtraInfo;
-        public object? ExpectedValue;
-        public object? ActualValue;
+        public ObjectMatchResult[] DeeperReasons;
+        public object ExpectedValue;
+        public object ActualValue;
 
         public override string ToString()
         {
-            return $"{this.MismatchType} @{this.MismatchLocation}: expected {this.ExpectedValue}, actual {this.ActualValue}), extra info {this.ExtraInfo} ";
+            return $"{this.MismatchType} @{this.MismatchLocation}";
         }
     }
 
@@ -54,7 +58,7 @@
         Type,
         PropertyValue,
         CollectionLength,
-        CollectionElement,
+        CollectionElementNotFound,
         CollectionElementOrder
     }
 }

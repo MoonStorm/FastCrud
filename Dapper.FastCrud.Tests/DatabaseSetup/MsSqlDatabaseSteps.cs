@@ -178,6 +178,17 @@
                         ),
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
 
+                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Badges](
+	                    [Id] [int] NOT NULL,
+	                    [EmployeeId] [uniqueidentifier] NOT NULL,
+	                    [Barcode] [nvarchar](100) NOT NULL,
+                        CONSTRAINT [PK_Badge] PRIMARY KEY CLUSTERED
+                        (
+	                        [Id] ASC,
+	                        [EmployeeId] ASC
+                        ),
+                        CONSTRAINT [FK_Badge_Employee] FOREIGN KEY (Id, EmployeeId) REFERENCES [dbo].[Employee] (Id, EmployeeId))");
+
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [BuildingName] [nvarchar](100) NULL,

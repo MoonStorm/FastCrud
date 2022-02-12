@@ -23,7 +23,7 @@
             OrmConfiguration.DefaultDialect = dialect;
 
             // setup any entities that are left via fluent registration
-            OrmConfiguration.RegisterEntity<Building>()
+            OrmConfiguration.RegisterEntity<BuildingDbEntity>()
                             .SetTableName("Buildings")
                             .SetProperty(building => building.BuildingId, propMapping => propMapping.SetPrimaryKey().SetDatabaseGenerated(DatabaseGeneratedOption.Identity).SetDatabaseColumnName("Id"))
                             .SetProperty(building => building.Name, propMapping => propMapping.SetDatabaseColumnName("BuildingName"))

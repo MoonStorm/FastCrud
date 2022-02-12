@@ -22,7 +22,7 @@
         public CrudSteps(DatabaseTestContext testContext)
         {
             _testContext = testContext;
-            Assert.NotNull(OrmConfiguration.GetDefaultEntityMapping<Employee>());
+            Assert.NotNull(OrmConfiguration.GetDefaultEntityMapping<EmployeeDbEntity>());
         }
 
         [When(@"I insert (\d*) building entities using (.*) methods")]
@@ -30,16 +30,16 @@
         {
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Building>(CreateBuilding, entitiesCount);
+                await this.InsertEntityAsync<BuildingDbEntity>(CreateBuilding, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Building>(CreateBuilding, entitiesCount);
+                this.InsertEntity<BuildingDbEntity>(CreateBuilding, entitiesCount);
             }
 
-            Building CreateBuilding(int index)
+            BuildingDbEntity CreateBuilding(int index)
             {
-                return new Building()
+                return new BuildingDbEntity()
                     {
                         Name = $"Building {Guid.NewGuid().ToString("N")}"
                     };
@@ -51,16 +51,16 @@
         {
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Workstation>(CreateWorkstation, entitiesCount);
+                await this.InsertEntityAsync<WorkstationDbEntity>(CreateWorkstation, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Workstation>(CreateWorkstation, entitiesCount);
+                this.InsertEntity<WorkstationDbEntity>(CreateWorkstation, entitiesCount);
             }
 
-            Workstation CreateWorkstation(int index)
+            WorkstationDbEntity CreateWorkstation(int index)
             {
-                return new Workstation()
+                return new WorkstationDbEntity()
                     {
                         InventoryIndex = index,
                         Name = $"Workstation {Guid.NewGuid().ToString("N")}",
@@ -73,16 +73,16 @@
         {
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+                await this.InsertEntityAsync<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+                this.InsertEntity<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
 
-            Employee CreateEmployee(int index)
+            EmployeeDbEntity CreateEmployee(int index)
             {
-                return new Employee()
+                return new EmployeeDbEntity()
                     {
                         FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
                         LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
@@ -97,24 +97,24 @@
         {
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+                await this.InsertEntityAsync<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+                this.InsertEntity<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
 
-            Employee CreateEmployee(int index)
+            EmployeeDbEntity CreateEmployee(int index)
             {
-                var workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Skip(index).FirstOrDefault();
+                var workstation = _testContext.GetInsertedEntitiesOfType<WorkstationDbEntity>().Skip(index).FirstOrDefault();
 
                 // in case we link more employees than workstations available, use the last one there
                 if (workstation == null)
                 {
-                    workstation = _testContext.GetInsertedEntitiesOfType<Workstation>().Last();
+                    workstation = _testContext.GetInsertedEntitiesOfType<WorkstationDbEntity>().Last();
                 }
 
-                var employee = new Employee()
+                var employee = new EmployeeDbEntity()
                     {
                         FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
                         LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
@@ -129,10 +129,10 @@
 
                 if (workstation.Employees == null)
                 {
-                    workstation.Employees = new List<Employee>();
+                    workstation.Employees = new List<EmployeeDbEntity>();
                 }
 
-                ((IList<Employee>)workstation.Employees).Add(employee);
+                ((IList<EmployeeDbEntity>)workstation.Employees).Add(employee);
 
                 return employee;
             }
@@ -141,23 +141,22 @@
         [When(@"I insert (.*) employee entities as children of promoted manager and supervisor employee entities using (.*) methods")]
         public async Task WhenIInsertEmployeeEntitiesAsChildrenOfPromotedManagerAndSupervisorEmployeeEntitiesUsingMethods(int entitiesCount, bool makeAsyncCalls)
         {
-            var rnd = new Random();
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Employee>(CreateEmployee, entitiesCount);
+                await this.InsertEntityAsync<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Employee>(CreateEmployee, entitiesCount);
+                this.InsertEntity<EmployeeDbEntity>(CreateEmployee, entitiesCount);
             }
 
-            Employee CreateEmployee(int index)
+            EmployeeDbEntity CreateEmployee(int index)
             {
-                var existingEmployees = _testContext.GetInsertedEntitiesOfType<Employee>().ToArray();
-                var manager = existingEmployees[rnd.Next(0, existingEmployees.Length - 1)];
-                var supervisor = existingEmployees[rnd.Next(0, existingEmployees.Length - 1)];
+                var existingEmployees = _testContext.GetInsertedEntitiesOfType<EmployeeDbEntity>().ToArray();
+                var manager = existingEmployees[_rnd.Next(0, existingEmployees.Length - 1)];
+                var supervisor = existingEmployees[_rnd.Next(0, existingEmployees.Length - 1)];
 
-                var employee = new Employee()
+                var employee = new EmployeeDbEntity()
                     {
                         FirstName = $"First Name {Guid.NewGuid().ToString("N")}",
                         LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
@@ -178,36 +177,67 @@
                 // these collections are not going to get inserted in the db either, but we need them for local comparisons
                 if (manager.ManagedEmployees == null)
                 {
-                    manager.ManagedEmployees = new List<Employee>();
+                    manager.ManagedEmployees = new List<EmployeeDbEntity>();
                 }
-                ((List<Employee>)manager.ManagedEmployees).Add(employee);
+                ((List<EmployeeDbEntity>)manager.ManagedEmployees).Add(employee);
 
                 if (supervisor.SupervisedEmployees == null)
                 {
-                    supervisor.SupervisedEmployees = new List<Employee>();
+                    supervisor.SupervisedEmployees = new List<EmployeeDbEntity>();
                 }
-                ((List<Employee>)supervisor.SupervisedEmployees).Add(employee);
+                ((List<EmployeeDbEntity>)supervisor.SupervisedEmployees).Add(employee);
 
                 return employee;
             }
         }
+
+        [When(@"I assign unique badges to the last inserted (.*) employee entities using (.*) methods")]
+        public async Task WhenIAssignUniqueBadgesToTheLastInsertedEmployeeEntitiesUsingMethods(int badgeCount, bool makeAsyncCalls)
+        {
+            if (makeAsyncCalls)
+            {
+                await this.InsertEntityAsync<BadgeDbEntity>(CreateBadge, badgeCount);
+            }
+            else
+            {
+                this.InsertEntity<BadgeDbEntity>(CreateBadge, badgeCount);
+            }
+
+            BadgeDbEntity CreateBadge(int index)
+            {
+                var employee = _testContext.GetInsertedEntitiesOfType<EmployeeDbEntity>().Reverse().Skip(index).Take(1).Single();
+
+                var badge = new BadgeDbEntity()
+                {
+                    EmployeeUserId = employee.UserId,
+                    EmployeeId = employee.EmployeeId,
+                    Barcode = Guid.NewGuid().ToString("N"),
+                    Employee = employee
+                };
+
+                employee.Badge = badge;
+
+                return badge;
+            }
+        }
+
 
         [When(@"I insert (\d*) workstation entities parented to existing building entities using (.*) methods")]
         public async Task WhenIInsertWorkstationEntitiesParentedToExistingBuildingEntitiesUsingSynchronousMethods(int entitiesCount, bool makeAsyncCalls)
         {
             if (makeAsyncCalls)
             {
-                await this.InsertEntityAsync<Workstation>(CreateEntity, entitiesCount);
+                await this.InsertEntityAsync<WorkstationDbEntity>(CreateEntity, entitiesCount);
             }
             else
             {
-                this.InsertEntity<Workstation>(CreateEntity, entitiesCount);
+                this.InsertEntity<WorkstationDbEntity>(CreateEntity, entitiesCount);
             }
 
-            Workstation CreateEntity(int index)
+            WorkstationDbEntity CreateEntity(int index)
             {
-                var building = _testContext.GetInsertedEntitiesOfType<Building>().Skip(index).First();
-                var workstation = new Workstation()
+                var building = _testContext.GetInsertedEntitiesOfType<BuildingDbEntity>().Skip(index).First();
+                var workstation = new WorkstationDbEntity()
                     {
                         InventoryIndex = index,
                         Name = $"Workstation {Guid.NewGuid().ToString("N")}",
@@ -221,10 +251,10 @@
 
                 if (building.Workstations == null)
                 {
-                    building.Workstations = new List<Workstation>();
+                    building.Workstations = new List<WorkstationDbEntity>();
                 }
 
-                ((IList<Workstation>)building.Workstations).Add(workstation);
+                ((IList<WorkstationDbEntity>)building.Workstations).Add(workstation);
 
                 return workstation;
             }
@@ -233,31 +263,31 @@
         [When(@"I query for one workstation entity combined with the employee entities using (.*) methods")]
         public async Task WhenIQueryForOneWorkstationEntityCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            var workstationId = _testContext.GetInsertedEntitiesOfType<Workstation>()
+            var workstationId = _testContext.GetInsertedEntitiesOfType<WorkstationDbEntity>()
                                             .Select(workStation => workStation.WorkstationId)
                                             .Single();
-            Workstation queriedEntity;
+            WorkstationDbEntity queriedEntity;
 
             if (useAsyncMethods)
             {
                 // we have to escape Specflow's bad synchronization context
                 queriedEntity = await Task.Run(async () =>
                 {
-                    return await _testContext.DatabaseConnection.GetAsync<Workstation>(
-                               new Workstation()
+                    return await _testContext.DatabaseConnection.GetAsync<WorkstationDbEntity>(
+                               new WorkstationDbEntity()
                                    {
                                        WorkstationId = workstationId
                                    },
-                               options => options.Include<Employee>());
+                               options => options.Include<EmployeeDbEntity>());
                 }).ConfigureAwait(false);
             }
             else
             {
-                queriedEntity = _testContext.DatabaseConnection.Get<Workstation>(
-                    new Workstation()
+                queriedEntity = _testContext.DatabaseConnection.Get<WorkstationDbEntity>(
+                    new WorkstationDbEntity()
                         {
                             WorkstationId = workstationId
-                        }, options => options.Include<Employee>());
+                        }, options => options.Include<EmployeeDbEntity>());
 
             }
             
@@ -267,18 +297,18 @@
         [When(@"I query for all the workstation entities combined with the employee entities using (.*) methods")]
         public async Task WhenIQueryForAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
-            IEnumerable<Workstation> queriedEntities;
+            IEnumerable<WorkstationDbEntity> queriedEntities;
             if (useAsyncMethods)
             {
                 // we have to escape Specflow's bad synchronization context
                 queriedEntities = await Task.Run(async () =>
                 {
-                    return await _testContext.DatabaseConnection.FindAsync<Workstation>(options => options.Include<Employee>());
+                    return await _testContext.DatabaseConnection.FindAsync<WorkstationDbEntity>(options => options.Include<EmployeeDbEntity>());
                 });
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<Workstation>(options => options.Include<Employee>());
+                queriedEntities = _testContext.DatabaseConnection.Find<WorkstationDbEntity>(options => options.Include<EmployeeDbEntity>());
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -290,19 +320,19 @@
         [When(@"I query for all the employee entities combined with the workstation entities using (.*) methods")]
         public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithTheWorkstationEntitiesUsingMethods(bool useAsyncMethods)
         {
-            IEnumerable<Employee> queriedEntities;
+            IEnumerable<EmployeeDbEntity> queriedEntities;
 
             if (useAsyncMethods)
             {
                 // we have to escape Specflow's bad synchronization context
                 queriedEntities = await Task.Run(async () =>
                 {
-                    return await _testContext.DatabaseConnection.FindAsync<Employee>(options => options.Include<Workstation>());
+                    return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options.Include<WorkstationDbEntity>());
                 });
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options.Include<Workstation>());
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options.Include<WorkstationDbEntity>());
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -311,26 +341,103 @@
             }
         }
 
-        [When(@"I query for all the building entities combined with workstation and employee entities using (.*) methods")]
-        public async Task WhenIQueryForAllTheBuildingEntitiesCombinedWithWorkstationAndEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        [When(@"I query for all the employee entities combined with the assigned badge entities using (.*) methods")]
+        public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithTheAssignedBadgeEntitiesUsingSynchronousMethods(bool useAsyncMethods)
         {
-            IEnumerable<Building> queriedEntities;
+            IEnumerable<EmployeeDbEntity> queriedEntities;
 
             if (useAsyncMethods)
             {
                 // we have to escape Specflow's bad synchronization context
                 queriedEntities = await Task.Run(async () =>
                 {
-                    return await _testContext.DatabaseConnection.FindAsync<Building>(options => options
-                                                                                                .Include<Workstation>()
-                                                                                                .Include<Employee>());
+                    return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options.LeftJoin<EmployeeDbEntity, BadgeDbEntity>(join => join.MapResults()));
                 });
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<Building>(options => options
-                                                                                            .Include<Workstation>()
-                                                                                            .Include<Employee>());
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options.LeftJoin<EmployeeDbEntity, BadgeDbEntity>(join => join.MapResults()));
+            }
+
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
+        }
+
+
+        [When(@"I query for all the employee entities combined with the workstation entities when no relationships or navigation properties are set up using (.*) methods")]
+        public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithTheWorkstationEntitiesWhenNoRelationshipsOrNavigationPropertiesAreSetUpUsingMethods(bool useAsyncMethods)
+        {
+            IEnumerable<EmployeeDbEntity> queriedEntities;
+            var workstationMappingNoRelationships = OrmConfiguration.GetDefaultEntityMapping<WorkstationDbEntity>()
+                                                                    .Clone()
+                                                                    .RemoveAllRelationships();
+            var employeeMappingNoRelationships = OrmConfiguration.GetDefaultEntityMapping<EmployeeDbEntity>()
+                                                                 .Clone()
+                                                                 .RemoveAllRelationships();
+
+
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options
+                                                                                                .WithAlias("em")
+                                                                                                .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                                .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join
+                                                                                                                                         .FromAlias("em")
+                                                                                                                                         .FromNavigationProperty(employee => employee.Workstation)
+                                                                                                                                         .ToAlias("ws")
+                                                                                                                                         .WithEntityMappingOverride(workstationMappingNoRelationships)
+                                                                                                                                         .ToNavigationProperty(workstation => workstation.Employees)
+                                                                                                                                         .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
+                                                                                                ));
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
+                                                                                          .WithAlias("em")
+                                                                                          .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                          .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join
+                                                                                                                                   .WithEntityMappingOverride(workstationMappingNoRelationships)
+                                                                                                                                   .FromAlias("em")
+                                                                                                                                   .FromNavigationProperty(employee => employee.Workstation)
+                                                                                                                                   .ToAlias("ws")
+                                                                                                                                   .ToNavigationProperty(workstation => workstation.Employees)
+                                                                                                                                   .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
+                                                                                          ));
+            }
+
+            foreach (var queriedEntity in queriedEntities)
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
+        }
+
+
+        [When(@"I query for all the building entities combined with workstation and employee entities using (.*) methods")]
+        public async Task WhenIQueryForAllTheBuildingEntitiesCombinedWithWorkstationAndEmployeeEntitiesUsingMethods(bool useAsyncMethods)
+        {
+            IEnumerable<BuildingDbEntity> queriedEntities;
+
+            if (useAsyncMethods)
+            {
+                // we have to escape Specflow's bad synchronization context
+                queriedEntities = await Task.Run(async () =>
+                {
+                    return await _testContext.DatabaseConnection.FindAsync<BuildingDbEntity>(options => options
+                                                                                                .Include<WorkstationDbEntity>()
+                                                                                                .Include<EmployeeDbEntity>());
+                });
+            }
+            else
+            {
+                queriedEntities = _testContext.DatabaseConnection.Find<BuildingDbEntity>(options => options
+                                                                                            .Include<WorkstationDbEntity>()
+                                                                                            .Include<EmployeeDbEntity>());
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -342,7 +449,7 @@
         [When(@"I query for all the employee entities combined with workstation and building entities using (.*) methods")]
         public async Task WhenIQueryForAllTheEmployeeEntitiesCombinedWithWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            IEnumerable<Employee> queriedEntities;
+            IEnumerable<EmployeeDbEntity> queriedEntities;
 
             if (useAsyncMethods)
             {
@@ -350,15 +457,15 @@
                 queriedEntities = await Task.Run(async () =>
                                       {
                                           return await _testContext.DatabaseConnection
-                                                                   .FindAsync<Employee>(options => options
+                                                                   .FindAsync<EmployeeDbEntity>(options => options
                                                                                                    .WithAlias("e")
-                                                                                                   .LeftJoin<Employee, Workstation>(
+                                                                                                   .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(
                                                                                                        join => join
                                                                                                                .FromAlias("e")
                                                                                                                .ToAlias("ws")
                                                                                                                .MapResults()
                                                                                                        )
-                                                                                                   .LeftJoin<Workstation, Building>(
+                                                                                                   .LeftJoin<WorkstationDbEntity, BuildingDbEntity>(
                                                                                                        join => join
                                                                                                                .FromAlias("ws")
                                                                                                                .ToAlias("b")
@@ -368,9 +475,9 @@
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
-                                                                                            .LeftJoin<Employee, Workstation>(join => join.MapResults())
-                                                                                            .LeftJoin<Workstation, Building>(join => join.MapResults()));
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
+                                                                                            .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join.MapResults())
+                                                                                            .LeftJoin<WorkstationDbEntity, BuildingDbEntity>(join => join.MapResults()));
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -388,12 +495,12 @@
         [When(@"I query for the last (\d*) inserted employee entities combined with themselves as managers and supervisors using (.*) methods")]
         public async Task WhenIQueryForTopEmployeeEntitiesCombinedWithThemselvesAsManagersAndSupervisorsSkippingEntitiesUsingMethods(int? lastInsertedRecordCount, bool useAsyncMethods)
         {
-            IEnumerable<Employee> queriedEntities;
+            IEnumerable<EmployeeDbEntity> queriedEntities;
 
             var queryParams = new
                 {
                     MinRecordIndex = lastInsertedRecordCount.HasValue
-                                    ? _testContext.GetInsertedEntitiesOfType<Employee>().TakeLast(lastInsertedRecordCount.Value).First().RecordIndex
+                                    ? _testContext.GetInsertedEntitiesOfType<EmployeeDbEntity>().TakeLast(lastInsertedRecordCount.Value).First().RecordIndex
                                     : 0
                 };
 
@@ -403,23 +510,23 @@
                 queriedEntities = await Task.Run(async () =>
                 {
                     return await _testContext.DatabaseConnection
-                                             .FindAsync<Employee>(options => options
-                                                                             .LeftJoin<Employee, Employee>( 
+                                             .FindAsync<EmployeeDbEntity>(options => options
+                                                                             .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>( 
                                                                                  join => join
                                                                                          .FromNavigationProperty(employee => employee.Manager)
                                                                                          .ToNavigationProperty(manager => manager.ManagedEmployees)
                                                                                          .ToAlias("manager")
                                                                                          .MapResults())
-                                                                             .LeftJoin<Employee, Employee>(
+                                                                             .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
                                                                                  join => join
                                                                                              .FromNavigationProperty(employee => employee.Supervisor)
                                                                                              .ToNavigationProperty(manager => manager.SupervisedEmployees)
                                                                                              .ToAlias("supervisor")
                                                                                              .MapResults())
                                                                              .Where(lastInsertedRecordCount.HasValue
-                                                                                        ? (FormattableString?)$"{nameof(Employee.RecordIndex):TC}>={nameof(queryParams.MinRecordIndex):P}"
+                                                                                        ? (FormattableString?)$"{nameof(EmployeeDbEntity.RecordIndex):TC}>={nameof(queryParams.MinRecordIndex):P}"
                                                                                         : (FormattableString?)null)
-                                                                             .OrderBy($"{nameof(Employee.UserId):TC} ASC")
+                                                                             .OrderBy($"{nameof(EmployeeDbEntity.UserId):TC} ASC")
                                                                              .WithParameters(queryParams)
 
                                              );
@@ -428,16 +535,16 @@
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<Employee>(options => options
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
                                                                                             .WithAlias("employee")
-                                                                                            .LeftJoin<Employee, Employee>(
+                                                                                            .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
                                                                                                 join => join
                                                                                                         .FromNavigationProperty(employee => employee.Manager)
                                                                                                         .ToNavigationProperty(manager => manager.ManagedEmployees)
                                                                                                         .FromAlias("employee")
                                                                                                         .ToAlias("manager")
                                                                                                         .MapResults())
-                                                                                            .LeftJoin<Employee, Employee>(
+                                                                                            .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
                                                                                                 join => join
                                                                                                         .FromNavigationProperty(employee => employee.Supervisor)
                                                                                                         .ToNavigationProperty(manager => manager.SupervisedEmployees)
@@ -445,9 +552,9 @@
                                                                                                         .ToAlias("supervisor")
                                                                                                         .MapResults())
                                                                                             .Where(lastInsertedRecordCount.HasValue
-                                                                                                       ? (FormattableString?)$"{nameof(Employee.RecordIndex):of employee}>={nameof(queryParams.MinRecordIndex):P}"
+                                                                                                       ? (FormattableString?)$"{nameof(EmployeeDbEntity.RecordIndex):of employee}>={nameof(queryParams.MinRecordIndex):P}"
                                                                                                        : (FormattableString?)null)
-                                                                                            .OrderBy($"{nameof(Employee.UserId):of employee} ASC")
+                                                                                            .OrderBy($"{nameof(EmployeeDbEntity.UserId):of employee} ASC")
                                                                                             .WithParameters(queryParams)
                 );
             }
@@ -463,11 +570,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Workstation>();
+                await this.QueryForInsertedEntitiesAsync<WorkstationDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Workstation>();
+                this.QueryForInsertedEntities<WorkstationDbEntity>();
             }
         }
 
@@ -476,11 +583,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Building>();
+                await this.QueryForInsertedEntitiesAsync<BuildingDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Building>();
+                this.QueryForInsertedEntities<BuildingDbEntity>();
             }
         }
 
@@ -489,11 +596,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Employee>();
+                await this.QueryForInsertedEntitiesAsync<EmployeeDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Employee>();
+                this.QueryForInsertedEntities<EmployeeDbEntity>();
             }
         }
 
@@ -502,11 +609,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryEntityCountAsync<Employee>();
+                await this.QueryEntityCountAsync<EmployeeDbEntity>();
             }
             else
             {
-                this.QueryEntityCount<Employee>();
+                this.QueryEntityCount<EmployeeDbEntity>();
             }
         }
 
@@ -515,11 +622,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryEntityCountAsync<Building>();
+                await this.QueryEntityCountAsync<BuildingDbEntity>();
             }
             else
             {
-                this.QueryEntityCount<Building>();
+                this.QueryEntityCount<BuildingDbEntity>();
             }
         }
 
@@ -528,32 +635,32 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryEntityCountAsync<Workstation>();
+                await this.QueryEntityCountAsync<WorkstationDbEntity>();
             }
             else
             {
-                this.QueryEntityCount<Workstation>();
+                this.QueryEntityCount<WorkstationDbEntity>();
             }
         }
 
         [When(@"I query for the count of all the inserted building entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            FormattableString whereClause = $"charindex(cast({nameof(Building.BuildingId):of b} as varchar(10)), @BuildingIds) > 4";
+            FormattableString whereClause = $"charindex(cast({nameof(BuildingDbEntity.BuildingId):of b} as varchar(10)), @BuildingIds) > 4";
 
-            var buildingIds = "ids:" + string.Join(",", _testContext.GetInsertedEntitiesOfType<Building>()
+            var buildingIds = "ids:" + string.Join(",", _testContext.GetInsertedEntitiesOfType<BuildingDbEntity>()
                                                            .Select(building => building.BuildingId));
 
             _testContext.LastCountQueryResult = useAsyncMethods
                                                     ? await _testContext
                                                             .DatabaseConnection
-                                                            .CountAsync<Building>(statement => statement
+                                                            .CountAsync<BuildingDbEntity>(statement => statement
                                                                                                .WithAlias("b")
                                                                                                .Where(whereClause)
                                                                                                .WithParameters(new { BuildingIds = buildingIds }))
                                                     : _testContext
                                                       .DatabaseConnection
-                                                      .Count<Building>(statement => statement
+                                                      .Count<BuildingDbEntity>(statement => statement
                                                                                     .WithAlias("b")
                                                                                     .Where(whereClause)
                                                                                     .WithParameters(new { BuildingIds = buildingIds }));
@@ -563,21 +670,62 @@
         public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
             _testContext.LastCountQueryResult = useAsyncMethods
-                ? await _testContext.DatabaseConnection.CountAsync<Workstation>(statement => statement
-                                                                                    .Include<Employee>())
-                : _testContext.DatabaseConnection.Count<Workstation>(statement => statement.Include<Employee>());
+                ? await _testContext.DatabaseConnection.CountAsync<WorkstationDbEntity>(statement => statement
+                                                                                        // old way
+                                                                                    .Include<EmployeeDbEntity>(join => join.InnerJoin()))
+                : _testContext.DatabaseConnection.Count<WorkstationDbEntity>(statement => statement
+                                                                         // new way
+                                                                         .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>());
         }
+
+        [When(@"I query for the count of all the workstation entities combined with the employee entities when no relationships or navigation properties are set up using (.*) methods")]
+        public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesWhenNoRelationshipsOrNavigationPropertiesAreSetUpUsingSynchronousMethods(bool useAsyncMethods)
+        {
+            var workstationMappingNoRelationships = OrmConfiguration.GetDefaultEntityMapping<WorkstationDbEntity>()
+                                                                    .Clone()
+                                                                    .RemoveAllRelationships();
+            var employeeMappingNoRelationships = OrmConfiguration.GetDefaultEntityMapping<EmployeeDbEntity>()
+                                                                    .Clone()
+                                                                    .RemoveAllRelationships();
+
+            if (useAsyncMethods)
+            {
+                _testContext.LastCountQueryResult = await _testContext.DatabaseConnection
+                                                                      .CountAsync<WorkstationDbEntity>(statement => 
+                                                                                                   statement
+                                                                                                           .WithAlias("ws")
+                                                                                                           .WithEntityMappingOverride(workstationMappingNoRelationships)
+                                                                                                           .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>(join => join
+                                                                                                                                                                     .FromAlias("ws")
+                                                                                                                                                                     .ToAlias("em")
+                                                                                                                                                                     .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                                                                                                     .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
+            }
+            else
+            {
+                _testContext.LastCountQueryResult = _testContext.DatabaseConnection.Count<WorkstationDbEntity>(statement =>
+                                                                                                                statement
+                                                                                                                    .WithAlias("ws")
+                                                                                                                    .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>(join => join
+                                                                                                                                                              .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                                                                                              .FromAlias("ws")
+                                                                                                                                                              .ToAlias("em")
+                                                                                                                                                              .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
+
+            }
+        }
+
 
         [When(@"I query for the count of all the employee entities strictly linked to workstation and building entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheEmployeeEntitiesStrictlyLinkedToWorkstationAndBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
             _testContext.LastCountQueryResult = useAsyncMethods
-                                                      ? await _testContext.DatabaseConnection.CountAsync<Employee>(statement => statement
-                                                                                                                                .Include<Workstation>(join => join.InnerJoin())
-                                                                                                                                .Include<Building>())
-                                                      : _testContext.DatabaseConnection.Count<Employee>(statement => statement
-                                                                                                                     .Include<Workstation>(join => join.InnerJoin())
-                                                                                                                     .Include<Building>(join => join.InnerJoin()));
+                                                      ? await _testContext.DatabaseConnection.CountAsync<EmployeeDbEntity>(statement => statement
+                                                                                                                                .Include<WorkstationDbEntity>(join => join.InnerJoin())
+                                                                                                                                .Include<BuildingDbEntity>())
+                                                      : _testContext.DatabaseConnection.Count<EmployeeDbEntity>(statement => statement
+                                                                                                                     .Include<WorkstationDbEntity>(join => join.InnerJoin())
+                                                                                                                     .Include<BuildingDbEntity>(join => join.InnerJoin()));
         }
 
         [When(@"I query for the inserted building entities using (.*) methods")]
@@ -585,11 +733,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Building>();
+                await this.QueryForInsertedEntitiesAsync<BuildingDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Building>();
+                this.QueryForInsertedEntities<BuildingDbEntity>();
             }
         }
 
@@ -598,11 +746,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Workstation>();
+                await this.QueryForInsertedEntitiesAsync<WorkstationDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Workstation>();
+                this.QueryForInsertedEntities<WorkstationDbEntity>();
             }
         }
 
@@ -611,11 +759,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.QueryForInsertedEntitiesAsync<Employee>();
+                await this.QueryForInsertedEntitiesAsync<EmployeeDbEntity>();
             }
             else
             {
-                this.QueryForInsertedEntities<Employee>();
+                this.QueryForInsertedEntities<EmployeeDbEntity>();
             }
         }
 
@@ -623,17 +771,17 @@
         [When(@"I batch update all the inserted employee entities using (.*) methods")]
         public async Task WhenIBatchUpdateAMaximumOfEmployeeEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
-            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Employee>()
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<EmployeeDbEntity>()
                                                .ToArray();
 
-            var customMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>()
+            var customMapping = OrmConfiguration.GetDefaultEntityMapping<EmployeeDbEntity>()
                                                 .Clone()
                                                 .UpdatePropertiesExcluding(prop =>
                                                                                prop.IsExcludedFromUpdates = true,
-                                                                           nameof(Employee.KeyPass),
-                                                                           nameof(Employee.BirthDate));
+                                                                           nameof(EmployeeDbEntity.KeyPass),
+                                                                           nameof(EmployeeDbEntity.BirthDate));
 
-            var updateData = new Employee()
+            var updateData = new EmployeeDbEntity()
                 {
                     KeyPass = Guid.NewGuid(),
                     BirthDate = new DateTime(1951, 09, 30),
@@ -647,13 +795,16 @@
             switch (OrmConfiguration.DefaultDialect)
             {
                 case SqlDialect.PostgreSql:
-                    whereCondition = $"{nameof(Employee.UserId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    whereCondition = $"{nameof(EmployeeDbEntity.UserId):C}=ANY({nameof(statementParams.EntityIds):P})";
                     break;
                 case SqlDialect.SqLite:
-                    whereCondition = $"{nameof(Employee.UserId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $"{nameof(EmployeeDbEntity.UserId):C} IN {nameof(statementParams.EntityIds):P}";
                     break;
                 default:
-                    whereCondition = $"{nameof(Employee.UserId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $@"
+                        /* comment test */
+                        {nameof(EmployeeDbEntity.UserId):C} IN {nameof(statementParams.EntityIds):P}
+                    ";
                     break;
             }
 
@@ -693,16 +844,16 @@
         [When(@"I batch update all the inserted workstation entities using (.*) methods")]
         public async Task WhenIBatchUpdateAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
-            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<Workstation>()
+            var entitiesToUpdate = _testContext.GetInsertedEntitiesOfType<WorkstationDbEntity>()
                                                .ToArray();
 
-            var customMapping = OrmConfiguration.GetDefaultEntityMapping<Workstation>()
+            var customMapping = OrmConfiguration.GetDefaultEntityMapping<WorkstationDbEntity>()
                                                 .Clone()
                                                 .UpdatePropertiesExcluding(prop =>
                                                                                prop.IsExcludedFromUpdates = true,
-                                                                           nameof(Workstation.Name));
+                                                                           nameof(WorkstationDbEntity.Name));
 
-            var updateData = new Workstation()
+            var updateData = new WorkstationDbEntity()
                 {
                     Name = "Batch updated workstation"
                 };
@@ -715,13 +866,13 @@
             switch (OrmConfiguration.DefaultDialect)
             {
                 case SqlDialect.PostgreSql:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
                     break;
                 case SqlDialect.SqLite:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
                     break;
                 default:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
                     break;
             }
 
@@ -760,7 +911,7 @@
         [When(@"I batch delete all the inserted workstation entities using (.*) methods")]
         public async Task WhenIBatchDeleteAMaximumOfWorkstationEntitiesSkippingAndUsingMethods(bool useAsyncMethods)
         {
-            var entitiesToDelete = _testContext.GetInsertedEntitiesOfType<Workstation>()
+            var entitiesToDelete = _testContext.GetInsertedEntitiesOfType<WorkstationDbEntity>()
                                                .ToArray();
 
             var statementParams = new
@@ -771,27 +922,27 @@
             switch (OrmConfiguration.DefaultDialect)
             {
                 case SqlDialect.PostgreSql:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C}=ANY({nameof(statementParams.EntityIds):P})";
                     break;
                 case SqlDialect.SqLite:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
                     break;
                 default:
-                    whereCondition = $"{nameof(Workstation.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
+                    whereCondition = $"{nameof(WorkstationDbEntity.WorkstationId):C} IN {nameof(statementParams.EntityIds):P}";
                     break;
             }
 
             int recordsDeleted;
             if (useAsyncMethods)
             {
-                recordsDeleted = await _testContext.DatabaseConnection.BulkDeleteAsync<Workstation>(statement => statement
+                recordsDeleted = await _testContext.DatabaseConnection.BulkDeleteAsync<WorkstationDbEntity>(statement => statement
                                                                                                                  .Where(whereCondition)
                                                                                                                  .WithParameters(statementParams)
                                  );
             }
             else
             {
-                recordsDeleted = _testContext.DatabaseConnection.BulkDelete<Workstation>(statement => statement
+                recordsDeleted = _testContext.DatabaseConnection.BulkDelete<WorkstationDbEntity>(statement => statement
                                                                                              .Where(whereCondition)
                                                                                              .WithParameters(statementParams)
                 );
@@ -805,16 +956,16 @@
         {
             if (useAsyncMethods)
             {
-                await this.UpdateInsertedEntitiesAsync<Employee>(UpdateEmployee);
+                await this.UpdateInsertedEntitiesAsync<EmployeeDbEntity>(UpdateEmployee);
             }
             else
             {
-                this.UpdateInsertedEntities<Employee>(UpdateEmployee);
+                this.UpdateInsertedEntities<EmployeeDbEntity>(UpdateEmployee);
             }
 
-            Employee UpdateEmployee(Employee originalEmployeeEntity)
+            EmployeeDbEntity UpdateEmployee(EmployeeDbEntity originalEmployeeEntity)
             {
-                return new Employee()
+                return new EmployeeDbEntity()
                     {
                         // all the properties linked to the composite primary key must be used
                         UserId = originalEmployeeEntity.UserId,
@@ -833,16 +984,16 @@
         {
             if (useAsyncMethods)
             {
-                await this.UpdateInsertedEntitiesAsync<Building>(UpdateBuilding);
+                await this.UpdateInsertedEntitiesAsync<BuildingDbEntity>(UpdateBuilding);
             }
             else
             {
-                this.UpdateInsertedEntities<Building>(UpdateBuilding);
+                this.UpdateInsertedEntities<BuildingDbEntity>(UpdateBuilding);
             }
 
-            Building UpdateBuilding(Building originalBuildingEntity)
+            BuildingDbEntity UpdateBuilding(BuildingDbEntity originalBuildingEntity)
             {
-                return new Building()
+                return new BuildingDbEntity()
                     {
                         BuildingId = originalBuildingEntity.BuildingId,
                         Name = "Updated " + originalBuildingEntity.Name,
@@ -856,16 +1007,16 @@
         {
             if (useAsyncMethods)
             {
-                await this.UpdateInsertedEntitiesAsync<Workstation>(UpdateWorkstation);
+                await this.UpdateInsertedEntitiesAsync<WorkstationDbEntity>(UpdateWorkstation);
             }
             else
             {
-                this.UpdateInsertedEntities<Workstation>(UpdateWorkstation);
+                this.UpdateInsertedEntities<WorkstationDbEntity>(UpdateWorkstation);
             }
 
-            Workstation UpdateWorkstation(Workstation originalWorkstationEntity)
+            WorkstationDbEntity UpdateWorkstation(WorkstationDbEntity originalWorkstationEntity)
             {
-                return new Workstation()
+                return new WorkstationDbEntity()
                     {
                         WorkstationId = originalWorkstationEntity.WorkstationId,
                         Name = "Updated " + originalWorkstationEntity.Name
@@ -878,11 +1029,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.DeleteInsertedEntitiesAsync<Workstation>();
+                await this.DeleteInsertedEntitiesAsync<WorkstationDbEntity>();
             }
             else
             {
-                this.DeleteInsertedEntities<Workstation>();
+                this.DeleteInsertedEntities<WorkstationDbEntity>();
             }
         }
 
@@ -891,11 +1042,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.DeleteInsertedEntitiesAsync<Employee>();
+                await this.DeleteInsertedEntitiesAsync<EmployeeDbEntity>();
             }
             else
             {
-                this.DeleteInsertedEntities<Employee>();
+                this.DeleteInsertedEntities<EmployeeDbEntity>();
             }
         }
 
@@ -904,11 +1055,11 @@
         {
             if (useAsyncMethods)
             {
-                await this.DeleteInsertedEntitiesAsync<Building>();
+                await this.DeleteInsertedEntitiesAsync<BuildingDbEntity>();
             }
             else
             {
-                this.DeleteInsertedEntities<Building>();
+                this.DeleteInsertedEntities<BuildingDbEntity>();
             }
         }
 
@@ -921,10 +1072,10 @@
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
         public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int? max, int? skip)
         {
-            var queriedEntities = _testContext.DatabaseConnection.Find<Workstation>(
+            var queriedEntities = _testContext.DatabaseConnection.Find<WorkstationDbEntity>(
                 statementOptions =>
-                    statementOptions.Where($"{nameof(Workstation.WorkstationId):C} IS NOT NULL")
-                                    .OrderBy($"{nameof(Workstation.InventoryIndex):C} DESC")
+                    statementOptions.Where($"{nameof(WorkstationDbEntity.WorkstationId):C} IS NOT NULL")
+                                    .OrderBy($"{nameof(WorkstationDbEntity.InventoryIndex):C} DESC")
                                     .Skip(skip)
                                     .Top(max));
             foreach (var queriedEntity in queriedEntities)
@@ -937,7 +1088,7 @@
         public void WhenIPartiallyUpdateAllTheInsertedEmployeeEntities()
         {
             // prepare a new mapping
-            var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<Employee>();
+            var defaultMapping = OrmConfiguration.GetDefaultEntityMapping<EmployeeDbEntity>();
             Assert.IsTrue(defaultMapping.Registration.IsFrozen);
 
             try
@@ -950,11 +1101,11 @@
             {
             }
 
-            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(Employee.LastName));
+            var customMapping = defaultMapping.Clone().UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(EmployeeDbEntity.LastName));
 
-            foreach (var insertedEntity in _testContext.GetInsertedEntitiesOfType<Employee>())
+            foreach (var insertedEntity in _testContext.GetInsertedEntitiesOfType<EmployeeDbEntity>())
             {
-                var partialUpdatedEntity = new Employee()
+                var partialUpdatedEntity = new EmployeeDbEntity()
                     {
                         UserId = insertedEntity.UserId,
                         EmployeeId = insertedEntity.EmployeeId,
@@ -1050,24 +1201,24 @@
                     // this looks a bit stupid, but we want to test the typed queries
                     switch (originalEntity)
                     {
-                        case Employee originalEmployeeEntity:
+                        case EmployeeDbEntity originalEmployeeEntity:
                             var queriedEmployeeEntity = await _testContext.DatabaseConnection.GetAsync(
-                                                            new Employee
+                                                            new EmployeeDbEntity
                                                                 {
                                                                     UserId = originalEmployeeEntity.UserId, 
                                                                     EmployeeId = originalEmployeeEntity.EmployeeId
                                                                 });
                             _testContext.RecordQueriedEntity(queriedEmployeeEntity);
                             break;
-                        case Workstation originalWorkstationEntity:
-                            var queriedWorkstationEntity = await _testContext.DatabaseConnection.GetAsync(new Workstation
+                        case WorkstationDbEntity originalWorkstationEntity:
+                            var queriedWorkstationEntity = await _testContext.DatabaseConnection.GetAsync(new WorkstationDbEntity
                                 {
                                     WorkstationId = originalWorkstationEntity.WorkstationId
                                 });
                             _testContext.RecordQueriedEntity(queriedWorkstationEntity);
                             break;
-                        case Building originalBuildingEntity:
-                            var queriedBuildingEntity = await _testContext.DatabaseConnection.GetAsync(new Building
+                        case BuildingDbEntity originalBuildingEntity:
+                            var queriedBuildingEntity = await _testContext.DatabaseConnection.GetAsync(new BuildingDbEntity
                                 {
                                     BuildingId = originalBuildingEntity.BuildingId
                                 });
@@ -1091,24 +1242,24 @@
                 // this looks a bit stupid, but we want to test the typed queries
                 switch (originalEntity)
                 {
-                    case Employee originalEmployeeEntity:
+                    case EmployeeDbEntity originalEmployeeEntity:
                         var queriedEmployeeEntity = _testContext.DatabaseConnection.Get(
-                                                        new Employee
+                                                        new EmployeeDbEntity
                                                         {
                                                             UserId = originalEmployeeEntity.UserId,
                                                             EmployeeId = originalEmployeeEntity.EmployeeId
                                                         });
                         _testContext.RecordQueriedEntity(queriedEmployeeEntity);
                         break;
-                    case Workstation originalWorkstationEntity:
-                        var queriedWorkstationEntity = _testContext.DatabaseConnection.Get(new Workstation
+                    case WorkstationDbEntity originalWorkstationEntity:
+                        var queriedWorkstationEntity = _testContext.DatabaseConnection.Get(new WorkstationDbEntity
                         {
                             WorkstationId = originalWorkstationEntity.WorkstationId
                         });
                         _testContext.RecordQueriedEntity(queriedWorkstationEntity);
                         break;
-                    case Building originalBuildingEntity:
-                        var queriedBuildingEntity = _testContext.DatabaseConnection.Get(new Building
+                    case BuildingDbEntity originalBuildingEntity:
+                        var queriedBuildingEntity = _testContext.DatabaseConnection.Get(new BuildingDbEntity
                         {
                             BuildingId = originalBuildingEntity.BuildingId
                         });

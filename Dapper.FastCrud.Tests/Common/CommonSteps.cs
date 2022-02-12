@@ -10,6 +10,7 @@
     using Dapper.FastCrud.Tests.Contexts;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 
@@ -104,7 +105,7 @@
         public void ThenTheQueriedEntitiesShouldBeTheSameAsTheLastInsertedOnes(Type entityType, int lastEntityCount)
         {
             var queriedEntities = _testContext.GetQueriedEntitiesOfType(entityType);
-            var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType).TakeLast(lastEntityCount);
+            var insertedEntities = _testContext.GetInsertedEntitiesOfType(entityType).TakeLast(lastEntityCount).ToArray();
 
             this.CompareCollections(
                 queriedEntities,
@@ -121,9 +122,9 @@
             var updatedEntities = _testContext.GetUpdatedEntitiesOfType(entityType);
 
             this.CompareCollections(
-                queriedEntities, 
-                updatedEntities, 
-                true, 
+                queriedEntities,
+                updatedEntities,
+                true,
                 false,
                 true);
         }
@@ -137,9 +138,9 @@
                                                .Skip(startIndex ?? 0)
                                                .Take(maxCount ?? int.MaxValue);
             this.CompareCollections(
-                queriedEntities, 
-                insertedEntities, 
-                true, 
+                queriedEntities,
+                insertedEntities,
+                true,
                 true,
                 true);
         }
@@ -165,7 +166,7 @@
             var expectedCollectionLength = expectedEntityCollection?.Count() ?? 0;
             if (actualCollectionLength != expectedCollectionLength)
             {
-                finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionLength, "", expectedCollectionLength, actualEntityCollection);
+                finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionLength, currentLevel, "", expectedCollectionLength, actualEntityCollection, null);
                 if (assertOnMismatch)
                 {
                     Assert.Fail($"Expected a collection with {expectedCollectionLength} entities, but found {actualCollectionLength} entities.");
@@ -198,9 +199,9 @@
                 foreach (var actualEntity in actualEntityCollection!)
                 {
                     var expectedToActualEntityMatchResult = this.CompareObjects(
-                        actualEntity, 
-                        expectedEntity, 
-                        compareComplexTypedProperties, 
+                        actualEntity,
+                        expectedEntity,
+                        compareComplexTypedProperties,
                         maxLevelToCheck,
                         currentLevel + 1,
                         alreadyChecked);
@@ -208,15 +209,20 @@
                     {
                         if (enforceOrder && (actualEntityIndex != expectedEntityIndex))
                         {
-                            finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElementOrder, "", expectedEntityIndex, actualEntityIndex, mismatchedExpectedEncounters);
+                            finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElementOrder, currentLevel, $"Expected index {expectedEntityIndex}, found at {actualEntityIndex}", expectedEntityIndex, actualEntityIndex);
                             if (assertOnMismatch)
                             {
                                 Assert.Fail($"[Level: {currentLevel}] Expected entity to be located at index {expectedEntityIndex} but it was found in index {actualEntityIndex}");
                             }
-                        }
 
-                        expectedEntityFound = true;
-                        break;
+                            break;
+                        }
+                        else
+                        {
+                            finalMatchResult.MatchingScore += 1;
+                            expectedEntityFound = true;
+                            break;
+                        }
                     }
                     else
                     {
@@ -228,13 +234,18 @@
 
                 if (!expectedEntityFound)
                 {
-                    finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElement, "", expectedEntity, null, mismatchedExpectedEncounters);
+                    // mismatchedExpectedEncounters
+                    finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.CollectionElementNotFound,
+                                                      currentLevel,
+                                                      $"Index {expectedEntityIndex}",
+                                                      expectedEntity,
+                                                      null,
+                                                      mismatchedExpectedEncounters.OrderByDescending(mismatch => mismatch.MatchingScore).ToArray());
                     if (assertOnMismatch)
                     {
                         Assert.Fail($"[Level: {currentLevel}] Could not locate the expect entity at the index {expectedEntityIndex} (Final match result: {finalMatchResult})");
                     }
                 }
-
 
                 expectedEntityIndex++;
             }
@@ -272,7 +283,7 @@
 
             if (!expectedEntityType.IsAssignableFrom(actualEntityType))
             {
-                matchResult.RegisterMismatch(ObjectMatchMismatchType.Type, "", expectedEntityType, actualEntityType);
+                matchResult.RegisterMismatch(ObjectMatchMismatchType.Type, currentLevel, "", expectedEntityType, actualEntityType, null);
                 return matchResult;
             }
 
@@ -319,9 +330,13 @@
                         }
                     }
 
-                    if (!decision)
+                    if (decision)
                     {
-                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue);
+                        matchResult.MatchingScore += 10;
+                    }
+                    else
+                    {
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, currentLevel, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, null);
                     }
                 }
                 else if (compareComplexTypedProperties && typeof(IEnumerable).IsAssignableFrom(propType))
@@ -338,9 +353,13 @@
                         maxLevelToCheck,
                         currentLevel + 1,
                         alreadyChecked);
-                    if (!decision.IsMatch)
+                    if (decision.IsMatch)
                     {
-                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
+                        matchResult.MatchingScore += 1;
+                    }
+                    else
+                    {
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, currentLevel, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
                     }
                 }
                 else if (compareComplexTypedProperties)
@@ -353,9 +372,13 @@
                         maxLevelToCheck,
                         currentLevel + 1,
                         alreadyChecked);
-                    if (!decision.IsMatch)
+                    if (decision.IsMatch)
                     {
-                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
+                        matchResult.MatchingScore += 1;
+                    }
+                    else
+                    {
+                        matchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, currentLevel, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
                     }
                 }
             }

@@ -22,25 +22,25 @@
         [Given(@"I extract the SQL builder for LocalDb and workstation")]
         public void GivenIExtractTheSQLBuilderForLocalDbAndWorkstation()
         {
-            PrepareEnvironment<Workstation>(SqlDialect.MsSql);
+            PrepareEnvironment<WorkstationDbEntity>(SqlDialect.MsSql);
         }
 
         [Given(@"I extract the SQL builder for PostgreSql and workstation")]
         public void GivenIExtractTheSQLBuilderForPostgreSqlAndWorkstation()
         {
-            PrepareEnvironment<Workstation>(SqlDialect.PostgreSql);
+            PrepareEnvironment<WorkstationDbEntity>(SqlDialect.PostgreSql);
         }
 
         [Given(@"I extract the SQL builder for MySql and workstation")]
         public void GivenIExtractTheSQLBuilderForMySqlAndWorkstation()
         {
-            PrepareEnvironment<Workstation>(SqlDialect.MySql);
+            PrepareEnvironment<WorkstationDbEntity>(SqlDialect.MySql);
         }
 
         [Given(@"I extract the SQL builder for SqLite and workstation")]
         public void GivenIExtractTheSQLBuilderForSqLiteAndWorkstation()
         {
-            PrepareEnvironment<Workstation>(SqlDialect.SqLite);
+            PrepareEnvironment<WorkstationDbEntity>(SqlDialect.SqLite);
         }
 
         [When(@"I construct the select column enumeration")]
@@ -67,10 +67,10 @@
                     BuildingName = "Belfry Tower"
                 };
             //  _currentSqlBuilder.Format no longer supported
-            _buildingRawJoinQueryStatement = Sql.Format<Workstation>(
-                $@" SELECT {nameof(Workstation):T}.{nameof(Workstation.WorkstationId):C}, {Sql.Table<Building>()}.{Sql.Column<Building>(building => building.BuildingId)}
-                    FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
-                    WHERE {nameof(Workstation):T}.{nameof(Workstation.BuildingId):C} = {Sql.Table<Building>():T}.{Sql.Column<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}" );
+            _buildingRawJoinQueryStatement = Sql.Format<WorkstationDbEntity>(
+                $@" SELECT {nameof(WorkstationDbEntity):T}.{nameof(WorkstationDbEntity.WorkstationId):C}, {Sql.Table<BuildingDbEntity>()}.{Sql.Column<BuildingDbEntity>(building => building.BuildingId)}
+                    FROM {nameof(WorkstationDbEntity):T}, {Sql.Table<BuildingDbEntity>()}
+                    WHERE {nameof(WorkstationDbEntity):T}.{nameof(WorkstationDbEntity.BuildingId):C} = {Sql.Table<BuildingDbEntity>():T}.{Sql.Column<BuildingDbEntity>(nameof(BuildingDbEntity.BuildingId))} AND {Sql.Table<BuildingDbEntity>()}.{Sql.Column<BuildingDbEntity>(nameof(BuildingDbEntity.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}" );
         }
 
         [When(@"I construct a complex join query for workstation using combined table and column identifier resolvers")]
@@ -81,10 +81,10 @@
                     BuildingName = "Belfry Tower"
                 };
             //  _currentSqlBuilder.Format no longer supported
-            _buildingRawJoinQueryStatement = Sql.Format<Workstation>(
-                $@" SELECT {nameof(Workstation.WorkstationId):TC}, {Sql.TableAndColumn<Building>(nameof(Building.BuildingId))}
-                    FROM {nameof(Workstation):T}, {Sql.Table<Building>()}
-                    WHERE {nameof(Workstation.BuildingId):TC} = {Sql.TableAndColumn<Building>(nameof(Building.BuildingId))} AND {Sql.Table<Building>()}.{Sql.Column<Building>(nameof(Building.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}");
+            _buildingRawJoinQueryStatement = Sql.Format<WorkstationDbEntity>(
+                $@" SELECT {nameof(WorkstationDbEntity.WorkstationId):TC}, {Sql.TableAndColumn<BuildingDbEntity>(nameof(BuildingDbEntity.BuildingId))}
+                    FROM {nameof(WorkstationDbEntity):T}, {Sql.Table<BuildingDbEntity>()}
+                    WHERE {nameof(WorkstationDbEntity.BuildingId):TC} = {Sql.TableAndColumn<BuildingDbEntity>(nameof(BuildingDbEntity.BuildingId))} AND {Sql.Table<BuildingDbEntity>()}.{Sql.Column<BuildingDbEntity>(nameof(BuildingDbEntity.Name))}={Sql.Parameter(nameof(parameters.BuildingName))}");
         }
 
         [Then(@"I should get a valid join query statement for workstation")]
@@ -94,11 +94,11 @@
                 {
                     BuildingName = "Belfry Tower"
                 };
-            var buildingSqlBuilder = OrmConfiguration.GetSqlBuilder<Building>();
+            var buildingSqlBuilder = OrmConfiguration.GetSqlBuilder<BuildingDbEntity>();
             var expectedQuery =
-                $@" SELECT {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.WorkstationId))}, {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))}
+                $@" SELECT {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(WorkstationDbEntity.WorkstationId))}, {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(BuildingDbEntity.BuildingId))}
                     FROM {_currentSqlBuilder.GetTableName()}, {buildingSqlBuilder.GetTableName()}
-                    WHERE {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(Workstation.BuildingId))} = {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.BuildingId))} AND {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(Building.Name))}=@{nameof(parameters.BuildingName)}";
+                    WHERE {_currentSqlBuilder.GetTableName()}.{_currentSqlBuilder.GetColumnName(nameof(WorkstationDbEntity.BuildingId))} = {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(BuildingDbEntity.BuildingId))} AND {buildingSqlBuilder.GetTableName()}.{buildingSqlBuilder.GetColumnName(nameof(BuildingDbEntity.Name))}=@{nameof(parameters.BuildingName)}";
 
             Assert.That(_buildingRawJoinQueryStatement, Is.EqualTo(expectedQuery));
         }

@@ -6,7 +6,9 @@
     using System.Data.Common;
     using System.Diagnostics;
     using System.Linq;
+    using System.Text.Json;
     using Dapper.FastCrud.Tests.Common;
+    using Newtonsoft.Json;
 
     public class DatabaseTestContext
     {
@@ -14,11 +16,22 @@
         private readonly List<DatabaseEntityInstanceInfo> _queriedEntities = new List<DatabaseEntityInstanceInfo>();
         private readonly List<DatabaseEntityInstanceInfo> _updatedEntities = new List<DatabaseEntityInstanceInfo>();
 
+        public DatabaseTestContext()
+        {
+            this.JSonSerializerOptions = new JsonSerializerSettings()
+                {
+                    MaxDepth = 16,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    Formatting = Formatting.Indented,
+                };
+        }
+
         public string DatabaseName { get; } = "FastCrudTestDatabaseF8D8B1E3"; // we need something fairly unique here
         public string CurrentExecutionFolder { get; } = typeof(DatabaseTestContext).Assembly.GetDirectory();
         public Stopwatch Stopwatch { get; } = new Stopwatch();
         public DbConnection DatabaseConnection { get; set; }
         public int LastCountQueryResult { get; set; }
+        public JsonSerializerSettings JSonSerializerOptions {get;}
 
         public void RecordInsertedEntity<EntityType>(EntityType entityInstance)
         {

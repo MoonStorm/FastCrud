@@ -28,6 +28,15 @@
         protected abstract TStatementOptionsBuilder Builder { get; }
 
         /// <summary>
+        /// Has no effect on the join builder.
+        /// Provided in case you want to include conditional options.
+        /// </summary>
+        public TStatementOptionsBuilder NoOp()
+        {
+            return this.Builder;
+        }
+
+        /// <summary>
         /// The entity mapping override to be used for the joined entity.
         /// </summary>
         public TStatementOptionsBuilder WithEntityMappingOverride(EntityMapping<TReferencedEntity>? entityMapping)

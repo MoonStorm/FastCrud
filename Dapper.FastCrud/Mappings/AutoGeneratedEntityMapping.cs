@@ -117,29 +117,36 @@
         private IEnumerable<EntityRelationshipRegistration> DiscoverParentChildrenRelationships(Type entityType)
         {
             // this can be in the form of:
-            //     1. as a marked property of the same type decorated with an InversePropertyAttribute pointing back to our nav property
+            //     1. as a marked property of the same type decorated with an InversePropertyAttribute pointing back to our nav property (can even be an entity and not a collection for one-to-one relationships)
             //     2. an unmarked property of type IEnumerable<> OR
             var parentChildrenPropGroups = TypeDescriptor.GetProperties(entityType)
                                             .OfType<PropertyDescriptor>()
-                                            .Where(prop => !OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop).OfType<NotMappedAttribute>().Any()
-                                                                            &&prop.IsEntityCollectionProperty())
                                             .Select(prop =>
                                             {
-                                                var inverseAttributes = OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop)
-                                                                                        .OfType<InversePropertyAttribute>()
-                                                                                        .ToArray();
-                                                if (inverseAttributes.Length > 1)
+                                                Type? childType = null; // null if the prop is to be ignored
+                                                string? inverseNavPropertyName = null;
+                                                var propAttrs = OrmConfiguration.Conventions.GetEntityPropertyAttributes(entityType, prop);
+                                                if (!propAttrs.OfType<NotMappedAttribute>().Any())
                                                 {
-                                                    throw new InvalidOperationException($"The property '{prop.Name}' on the type '{entityType}' has {inverseAttributes.Length} InverseProperty attributes");
+                                                    var inverseAttr = propAttrs.OfType<InversePropertyAttribute>().SingleOrDefault();
+                                                    inverseNavPropertyName = inverseAttr?.Property;
+
+                                                    // it should be a collection or a complex object marked with InverseProperty
+                                                    if (inverseAttr!= null || prop.IsEntityCollectionProperty())
+                                                    {
+                                                        childType = prop.GetEntityType();
+                                                    }
                                                 }
+
                                                 return new
-                                                {
-                                                    prop = prop,
-                                                    childType = prop.PropertyType.GetGenericArguments()[0],
-                                                    inverseNavPropertyName = inverseAttributes.Select(attr => attr.Property).SingleOrDefault()
-                                                };
+                                                    {
+                                                        prop = prop,
+                                                        childType = childType,
+                                                        inverseNavPropertyName = inverseNavPropertyName
+                                                    };
                                             })
-                                            .GroupBy(prop => $"{prop.childType.AssemblyQualifiedName}_{prop.inverseNavPropertyName}")
+                                            .Where(propInfo => propInfo.childType!=null)
+                                            .GroupBy(propInfo => $"{propInfo.childType!.AssemblyQualifiedName}_{propInfo.inverseNavPropertyName}")
                                             .ToArray();
 
             foreach (var parentChildrenPropGroup in parentChildrenPropGroups)
