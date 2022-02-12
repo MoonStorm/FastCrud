@@ -40,7 +40,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.
 
-#### Release Notes
+#### Active Versions
 - 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
   - Main library:
     - Added support for .NET Standard 2.1
