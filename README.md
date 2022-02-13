@@ -42,7 +42,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
 #### Active Versions
 - 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
-  - Main library:
+  - Main library:  
     - Added support for .NET Standard 2.1
     - Extended support for the MetadataType attribute in .NET Standard 2.1
     - Bulk update can now be used with parameters.
@@ -52,15 +52,14 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
     - [Breaking change] Clean separation for the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
     - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
     - Relationships have been reworked:
-        - [Breaking change] The fluent mapping setup has changed for setting up relationships.
-        - The limit of 7 entities in a JOIN was removed.
-        - The main entity and the JOINed entities can now be aliased. It is now recommended to do so when working with multiple entities in a statement for easy targeting in the WHERE clause.
-        - JOIN support has been extended to the GET and COUNT methods.
-        - SQL statements no longer require the presence of a relationship preset in the mappings. You can join with whatever you want, using whatever navigation properties you want (or none) and with any ON clause you desire.
-        - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
-        - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).
-        - Added support for multiple references to the same target (via InverseProperty attribute / fluent mappings / directly in the query).
-    - A stable preview is available on NuGet (visible in VS when "Include preleleases" is checked in the Package Manager panel). 
+      - [Breaking change] The fluent mapping setup has changed for setting up relationships.
+      - The limit of 7 entities in a JOIN was removed.
+      - The main entity and the JOINed entities can now be aliased. It is now recommended to do so when working with multiple entities in a statement for easy targeting in the WHERE clause.
+      - JOIN support has been extended to the GET and COUNT methods.
+      - SQL statements no longer require the presence of a relationship preset in the mappings. You can join with whatever you want, using whatever navigation properties you want (or none) and with any ON clause you desire.
+      - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
+      - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).
+      - Added support for multiple references to the same target (via InverseProperty attribute / fluent mappings / directly in the query).
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.
