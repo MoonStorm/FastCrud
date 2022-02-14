@@ -12,8 +12,8 @@
     public interface ISqJoinOptionsSetter<TReferencedEntity, TStatementOptionsBuilder>
     {
         /// <summary>
-        /// Sets up an alias for the main entity to be used in a relationship.
-        /// It is recommended to add aliases to the joined entities as well.
+        /// Sets up an alias for the referenced entity to be used in a relationship.
+        /// It is recommended to add aliases to all the entities.
         /// </summary>
         TStatementOptionsBuilder WithAlias(string? referencedEntityAlias);
 
@@ -24,7 +24,7 @@
 
         /// <summary>
         /// Sets up the ON clause on the query.
-        /// Remember to use aliases instead of the entities in case you called <seealso cref="ToAlias"/> and <seealso cref="FromAlias"/>.
+        /// Remember to use aliases instead of the entities in case you called <seealso cref="WithAlias"/>.
         /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL ON clause you'd normally get automatically for the relationship.
         /// </summary>
         TStatementOptionsBuilder On(FormattableString? onClause);
@@ -65,7 +65,8 @@
         TStatementOptionsBuilder MapResults(bool mapResults = true);
 
         /// <summary>
-        /// Specifies the referencing entity inside a relationships.
+        /// Provides information about the referencing entity participating in the JOIN.
+        /// Multiple calls can be made to this method to add more links between other entities and the current one.
         /// </summary>
         TStatementOptionsBuilder Referencing<TReferencingEntity>(Action<ISqlJoinRelationshipOptionsBuilder<TReferencingEntity, TReferencedEntity>>? relationship = null);
     }

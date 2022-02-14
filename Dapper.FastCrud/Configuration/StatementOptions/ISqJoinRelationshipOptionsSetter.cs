@@ -13,7 +13,7 @@
     public interface ISqJoinRelationshipOptionsSetter<TReferencingEntity, TReferencedEntity, TStatementOptionsBuilder>
     {
         /// <summary>
-        /// If set to true, the results are set on <see cref="ToProperty(Expression?)"/> and <see cref="FromProperty(Expression?)"/>.
+        /// If set to true, the results are set on <see cref="FromProperty(Expression?)"/> and <see cref="ToProperty(Expression?)"/>.
         /// </summary>
         TStatementOptionsBuilder MapResults(bool mapResults = true);
 

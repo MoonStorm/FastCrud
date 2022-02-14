@@ -53,8 +53,8 @@
         }
 
         /// <summary>
-        /// Sets up an alias for the main entity to be used in a relationship.
-        /// It is recommended to add aliases to the joined entities as well.
+        /// Sets up an alias for the referenced entity to be used in a relationship.
+        /// It is recommended to add aliases to all entities as well.
         /// </summary>
         public TStatementOptionsBuilder WithAlias(string? referencedEntityAlias)
         {
@@ -63,7 +63,7 @@
         }
 
         /// <summary>
-        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="ToAlias"/>.
+        /// Sets up the ON clause on the query. Remember to use the alias for the related entity in case it was set with <seealso cref="WithAlias"/>.
         /// In case the relationship is already known through the mapping, calling this method will override the implicit SQL you'd normally get for the JOIN.
         /// However in this case it is recommended to use the final WHERE clause on the main query.
         /// </summary>
