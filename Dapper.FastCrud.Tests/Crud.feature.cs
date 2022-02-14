@@ -924,13 +924,20 @@ this.ScenarioInitialize(scenarioInfo);
         
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Batch update (build server test)")]
+        [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "10", "3", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "10", "3", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "asynchronous", null)]
         public virtual void BatchUpdateBuildServerTest(string databaseType, string entityType, string entityCount, string skip, string max, string methodType, string[] exampleTags)
         {
-            string[] tagsOfScenario = exampleTags;
+            string[] @__tags = new string[] {
+                    "AutomaticBuildServerTest"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity type", entityType);
@@ -939,7 +946,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 243
+#line 244
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -959,19 +966,19 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 244
+#line 245
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 245
+#line 246
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 246
+#line 247
  testRunner.And(string.Format("I batch update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 247
+#line 248
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 248
+#line 249
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1000,7 +1007,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 257
+#line 258
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1020,19 +1027,19 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 258
+#line 259
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 259
+#line 260
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 260
+#line 261
  testRunner.And(string.Format("I batch update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 261
+#line 262
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 262
+#line 263
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1063,7 +1070,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 271
+#line 272
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1083,19 +1090,19 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 272
+#line 273
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 273
+#line 274
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 274
+#line 275
  testRunner.And(string.Format("I batch delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 275
+#line 276
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 276
+#line 277
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1124,7 +1131,7 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 285
+#line 286
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -1144,19 +1151,19 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-#line 286
+#line 287
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 287
+#line 288
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 288
+#line 289
  testRunner.And(string.Format("I batch delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 289
+#line 290
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 290
+#line 291
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }

@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers
+﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Containers
 {
     using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Validations;
@@ -11,7 +11,7 @@
     /// <summary>
     /// Holds unique entities of a specific type.
     /// </summary>
-    internal class EntityContainer
+    internal class TypedEntityContainer
     {
         private readonly Dictionary<EntityInstanceWrapper, EntityInstanceWrapper> _globalEntityInstanceWrappers;
         private readonly IList _globalEntityInstances;
@@ -20,12 +20,12 @@
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public EntityContainer(Type entityType, IList? globalEntityInstances = null)
+        public TypedEntityContainer(Type entityType)
         {
             Requires.NotNull(entityType, nameof(entityType));
 
             this.EntityType = entityType;
-            _globalEntityInstances = globalEntityInstances ?? new List<object>();
+            _globalEntityInstances = new List<object>();
             _globalEntityInstanceWrappers = new Dictionary<EntityInstanceWrapper, EntityInstanceWrapper>();
             _localEntityInstances = new Dictionary<LocalEntityCollectionKey, Dictionary<EntityInstanceWrapper, EntityInstanceWrapper>>();
         }
@@ -123,7 +123,7 @@
             /// <see langword="true" /> if the specified object  is equal to the current object; otherwise, <see langword="false" />.</returns>
             public override bool Equals(object? obj)
             {
-                return ReferenceEquals(this, obj) || obj is LocalEntityCollectionKey other && Equals(other);
+                return ReferenceEquals(this, obj) || obj is LocalEntityCollectionKey other && this.Equals(other);
             }
 
             /// <summary>Serves as the default hash function.</summary>
@@ -133,7 +133,7 @@
                 return _hashCode.Value;
             }
 
-            /// <summary>Returns a value that indicates whether the values of two <see cref="T:Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.EntityContainer.LocalEntityCollectionKey" /> objects are equal.</summary>
+            /// <summary>Returns a value that indicates whether the values of two <see cref="T:Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Containers.EntityContainer.LocalEntityCollectionKey" /> objects are equal.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if the <paramref name="left" /> and <paramref name="right" /> parameters have the same value; otherwise, false.</returns>
@@ -142,7 +142,7 @@
                 return Equals(left, right);
             }
 
-            /// <summary>Returns a value that indicates whether two <see cref="T:Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.EntityContainer.LocalEntityCollectionKey" /> objects have different values.</summary>
+            /// <summary>Returns a value that indicates whether two <see cref="T:Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Containers.EntityContainer.LocalEntityCollectionKey" /> objects have different values.</summary>
             /// <param name="left">The first value to compare.</param>
             /// <param name="right">The second value to compare.</param>
             /// <returns>true if <paramref name="left" /> and <paramref name="right" /> are not equal; otherwise, false.</returns>

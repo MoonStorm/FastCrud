@@ -3,149 +3,67 @@
     using Dapper.FastCrud.Configuration.StatementOptions;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.EntityDescriptors;
-    using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Formatters;
     using Dapper.FastCrud.Formatters.Contexts;
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.Validations;
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
-    using System.Threading;
 
     /// <summary>
     /// This is mainly used by <seealso cref="GenericSqlStatements{TEntity}"/> class to
-    ///   analyze the join options passed in via <seealso cref="AggregatedRelationalSqlStatementOptions"/>
+    ///   analyze the join options passed in via <seealso cref="AggregatedSqlJoinOptions"/>
     ///   and entities having the information stored in <seealso cref="GenericSqlStatementFormatter"/> for the duration of the request.
     /// The analysis goes all the way to identify even the individual columns used in joining two entities.
     /// </summary>
     internal class SqlStatementJoin
     {
-        private readonly Lazy<GenericStatementSqlBuilder> _referencedEntitySqlBuilder;
-        private readonly Lazy<GenericStatementSqlBuilder> _referencingEntitySqlBuilder;
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        private SqlStatementJoin(
-            SqlJoinType joinType,
-            bool requiresResultMapping,
-            FormattableString? joinExtraWhereClause, // this is deprecated
-            FormattableString? joinExtraOrderByClause, // this is deprecated
-            FormattableString? joinOnClause,
-
-            EntityRelationshipType? relationshipType,
-
-            EntityDescriptor referencingEntityDescriptor,
-            EntityRegistration? referencingEntityRegistration,
-            SqlStatementFormatterResolver? referencingEntityResolver,
-            PropertyDescriptor? referencingNavigationProperty,
-            bool referencingNavigationPropertyIsCollection,
-            PropertyRegistration[]? referencingColumnProperties,
-
-            EntityDescriptor referencedEntityDescriptor,
-            EntityRegistration referencedEntityRegistration,
-            SqlStatementFormatterResolver referencedEntityResolver,
-            PropertyDescriptor? referencedNavigationProperty,
-            bool referencedNavigationPropertyIsCollection,
-            PropertyRegistration[]? referencedColumnProperties)
+        public SqlStatementJoin(
+            AggregatedSqlStatementOptions mainStatementOptions, 
+            AggregatedSqlJoinOptions joinStatementOptions)
         {
-            Requires.NotNull(referencingEntityDescriptor, nameof(referencingEntityDescriptor));
-            Requires.NotNull(referencedEntityDescriptor, nameof(referencedEntityDescriptor));
-            Requires.NotNull(referencedEntityRegistration, nameof(referencedEntityRegistration));
-            Requires.NotNull(referencedEntityResolver, nameof(referencedEntityResolver));
+            Requires.NotNull(mainStatementOptions, nameof(mainStatementOptions));
 
-            this.JoinType = joinType;
-            this.RequiresResultMapping = requiresResultMapping;
-            this.JoinExtraWhereClause = joinExtraWhereClause;
-            this.JoinExtraOrderByClause = joinExtraOrderByClause;
-            this.JoinOnClause = joinOnClause;
-            this.RelationshipType = relationshipType;
-
-            this.ReferencingEntityRegistration = referencingEntityRegistration;
-            this.ReferencingEntityFormatterResolver = referencingEntityResolver;
-            this.ReferencingNavigationProperty = referencingNavigationProperty;
-            this.ReferencingNavigationPropertyIsCollection = referencingNavigationPropertyIsCollection;
-            this.ReferencingColumnProperties = referencingColumnProperties;
-
-            this.ReferencedEntityRegistration = referencedEntityRegistration;
-            this.ReferencedEntityFormatterResolver = referencedEntityResolver;
-            this.ReferencedNavigationProperty = referencedNavigationProperty;
-            this.ReferencedNavigationPropertyIsCollection = referencedNavigationPropertyIsCollection;
-            this.ReferencedColumnProperties = referencedColumnProperties;
-
-            _referencingEntitySqlBuilder = new Lazy<GenericStatementSqlBuilder>(() => referencingEntityDescriptor.GetSqlBuilder(this.ReferencingEntityRegistration), LazyThreadSafetyMode.PublicationOnly);
-            _referencedEntitySqlBuilder = new Lazy<GenericStatementSqlBuilder>(() => referencedEntityDescriptor.GetSqlBuilder(this.ReferencedEntityRegistration), LazyThreadSafetyMode.PublicationOnly);
+            this.JoinType = joinStatementOptions.JoinType;
+            this.JoinOnClause = joinStatementOptions.JoinOnClause;
+            this.JoinExtraWhereClause = joinStatementOptions.ExtraWhereClause;
+            this.JoinExtraOrderByClause = joinStatementOptions.ExtraOrderClause;
+            this.ReferencedEntityFormatterResolver = joinStatementOptions.ReferencedEntityFormatterResolver;
+            this.ResolvedRelationships = this.DiscoverJoinRelationships(mainStatementOptions, joinStatementOptions);
         }
 
         /// <summary>
-        /// This property holds the referencing entity registration.
-        /// </summary>
-        public EntityRegistration? ReferencingEntityRegistration { get; }
-
-        /// <summary>
-        /// This property holds the referenced entity registration.
-        /// </summary>
-        public EntityRegistration ReferencedEntityRegistration { get; }
-
-        /// <summary>
-        /// If a matching relationship has been located from the entity registrations,
-        /// this property holds the referencing formatter resolver.
-        /// This had to be previously registered in <seealso cref="SqlStatementFormatterResolverMap"/>
-        /// and can be used to set the active resolver in <seealso cref="GenericSqlStatementFormatter.SetActiveMainResolver"/>.
-        /// </summary>
-        public SqlStatementFormatterResolver? ReferencingEntityFormatterResolver { get; }
-
-        /// <summary>
-        /// If a matching relationship has been located from the entity registrations,
-        /// this property holds the referenced formatter resolver.
-        /// This had to be previously registered in <seealso cref="SqlStatementFormatterResolverMap"/>
-        /// and can be used to set the active resolver in <seealso cref="GenericSqlStatementFormatter.SetActiveMainResolver"/>.
+        /// Gets the formatter resolver for the referenced entity.
         /// </summary>
         public SqlStatementFormatterResolver ReferencedEntityFormatterResolver { get; }
 
         /// <summary>
-        /// If a matching referencing-&lt;referenced relationship has been located from the entity registrations,
-        /// this holds the navigation property the relationship was set with.
-        /// Note that this is an optional feature when defining a relationship.
+        /// Gets the referenced entity descriptor.
         /// </summary>
-        public PropertyDescriptor? ReferencingNavigationProperty { get; }
+        public EntityDescriptor ReferencedEntityDescriptor => this.ReferencedEntityFormatterResolver.EntityDescriptor;
 
         /// <summary>
-        /// Returns true if the navigation property on the referencing property is a collection.
+        /// Gets the referenced entity registration.
         /// </summary>
-        public bool ReferencingNavigationPropertyIsCollection { get; }
+        public EntityRegistration ReferencedEntityRegistration => this.ReferencedEntityFormatterResolver.EntityRegistration;
 
         /// <summary>
-        /// If a matching referenced-&lt;referencing relationship has been located from the entity registrations,
-        /// this holds the navigation property the relationship was set with.
-        /// Note that this is an optional feature when defining a relationship.
+        /// Gets the SQL builder attached to the referenced entity.
         /// </summary>
-        public PropertyDescriptor? ReferencedNavigationProperty { get; }
+        public GenericStatementSqlBuilder ReferencedEntitySqlBuilder => this.ReferencedEntityFormatterResolver.SqlBuilder;
 
         /// <summary>
-        /// Returns true if the navigation property on the referenced property is a collection.
+        /// Returns the resolved relationships.
         /// </summary>
-        public bool ReferencedNavigationPropertyIsCollection { get; }
+        public SqlStatementJoinRelationship[] ResolvedRelationships;
 
         /// <summary>
-        /// If a matching relationship has been located from the entity registrations,
-        /// this holds the properties representing the columns on the referencing entity that are used to JOIN the two entities.
+        /// Returns true if any of the relationships require result mapping.
         /// </summary>
-        public PropertyRegistration[]? ReferencingColumnProperties { get; }
-
-        /// <summary>
-        /// If a matching relationship has been located from the entity registrations,
-        /// this holds the properties representing the columns on the referenced entity that are used to JOIN the two entities.
-        /// </summary>
-        public PropertyRegistration[]? ReferencedColumnProperties { get; }
-
-        /// <summary>
-        /// If a matching relationship has been located from the entity registrations,
-        /// this property holds the type of relationship found between the two entity types.
-        /// </summary>
-        public EntityRelationshipType? RelationshipType { get; }
+        public bool RequiresResultMapping => this.ResolvedRelationships.Any(rel => rel.MapResults);
 
         /// <summary>
         /// The JOIN ON clause. This overrides any relationship that was located through the entity relationship registrations.
@@ -165,173 +83,144 @@
         public FormattableString? JoinExtraOrderByClause { get; }
 
         /// <summary>
-        /// When this is set, the results should be populated in <seealso cref="ReferencingNavigationProperty"/> and <seealso cref="ReferencedNavigationProperty"/>.
-        /// </summary>
-        public bool RequiresResultMapping { get; }
-
-        /// <summary>
         /// The type of JOIN requested
         /// </summary>
         public SqlJoinType JoinType { get; }
 
-        /// <summary>
-        /// The SQL builder attached to the referencing entity.
-        /// </summary>
-        public GenericStatementSqlBuilder ReferencingEntitySqlBuilder => _referencingEntitySqlBuilder.Value;
-
-        /// <summary>
-        /// The SQL builder attached to the referenced entity.
-        /// </summary>
-        public GenericStatementSqlBuilder ReferencedEntitySqlBuilder => _referencedEntitySqlBuilder.Value;
-
-        /// <summary>
-        /// Attempts to find information about a JOIN.
-        /// </summary>
-        public static SqlStatementJoin From(
+        private SqlStatementJoinRelationship[] DiscoverJoinRelationships(
             AggregatedSqlStatementOptions statementOptions,
-            AggregatedRelationalSqlStatementOptions referencedJoinOptions)
+            AggregatedSqlJoinOptions joinOptions)
         {
-            Requires.NotNull(statementOptions, nameof(statementOptions));
-            Requires.NotNull(referencedJoinOptions, nameof(referencedJoinOptions));
+            var relationshipsToInvestigate = new List<RelationshipToInvestigate>();
 
-            EntityRelationshipType? referencingToReferencedRelationshipType = null;
-            EntityRelationshipType? referencedToReferencingRelationshipType = null;
-
-            EntityRegistration referencingEntityRegistration = referencedJoinOptions.ReferencingEntityFormatterResolver.EntityRegistration;
-            EntityRegistration referencedEntityRegistration = referencedJoinOptions.ReferencedEntityRegistration;
-
-            PropertyDescriptor? referencingNavigationProperty = referencedJoinOptions.ReferencingNavigationProperty;
-            PropertyDescriptor? referencedNavigationProperty = referencedJoinOptions.ReferencedNavigationProperty;
-            PropertyRegistration[]? referencingColumnProperties = null;
-            PropertyRegistration[]? referencedColumnProperties = null;
-
-            // UPDATE: the following was disabled as we could be very wrong
-            // try to guess the type of relationships we're dealing with here
-            // after we have located the actual relationship registrations, we'll update them
-            //if (referencingNavigationProperty != null)
-            //{
-            //    if (referencingNavigationProperty.IsEntityCollectionProperty())
-            //    {
-            //        referencingToReferencedRelationshipType = EntityRelationshipType.ParentToChildren;
-            //        referencedToReferencingRelationshipType = EntityRelationshipType.ChildToParent;
-            //    }
-            //    else
-            //    {
-            //        referencingToReferencedRelationshipType = EntityRelationshipType.ChildToParent;
-            //        referencedToReferencingRelationshipType = EntityRelationshipType.ParentToChildren;
-            //    }
-            //}
-            //else if (referencedNavigationProperty != null)
-            //{
-            //    if (referencedNavigationProperty.IsEntityCollectionProperty())
-            //    {
-            //        referencingToReferencedRelationshipType = EntityRelationshipType.ChildToParent;
-            //        referencedToReferencingRelationshipType = EntityRelationshipType.ParentToChildren;
-            //    }
-            //    else
-            //    {
-            //        referencingToReferencedRelationshipType = EntityRelationshipType.ParentToChildren;
-            //        referencedToReferencingRelationshipType = EntityRelationshipType.ChildToParent;
-            //    }
-            //}
-
-            // try to locate the referenced -> referencing relationship
-            EntityRelationshipRegistration? matchedReferencedToReferencingRelationship = referencedEntityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(
-                referencingEntityRegistration.EntityType,
-                relationshipTypeToFind: referencedToReferencingRelationshipType,
-                referencingNavigationPropertyToFind: referencedNavigationProperty);
-
-            // set some of our guesses with the real values
-            if (matchedReferencedToReferencingRelationship != null)
+            // if we were provided with anything in the JOINed relationships, we'll use that information for investigation
+            foreach (var providedJoinRelationship in joinOptions.JoinRelationships)
             {
-                referencedToReferencingRelationshipType = matchedReferencedToReferencingRelationship.RelationshipType;
-                referencedNavigationProperty ??= matchedReferencedToReferencingRelationship.ReferencingNavigationProperty;
+                var relationshipToInvestigate = new RelationshipToInvestigate(
+                    statementOptions.StatementFormatter.LocateResolver(providedJoinRelationship.ReferencingEntityDescriptor.EntityType, providedJoinRelationship.ReferencingEntityAlias),
+                    providedJoinRelationship.MapResults ?? joinOptions.MapResults
+                );
+
+                relationshipToInvestigate.ReferencingNavigationProperty = providedJoinRelationship.ReferencingNavigationProperty;
+                relationshipToInvestigate.ReferencedNavigationProperty = providedJoinRelationship.ReferencedNavigationProperty;
+
+                relationshipsToInvestigate.Add(relationshipToInvestigate);
             }
 
-            // now try to locate the referencing -> referenced relationship
-            var matchedReferencingToReferencedRelationship =
-                referencingEntityRegistration
-                    .TryLocateRelationshipThrowWhenMultipleAreFound(
-                        referencedEntityRegistration.EntityType,
-                        relationshipTypeToFind: referencingToReferencedRelationshipType,
-                        referencedColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
-                        {
-                            EntityRelationshipType.ChildToParent => matchedReferencedToReferencingRelationship.ReferencingColumnProperties,
-                            _ => Array.Empty<string>()
-                        },
-                        referencingColumnPropertiesToFind: matchedReferencedToReferencingRelationship?.RelationshipType switch
-                        {
-                            EntityRelationshipType.ParentToChildren => matchedReferencedToReferencingRelationship.ReferencedColumnProperties,
-                            _ => Array.Empty<string>()
-                        });
-
-            if (matchedReferencingToReferencedRelationship != null)
+            if (joinOptions.JoinRelationships.Count == 0)
             {
-                referencingNavigationProperty ??= matchedReferencingToReferencedRelationship.ReferencingNavigationProperty;
-                referencingToReferencedRelationshipType = matchedReferencingToReferencedRelationship.RelationshipType;
-            }
-
-            if (matchedReferencingToReferencedRelationship != null)
-            {
-                switch (referencingToReferencedRelationshipType)
+                // or look at all of them prior to this one
+                var previousUnusedEntityResolvers = statementOptions.Joins.TakeWhile(join => join != joinOptions)
+                                                                    .Select(join => join.ReferencedEntityFormatterResolver)
+                                                                    .Concat(new[] { statementOptions.MainEntityFormatterResolver });
+                                                                    //.Where(existingResolver => !relationshipsToInvestigate
+                                                                    //                            .Select(rel => rel.ReferencingEntityResolver)
+                                                                    //                            .Contains(existingResolver)
+                foreach (var otherResolver in previousUnusedEntityResolvers)
                 {
-                    case EntityRelationshipType.ChildToParent:
-                        referencingColumnProperties = matchedReferencingToReferencedRelationship!.ReferencingColumnProperties
-                                                                                                 .Select(prop => referencingEntityRegistration
-                                                                                                                 .GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
-                                                                                                 .ToArray();
-                        referencedColumnProperties = referencedEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
-                        break;
-                    case EntityRelationshipType.ParentToChildren:
-                        referencingColumnProperties = referencingEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
-                        referencedColumnProperties = matchedReferencingToReferencedRelationship!.ReferencedColumnProperties
-                                                                                                .Select(prop => referencedEntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(prop))
-                                                                                                .ToArray();
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unknown relationship type '{referencingToReferencedRelationshipType}' when trying to locate the column properties involved in a relationship.");
+                    var relationshipToInvestigate = new RelationshipToInvestigate(otherResolver, joinOptions.MapResults);
+                    relationshipsToInvestigate.Add(relationshipToInvestigate);
                 }
             }
 
-            if (referencedJoinOptions.JoinOnClause == null)
+            var analyzedRelationships = new List<SqlStatementJoinRelationship>(relationshipsToInvestigate.Count);
+            foreach (var relationshipToInvestigate in relationshipsToInvestigate)
             {
-                // we have to come up with the join condition ourselves, for which we need a set of columns to match
-                if (referencedColumnProperties == null || referencedColumnProperties.Length == 0)
+                // now we need to resolve the relationships to extract the matching column properties
+                // bear in mind though that we allow extra navigation properties to be added, or use the JOIN ON clause,
+                //    in which case we don't have to necessarily succeed at locating relationship registrations
+
+                var referencingRelationshipRegistration = relationshipToInvestigate
+                                                                  .ReferencingEntityResolver
+                                                                  .EntityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(
+                                                                      joinOptions.ReferencedEntityRegistration.EntityType,
+                                                                      referencingNavigationPropertyToFind: relationshipToInvestigate.ReferencingNavigationProperty);
+
+                var referencedRelationshipRegistration = joinOptions
+                                                         .ReferencedEntityRegistration
+                                                         .TryLocateRelationshipThrowWhenMultipleAreFound(
+                                                             relationshipToInvestigate.ReferencingEntityResolver.EntityRegistration.EntityType,
+                                                             referencingNavigationPropertyToFind: relationshipToInvestigate.ReferencedNavigationProperty);
+
+                PropertyRegistration[]? referencingEntityColumnProperties = null;
+                PropertyRegistration[]? referencedEntityColumnProperties = null;
+                PropertyDescriptor? referencingEntityNavigationProperty = null;
+                PropertyDescriptor? referencedEntityNavigationProperty = null;
+
+                // we need the referencing relationship
+                // if we found the reverse relationship but not the normal one, something's wrong
+                if (referencedRelationshipRegistration != null && referencingRelationshipRegistration == null)
                 {
-                    throw new InvalidOperationException($"Found no columns on the referenced entity '{referencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias}) that can participate in the JOIN with the referencing entity '{referencingEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}).");
+                    throw new InvalidOperationException($"Could not locate a matching relationship for '{relationshipToInvestigate.ReferencingEntityResolver.EntityRegistration.EntityType}' (alias '{relationshipToInvestigate.ReferencingEntityResolver.Alias}') -> '{joinOptions.ReferencedEntityRegistration.EntityType}' (alias: '{joinOptions.ReferencedEntityAlias}')");
                 }
 
-                if (referencingColumnProperties == null || referencingColumnProperties.Length == 0)
+                // now try to resolve our column properties used in the JOIN 
+                // also set up the optional navigation properties
+                if (referencingRelationshipRegistration != null)
                 {
-                    throw new InvalidOperationException($"Found no columns on the referencing entity '{referencingEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}) that can participate in the JOIN with the referenced entity '{referencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias}).");
+                    referencingEntityNavigationProperty = relationshipToInvestigate.ReferencingNavigationProperty ?? referencingRelationshipRegistration.ReferencingNavigationProperty;
+                    referencedEntityNavigationProperty = relationshipToInvestigate.ReferencedNavigationProperty ?? referencedRelationshipRegistration?.ReferencingNavigationProperty;
+
+                    // now try to resolve the referencing column properties
+                    switch (referencingRelationshipRegistration.RelationshipType)
+                    {
+                        case EntityRelationshipType.ChildToParent:
+                            referencingEntityColumnProperties = referencingRelationshipRegistration.ReferencingColumnProperties
+                                                                                                   .Select(propName => relationshipToInvestigate.ReferencingEntityResolver.EntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(propName))
+                                                                                                   .ToArray();
+                            referencedEntityColumnProperties = joinOptions.ReferencedEntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
+                            break;
+                        case EntityRelationshipType.ParentToChildren:
+                            referencingEntityColumnProperties = relationshipToInvestigate.ReferencingEntityResolver.EntityRegistration.GetAllOrderedFrozenPrimaryKeyRegistrations();
+                            referencedEntityColumnProperties = referencingRelationshipRegistration.ReferencedColumnProperties
+                                                                                                  .Select(propName => joinOptions.ReferencedEntityRegistration.GetOrThrowFrozenPropertyRegistrationByPropertyName(propName))
+                                                                                                  .ToArray();
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Unknown relationship type {referencingRelationshipRegistration.RelationshipType}");
+                    }
+
+                    // again check for imbalances
+                    if (referencingEntityColumnProperties.Length != referencedEntityColumnProperties.Length || referencingEntityColumnProperties.Length == 0)
+                    {
+                        throw new InvalidOperationException($"Invalid number of columns discovered for the relationship '{joinOptions.ReferencedEntityRegistration.EntityType}' (alias: '{joinOptions.ReferencedEntityAlias}') and '{relationshipToInvestigate.ReferencingEntityResolver.EntityRegistration.EntityType}' (alias '{relationshipToInvestigate.ReferencingEntityResolver.Alias}')");
+                    }
                 }
 
-                if (referencingColumnProperties.Length != referencedColumnProperties.Length)
+                // if we do have a relationship or navigation properties to record, do it now
+                if (referencingEntityColumnProperties != null || referencingEntityNavigationProperty != null || referencedEntityNavigationProperty != null)
                 {
-                    throw new InvalidOperationException($"The columns used in the JOIN '{referencedJoinOptions.ReferencingEntityDescriptor.EntityType}' (alias: {referencedJoinOptions.ReferencingEntityAlias}) -> '{referencedJoinOptions.ReferencedEntityRegistration.EntityType}' (alias: {referencedJoinOptions.ReferencedEntityAlias})  do not match by count.");
+                    var analyzedRelationship = new SqlStatementJoinRelationship(
+                        relationshipToInvestigate.ReferencingEntityResolver,
+                        referencingEntityNavigationProperty,
+                        referencingEntityColumnProperties,
+                        joinOptions.ReferencedEntityFormatterResolver,
+                        referencedEntityNavigationProperty,
+                        referencedEntityColumnProperties,
+                        relationshipToInvestigate.MapResults && (referencedEntityNavigationProperty != null || referencingEntityNavigationProperty != null));
+
+                    analyzedRelationships.Add(analyzedRelationship);
                 }
             }
 
-            // now we have everything we need
-            return new SqlStatementJoin(
-                referencedJoinOptions.JoinType,
-                referencedJoinOptions.MapResultToNavigationProperties,
-                referencedJoinOptions.ExtraWhereClause,
-                referencedJoinOptions.ExtraOrderClause,
-                referencedJoinOptions.JoinOnClause,
-                referencingToReferencedRelationshipType,
-                referencedJoinOptions.ReferencingEntityDescriptor,
-                referencingEntityRegistration,
-                referencedJoinOptions.ReferencingEntityFormatterResolver,
-                referencingNavigationProperty,
-                referencingNavigationProperty?.IsEntityCollectionProperty() == true,
-                referencingColumnProperties,
-                referencedJoinOptions.ReferencedEntityDescriptor,
-                referencedJoinOptions.ReferencedEntityRegistration,
-                referencedJoinOptions.ReferencedEntityFormatterResolver,
-                referencedNavigationProperty,
-                referencedNavigationProperty?.IsEntityCollectionProperty() == true,
-                referencedColumnProperties);
+            return analyzedRelationships.ToArray();
+
+        }
+
+        private class RelationshipToInvestigate
+        {
+            public RelationshipToInvestigate(
+                SqlStatementFormatterResolver referencingEntityResolver,
+                bool mapResults)
+            {
+                this.MapResults = mapResults;
+                this.ReferencingEntityResolver = referencingEntityResolver;
+            }
+
+            public bool MapResults { get; }
+            public SqlStatementFormatterResolver ReferencingEntityResolver { get; }
+            public PropertyDescriptor? ReferencingNavigationProperty { get; set; }
+            public PropertyDescriptor? ReferencedNavigationProperty { get; set; }
         }
     }
 }

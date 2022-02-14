@@ -12,10 +12,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
     var persons = dbConnection.Find<Person>(statement => statement
         .WithAlias("person")
-        .InnerJoin<Person, Address>(join => join
-                                            .FromAlias("person")
-                                            .ToAlias("address")
-                                            .MapResults())
+        .Include<Address>(join => join.InnerJoin().WithAlias("address"))
         .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
         .OrderBy($"{nameof(Person.LastName):of person} DESC")  
         .Skip(10)  
@@ -84,7 +81,6 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
   - InsertAsync now calling the corresponding async Dapper method.
   - Added support for TimeSpan.
   - CI relocated.
-
 
 
 #### WIKI

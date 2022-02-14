@@ -244,7 +244,7 @@
 
             return tableAlias == null && (joinsRequiringColumnEnumeration == null || joinsRequiringColumnEnumeration.Length == 0)
                        ? _noAliasColumnEnumerationForSelect.Value : 
-                       this.ConstructColumnEnumerationForSelectInternal(tableAlias, joins);
+                       this.ConstructColumnEnumerationForSelectInternal(tableAlias, joinsRequiringColumnEnumeration);
         }
 
         /// <summary>
@@ -723,27 +723,31 @@
                     finalFromClause = $"{finalFromClause} ON ";
 
                     var firstColumnMatching = true;
-                    for (var joinColumnIndex = 0; joinColumnIndex < join.ReferencingColumnProperties!.Length; joinColumnIndex++)
+                    foreach (var joinRelationship in join.ResolvedRelationships
+                                                         .Where(relationship => relationship.ReferencingColumnProperties != null && relationship.ReferencedColumnProperties != null))
                     {
-                        if (firstColumnMatching)
+                        for (var columnIndex = 0; columnIndex < joinRelationship.ReferencingColumnProperties.Length; columnIndex++)
                         {
-                            firstColumnMatching = false;
-                        }
-                        else
-                        {
-                            finalFromClause = $"{finalFromClause} AND";
-                        }
+                            if (firstColumnMatching)
+                            {
+                                firstColumnMatching = false;
+                            }
+                            else
+                            {
+                                finalFromClause = $"{finalFromClause} AND";
+                            }
 
-                        var referencingFullyQualifiedColumn = join.ReferencingEntitySqlBuilder.GetColumnName(
-                            join.ReferencingColumnProperties[joinColumnIndex],
-                            join.ReferencingEntityFormatterResolver!.Alias ?? join.ReferencingEntityRegistration!.TableName,
-                            false);
-                        var referencedFullyQualifiedColumn = join.ReferencedEntitySqlBuilder.GetColumnName(
-                            join.ReferencedColumnProperties![joinColumnIndex],
-                            join.ReferencedEntityFormatterResolver!.Alias ?? join.ReferencedEntityRegistration.TableName,
-                            false);
+                            var referencingFullyQualifiedColumn = joinRelationship.ReferencingEntitySqlBuilder.GetColumnName(
+                                joinRelationship.ReferencingColumnProperties[columnIndex],
+                                joinRelationship.ReferencingEntityFormatterResolver!.Alias ?? joinRelationship.ReferencingEntityRegistration.TableName,
+                                false);
+                            var referencedFullyQualifiedColumn = joinRelationship.ReferencedEntitySqlBuilder.GetColumnName(
+                                joinRelationship.ReferencedColumnProperties[columnIndex],
+                                joinRelationship.ReferencedEntityFormatterResolver.Alias ?? joinRelationship.ReferencedEntityRegistration.TableName,
+                                false);
 
-                        finalFromClause = $"{finalFromClause} {referencingFullyQualifiedColumn} = {referencedFullyQualifiedColumn}";
+                            finalFromClause = $"{finalFromClause} {referencingFullyQualifiedColumn} = {referencedFullyQualifiedColumn}";
+                        }
                     }
                 }
             }

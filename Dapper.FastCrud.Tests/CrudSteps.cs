@@ -351,12 +351,12 @@
                 // we have to escape Specflow's bad synchronization context
                 queriedEntities = await Task.Run(async () =>
                 {
-                    return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options.LeftJoin<EmployeeDbEntity, BadgeDbEntity>(join => join.MapResults()));
+                    return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options.Include<BadgeDbEntity>());
                 });
             }
             else
             {
-                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options.LeftJoin<EmployeeDbEntity, BadgeDbEntity>(join => join.MapResults()));
+                queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options.Include<BadgeDbEntity>(join => join.LeftOuterJoin().MapResults()));
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -386,14 +386,15 @@
                     return await _testContext.DatabaseConnection.FindAsync<EmployeeDbEntity>(options => options
                                                                                                 .WithAlias("em")
                                                                                                 .WithEntityMappingOverride(employeeMappingNoRelationships)
-                                                                                                .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join
-                                                                                                                                         .FromAlias("em")
-                                                                                                                                         .FromNavigationProperty(employee => employee.Workstation)
-                                                                                                                                         .ToAlias("ws")
-                                                                                                                                         .WithEntityMappingOverride(workstationMappingNoRelationships)
-                                                                                                                                         .ToNavigationProperty(workstation => workstation.Employees)
-                                                                                                                                         .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
-                                                                                                ));
+                                                                                                .Include<WorkstationDbEntity>(join => join.WithEntityMappingOverride(workstationMappingNoRelationships)
+                                                                                                                                          .MapResults(true)
+                                                                                                                                          .WithAlias("ws")
+                                                                                                                                          .Referencing<EmployeeDbEntity>(rel => 
+                                                                                                                                              rel.FromAlias("em")
+                                                                                                                                                 .FromProperty(employee => employee.Workstation)
+                                                                                                                                                 .ToProperty(workstation => workstation.Employees))
+                                                                                                                                          .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
+                                                                                                                                          ));
                 });
             }
             else
@@ -401,13 +402,14 @@
                 queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
                                                                                           .WithAlias("em")
                                                                                           .WithEntityMappingOverride(employeeMappingNoRelationships)
-                                                                                          .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join
-                                                                                                                                   .WithEntityMappingOverride(workstationMappingNoRelationships)
-                                                                                                                                   .FromAlias("em")
-                                                                                                                                   .FromNavigationProperty(employee => employee.Workstation)
-                                                                                                                                   .ToAlias("ws")
-                                                                                                                                   .ToNavigationProperty(workstation => workstation.Employees)
-                                                                                                                                   .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
+                                                                                          .Include<WorkstationDbEntity>(join => join.WithEntityMappingOverride(workstationMappingNoRelationships)
+                                                                                                                                    .MapResults(true)
+                                                                                                                                    .WithAlias("ws")
+                                                                                                                                    .Referencing<EmployeeDbEntity>(rel =>
+                                                                                                                                                                       rel.FromAlias("em")
+                                                                                                                                                                           .FromProperty(employee => employee.Workstation)
+                                                                                                                                                                           .ToProperty(workstation => workstation.Employees))
+                                                                                                                                    .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")
                                                                                           ));
             }
 
@@ -459,25 +461,18 @@
                                           return await _testContext.DatabaseConnection
                                                                    .FindAsync<EmployeeDbEntity>(options => options
                                                                                                    .WithAlias("e")
-                                                                                                   .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(
-                                                                                                       join => join
-                                                                                                               .FromAlias("e")
-                                                                                                               .ToAlias("ws")
-                                                                                                               .MapResults()
-                                                                                                       )
-                                                                                                   .LeftJoin<WorkstationDbEntity, BuildingDbEntity>(
-                                                                                                       join => join
-                                                                                                               .FromAlias("ws")
-                                                                                                               .ToAlias("b")
-                                                                                                               .MapResults()));
+                                                                                                   .Include<WorkstationDbEntity>()
+                                                                                                   .Include<BuildingDbEntity>()
+                                                                                                   );
                                       }
                                   );
             }
             else
             {
                 queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
-                                                                                            .LeftJoin<EmployeeDbEntity, WorkstationDbEntity>(join => join.MapResults())
-                                                                                            .LeftJoin<WorkstationDbEntity, BuildingDbEntity>(join => join.MapResults()));
+                                                                                                    .Include<WorkstationDbEntity>()
+                                                                                                    .Include<BuildingDbEntity>()
+                );
             }
 
             foreach (var queriedEntity in queriedEntities)
@@ -511,18 +506,16 @@
                 {
                     return await _testContext.DatabaseConnection
                                              .FindAsync<EmployeeDbEntity>(options => options
-                                                                             .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>( 
-                                                                                 join => join
-                                                                                         .FromNavigationProperty(employee => employee.Manager)
-                                                                                         .ToNavigationProperty(manager => manager.ManagedEmployees)
-                                                                                         .ToAlias("manager")
-                                                                                         .MapResults())
-                                                                             .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
-                                                                                 join => join
-                                                                                             .FromNavigationProperty(employee => employee.Supervisor)
-                                                                                             .ToNavigationProperty(manager => manager.SupervisedEmployees)
-                                                                                             .ToAlias("supervisor")
-                                                                                             .MapResults())
+                                                                                     .Include<EmployeeDbEntity>(join => join
+                                                                                                                        .WithAlias("manager")
+                                                                                                                        .Referencing<EmployeeDbEntity>(rel => rel
+                                                                                                                                                           .FromProperty(employee => employee.Manager)
+                                                                                                                                                           .ToProperty(manager => manager.ManagedEmployees)))
+                                                                                     .Include<EmployeeDbEntity>(join => join
+                                                                                                                    .WithAlias("supervisor")
+                                                                                                                    .Referencing<EmployeeDbEntity>(rel => rel
+                                                                                                                                                          .FromProperty(employee => employee.Supervisor)
+                                                                                                                                                          .ToProperty(employee => employee.SupervisedEmployees)))
                                                                              .Where(lastInsertedRecordCount.HasValue
                                                                                         ? (FormattableString?)$"{nameof(EmployeeDbEntity.RecordIndex):TC}>={nameof(queryParams.MinRecordIndex):P}"
                                                                                         : (FormattableString?)null)
@@ -537,20 +530,18 @@
             {
                 queriedEntities = _testContext.DatabaseConnection.Find<EmployeeDbEntity>(options => options
                                                                                             .WithAlias("employee")
-                                                                                            .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
-                                                                                                join => join
-                                                                                                        .FromNavigationProperty(employee => employee.Manager)
-                                                                                                        .ToNavigationProperty(manager => manager.ManagedEmployees)
-                                                                                                        .FromAlias("employee")
-                                                                                                        .ToAlias("manager")
-                                                                                                        .MapResults())
-                                                                                            .LeftJoin<EmployeeDbEntity, EmployeeDbEntity>(
-                                                                                                join => join
-                                                                                                        .FromNavigationProperty(employee => employee.Supervisor)
-                                                                                                        .ToNavigationProperty(manager => manager.SupervisedEmployees)
-                                                                                                        .FromAlias("employee")
-                                                                                                        .ToAlias("supervisor")
-                                                                                                        .MapResults())
+                                                                                            .Include<EmployeeDbEntity>(join => join
+                                                                                                                               .WithAlias("manager")
+                                                                                                                               .Referencing<EmployeeDbEntity>(rel => rel
+                                                                                                                                                                     .FromAlias("employee")
+                                                                                                                                                                     .FromProperty(employee => employee.Manager)
+                                                                                                                                                                     .ToProperty(manager => manager.ManagedEmployees)))
+                                                                                            .Include<EmployeeDbEntity>(join => join
+                                                                                                                               .WithAlias("supervisor")
+                                                                                                                               .Referencing<EmployeeDbEntity>(rel => rel
+                                                                                                                                                                     .FromAlias("employee")
+                                                                                                                                                                     .FromProperty(employee => employee.Supervisor)
+                                                                                                                                                                     .ToProperty(employee => employee.SupervisedEmployees)))
                                                                                             .Where(lastInsertedRecordCount.HasValue
                                                                                                        ? (FormattableString?)$"{nameof(EmployeeDbEntity.RecordIndex):of employee}>={nameof(queryParams.MinRecordIndex):P}"
                                                                                                        : (FormattableString?)null)
@@ -670,12 +661,12 @@
         public async Task WhenIQueryForTheCountOfAllTheWorkstationEntitiesCombinedWithTheEmployeeEntitiesUsingMethods(bool useAsyncMethods)
         {
             _testContext.LastCountQueryResult = useAsyncMethods
-                ? await _testContext.DatabaseConnection.CountAsync<WorkstationDbEntity>(statement => statement
-                                                                                        // old way
-                                                                                    .Include<EmployeeDbEntity>(join => join.InnerJoin()))
-                : _testContext.DatabaseConnection.Count<WorkstationDbEntity>(statement => statement
-                                                                         // new way
-                                                                         .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>());
+                                                    ? await _testContext.DatabaseConnection.CountAsync<WorkstationDbEntity>(statement => statement
+                                                                                                                                // old way
+                                                                                                                                .Include<EmployeeDbEntity>(join => join.InnerJoin()))
+                                                    : _testContext.DatabaseConnection.Count<WorkstationDbEntity>(statement => statement
+                                                                                                                              .WithAlias("ws")
+                                                                                                                              .Include<EmployeeDbEntity>(join => join.InnerJoin()));
         }
 
         [When(@"I query for the count of all the workstation entities combined with the employee entities when no relationships or navigation properties are set up using (.*) methods")]
@@ -695,23 +686,23 @@
                                                                                                    statement
                                                                                                            .WithAlias("ws")
                                                                                                            .WithEntityMappingOverride(workstationMappingNoRelationships)
-                                                                                                           .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>(join => join
-                                                                                                                                                                     .FromAlias("ws")
-                                                                                                                                                                     .ToAlias("em")
-                                                                                                                                                                     .WithEntityMappingOverride(employeeMappingNoRelationships)
-                                                                                                                                                                     .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
+                                                                                                           .Include<EmployeeDbEntity>(join => join
+                                                                                                                                              .InnerJoin()
+                                                                                                                                              .WithAlias("em")
+                                                                                                                                              .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                                                                              .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
             }
             else
             {
                 _testContext.LastCountQueryResult = _testContext.DatabaseConnection.Count<WorkstationDbEntity>(statement =>
                                                                                                                 statement
                                                                                                                     .WithAlias("ws")
-                                                                                                                    .InnerJoin<WorkstationDbEntity, EmployeeDbEntity>(join => join
-                                                                                                                                                              .WithEntityMappingOverride(employeeMappingNoRelationships)
-                                                                                                                                                              .FromAlias("ws")
-                                                                                                                                                              .ToAlias("em")
-                                                                                                                                                              .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
-
+                                                                                                                    .Include<EmployeeDbEntity>(join => join
+                                                                                                                                                       .MapResults(false)
+                                                                                                                                                       .InnerJoin()
+                                                                                                                                                       .WithAlias("em")
+                                                                                                                                                       .WithEntityMappingOverride(employeeMappingNoRelationships)
+                                                                                                                                                       .On($"{nameof(EmployeeDbEntity.WorkstationId):of em} = {nameof(WorkstationDbEntity.WorkstationId):of ws}")));
             }
         }
 

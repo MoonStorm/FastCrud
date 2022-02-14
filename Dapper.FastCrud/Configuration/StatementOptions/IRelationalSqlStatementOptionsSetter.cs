@@ -15,27 +15,10 @@
         public TStatementOptionsBuilder WithAlias(string? mainEntityAlias);
         
         /// <summary>
-        /// Includes a referred entity into the query. The relationship must be set up prior to calling this method.
+        /// Includes a referenced entity into the query.
+        /// The referencing entity will tried to be inferred.
+        /// If more than one relationship was found between one of the existing entities and <seealso cref="TReferencedEntity"/>, use the join relationship options to add more information to be used in locating the relationship.
         /// </summary>
-        [Obsolete(message:"This method will be removed in a future version. Please use the Join methods instead.", error:false)]
-        TStatementOptionsBuilder Include<TReferredEntity> (Action<ILegacySqlRelationOptionsBuilder<TReferredEntity>>? join = null);
-
-        /// <summary>
-        /// Performs an INNER JOIN between the two entities provided.
-        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
-        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
-        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
-        /// </summary>
-        /// <param name="join">Optional join options.</param>
-        TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
-
-        /// <summary>
-        /// Performs a LEFT OUTER JOIN between the two entities provided.
-        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
-        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
-        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
-        /// </summary>
-        /// <param name="join">Optional join options.</param>
-        public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null);
+        TStatementOptionsBuilder Include<TReferencedEntity> (Action<ISqlJoinOptionsBuilder<TReferencedEntity>>? join = null);
     }
 }

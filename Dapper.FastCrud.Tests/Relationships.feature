@@ -27,6 +27,7 @@ Scenario Outline: Query single relationship parent with children (external datab
 	| MySql         | 10           | synchronous  |
 	| MySql         | 10           | asynchronous |
 
+@AutomaticBuildServerTest
 Scenario Outline: Query single relationship one-to-one (build server test)
 	Given I have initialized a <database type> database
 	When I insert <employee count> employee entities using <method type> methods
@@ -299,7 +300,7 @@ Scenario Outline: Query two relationships back to the same entity (build server 
 	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | referenced entity count | referencing entity count | method type  |
-	| LocalDb       | 10                      | 5                        | synchronous  |
+	| LocalDb       | 3                       | 2                        | synchronous  |
 	| LocalDb       | 10                      | 5                        | asynchronous |
 
 @ExternalDatabase

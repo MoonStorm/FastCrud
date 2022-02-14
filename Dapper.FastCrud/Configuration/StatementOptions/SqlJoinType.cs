@@ -19,10 +19,5 @@
         /// Inner join
         /// </summary>
         InnerJoin,
-
-        /// <summary>
-        /// Cross join
-        /// </summary>
-        CrossJoin
     }
 }

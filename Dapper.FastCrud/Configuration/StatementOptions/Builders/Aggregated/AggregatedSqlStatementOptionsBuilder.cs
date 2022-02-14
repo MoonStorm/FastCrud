@@ -151,123 +151,26 @@
             return this.Builder;
         }
 
-        /// <summary>
-        /// Performs an INNER JOIN between the two entities provided.
-        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
-        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
-        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
-        /// </summary>
-        /// <param name="join">Optional join options.</param>
-        public TStatementOptionsBuilder InnerJoin<TReferencingEntity, TReferencedEntity>(
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(SqlJoinType.InnerJoin, join);
-            return this.Builder;
-        }
-
-        /// <summary>
-        /// Performs a LEFT OUTER JOIN between the two entities provided.
-        /// If the mapped relationship can't be inferred from the entity relationship mappings, use
-        ///   <code>FromNavigationProperty</code>, <code>ToNavigationProperty</code>, <code>FromAlias</code> and <code>ToAlias</code> on the <paramref name="join"/>.
-        /// If you don't intend to use a relationship mapping, use <code>On</code> on the <paramref name="join"/>.
-        /// </summary>
-        /// <param name="join">Optional join options.</param>
-        public TStatementOptionsBuilder LeftJoin<TReferencingEntity, TReferencedEntity>(
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? join = null)
-        {
-            this.ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(SqlJoinType.LeftOuterJoin, join);
-            return this.Builder;
-        }
 
         /// <summary>
         /// Includes a referred entity into the query. The relationship and the associated mappings must be set up prior to calling this method.
         /// </summary>
-        [Obsolete(message: "This method will be removed in a future version. Please use the Join methods instead.", error: false)]
-        public TStatementOptionsBuilder Include<TReferencedEntity>(Action<ILegacySqlRelationOptionsBuilder<TReferencedEntity>>? join = null)
+        public TStatementOptionsBuilder Include<TReferencedEntity>(Action<ISqlJoinOptionsBuilder<TReferencedEntity>>? join = null)
         {
-            // this is an old method that supports a single entity relationship of the type provided
+            var joinOptionsBuilder = new SqlJoinOptionsBuilder<TReferencedEntity>();
+            joinOptionsBuilder.LeftOuterJoin();
+            joinOptionsBuilder.MapResults(true);
 
-            // first attempt to fetch the legacy options in any way we can (fake the referencing entity)
-            var originalOptionsBuilder = new LegacySqlRelationOptionsBuilder<TReferencedEntity>(OrmConfiguration.GetEntityDescriptor<FakeEntity>());
-            originalOptionsBuilder.OfType(SqlJoinType.LeftOuterJoin); // default for legacy
-            join?.Invoke(originalOptionsBuilder);
+            join?.Invoke(joinOptionsBuilder);
 
-            // let's try to find a matching relationship through the joins already provided to us
-            var matchedReferencingRelationships = new[]
-                                                  {
-                                                      new
-                                                      {
-                                                          EntityDescriptor = this.EntityDescriptor,
-                                                          EntityRegistration = this.EntityRegistration
-                                                      }
-                                                      
-                                                  }
-                                       .Concat(this.JoinOptions.Select(join =>
-                                       {
-                                           return new
-                                           {
-                                               EntityDescriptor = join.ReferencedEntityDescriptor, 
-                                               EntityRegistration = join.ReferencedEntityRegistration
-                                           };
-                                       }))
-                                       .Select(info =>
-                                       {
-                                           return new
-                                           {
-                                               EntityDescriptor = info.EntityDescriptor,
-                                               MatchedRelationship = info.EntityRegistration.TryLocateRelationshipThrowWhenMultipleAreFound(typeof(TReferencedEntity))
-                                           };
-                                       })
-                                       .Where(entityRegistrationRelationship => entityRegistrationRelationship.MatchedRelationship != null)
-                                       .ToArray();
-            if (matchedReferencingRelationships.Length == 0)
-            {
-                throw new InvalidOperationException($"Unable to locate any relationship where the referenced entity is '{typeof(TReferencedEntity)}'. It is recommended to use the Join methods instead.");
-            }
+            //perform a validation prior to adding the join
+            joinOptionsBuilder.ReferencedEntityFormatterResolver = this.StatementFormatter.RegisterResolver(
+                joinOptionsBuilder.ReferencedEntityDescriptor,
+                joinOptionsBuilder.ReferencedEntityRegistration,
+                joinOptionsBuilder.ReferencedEntityAlias);
+            this.Joins.Add(joinOptionsBuilder);
 
-            if (matchedReferencingRelationships.Length > 1)
-            {
-                throw new InvalidOperationException($"More than one relationships where found having the referenced entity as '{typeof(TReferencedEntity)}'. It is recommended to use the Join methods instead.");
-            }
-
-            var matchedReferencingRelationship = matchedReferencingRelationships[0];
-
-            // recreate the legacy builder but with a proper entity type now
-            var finalOptionsBuilder = new LegacySqlRelationOptionsBuilder<TReferencedEntity>(matchedReferencingRelationship.EntityDescriptor);
-            finalOptionsBuilder.OfType(originalOptionsBuilder.JoinType);
-            finalOptionsBuilder.UsingReferencingEntityNavigationProperty(matchedReferencingRelationship.MatchedRelationship!.ReferencingNavigationProperty);
-            finalOptionsBuilder.MapResults(matchedReferencingRelationship.MatchedRelationship!.ReferencingNavigationProperty!=null);
-            finalOptionsBuilder.WithEntityMappingOverride(new EntityMapping<TReferencedEntity>(originalOptionsBuilder.ReferencedEntityRegistration));
-            finalOptionsBuilder.Where(originalOptionsBuilder.ExtraWhereClause);
-            finalOptionsBuilder.OrderBy(originalOptionsBuilder.ExtraOrderClause);
-
-            this.ValidateAndAddJoin(finalOptionsBuilder);
             return this.Builder;
-        }
-
-        private void ValidateAndAddJoin<TReferencingEntity, TReferencedEntity>(
-            SqlJoinType joinType,
-            Action<ISqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>>? joinOptionsSetter)
-        {
-            var optionsBuilder = new SqlRelationOptionsBuilder<TReferencingEntity, TReferencedEntity>();
-            optionsBuilder.OfType(joinType);
-            joinOptionsSetter?.Invoke(optionsBuilder);
-
-            this.ValidateAndAddJoin(optionsBuilder);
-        }
-
-        private void ValidateAndAddJoin(AggregatedRelationalSqlStatementOptions joinOptions)
-        {
-            // for an early warning, perform the validation now
-            joinOptions.ReferencingEntityFormatterResolver = this.StatementFormatter.LocateResolver(
-                joinOptions.ReferencingEntityDescriptor.EntityType,
-                joinOptions.ReferencingEntityAlias);
-            joinOptions.ReferencedEntityFormatterResolver = this.StatementFormatter.RegisterResolver(
-                joinOptions.ReferencedEntityDescriptor, 
-                joinOptions.ReferencedEntityRegistration, 
-                joinOptions.ReferencedEntityAlias);
-
-            this.JoinOptions.Add(joinOptions);
         }
 
     }

@@ -401,11 +401,24 @@
 
             if (locatedRelationships.Length > 1)
             {
-                // nothing to do
-                var entityRelationshipsDesc = string.Join(
-                    "; ",
-                    locatedRelationships.Select(rel => $"relationship of type {rel.RelationshipType} with referencing navigation property '{rel.ReferencingNavigationProperty?.Name}' and referencing column properties {string.Join(", ", rel.ReferencingColumnProperties?.Select(prop=> $"'{prop}'")??Array.Empty<string>())} to '{rel.ReferencedEntity}' and referenced column properties {string.Join(", ", rel.ReferencedColumnProperties?.Select(prop => $"'{prop}'") ?? Array.Empty<string>())}"));
-                throw new InvalidOperationException($"More than one relationship has been found ({entityRelationshipsDesc})");
+                string message = $"More than one relationship has been found from '{this.EntityType}': ";
+
+                foreach (var locatedRelationship in locatedRelationships)
+                {
+                    switch (locatedRelationship.RelationshipType)
+                    {
+                        case EntityRelationshipType.ChildToParent:
+                            message = $"{message} child [{string.Join(", ", locatedRelationship.ReferencingColumnProperties)}] to parent '{locatedRelationship.ReferencedEntity}'; ";
+                            break;
+                        case EntityRelationshipType.ParentToChildren:
+                            message = $"{message} parent to child '{locatedRelationship.ReferencedEntity}' [[{string.Join(", ", locatedRelationship.ReferencedColumnProperties)}]]; ";
+                            break;
+                        default:
+                            message = $"{message} '{this.EntityType}' and '{locatedRelationship.ReferencedEntity}'; ";
+                            break;
+                    }
+                }
+                throw new InvalidOperationException(message );
             }
 
             return locatedRelationships.SingleOrDefault();

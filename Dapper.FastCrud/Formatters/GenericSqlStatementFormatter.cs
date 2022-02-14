@@ -71,6 +71,14 @@
         }
 
         /// <summary>
+        /// Gets all the formatters registered, excluding the set provided.
+        /// </summary>
+        public SqlStatementFormatterResolver[] GetAllFormatterResolversExcluding(params SqlStatementFormatterResolver[] unwantedResolvers)
+        {
+            return _resolverMap.GetAllFormatterResolversExcluding(unwantedResolvers);
+        }
+
+        /// <summary>
         /// Sets the main resolver used for incomplete column resolutions.
         /// The resolver MUST be registered first with <seealso cref="RegisterResolver"/>.
         /// Call the result's <seealso cref="IDisposable.Dispose"/> to restore the previous main resolver.

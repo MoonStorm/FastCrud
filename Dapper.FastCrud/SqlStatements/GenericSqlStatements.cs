@@ -9,7 +9,8 @@
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.SqlBuilders;
     using Dapper.FastCrud.SqlStatements.MultiEntity;
-    using Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Stages;
+    using Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers;
+    using Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Containers;
     using Dapper.FastCrud.Validations;
     using System;
 
@@ -41,7 +42,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TEntity? SelectById(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
         {
-            if (statementOptions.MainEntityAlias != null || statementOptions.JoinOptions.Count > 0)
+            if (statementOptions.MainEntityAlias != null || statementOptions.Joins.Count > 0)
             {
                 // this is no longer a simple entity selection, turn it into a full blown batch select
                 statementOptions.WhereClause = $"{_sqlBuilder.ConstructKeysWhereClause(statementOptions.MainEntityAlias??statementOptions.EntityRegistration.TableName)}";
@@ -62,7 +63,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<TEntity?> SelectByIdAsync(IDbConnection connection, TEntity keyEntity, AggregatedSqlStatementOptions statementOptions)
         {
-            if (statementOptions.MainEntityAlias != null || statementOptions.JoinOptions.Count > 0)
+            if (statementOptions.MainEntityAlias != null || statementOptions.Joins.Count > 0)
             {
                 // this is no longer a simple entity selection, turn it into a full blown batch select
                 statementOptions.WhereClause = $"{_sqlBuilder.ConstructKeysWhereClause(statementOptions.MainEntityAlias??statementOptions.EntityRegistration.TableName)}";
@@ -364,8 +365,9 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray();
-            if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
+            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray()??Array.Empty<SqlStatementJoin>();
+            /* UPDATE: makes no difference, since even joins but without the joined columns can return duplicate entries
+             if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
             {
                 results = connection.Query<TEntity>(
                     selectStatement,
@@ -375,13 +377,13 @@
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
 
             }
-            else
+            else*/
             {
                 var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
-                var mainEntityJoinParser = new MainEntityResultSetParserStage<TEntity>(joinsWithResultSetMappings);
+                var mainEntityJoinParser = new MainEntityResultSetParser<TEntity>(joinsWithResultSetMappings);
                 var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
 
-                connection.Query<MainEntityResultSetParserStage<TEntity>>(
+                connection.Query<MainEntityResultSetParser<TEntity>>(
                     selectStatement,
                     new[]{statementOptions.EntityRegistration.EntityType}
                         .Concat(joinsWithResultSetMappings.Select(join => join.ReferencedEntityRegistration.EntityType))
@@ -436,7 +438,8 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray();
+            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray()??Array.Empty<SqlStatementJoin>(); 
+            /* UPDATE: makes no difference, since even joins but without the joined columns can return duplicate entries
             if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
             {
                 results = await connection.QueryAsync<TEntity>(
@@ -445,13 +448,13 @@
                     transaction: statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
             }
-            else
+            else*/
             {
                 var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
-                var mainEntityJoinParser = new MainEntityResultSetParserStage<TEntity>(joinsWithResultSetMappings);
+                var mainEntityJoinParser = new MainEntityResultSetParser<TEntity>(joinsWithResultSetMappings);
                 var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
 
-                await connection.QueryAsync<MainEntityResultSetParserStage<TEntity>>(
+                await connection.QueryAsync<MainEntityResultSetParser<TEntity>>(
                     selectStatement,
                     new[] { statementOptions.EntityRegistration.EntityType }
                         .Concat(joinsWithResultSetMappings.Select(join => join.ReferencedEntityRegistration.EntityType))
@@ -493,9 +496,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private SqlStatementJoin[]? AnalyzeStatementJoins(AggregatedSqlStatementOptions statementOptions)
         {
-            if (statementOptions?.JoinOptions?.Count > 0)
+            if (statementOptions?.Joins?.Count > 0)
             {
-                return statementOptions.JoinOptions.Select(joinOptions => SqlStatementJoin.From(statementOptions, joinOptions)).ToArray();
+                return statementOptions.Joins.Select(joinOptions => new SqlStatementJoin(statementOptions, joinOptions)).ToArray();
             }
 
             return null;

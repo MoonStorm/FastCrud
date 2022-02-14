@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity
+﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity.ResultSetParsers.Containers
 {
     using Dapper.FastCrud.Extensions;
     using Dapper.FastCrud.Mappings.Registrations;
@@ -98,7 +98,7 @@
                 return true;
             }
 
-            return Equals(obj as EntityInstanceWrapper);
+            return this.Equals(obj as EntityInstanceWrapper);
         }
 
         /// <summary>Serves as the default hash function.</summary>

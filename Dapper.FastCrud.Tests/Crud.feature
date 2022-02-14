@@ -240,6 +240,7 @@ Scenario Outline: Delete by primary keys (external database)
 	| PostgreSql    | workstation | 3            | synchronous  |
 	| PostgreSql    | building    | 3            | synchronous  |
 
+@AutomaticBuildServerTest
 Scenario Outline:  Batch update (build server test)
 	Given I have initialized a <database type> database
 	When I insert <entity count> <entity type> entities using <method type> methods

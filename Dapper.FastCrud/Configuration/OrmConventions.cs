@@ -11,6 +11,7 @@
     using Dapper.FastCrud.Configuration.DialectOptions;
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Mappings.Registrations;
+    using System.Collections;
 
     /// <summary>
     /// Default conventions used by the library.
@@ -74,6 +75,17 @@
             this.AddEntityToTableNameConversionRule("(quiz)$", "$1zes");
             this.AddEntityToTableNameConversionRule("(campus)$", "$1es");
             this.AddEntityToTableNameConversionRule("^is$", "are");
+        }
+
+        /// <summary>
+        /// Creates a new entity entity collection and attaches it to the provided entity instance.
+        /// If null is returned, the operation is ignored.
+        /// </summary>
+        public virtual IList? CreateEntityCollection(object parentEntityInstance, PropertyDescriptor parentEntityProperty, Type childEntityType)
+        {
+            var collectionOfEntities = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(childEntityType));
+            parentEntityProperty.SetValue(parentEntityInstance, collectionOfEntities);
+            return collectionOfEntities;
         }
 
         /// <summary>

@@ -4,6 +4,7 @@
     using Dapper.FastCrud.Validations;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Holds a map of active resolvers.
@@ -21,7 +22,16 @@
         }
 
         /// <summary>
-        /// Locates a resolver. In case it can't be found, it will throe an exception.
+        /// Gets all the formatters registered, excluding the set provided.
+        /// </summary>
+        public SqlStatementFormatterResolver[] GetAllFormatterResolversExcluding(params SqlStatementFormatterResolver[] unwantedResolvers)
+        {
+            return _resolverMap.Values.Where(resolver => unwantedResolvers.Length == 0 || !unwantedResolvers.Contains(resolver))
+                               .ToArray();
+        }
+
+        /// <summary>
+        /// Locates a resolver. In case it can't be found, it will throw an exception.
         /// </summary>
         public SqlStatementFormatterResolver LocateResolver(Type entityType, string? alias)
         {
@@ -40,7 +50,7 @@
             {
                 if (!_resolverMap.TryGetValue(entityType.Name, out locatedResolver))
                 {
-                    throw new InvalidOperationException($"The type '{entityType}' was not registered");
+                    throw new InvalidOperationException($"The type '{entityType}' was not registered. It might have been registered with an alias.");
                 }
             }
 
