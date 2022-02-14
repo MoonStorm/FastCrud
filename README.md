@@ -57,6 +57,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
       - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
       - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).
       - Added support for multiple references to the same target (via InverseProperty attribute / fluent mappings / directly in the query).
+    - A preview version has been published on NuGet.
   - Model generator (database first):
     - [Breaking change] Added support for self referenced entities.
     - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.
