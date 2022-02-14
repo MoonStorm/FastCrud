@@ -3,6 +3,7 @@
     using System;
     using Dapper.FastCrud.Configuration.StatementOptions.Aggregated;
     using Dapper.FastCrud.Extensions;
+    using Dapper.FastCrud.Validations;
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
@@ -29,11 +30,19 @@
         protected abstract TStatementOptionsBuilder Builder { get; }
 
         /// <summary>
-        /// Has no effect on the join builder.
-        /// Provided in case you want to include conditional options.
+        /// If <paramref name="condition"/> then <paramref name="then"/> else <paramref name="otherwise"/>.
         /// </summary>
-        public TStatementOptionsBuilder NoOp()
+        public TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null)
         {
+            Requires.NotNull(then, nameof(then));
+            if (condition)
+            {
+                then(this.Builder);
+            }
+            else if (otherwise != null)
+            {
+                otherwise(this.Builder);
+            }
             return this.Builder;
         }
 

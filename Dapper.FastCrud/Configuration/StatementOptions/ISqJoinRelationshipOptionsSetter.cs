@@ -41,5 +41,10 @@
         /// Provides more information about the relationship between the two entities.
         /// </summary>
         TStatementOptionsBuilder ToProperty(Expression<Func<TReferencedEntity, IEnumerable<TReferencingEntity>?>>? referencedNavigationProperty);
+
+        /// <summary>
+        /// If <paramref name="condition"/> then <paramref name="then"/> else <paramref name="otherwise"/>.
+        /// </summary>
+        TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null);
     }
 }

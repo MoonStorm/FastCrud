@@ -6,6 +6,7 @@
     using Dapper.FastCrud.Mappings;
     using Dapper.FastCrud.Validations;
     using System.Linq;
+    using System.Threading;
 
     /// <summary>
     /// The full options builder for main queries.
@@ -107,11 +108,19 @@
         }
 
         /// <summary>
-        /// Has no effect on the statement builder.
-        /// Provided in case you want to include conditional options.
+        /// If <paramref name="condition"/> then <paramref name="then"/> else <paramref name="otherwise"/>.
         /// </summary>
-        public TStatementOptionsBuilder NoOp()
+        public TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null)
         {
+            Requires.NotNull(then, nameof(then));
+            if (condition)
+            {
+                then(this.Builder);
+            }
+            else if(otherwise != null)
+            {
+                otherwise(this.Builder);
+            }
             return this.Builder;
         }
 

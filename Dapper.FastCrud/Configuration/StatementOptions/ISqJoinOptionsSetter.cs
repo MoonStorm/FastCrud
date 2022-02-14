@@ -30,10 +30,9 @@
         TStatementOptionsBuilder On(FormattableString? onClause);
 
         /// <summary>
-        /// Has no effect on the statement builder.
-        /// Provided in case you want to include conditional options.
+        /// If <paramref name="condition"/> then <paramref name="then"/> else <paramref name="otherwise"/>.
         /// </summary>
-        TStatementOptionsBuilder NoOp();
+        TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null);
 
         /// <summary>
         /// Extra filter appended to the main WHERE clause.
