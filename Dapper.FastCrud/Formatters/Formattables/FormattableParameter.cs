@@ -16,17 +16,14 @@
         public FormattableParameter(
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
-            string parameter,
-            string defaultFormatSpecifier)
+            string parameter)
         {
-            Requires.NotNullOrEmpty(defaultFormatSpecifier, nameof(defaultFormatSpecifier));
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
             Requires.NotNullOrEmpty(parameter, nameof(parameter));
 
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Parameter = parameter;
-            this.DefaultFormatSpecifier = defaultFormatSpecifier;
         }
 
         /// <summary>
@@ -38,11 +35,6 @@
         /// An optional entity registration override.
         /// </summary>
         public EntityRegistration? EntityRegistrationOverride { get; }
-
-        /// <summary>
-        /// The default format specifier to use.
-        /// </summary>
-        public string DefaultFormatSpecifier { get; }
 
         /// <summary>
         /// The provided identifier.
@@ -58,10 +50,10 @@
         public override string ToString(string? format, IFormatProvider? formatProvider = null)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
-            if (formatProvider is GenericSqlStatementFormatter
-                && string.IsNullOrEmpty(format))
+            if (string.IsNullOrEmpty(format) && formatProvider is GenericSqlStatementFormatter)
             {
-                format = this.DefaultFormatSpecifier;
+                // if OUR formatter is being used, use the SQL ready version
+                format = FormatSpecifiers.Parameter;
             }
 
             switch (format)

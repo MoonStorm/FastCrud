@@ -16,23 +16,15 @@
         public FormattableIdentifier(
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
-            string identifier,
-            string defaultFormatSpecifier)
+            string identifier)
         {
-            Requires.NotNull(defaultFormatSpecifier, nameof(defaultFormatSpecifier));
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
             Requires.NotNullOrEmpty(identifier, nameof(identifier));
 
-            this.DefaultFormatSpecifier = defaultFormatSpecifier;
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Identifier = identifier;
         }
-
-        /// <summary>
-        /// The default format specifier to use.
-        /// </summary>
-        public string DefaultFormatSpecifier { get; }
 
         /// <summary>
         /// Entity descriptor.
@@ -59,9 +51,10 @@
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
 
-            if (formatProvider is GenericSqlStatementFormatter && string.IsNullOrEmpty(format))
+            if (string.IsNullOrEmpty(format) && formatProvider is GenericSqlStatementFormatter)
             {
-                format = this.DefaultFormatSpecifier;
+                // if OUR formatter is being used, use the SQL ready version
+                format = FormatSpecifiers.Identifier;
             }
 
             switch (format)

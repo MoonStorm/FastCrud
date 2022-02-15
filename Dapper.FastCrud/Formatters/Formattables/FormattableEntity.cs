@@ -17,11 +17,11 @@
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
             string? alias,
-            string? defaultFormatSpecifier)
+            string? legacyDefaultFormatSpecifierOutsideOurFormatter)
         {
             Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
 
-            this.DefaultFormatSpecifier = defaultFormatSpecifier;
+            this.LegacyDefaultFormatSpecifierOutsideOurFormatter = legacyDefaultFormatSpecifierOutsideOurFormatter;
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;
             this.Alias = alias;
@@ -43,9 +43,9 @@
         public EntityDescriptor EntityDescriptor { get; }
 
         /// <summary>
-        /// The default format specifier to use.
+        /// The default format specifier to use when running outside of our own formatter.
         /// </summary>
-        public string? DefaultFormatSpecifier { get; }
+        public string? LegacyDefaultFormatSpecifierOutsideOurFormatter { get; }
 
         /// <summary>
         /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}"/>.
@@ -57,16 +57,25 @@
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
 
-            GenericSqlStatementFormatter.ParseFormat(format, out string parsedFormat, out string parsedAlias);
+            GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
 
-            if (parsedFormat == null && parsedAlias != null)
+            if (parsedFormat == null)
             {
-                parsedFormat = FormatSpecifiers.TableOrAlias;
-            }
-
-            if (parsedFormat == null && formatProvider is GenericSqlStatementFormatter)
-            {
-                parsedFormat = this.DefaultFormatSpecifier;
+                if (parsedAlias != null)
+                {
+                    // only happening in the new world
+                    parsedFormat = FormatSpecifiers.TableOrAlias;
+                }
+                else if (formatProvider is GenericSqlStatementFormatter)
+                {
+                    // running under our own formatter could be legacy, otherwise we'll fail
+                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
+                }
+                else if (this.LegacyDefaultFormatSpecifierOutsideOurFormatter != null)
+                {
+                    // running outside our formatter, default to a legacy behavior
+                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
+                }
             }
 
             switch (parsedFormat)
@@ -74,6 +83,11 @@
                 case FormatSpecifiers.TableOrAlias:
                     return sqlBuilder.GetTableName(parsedAlias ?? this.Alias);
                 default:
+                    if (formatProvider is GenericSqlStatementFormatter)
+                    {
+                        throw new InvalidOperationException($"Unknown format specifier '{format}' specified for an entity in Dapper.FastCrud");
+                    }
+
                     // for generic usage, we'll return the table name or alias if provided, without delimiters
                     return this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName;
             }

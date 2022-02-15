@@ -18,8 +18,8 @@
             EntityRegistration? registrationOverride, 
             string propertyName, 
             string? alias,
-            string? defaultFormatSpecifier)
-            : base(entityDescriptor, registrationOverride, alias, defaultFormatSpecifier)
+            string? legacyDefaultFormatSpecifierOutsideOurFormatter)
+            : base(entityDescriptor, registrationOverride, alias, legacyDefaultFormatSpecifierOutsideOurFormatter)
         {
             Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
 
@@ -40,24 +40,25 @@
         public override string ToString(string? format, IFormatProvider? formatProvider = null)
         {
             var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
-            if (formatProvider is GenericSqlStatementFormatter 
-                && string.IsNullOrEmpty(format) 
-                && this.DefaultFormatSpecifier != null)
-            {
-                format = this.DefaultFormatSpecifier;
-            }
+            GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
 
-            GenericSqlStatementFormatter.ParseFormat(format, out string parsedFormat, out string parsedAlias);
-
-            if (parsedFormat == null && parsedAlias != null)
+            if (parsedFormat == null)
             {
-                // mimic what we have in the main formatter GenericSqlStatementFormatter
-                parsedFormat = FormatSpecifiers.FullyQualifiedColumn;
-            }
-
-            if (parsedFormat == null &&  formatProvider is GenericSqlStatementFormatter)
-            {
-                parsedFormat = this.DefaultFormatSpecifier;
+                if (parsedAlias != null)
+                {
+                    // only happening in the new world
+                    parsedFormat = FormatSpecifiers.FullyQualifiedColumn;
+                }
+                else if (formatProvider is GenericSqlStatementFormatter)
+                {
+                    // running under our own formatter, might be legacy, otherwise we'll fail later
+                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
+                }
+                else if (this.LegacyDefaultFormatSpecifierOutsideOurFormatter != null)
+                {
+                    // running outside our formatter, default to a legacy behavior
+                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
+                }
             }
 
             switch (parsedFormat)
@@ -71,6 +72,10 @@
                 case FormatSpecifiers.FullyQualifiedColumn:
                     return sqlBuilder.GetColumnName(this.PropertyName, parsedAlias ?? this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName);
                 default:
+                    if (formatProvider is GenericSqlStatementFormatter)
+                    {
+                        throw new InvalidOperationException($"Unknown format specifier '{format}' specified for an entity property in Dapper.FastCrud");
+                    }
                     // by default we'll return the column name in clear
                     var propertyRegistration = (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TryGetFrozenPropertyRegistrationByPropertyName(this.PropertyName);
                     if (propertyRegistration == null)
