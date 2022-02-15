@@ -91,10 +91,9 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 Most of us love Dapper for its speed. 
 Let's have a look at how ``Fast Crud`` performs against other similar libraries out there:  
 
-- ``Dapper.SimpleCRUD v1.13.0``
-- ``DapperExtensions v1.5.0 ``
-- ``Entity Framework v6.1.3`` was included as well, even though it's in a different class of ORMs.
-In an attempt to keep it on the same playing field, its proxy generation was turned off.
+- ``Dapper.SimpleCRUD v2.3.0``
+- ``DapperExtensions v1.6.3 ``
+- ``Entity Framework Core v6.0.2`` 
 
 ##### Automatic Benchmark Report (Last Run: Sunday, January 03, 2016)
 

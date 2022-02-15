@@ -1,9 +1,9 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks.Targets.FastCrud
 {
-    using Dapper.FastCrud.Benchmarks.Models;
-    using System.Linq;
-    using Dapper.FastCrud.Tests.Contexts;
+    using global::Dapper.FastCrud.Benchmarks.Models;
+    using global::Dapper.FastCrud.Tests.Contexts;
     using NUnit.Framework;
+    using System.Linq;
     using TechTalk.SpecFlow;
     using FastCrud = global::Dapper.FastCrud.DapperExtensions;
 

@@ -1,10 +1,7 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks.SimpleCrud
 {
     using Dapper.FastCrud.Benchmarks.Models;
-    using System.Linq;
-    using Dapper.FastCrud.Tests;
     using Dapper.FastCrud.Tests.Contexts;
-    using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
     using SimpleCrud = global::Dapper.SimpleCRUD;
@@ -41,7 +38,7 @@
             var dbConnection = _testContext.DatabaseConnection;
             foreach (var queriedEntity in SimpleCrud.GetList<SimpleBenchmarkEntity>(dbConnection))
             {
-                _testContext.RecordInsertedEntity(queriedEntity);
+                _testContext.RecordQueriedEntity(queriedEntity);
             }
         }
 

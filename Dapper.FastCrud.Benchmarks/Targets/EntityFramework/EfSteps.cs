@@ -1,20 +1,19 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks.Targets.EntityFramework
 {
-    using Dapper.FastCrud.Benchmarks.Models;
-    using System.Linq;
-    using Dapper.FastCrud.Tests.Contexts;
+    using global::Dapper.FastCrud.Benchmarks.Models;
+    using global::Dapper.FastCrud.Tests.Contexts;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
-    using System;
+    using System.Linq;
     using TechTalk.SpecFlow;
 
     [Binding]
     public sealed class EfSteps: EntityGenerationSteps
     {
         private DatabaseTestContext _testContext;
-        private Lazy<EfDbContext> _dbContext;
+        private EfDbContext _dbContext;
 
-        public EfSteps(DatabaseTestContext testContext, Lazy<EfDbContext> dbContext)
+        public EfSteps(DatabaseTestContext testContext, EfDbContext dbContext)
         {
             _testContext = testContext;
             _dbContext = dbContext;
@@ -80,12 +79,22 @@
             var entityIndex = 0;
             foreach (var oldEntity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                var newEntity = new SimpleBenchmarkEntity();
-                this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
-                newEntity.Id = oldEntity.Id;
+
+                var newEntity = new SimpleBenchmarkEntity()
+                {
+                    Id = oldEntity.Id, 
+                    FirstName = oldEntity.FirstName, 
+                    LastName = oldEntity.LastName, 
+                    DateOfBirth = oldEntity.DateOfBirth
+                };
 
                 _dbContext.Value.BenchmarkEntities.Attach(newEntity);
+
+                // now update it
+                this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
                 _dbContext.Value.SaveChanges();
+
+                _testContext.RecordUpdatedEntity(newEntity);
             }
         }
     }

@@ -7,6 +7,8 @@ using TechTalk.SpecFlow;
 
 namespace Dapper.FastCrud.Benchmarks
 {
+    using Dapper.FastCrud.Tests.Common;
+
     [Binding]
     public sealed class BenchmarkSteps
     {
@@ -22,8 +24,9 @@ namespace Dapper.FastCrud.Benchmarks
         {
             Trace.WriteLine($"Stopwatch reported: {_testContext.Stopwatch.Elapsed.TotalMilliseconds:0,0.00} milliseconds for {ormType}");
 
+#if !DEBUG
             // automatically update the docs
-            var docsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../README.MD");
+            var docsPath = Path.Combine(typeof(BenchmarkSteps).Assembly.GetDirectory(), "../../../../README.MD");
             var docsContents = File.ReadAllText(docsPath);
 
             var reportTitle = $"| {ormType} | {operation} | {opCount} |";
@@ -45,6 +48,7 @@ namespace Dapper.FastCrud.Benchmarks
             docsContents = benchmarkHeaderRegex.Replace(docsContents, $" (Last Run: {DateTime.Now:D})", 1);
 
             File.WriteAllText(docsPath, docsContents);
+#endif
         }
 
     }

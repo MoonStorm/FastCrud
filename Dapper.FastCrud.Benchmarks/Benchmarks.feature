@@ -85,6 +85,7 @@ Scenario Outline: Single Select Id Filter Benchmark
 	And I report the stopwatch value for <orm> finished processing <entity count> operations of type select by id
 	Then I should have queried <entity count> <entity type> entities
 	Then the queried <entity type> entities should be the same as the inserted ones
+	Then I cleanup the <database type> database
 	Examples: 
 	| database type     | entity type | entity count | orm               |
 	| Benchmark LocalDb | benchmark   | 30000        | Simple Crud       |
@@ -95,19 +96,19 @@ Scenario Outline: Single Select Id Filter Benchmark
 
 Scenario Outline: Single Update Benchmark
 	Given I have initialized a <database type> database
-	When I insert <entity count> <entity type> using ADO .NET
+	When I insert <entity count> <entity type> entities using ADO .NET
 	And I refresh the database connection
 	And I start the stopwatch
-	And I update all the <entity type> that I previously inserted using <orm>
+	And I update all the <entity type> entities that I previously inserted using <orm>
 	And I stop the stopwatch
 	And I report the stopwatch value for <orm> finished processing <entity count> operations of type update
-	And I select all the <entity type> using Dapper
-	Then the queried <entity type> entities should be the same as the inserted ones
+	And I select all the <entity type> entities using Dapper
+	Then the queried <entity type> entities should be the same as the updated ones
 	Then I cleanup the <database type> database
 	Examples: 
-	| database type     | entity type        | entity count | orm               |
-	| Benchmark LocalDb | benchmark entities | 30000        | Simple Crud       |
-	| Benchmark LocalDb | benchmark entities | 30000        | Dapper Extensions |
-	| Benchmark LocalDb | benchmark entities | 30000        | Fast Crud         |
-	| Benchmark LocalDb | benchmark entities | 30000        | Dapper            |
-	| Benchmark LocalDb | benchmark entities | 30000        | Entity Framework  |
+	| database type     | entity type | entity count | orm               |
+	| Benchmark LocalDb | benchmark   | 30000        | Simple Crud       |
+	| Benchmark LocalDb | benchmark   | 30000        | Dapper Extensions |
+	| Benchmark LocalDb | benchmark   | 30000        | Fast Crud         |
+	| Benchmark LocalDb | benchmark   | 30000        | Dapper            |
+	| Benchmark LocalDb | benchmark   | 30000        | Entity Framework  |

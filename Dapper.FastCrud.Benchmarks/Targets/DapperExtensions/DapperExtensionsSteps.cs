@@ -1,9 +1,7 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks.Targets.DapperExtensions
 {
-    using Dapper.FastCrud.Benchmarks.Models;
-    using System.Linq;
-    using Dapper.FastCrud.Tests.Contexts;
-    using Dapper.FastCrud.Tests.Models;
+    using global::Dapper.FastCrud.Benchmarks.Models;
+    using global::Dapper.FastCrud.Tests.Contexts;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
     using DapperExtensions = global::DapperExtensions.DapperExtensions;
@@ -21,6 +19,9 @@
         [BeforeScenario()]
         public void SetupPluralTableMapping()
         {
+            // UPDATE: in 1.7 we have a blocking error:
+            // https://github.com/tmsmith/Dapper-Extensions/issues/276
+            // Reverted to 1.6.3
             DapperExtensions.DefaultMapper = typeof(global::DapperExtensions.Mapper.PluralizedAutoClassMapper<>);
         }
 

@@ -1,14 +1,12 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+﻿namespace Dapper.FastCrud.Benchmarks.Targets.Dapper
 {
-    using Dapper.FastCrud.Benchmarks.Models;
+    using global::Dapper.FastCrud.Benchmarks.Models;
+    using global::Dapper.FastCrud.Tests.Contexts;
+    using NUnit.Framework;
+    using System;
     using System.Data;
     using System.Data.SqlClient;
     using System.Linq;
-    using Dapper.FastCrud.Tests;
-    using Dapper.FastCrud.Tests.Contexts;
-    using Dapper.FastCrud.Tests.Models;
-    using NUnit.Framework;
-    using System;
     using TechTalk.SpecFlow;
 
     [Binding]
@@ -68,7 +66,7 @@
             var dbConnection = _testContext.DatabaseConnection;
             foreach (var queriedEntity in dbConnection.Query<SimpleBenchmarkEntity>(_selectAllSql))
             {
-                _testContext.RecordInsertedEntity(queriedEntity);
+                _testContext.RecordQueriedEntity(queriedEntity);
             }
         }
 
@@ -79,7 +77,7 @@
 
             foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                _testContext.RecordInsertedEntity(dbConnection.Query<SimpleBenchmarkEntity>(_selectByIdSql,new { Id = entity.Id }));
+                _testContext.RecordQueriedEntity(dbConnection.Query<SimpleBenchmarkEntity>(_selectByIdSql,new { Id = entity.Id }).Single());
             }
         }
 

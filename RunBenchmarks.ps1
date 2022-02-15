@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = "Stop"
 
-& "$PSScriptRoot\.nunit\nunit-console.exe" "$PSScriptRoot\Dapper.FastCRUD.Benchmarks\bin\Release\Dapper.FastCrud.Benchmarks.dll" /noshadow /nothread /framework:v4.5
+& dotnet test "$PSScriptRoot\Dapper.FastCRUD.Benchmarks\bin\Release\net6.0\Dapper.FastCrud.Benchmarks.dll"
 if ($LASTEXITCODE -ne 0){
     throw "tests failed"
 }
