@@ -6,6 +6,7 @@
     <AssemblyName>Dapper.FastCrud</AssemblyName>
     <PackageId>Dapper.FastCrud</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
@@ -17,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README[NuGet].md" Pack="true" PackagePath="/docs/README.md"/>  
+    <None Include="README[NuGet].md" Pack="true" PackagePath="/README.md"/>  
   </ItemGroup>
 
   <ItemGroup>
