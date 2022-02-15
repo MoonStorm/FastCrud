@@ -17,23 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="SqlStatements\Old\**" />
-    <EmbeddedResource Remove="SqlStatements\Old\**" />
-    <None Remove="SqlStatements\Old\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="SqlStatements\FiveEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\FourEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\MultiEntitySqlStatements.cs" />
-    <Compile Remove="SqlStatements\MultipleEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\RelationshipEntityInstanceBuilder.cs" />
-    <Compile Remove="SqlStatements\RelationshipEntityInstanceIdentity.cs" />
-    <Compile Remove="SqlStatements\RelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\SevenEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\SixEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\ThreeEntitiesRelationshipSqlStatements.cs" />
-    <Compile Remove="SqlStatements\TwoEntitiesRelationshipSqlStatements.cs" />
+    <None Include="README[NuGet].md" Pack="true" PackagePath="/docs/README.md"/>  
   </ItemGroup>
 
   <ItemGroup>
