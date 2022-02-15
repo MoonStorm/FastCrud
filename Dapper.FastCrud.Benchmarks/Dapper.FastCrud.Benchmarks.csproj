@@ -1,25 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>Dapper.FastCrud.Benchmarks</AssemblyTitle>
     <AssemblyName>Dapper.FastCrud.Benchmarks</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DeclarativeSqlSteps_Invalid.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="DeclarativeSqlSteps_Invalid.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper.SimpleCRUD" Version="2.3.0" />
+    <PackageReference Include="DapperExtensions" Version="1.7.0" />
     <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="3.1.22" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.22" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <!--<PackageReference Include="Microsoft.SqlServer.Compact">
+      <Version>4.0.8876.1</Version>
+      <GeneratePathProperty>true</GeneratePathProperty>
+    </PackageReference>-->
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="150.18208.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.2" />
+    <PackageReference Include="MySql.Data" Version="8.0.27" />
+    <PackageReference Include="Npgsql" Version="6.0.2" />
     <PackageReference Include="SpecFlow.NUnit.Runners" Version="3.9.40" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.40" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.115.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dapper.FastCrud.Tests\Dapper.FastCrud.Tests.csproj" />
     <ProjectReference Include="..\Dapper.FastCrud\Dapper.FastCrud.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

@@ -1,29 +1,45 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.Entity;
-    using System.Data.Entity.Infrastructure;
-    using Dapper.FastCrud.Tests.Models;
+    using Dapper.FastCrud.Benchmarks.Models;
+    using Dapper.FastCrud.Tests.Contexts;
+    using Microsoft.EntityFrameworkCore;
 
     public class EfDbContext:DbContext
     {
-        /// <summary>
-        /// Constructs a new context instance using the existing connection to connect to a database,
-        ///             and initializes it from the given model.
-        ///             The connection will not be disposed when the context is disposed if <paramref name="contextOwnsConnection"/>
-        ///             is <c>false</c>.
-        /// </summary>
-        /// <param name="existingConnection">An existing connection to use for the new context. </param>
-        /// <param name="model">The model that will back this context. </param>
-        /// <param name="contextOwnsConnection">If set to <c>true</c> the connection is disposed when the context is disposed, otherwise the caller must dispose the connection.
-        ///             </param>
-        public EfDbContext(DbConnection existingConnection, DbCompiledModel model, bool enableProxyCreation)
-            : base(existingConnection, model, false)
+        private readonly DatabaseTestContext _testContext;
+
+        public EfDbContext(DatabaseTestContext testContext)
         {
-            this.Configuration.ProxyCreationEnabled = enableProxyCreation;
+            _testContext = testContext;
         }
 
         public DbSet<SimpleBenchmarkEntity> BenchmarkEntities { get; set; }
+
+        /// <summary>
+        ///     <para>
+        ///         Override this method to configure the database (and other options) to be used for this context.
+        ///         This method is called for each instance of the context that is created.
+        ///         The base implementation does nothing.
+        ///     </para>
+        ///     <para>
+        ///         In situations where an instance of <see cref="T:Microsoft.EntityFrameworkCore.DbContextOptions" /> may or may not have been passed
+        ///         to the constructor, you can use <see cref="P:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.IsConfigured" /> to determine if
+        ///         the options have already been set, and skip some or all of the logic in
+        ///         <see cref="M:Microsoft.EntityFrameworkCore.DbContext.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)" />.
+        ///     </para>
+        /// </summary>
+        /// <remarks>
+        ///     See <see href="https://aka.ms/efcore-docs-dbcontext">DbContext lifetime, configuration, and initialization</see>
+        ///     for more information.
+        /// </remarks>
+        /// <param name="optionsBuilder">
+        ///     A builder used to create or modify options for this context. Databases (and other extensions)
+        ///     typically define extension methods on this object that allow you to configure the context.
+        /// </param>
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(_testContext.DatabaseConnection);
+            base.OnConfiguring(optionsBuilder);
+        }
     }
 }

@@ -1,12 +1,10 @@
 ﻿namespace Dapper.FastCrud.Tests.Contexts
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Diagnostics;
     using System.Linq;
-    using System.Text.Json;
     using Dapper.FastCrud.Tests.Common;
     using Newtonsoft.Json;
 
@@ -30,8 +28,8 @@
         public string CurrentExecutionFolder { get; } = typeof(DatabaseTestContext).Assembly.GetDirectory();
         public Stopwatch Stopwatch { get; } = new Stopwatch();
         public DbConnection DatabaseConnection { get; set; }
-        public int LastCountQueryResult { get; set; }
         public JsonSerializerSettings JSonSerializerOptions {get;}
+        public int LastCountQueryResult { get; set; }
 
         public void RecordInsertedEntity<EntityType>(EntityType entityInstance)
         {
@@ -85,6 +83,11 @@
             return this.GetEntitiesOfType(_queriedEntities, typeof(TEntityType), onlyLastCount)
                        .Select(entity => (TEntityType)entity)
                        .ToArray();
+        }
+
+        public void ClearQueriedEntities()
+        {
+            _queriedEntities.Clear();
         }
 
         private IEnumerable<object> GetEntitiesOfType(IList<DatabaseEntityInstanceInfo> collection, Type entityType, int? onlyLastCount)

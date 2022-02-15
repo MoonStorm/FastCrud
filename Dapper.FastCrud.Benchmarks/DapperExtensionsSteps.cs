@@ -1,7 +1,8 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
+    using Dapper.FastCrud.Benchmarks.Models;
     using System.Linq;
-    using Dapper.FastCrud.Tests;
+    using Dapper.FastCrud.Tests.Contexts;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -34,8 +35,8 @@
 
                 generatedEntity.Id = DapperExtensions.Insert(dbConnection, generatedEntity);
 
-                Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
-                _testContext.LocalInsertedEntities.Add(generatedEntity);
+                Assert.That(generatedEntity.Id, Is.GreaterThan(1)); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
+                _testContext.RecordInsertedEntity(generatedEntity);
             }
         }
 
@@ -43,16 +44,19 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapperExtensions()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            _testContext.QueriedEntities.AddRange(DapperExtensions.GetList<SimpleBenchmarkEntity>(dbConnection));
+            foreach (var queriedEntity in DapperExtensions.GetList<SimpleBenchmarkEntity>(dbConnection))
+            {
+                _testContext.RecordQueriedEntity(queriedEntity);
+            }
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Dapper Extensions")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingDapperExtensions()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                _testContext.QueriedEntities.Add(DapperExtensions.Get<SimpleBenchmarkEntity>(dbConnection, entity.Id));
+                _testContext.RecordQueriedEntity(DapperExtensions.Get<SimpleBenchmarkEntity>(dbConnection, entity.Id));
             }
         }
 
@@ -60,15 +64,14 @@
         public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingDapperExtensions()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var entityCount = _testContext.LocalInsertedEntities.Count;
 
-            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
+            var entityIndex = 0;
+            foreach (var oldInsertedEntity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                var oldEntity = _testContext.LocalInsertedEntities[entityIndex] as SimpleBenchmarkEntity;
-                var newEntity = this.GenerateSimpleBenchmarkEntity(entityCount++);
-                newEntity.Id = oldEntity.Id;
+                var newEntity = this.GenerateSimpleBenchmarkEntity(entityIndex++);
+                newEntity.Id = oldInsertedEntity.Id;
                 DapperExtensions.Update(dbConnection, newEntity);
-                _testContext.LocalInsertedEntities[entityIndex] = newEntity;
+                _testContext.RecordUpdatedEntity(newEntity);
             }
         }
 
@@ -77,7 +80,7 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
 
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
                 DapperExtensions.Delete(dbConnection, entity);
             }

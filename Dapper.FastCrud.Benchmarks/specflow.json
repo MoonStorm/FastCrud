@@ -1,0 +1,7 @@
+  {
+    "stepAssemblies": [
+        {
+          "assembly": "Dapper.FastCrud.Tests"
+        }
+      ]
+  }

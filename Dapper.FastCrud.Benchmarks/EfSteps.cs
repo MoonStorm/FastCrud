@@ -1,27 +1,32 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
-    using System.Data.Entity;
-    using System.Data.Entity.Infrastructure;
+    using Dapper.FastCrud.Benchmarks.Models;
     using System.Linq;
-    using Dapper.FastCrud.Tests;
-    using Dapper.FastCrud.Tests.Models;
+    using Dapper.FastCrud.Tests.Contexts;
+    using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
+    using System;
     using TechTalk.SpecFlow;
 
     [Binding]
     public sealed class EfSteps: EntityGenerationSteps
     {
         private DatabaseTestContext _testContext;
-        private DbCompiledModel _compiledModel;
+        private Lazy<EfDbContext> _dbContext;
 
-        public EfSteps(DatabaseTestContext testContext)
+        public EfSteps(DatabaseTestContext testContext, Lazy<EfDbContext> dbContext)
         {
             _testContext = testContext;
-            var dbModelBuilder = new DbModelBuilder();
-            dbModelBuilder.Entity<SimpleBenchmarkEntity>();
+            _dbContext = dbContext;
+        }
 
-            var dbModel = dbModelBuilder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
-            _compiledModel = dbModel.Compile();
+        [AfterScenario()]
+        public void Cleanup()
+        {
+            if (_dbContext.IsValueCreated)
+            {
+                _dbContext.Value.Dispose();
+            }
         }
 
         [When(@"I insert (.*) benchmark entities using Entity Framework")]
@@ -30,70 +35,57 @@
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
                 var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
-                using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
-                {
-                    dbContext.BenchmarkEntities.Add(generatedEntity);
-                    dbContext.SaveChanges();
-                }
+
+                _dbContext.Value.BenchmarkEntities.Add(generatedEntity);
+                _dbContext.Value.SaveChanges();
 
                 Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
-                _testContext.LocalInsertedEntities.Add(generatedEntity);
+                _testContext.RecordInsertedEntity(generatedEntity);
             }
         }
 
         [When(@"I select all the benchmark entities using Entity Framework")]
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingEntityFramework()
         {
-            using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
+            foreach (var queriedEntity in _dbContext.Value.BenchmarkEntities)
             {
-                _testContext.QueriedEntities.AddRange(dbContext.BenchmarkEntities);
+                _testContext.RecordQueriedEntity(queriedEntity);
             }
         }
 
         [When(@"I delete all the inserted benchmark entities using Entity Framework")]
         public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingEntityFramework()
         {
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
-                {
-                    dbContext.BenchmarkEntities.Attach(entity);
-                    dbContext.BenchmarkEntities.Remove(entity);
-                    dbContext.SaveChanges();
-                }
+                _dbContext.Value.BenchmarkEntities.Attach(entity);
+                _dbContext.Value.BenchmarkEntities.Remove(entity);
+                _dbContext.Value.SaveChanges();
             }
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Entity Framework")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
         {
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            var entityIndex = 0;
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
-                {
-                    _testContext.QueriedEntities.Add(dbContext.BenchmarkEntities.AsNoTracking().Single(queriedEntity => queriedEntity.Id == entity.Id));
-                }
+                _testContext.RecordQueriedEntity(_dbContext.Value.BenchmarkEntities.AsNoTracking().Single(queriedEntity => queriedEntity.Id == entity.Id));
             }
         }
 
         [When(@"I update all the benchmark entities that I previously inserted using Entity Framework")]
         public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
         {
-            var entityCount = _testContext.LocalInsertedEntities.Count;
-
-            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
+            var entityIndex = 0;
+            foreach (var oldEntity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                var oldEntity = _testContext.LocalInsertedEntities[entityIndex] as SimpleBenchmarkEntity;
                 var newEntity = new SimpleBenchmarkEntity();
+                this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
                 newEntity.Id = oldEntity.Id;
 
-                using (var dbContext = new EfDbContext(_testContext.DatabaseConnection, _compiledModel, false))
-                {
-                    dbContext.BenchmarkEntities.Attach(newEntity);
-                    this.GenerateSimpleBenchmarkEntity(entityCount++, newEntity);
-                    dbContext.SaveChanges();
-                }
-                _testContext.LocalInsertedEntities[entityIndex] = newEntity;
+                _dbContext.Value.BenchmarkEntities.Attach(newEntity);
+                _dbContext.Value.SaveChanges();
             }
         }
     }

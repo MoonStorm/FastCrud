@@ -80,6 +80,12 @@
             _testContext.Stopwatch.Stop();
         }
 
+        [When(@"I clear all the queried entities")]
+        public void WhenIClearAllTheQueriedEntities()
+        {
+            _testContext.ClearQueriedEntities();
+        }
+
         [Then(@"I should have queried (\d+) (.+) entities")]
         public void ThenIShouldHaveQueriedEntities(int queryEntitiesCount, Type entityType)
         {

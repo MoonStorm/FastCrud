@@ -1054,12 +1054,6 @@
             }
         }
 
-        [Then(@"the result of the last query count should be (.*)")]
-        public void ThenTheDatabaseCountOfTheQueriedEntitiesShouldBe(int expectedQueryCount)
-        {
-            Assert.That(_testContext.LastCountQueryResult, Is.EqualTo(expectedQueryCount));
-        }
-
         [When(@"I query for a maximum of (.*) workstation entities reverse ordered skipping (.*) records")]
         public void WhenIQueryForAMaximumOfWorkstationEntitiesInReverseOrderOfWorkstationIdSkippingRecords(int? max, int? skip)
         {

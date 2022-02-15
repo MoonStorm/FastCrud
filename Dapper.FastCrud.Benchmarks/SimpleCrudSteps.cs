@@ -1,7 +1,9 @@
 ﻿namespace Dapper.FastCrud.Benchmarks
 {
+    using Dapper.FastCrud.Benchmarks.Models;
     using System.Linq;
     using Dapper.FastCrud.Tests;
+    using Dapper.FastCrud.Tests.Contexts;
     using Dapper.FastCrud.Tests.Models;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
@@ -29,7 +31,7 @@
                 generatedEntity.Id = SimpleCrud.Insert(dbConnection, generatedEntity).Value;
 
                 Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
-                _testContext.LocalInsertedEntities.Add(generatedEntity);
+                _testContext.RecordInsertedEntity(generatedEntity);
             }
         }
 
@@ -37,16 +39,19 @@
         public void WhenISelectAllTheSingleIntKeyEntitiesUsingSimpleCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            _testContext.QueriedEntities.AddRange(SimpleCrud.GetList<SimpleBenchmarkEntity>(dbConnection));
+            foreach (var queriedEntity in SimpleCrud.GetList<SimpleBenchmarkEntity>(dbConnection))
+            {
+                _testContext.RecordInsertedEntity(queriedEntity);
+            }
         }
 
         [When(@"I select all the benchmark entities that I previously inserted using Simple Crud")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingSimpleCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                _testContext.QueriedEntities.Add(SimpleCrud.Get<SimpleBenchmarkEntity>(dbConnection, entity.Id));
+                _testContext.RecordQueriedEntity(SimpleCrud.Get<SimpleBenchmarkEntity>(dbConnection, entity.Id));
             }
         }
 
@@ -54,15 +59,14 @@
         public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingSimpleCrud()
         {
             var dbConnection = _testContext.DatabaseConnection;
-            var entityCount = _testContext.LocalInsertedEntities.Count;
 
-            for (var entityIndex = 0; entityIndex < _testContext.LocalInsertedEntities.Count; entityIndex++)
+            var entityIndex = 0;
+            foreach (var oldEntity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                var oldEntity = _testContext.LocalInsertedEntities[entityIndex] as SimpleBenchmarkEntity;
-                var newEntity = this.GenerateSimpleBenchmarkEntity(entityCount++);
+                var newEntity = this.GenerateSimpleBenchmarkEntity(entityIndex++);
                 newEntity.Id = oldEntity.Id;
                 SimpleCrud.Update(dbConnection, newEntity);
-                _testContext.LocalInsertedEntities[entityIndex] = newEntity;
+                _testContext.RecordUpdatedEntity(newEntity);
             }
         }
 
@@ -71,7 +75,7 @@
         {
             var dbConnection = _testContext.DatabaseConnection;
 
-            foreach (var entity in _testContext.LocalInsertedEntities.OfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
                 SimpleCrud.Delete(dbConnection, entity);
             }
