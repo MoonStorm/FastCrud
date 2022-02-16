@@ -88,7 +88,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
 
 #### Speed
-Let's have a look at some of the most popular ORMs out there in terms of speed:  
+Let's have a look at some popular ORMs out there and benchmark their speed:  
 
 - ``Dapper.SimpleCRUD v2.3.0``
 - ``DapperExtensions v1.6.3 ``
