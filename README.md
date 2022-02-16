@@ -1,4 +1,4 @@
-You hate verbatim SQL queries with zero type safety for your code but you love the speed? ``Dapper.FastCrud`` is the fastest micro-orm extension for Dapper, built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings.
+You hate verbatim SQL queries with zero type safety for your code but you love the speed? ``Dapper.FastCrud`` is a fast orm built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings.
 Visual Studio 2019 and above is recommended. 
 
 #### What to expect when working with Dapper.FastCrud in the DAL? 
@@ -89,7 +89,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
 
 #### Speed
-Let's have a look at some of the most popular ORMs out there in terms of speed:  
+Let's have a look at some popular ORMs out there and benchmark their speed:  
 
 - ``Dapper.SimpleCRUD v2.3.0``
 - ``DapperExtensions v1.6.3 ``
