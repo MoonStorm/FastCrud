@@ -634,13 +634,13 @@
             {
                 if (!firstJoin || requiresFirstAnd)
                 {
-                    finalWhereClause = $"{finalWhereClause} AND";
+                    finalWhereClause = $"({finalWhereClause}) AND";
                 }
 
                 firstJoin = false;
                 using (formatter.SetActiveMainResolver(join.ReferencedEntityFormatterResolver, true))
                 {
-                    finalWhereClause = $"{finalWhereClause} {join.JoinExtraWhereClause!.ToString(formatter)}";
+                    finalWhereClause = $"{finalWhereClause} ({join.JoinExtraWhereClause!.ToString(formatter)})";
                 }
             }
 

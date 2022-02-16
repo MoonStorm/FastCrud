@@ -3,6 +3,8 @@
     using Dapper.FastCrud.Benchmarks.Models;
     using Dapper.FastCrud.Tests.Contexts;
     using NUnit.Framework;
+    using System.Collections;
+    using System.Reflection;
     using TechTalk.SpecFlow;
     using SimpleCrud = global::Dapper.SimpleCRUD;
 
@@ -14,6 +16,19 @@
         public SimpleCrudSteps(DatabaseTestContext testContext)
         {
             _testContext = testContext;
+        }
+
+        [BeforeScenario]
+        public static void TestSetup()
+        {
+            // clear caches
+            var tableNamesPropInfo = typeof(SimpleCrud).GetField("TableNames", BindingFlags.Static | BindingFlags.NonPublic);
+            var tableNamesInstance = tableNamesPropInfo.GetValue(null);
+            ((IDictionary)tableNamesInstance).Clear();
+
+            var columnNamesPropInfo = typeof(SimpleCrud).GetField("ColumnNames", BindingFlags.Static | BindingFlags.NonPublic);
+            var columnNameInstance = columnNamesPropInfo.GetValue(null);
+            ((IDictionary)columnNameInstance).Clear();
         }
 
         [When(@"I insert (.*) benchmark entities using Simple Crud")]
@@ -32,13 +47,19 @@
             }
         }
 
-        [When(@"I select all the benchmark entities using Simple Crud")]
-        public void WhenISelectAllTheSingleIntKeyEntitiesUsingSimpleCrud()
+        [When(@"I select all the benchmark entities using Simple Crud (\d+) times")]
+        public void WhenISelectAllTheSingleIntKeyEntitiesUsingSimpleCrud(int opCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var queriedEntity in SimpleCrud.GetList<SimpleBenchmarkEntity>(dbConnection))
+            while (--opCount >= 0)
             {
-                _testContext.RecordQueriedEntity(queriedEntity);
+                foreach (var queriedEntity in SimpleCrud.GetList<SimpleBenchmarkEntity>(dbConnection))
+                {
+                    if (opCount == 0)
+                    {
+                        _testContext.RecordQueriedEntity(queriedEntity);
+                    }
+                }
             }
         }
 

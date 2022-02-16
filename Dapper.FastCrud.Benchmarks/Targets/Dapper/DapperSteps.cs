@@ -4,9 +4,12 @@
     using global::Dapper.FastCrud.Tests.Contexts;
     using NUnit.Framework;
     using System;
+    using Dapper;
+    using System.Collections;
     using System.Data;
     using System.Data.SqlClient;
     using System.Linq;
+    using System.Reflection;
     using TechTalk.SpecFlow;
 
     [Binding]
@@ -26,23 +29,39 @@
             _testContext = testContext;
         }
 
+        [BeforeScenario]
+        public static void TestSetup()
+        {
+            // clear caches
+            var dapperQueryCachePropInfo = typeof(global::Dapper.SqlMapper).GetField("_queryCache", BindingFlags.NonPublic | BindingFlags.Static);
+            var dapperQueryCacheInstance = dapperQueryCachePropInfo.GetValue(null);
+            ((IDictionary)dapperQueryCacheInstance).Clear();
+        }
+
         [When(@"I insert (.*) benchmark entities using ADO \.NET")]
         public void WhenIInsertBenchmarkEntitiesUsingADONET(int entitiesCount)
         {
-            for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
+            using (var tran = _testContext.DatabaseConnection.BeginTransaction())
             {
-                var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
-
-                using (var sqlInsertCommand = new SqlCommand(_insertSql, (SqlConnection)_testContext.DatabaseConnection))
+                for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
                 {
-                    sqlInsertCommand.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = generatedEntity.FirstName });
-                    sqlInsertCommand.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = generatedEntity.LastName });
-                    sqlInsertCommand.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = generatedEntity.DateOfBirth });
-                    generatedEntity.Id = Convert.ToInt32(sqlInsertCommand.ExecuteScalar());
+                    var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
+
+                    using (var sqlInsertCommand = _testContext.DatabaseConnection.CreateCommand())
+                    {
+                        sqlInsertCommand.CommandText = _insertSql;
+                        sqlInsertCommand.Transaction = tran;
+                        sqlInsertCommand.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar) { Value = generatedEntity.FirstName });
+                        sqlInsertCommand.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar) { Value = generatedEntity.LastName });
+                        sqlInsertCommand.Parameters.Add(new SqlParameter("@DateOfBirth", SqlDbType.DateTime) { Value = generatedEntity.DateOfBirth });
+                        generatedEntity.Id = Convert.ToInt32(sqlInsertCommand.ExecuteScalar());
+                    }
+
+                    Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
+                    _testContext.RecordInsertedEntity(generatedEntity);
                 }
 
-                Assert.Greater(generatedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
-                _testContext.RecordInsertedEntity(generatedEntity);
+                tran.Commit();
             }
         }
 
@@ -60,13 +79,19 @@
             }
         }
 
-        [When(@"I select all the benchmark entities using Dapper")]
-        public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapper()
+        [When(@"I select all the benchmark entities using Dapper (\d+) times")]
+        public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapper(int opCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var queriedEntity in dbConnection.Query<SimpleBenchmarkEntity>(_selectAllSql))
+            while (--opCount >= 0)
             {
-                _testContext.RecordQueriedEntity(queriedEntity);
+                foreach (var queriedEntity in dbConnection.Query<SimpleBenchmarkEntity>(_selectAllSql))
+                {
+                    if (opCount == 0)
+                    {
+                        _testContext.RecordQueriedEntity(queriedEntity);
+                    }
+                }
             }
         }
 

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyDescription("Dapper.FastCRUD is built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings. VS2015 or an equivalent build environment is recommended.")]
 [assembly: AssemblyProduct("Dapper.FastCRUD")]
-[assembly: AssemblyCopyright("Copyright © 2021 Dapper.FastCRUD contributors")]
+[assembly: AssemblyCopyright("Copyright © 2022 Dapper.FastCRUD contributors")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyTitle("Dapper.FastCRUD")]
@@ -37,4 +37,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("Dapper.FastCrud.Tests")]
+[assembly: InternalsVisibleTo("Dapper.FastCrud.Benchmarks")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

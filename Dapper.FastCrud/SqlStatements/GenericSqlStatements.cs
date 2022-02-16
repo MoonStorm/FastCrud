@@ -149,7 +149,7 @@
                     singleUpdateStatement,
                     keyEntity,
                     transaction:
-                        statementOptions.Transaction,
+                    statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds).FirstOrDefault();
 
                 if (updatedEntity != null)
@@ -162,11 +162,11 @@
             }
 
             return connection.Execute(
-                _sqlBuilder.ConstructFullSingleUpdateStatement(), 
-                keyEntity, 
-                transaction: 
-                statementOptions.Transaction, 
-                commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
+                       singleUpdateStatement,
+                       keyEntity,
+                       transaction:
+                       statementOptions.Transaction,
+                       commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds) > 0;
         }
 
         /// <summary>
@@ -365,9 +365,7 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray()??Array.Empty<SqlStatementJoin>();
-            /* UPDATE: makes no difference, since even joins but without the joined columns can return duplicate entries
-             if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
+             if (joins == null)
             {
                 results = connection.Query<TEntity>(
                     selectStatement,
@@ -377,8 +375,9 @@
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
 
             }
-            else*/
+            else
             {
+                var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray() ?? Array.Empty<SqlStatementJoin>();
                 var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
                 var mainEntityJoinParser = new MainEntityResultSetParser<TEntity>(joinsWithResultSetMappings);
                 var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];
@@ -438,9 +437,7 @@
                 skipRowsCount: statementOptions.SkipResults,
                 limitRowsCount: statementOptions.LimitResults);
 
-            var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray()??Array.Empty<SqlStatementJoin>(); 
-            /* UPDATE: makes no difference, since even joins but without the joined columns can return duplicate entries
-            if (joinsWithResultSetMappings == null || joinsWithResultSetMappings.Length == 0)
+            if (joins == null)
             {
                 results = await connection.QueryAsync<TEntity>(
                     selectStatement,
@@ -448,8 +445,9 @@
                     transaction: statementOptions.Transaction,
                     commandTimeout: (int?)statementOptions.CommandTimeout?.TotalSeconds);
             }
-            else*/
+            else
             {
+                var joinsWithResultSetMappings = joins?.Where(join => join.RequiresResultMapping).ToArray() ?? Array.Empty<SqlStatementJoin>();
                 var splitOn = _sqlBuilder.ConstructSplitOnExpression(joinsWithResultSetMappings);
                 var mainEntityJoinParser = new MainEntityResultSetParser<TEntity>(joinsWithResultSetMappings);
                 var rowInstanceWrappers = new EntityInstanceWrapper[joinsWithResultSetMappings.Length + 1];

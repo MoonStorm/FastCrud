@@ -1109,6 +1109,12 @@
             }
         }
 
+        [Then(@"the result of the last query count should be (.*)")]
+        public void ThenTheResultOfTheLastQueryCountShouldBe(int lastCountValue)
+        {
+            Assert.That(_testContext.LastCountQueryResult, Is.EqualTo(lastCountValue));
+        }
+
         private async Task DeleteInsertedEntitiesAsync<TEntity>(int? skipCount = null, int? maxCount = null)
         {
             var entitiesToBeDeleted = _testContext.GetInsertedEntitiesOfType<TEntity>()

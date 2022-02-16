@@ -10,18 +10,34 @@
     public class EfDbContext:DbContext
     {
         private readonly DatabaseTestContext _testContext;
-        private Lazy<EfInternalDbContext> _dbContext;
+        private EfInternalDbContext? _dbContext;
 
         public EfDbContext(DatabaseTestContext testContext)
         {
             _testContext = testContext;
-            _dbContext = new Lazy<EfInternalDbContext>(() => new EfInternalDbContext(_testContext.DatabaseConnection), LazyThreadSafetyMode.None);
-
         }
 
-        public EfInternalDbContext Value => _dbContext.Value;
+        public EfInternalDbContext Value
+        {
+            get
+            {
+                if (_dbContext == null)
+                {
+                    _dbContext = new EfInternalDbContext(_testContext.DatabaseConnection);
+                }
 
-        public bool IsValueCreated => _dbContext.IsValueCreated;
+                return _dbContext;
+            }
+        }
+
+
+        public bool IsValueCreated => _dbContext!=null;
+
+        public void ResetContext()
+        {
+            _dbContext?.Dispose();
+            _dbContext = null;
+        }
 
         public class EfInternalDbContext : DbContext
         {

@@ -3,7 +3,9 @@
     using global::Dapper.FastCrud.Benchmarks.Models;
     using global::Dapper.FastCrud.Tests.Contexts;
     using NUnit.Framework;
+    using System.Collections;
     using System.Linq;
+    using System.Reflection;
     using TechTalk.SpecFlow;
     using FastCrud = global::Dapper.FastCrud.DapperExtensions;
 
@@ -15,6 +17,15 @@
         public FastCrudTests(DatabaseTestContext testContext)
         {
             _testContext = testContext;
+        }
+
+        [BeforeScenario]
+        public static void TestSetup()
+        {
+            // clear caches
+            var fastCrudCachePropInfo = typeof(OrmConfiguration).GetField("_entityDescriptorCache", BindingFlags.Static | BindingFlags.NonPublic);
+            var fastCrudCacheInstance = fastCrudCachePropInfo.GetValue(null);
+            ((IDictionary)fastCrudCacheInstance).Clear();
         }
 
         [When(@"I insert (.*) benchmark entities using Fast Crud")]
@@ -42,13 +53,19 @@
             Assert.That(entities.Count(), Is.EqualTo(entitiesCount));
         }
 
-        [When(@"I select all the benchmark entities using Fast Crud")]
-        public void WhenISelectAllTheSingleIntKeyEntitiesUsingFastCrud()
+        [When(@"I select all the benchmark entities using Fast Crud (\d+) times")]
+        public void WhenISelectAllTheSingleIntKeyEntitiesUsingFastCrud(int opCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var queriedEntity in FastCrud.Find<SimpleBenchmarkEntity>(dbConnection))
+            while (--opCount >= 0)
             {
-                _testContext.RecordQueriedEntity(queriedEntity);
+                foreach (var queriedEntity in FastCrud.Find<SimpleBenchmarkEntity>(dbConnection))
+                {
+                    if (opCount == 0)
+                    {
+                        _testContext.RecordQueriedEntity(queriedEntity);
+                    }
+                }
             }
         }
 

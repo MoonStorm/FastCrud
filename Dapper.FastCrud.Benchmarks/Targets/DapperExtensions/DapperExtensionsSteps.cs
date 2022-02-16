@@ -2,9 +2,14 @@
 {
     using global::Dapper.FastCrud.Benchmarks.Models;
     using global::Dapper.FastCrud.Tests.Contexts;
+    using global::DapperExtensions;
+    using global::DapperExtensions.Mapper;
+    using global::DapperExtensions.Sql;
     using NUnit.Framework;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Reflection;
     using TechTalk.SpecFlow;
-    using DapperExtensions = global::DapperExtensions.DapperExtensions;
 
     [Binding]
     public class DapperExtensionsSteps : EntityGenerationSteps
@@ -16,14 +21,19 @@
             _testContext = testContext;
         }
 
-        [BeforeScenario()]
-        public void SetupPluralTableMapping()
+        [BeforeScenario]
+        public static void TestSetup()
         {
-            // UPDATE: in 1.7 we have a blocking error:
-            // https://github.com/tmsmith/Dapper-Extensions/issues/276
-            // Reverted to 1.6.3
-            DapperExtensions.DefaultMapper = typeof(global::DapperExtensions.Mapper.PluralizedAutoClassMapper<>);
+            // clear caches by reinitializing
+            var config = new DapperExtensionsConfiguration(typeof(PluralizedAutoClassMapper<>), (IList<Assembly>)new List<Assembly>(), (ISqlDialect)new SqlServerDialect());
+            DapperExtensions.Configure(config);
+            
+            //// UPDATE: in 1.7 we have a blocking bug:
+            //// https://github.com/tmsmith/Dapper-Extensions/issues/276
+            //// Reverted to 1.6.3
+            //DapperExtensions.DefaultMapper = typeof(global::DapperExtensions.Mapper.PluralizedAutoClassMapper<>);
         }
+
 
         [When(@"I insert (.*) benchmark entities using Dapper Extensions")]
         public void WhenIInsertSingleIntKeyEntitiesUsingDapperExtensions(int entitiesCount)
@@ -41,13 +51,19 @@
             }
         }
 
-        [When(@"I select all the benchmark entities using Dapper Extensions")]
-        public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapperExtensions()
+        [When(@"I select all the benchmark entities using Dapper Extensions (\d+) times")]
+        public void WhenISelectAllTheSingleIntKeyEntitiesUsingDapperExtensions(int opCount)
         {
             var dbConnection = _testContext.DatabaseConnection;
-            foreach (var queriedEntity in DapperExtensions.GetList<SimpleBenchmarkEntity>(dbConnection))
+            while (--opCount >= 0)
             {
-                _testContext.RecordQueriedEntity(queriedEntity);
+                foreach (var queriedEntity in DapperExtensions.GetList<SimpleBenchmarkEntity>(dbConnection))
+                {
+                    if (opCount == 0)
+                    {
+                        _testContext.RecordQueriedEntity(queriedEntity);
+                    }
+                }
             }
         }
 

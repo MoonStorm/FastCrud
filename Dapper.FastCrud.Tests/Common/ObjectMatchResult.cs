@@ -1,9 +1,10 @@
 ﻿namespace Dapper.FastCrud.Tests.Common
 {
+    using System;
     using System.Collections.Generic;
     using Newtonsoft.Json;
 
-    internal class ObjectMatchResult
+    internal sealed class ObjectMatchResult:IDisposable
     {
         private List<ObjectMatchMismatch> _mismatches = new List<ObjectMatchMismatch>();
 
@@ -20,6 +21,7 @@
                                      object? actualValue,
                                      params ObjectMatchResult[] deeperReason)
         {
+            this.IsMatch = false;
             _mismatches.Add(new ObjectMatchMismatch()
                 {
                     Level = level,
@@ -31,11 +33,27 @@
                 });
         }
 
+        public void RegisterInterestedParty()
+        {
+            this.InterestedParties++;
+        }
+
+        public int InterestedParties { get; private set; }
         public object ExpectedObject { get; }
         public object ActualObject { get; }
         public ObjectMatchMismatch[] Mismatches => _mismatches.ToArray();
-        public bool IsMatch => this.Mismatches.Length == 0;
+        public bool? IsMatch { get; set; }
         public int MatchingScore { get; set; } // 10 for each prop simply matched, 1 for matched collections or complex objects
+
+        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        public void Dispose()
+        {
+            this.InterestedParties--;
+            if (this.InterestedParties == 0 && !this.IsMatch.HasValue)
+            {
+                this.IsMatch = _mismatches.Count == 0;
+            }
+        }
     }
 
     internal class ObjectMatchMismatch

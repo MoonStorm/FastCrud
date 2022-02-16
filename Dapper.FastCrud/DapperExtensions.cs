@@ -311,6 +311,7 @@ namespace Dapper.FastCrud
             return sqlStatements.BatchSelectAsync(connection, options);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ISqlStatements<TEntity> GetStatements<TEntity>(AggregatedSqlStatementOptions statementOptions)
         {
             ISqlStatements<TEntity> sqlStatements;

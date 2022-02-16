@@ -36,6 +36,6 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 - The following mapping styles are supported:
   - Database first (limited to SQL Server)
   - Code first, using model data annotations (preferred)
-  - Fluent validation for POCO objects
+  - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.

@@ -4,6 +4,7 @@
     using global::Dapper.FastCrud.Tests.Contexts;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
+    using System.Collections.Generic;
     using System.Linq;
     using TechTalk.SpecFlow;
 
@@ -28,8 +29,8 @@
             }
         }
 
-        [When(@"I insert (.*) benchmark entities using Entity Framework")]
-        public void WhenIInsertSingleIntKeyEntitiesUsingEntityFramework(int entitiesCount)
+        [When(@"I insert (.*) benchmark entities using Entity Framework - single op/call")]
+        public void WhenIInsertSingleIntKeyEntitiesUsingEntityFrameworkSingleOpCall(int entitiesCount)
         {
             for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
@@ -43,17 +44,45 @@
             }
         }
 
-        [When(@"I select all the benchmark entities using Entity Framework")]
-        public void WhenISelectAllTheSingleIntKeyEntitiesUsingEntityFramework()
+        [When(@"I insert (.*) benchmark entities using Entity Framework - batch")]
+        public void WhenIInsertSingleIntKeyEntitiesUsingEntityFrameworkBatch(int entitiesCount)
         {
-            foreach (var queriedEntity in _dbContext.Value.BenchmarkEntities)
+            var insertedEntities = new List<SimpleBenchmarkEntity>(entitiesCount);
+            for (var entityIndex = 1; entityIndex <= entitiesCount; entityIndex++)
             {
-                _testContext.RecordQueriedEntity(queriedEntity);
+                var generatedEntity = this.GenerateSimpleBenchmarkEntity(entityIndex);
+
+                _dbContext.Value.BenchmarkEntities.Add(generatedEntity);
+                insertedEntities.Add(generatedEntity);
+                _testContext.RecordInsertedEntity(generatedEntity);
+            }
+            _dbContext.Value.SaveChanges();
+
+            foreach (var insertedEntity in insertedEntities)
+            {
+                Assert.Greater(insertedEntity.Id, 1); // the seed starts from 2 in the db to avoid confusion with the number of rows modified
             }
         }
 
-        [When(@"I delete all the inserted benchmark entities using Entity Framework")]
-        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingEntityFramework()
+        [When(@"I select all the benchmark entities using Entity Framework (\d+) times")]
+        public void WhenISelectAllTheSingleIntKeyEntitiesUsingEntityFramework(int opCount)
+        {
+            var dbConnection = _testContext.DatabaseConnection;
+            while (--opCount >= 0)
+            {
+                _dbContext.ResetContext();
+                foreach (var queriedEntity in _dbContext.Value.BenchmarkEntities)
+                {
+                    if (opCount == 0)
+                    {
+                        _testContext.RecordQueriedEntity(queriedEntity);
+                    }
+                }
+            }
+        }
+
+        [When(@"I delete all the inserted benchmark entities using Entity Framework - single op/call")]
+        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingEntityFrameworkSingleOpCall()
         {
             foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
@@ -63,39 +92,72 @@
             }
         }
 
+        [When(@"I delete all the inserted benchmark entities using Entity Framework - batch")]
+        public void WhenIDeleteAllTheInsertedSingleIntKeyEntitiesUsingEntityFrameworkBatch()
+        {
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
+            {
+                _dbContext.Value.BenchmarkEntities.Attach(entity);
+                _dbContext.Value.BenchmarkEntities.Remove(entity);
+            }
+            _dbContext.Value.SaveChanges();
+        }
+
         [When(@"I select all the benchmark entities that I previously inserted using Entity Framework")]
         public void WhenISelectAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
         {
             var entityIndex = 0;
             foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                _testContext.RecordQueriedEntity(_dbContext.Value.BenchmarkEntities.AsNoTracking().Single(queriedEntity => queriedEntity.Id == entity.Id));
+                _testContext.RecordQueriedEntity(_dbContext.Value.BenchmarkEntities.Single(queriedEntity => queriedEntity.Id == entity.Id));
             }
         }
 
-        [When(@"I update all the benchmark entities that I previously inserted using Entity Framework")]
-        public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFramework()
+        [When(@"I update all the benchmark entities that I previously inserted using Entity Framework - single op/call")]
+        public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFrameworkSingleOpCall()
         {
             var entityIndex = 0;
-            foreach (var oldEntity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
 
-                var newEntity = new SimpleBenchmarkEntity()
-                {
-                    Id = oldEntity.Id, 
-                    FirstName = oldEntity.FirstName, 
-                    LastName = oldEntity.LastName, 
-                    DateOfBirth = oldEntity.DateOfBirth
-                };
+                //var newEntity = new SimpleBenchmarkEntity()
+                //{
+                //    Id = oldEntity.Id, 
+                //    FirstName = oldEntity.FirstName, 
+                //    LastName = oldEntity.LastName, 
+                //    DateOfBirth = oldEntity.DateOfBirth
+                //};
+                // _dbContext.Value.BenchmarkEntities.Attach(newEntity);
+                // this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
 
-                _dbContext.Value.BenchmarkEntities.Attach(newEntity);
-
-                // now update it
-                this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
+                this.GenerateSimpleBenchmarkEntity(entityIndex++, entity);
                 _dbContext.Value.SaveChanges();
 
-                _testContext.RecordUpdatedEntity(newEntity);
+                _testContext.RecordUpdatedEntity(entity);
             }
+        }
+
+        [When(@"I update all the benchmark entities that I previously inserted using Entity Framework - batch")]
+        public void WhenIUpdateAllTheSingleIntKeyEntitiesThatIPreviouslyInsertedUsingEntityFrameworkBatch()
+        {
+            var entityIndex = 0;
+            foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
+            {
+
+                //var newEntity = new SimpleBenchmarkEntity()
+                //{
+                //    Id = oldEntity.Id, 
+                //    FirstName = oldEntity.FirstName, 
+                //    LastName = oldEntity.LastName, 
+                //    DateOfBirth = oldEntity.DateOfBirth
+                //};
+                // _dbContext.Value.BenchmarkEntities.Attach(newEntity);
+                // this.GenerateSimpleBenchmarkEntity(entityIndex++, newEntity);
+
+                this.GenerateSimpleBenchmarkEntity(entityIndex++, entity);
+                _testContext.RecordUpdatedEntity(entity);
+            }
+            _dbContext.Value.SaveChanges();
         }
     }
 }
