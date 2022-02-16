@@ -33,7 +33,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 - The following mapping styles are supported:
   - Database first (limited to SQL Server)
   - Code first, using model data annotations (preferred)
-  - Fluent validation for POCO objects
+  - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
 - Extensibility points are also provided.
 
@@ -88,52 +88,52 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
 
 #### Speed
-Most of us love Dapper for its speed. 
-Let's have a look at how ``Fast Crud`` performs against other similar libraries out there:  
+Let's have a look at some of the most popular ORMs out there in terms of speed:  
 
 - ``Dapper.SimpleCRUD v2.3.0``
 - ``DapperExtensions v1.6.3 ``
 - ``Entity Framework Core v6.0.2`` 
 
-##### Automatic Benchmark Report (Last Run: Sunday, January 03, 2016)
+##### Automatic Benchmark Report (Last Run: Wednesday, February 16, 2022)
 
 |  Library   |  Operation | Op Count |Time (ms) | Time/op (μs) |
 |------------|------------|----------|----------|--------------|
+| <a name="new_entry_marker"/> |
 ||||||
-| Dapper | insert | 30000 | 10,016.88 | 333.90 |
-| Fast Crud | insert | 30000 | 10,431.64 | 347.72 |
-| Dapper Extensions | insert | 30000 | 13,272.40 | 442.41 |
-| Simple Crud | insert | 30000 | 19,954.31 | 665.14 |
-| Entity Framework | insert | 30000 | 43,636.47 | 1,454.55 |
+| Dapper | insert | 10000 | 2,974.40 | 297.44 |
+| Fast Crud | insert | 10000 | 3,172.67 | 317.27 |
+| Dapper Extensions | insert | 10000 | 3,529.16 | 352.92 |
+| Simple Crud | insert | 10000 | 3,110.40 | 311.04 |
+| Entity Framework - single op/call | insert | 10000 | 119,784.63 | 11,978.46 |
 ||||||
-| Dapper | update | 30000 | 6,439.43 | 214.65 |
-| Fast Crud | update | 30000 | 6,668.78 | 222.29 |
-| Dapper Extensions | update | 30000 | 8,803.26 | 293.44 |
-| Simple Crud | update | 30000 | 10,204.28 | 340.14 |
-| Entity Framework | update | 30000 | 39,954.88 | 1,331.83 |
+| Dapper | update | 10000 | 3,319.82 | 331.98 |
+| Fast Crud | update | 10000 | 3,276.99 | 327.70 |
+| Dapper Extensions | update | 10000 | 3,657.30 | 365.73 |
+| Simple Crud | update | 10000 | 3,150.76 | 315.08 |
+| Entity Framework - single op/call | update | 10000 | 235,678.77 | 23,567.88 |
 ||||||
-| Dapper | delete | 30000 | 8,312.94 | 277.10 |
-| Fast Crud | delete | 30000 | 8,693.02 | 289.77 |
-| Dapper Extensions | delete | 30000 | 10,804.55 | 360.15 |
-| Simple Crud | delete | 30000 | 13,642.98 | 454.77 |
-| Entity Framework | delete | 30000 | 35,973.40 | 1,199.11 |
+| Dapper | delete | 10000 | 2,869.64 | 286.96 |
+| Fast Crud | delete | 10000 | 2,916.99 | 291.70 |
+| Dapper Extensions | delete | 10000 | 3,106.24 | 310.62 |
+| Simple Crud | delete | 10000 | 3,120.13 | 312.01 |
+| Entity Framework - single op/call | delete | 10000 | 7,326.03 | 732.60 |
 ||||||
-| Dapper | select by id | 30000 | 6,010.58 | 200.35 |
-| Fast Crud | select by id | 30000 | 6,172.08 | 205.74 |
-| Dapper Extensions | select by id | 30000 | 6,355.57 | 211.85 |
-| Simple Crud | select by id | 30000 | 12,912.19 | 430.41 |
-| Entity Framework | select by id | 30000 | 21,126.72 | 704.22 |
+| Dapper | select by id | 10000 | 1,499.67 | 149.97 |
+| Fast Crud | select by id | 10000 | 1,861.50 | 186.15 |
+| Dapper Extensions | select by id | 10000 | 2,026.22 | 202.62 |
+| Simple Crud | select by id | 10000 | 2,113.70 | 211.37 |
+| Entity Framework | select by id | 10000 | 3,665.71 | 366.57 |
 ||||||
-| Dapper | select all | 3 | 217.06 | 72,353.87 |
-| Fast Crud | select all | 3 | 262.41 | 87,468.83 |
-| Dapper Extensions | select all | 3 | 291.22 | 97,073.00 |
-| Simple Crud | select all | 3 | 814.65 | 271,549.57 |
-| Entity Framework | select all | 3 | 5,431.27 | 1,810,423.27 |
+| Dapper | select all | 10000 | 1,449.41 | 144.94 |
+| Fast Crud | select all | 10000 | 1,748.86 | 174.89 |
+| Dapper Extensions | select all | 10000 | 1,762.69 | 176.27 |
+| Simple Crud | select all | 10000 | 2,281.44 | 228.14 |
+| Entity Framework | select all | 10000 | 6,233.53 | 623.35 |
 
-Dapper is used as reference only, for the purpose of observing the overhead of the automatic SQL generation compared to verbatim  constructs. The database is re-created at every run, data file is pre-allocated, and the statistics are turned off.
-The tests are following the same steps and are running on the same number and size of records.
-
-Environment details: Windows 7, i7 3930K @3.2GHz, 16GB DDR3-1600, SATA600 SSD  
+Dapper is included for reference. All the libs involved get their own internal cache cleared before each run, the benchmark database is re-created, data file gets pre-allocated, and the statistics are turned off.
+The tests are following the same steps and are running in the same environment on the same number and size of records.
+We're happy to see that most light ORMs have matured enough over the years and caught up with ``FastCrud`` and even exceeded its speed in some cases. 
+The really heavy ones are still trailing far behind.
 
 You can find more details about how to run the benchmarks yourself in the wiki.
 

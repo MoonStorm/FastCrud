@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.2" />
     <PackageReference Include="MySql.Data" Version="8.0.27" />
     <PackageReference Include="Npgsql" Version="6.0.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="SpecFlow.NUnit.Runners" Version="3.9.40" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.40" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
