@@ -53,6 +53,18 @@ Scenario Outline: Count with a where clause (build server test)
 	| LocalDb       | 6            | asynchronous |
 	| LocalDb       | 6            | synchronous  |
 
+@ExternalDatabase
+Scenario Outline: Count with a where clause (external database)
+	Given I have initialized a <database type> database
+	When I insert <entity count> building entities using <method type> methods
+	And I query for the count of all the inserted building entities using <method type> methods
+	Then the result of the last query count should be <entity count>
+	Examples: 
+	| database type | entity count | method type  |
+	| PostgreSql    | 4            | asynchronous |
+	| MySql         | 3            | asynchronous |
+	| PostgreSql    | 4            | synchronous  |
+	| MySql         | 3            | synchronous  |
 
 @AutomaticBuildServerTest
 Scenario Outline: Find entities (build server test)

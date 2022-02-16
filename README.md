@@ -53,6 +53,7 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
       - The limit of 7 entities in a JOIN was removed.
       - The main entity and the JOINed entities can now be aliased. It is now recommended to do so when working with multiple entities in a statement for easy targeting in the WHERE clause.
       - JOIN support has been extended to the GET and COUNT methods.
+      - When joins are used in a COUNT statement, DISTINCT is used.
       - SQL statements no longer require the presence of a relationship preset in the mappings. You can join with whatever you want, using whatever navigation properties you want (or none) and with any ON clause you desire.
       - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
       - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).

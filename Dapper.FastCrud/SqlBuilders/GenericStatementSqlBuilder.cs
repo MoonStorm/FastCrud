@@ -81,7 +81,7 @@
             _noConditionFullBatchUpdateStatement = new Lazy<string>(()=>this.ConstructFullBatchUpdateStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
             _fullSingleDeleteStatement = new Lazy<string>(()=>this.ConstructFullSingleDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
             _noConditionFullBatchDeleteStatement = new Lazy<string>(()=>this.ConstructFullBatchDeleteStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
-            _noConditionFullCountStatement = new Lazy<string>(()=>this.ConstructFullCountStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
+            _noConditionFullCountStatement = new Lazy<string>(()=>this.ConstructFullCountStatementInternal(null, null, false, null),LazyThreadSafetyMode.PublicationOnly);
             _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
         }
         
@@ -326,9 +326,12 @@
         /// Constructs the count part of the select statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string ConstructCountSelectClause()
+        internal string ConstructCountSelectClause(bool joinsPresent, string? mainEntityAliasWhenInAJoin)
         {
-            //{this.ConstructKeyColumnEnumeration()} might not have keys, besides no speed difference
+            if (joinsPresent && this.KeyProperties.Length > 0)
+            {
+                return FormattableString.Invariant($@"COUNT(DISTINCT {string.Join(", ", this.KeyProperties.Select(propInfo => this.GetColumnName(propInfo, mainEntityAliasWhenInAJoin, false)))})");
+            }
             return "COUNT(*)";
         }
 
@@ -337,12 +340,14 @@
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal string ConstructFullCountStatement(
-            string? fromClause = null,
-            string? whereClause = null)
+            string? fromClause,
+            string? whereClause,
+            bool hasJoins,
+            string? mainEntityAliasWhenInAJoin)
         {
-            return whereClause == null && fromClause == null
+            return whereClause == null && fromClause == null && !hasJoins
                        ? _noConditionFullCountStatement.Value 
-                       : this.ConstructFullCountStatementInternal(fromClause, whereClause);
+                       : this.ConstructFullCountStatementInternal(fromClause, whereClause, hasJoins, mainEntityAliasWhenInAJoin);
         }
 
         /// <summary>
@@ -951,9 +956,9 @@
         /// <summary>
         /// Constructs a full count statement, optionally with a where clause.
         /// </summary>
-        protected virtual string ConstructFullCountStatementInternal(string? fromClause = null, string? whereClause = null)
+        protected virtual string ConstructFullCountStatementInternal(string? fromClause, string? whereClause, bool joinsPresent, string? mainEntityAliasWhenInAJoin)
         {
-            FormattableString statement = $"SELECT {this.ConstructCountSelectClause()} FROM {fromClause??this.GetTableName()}";
+            FormattableString statement = $"SELECT {this.ConstructCountSelectClause(joinsPresent, mainEntityAliasWhenInAJoin)} FROM {fromClause??this.GetTableName()}";
             if (whereClause != null)
             {
                 statement = $"{statement} WHERE {whereClause}";

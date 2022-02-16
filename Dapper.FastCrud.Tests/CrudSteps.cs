@@ -637,10 +637,11 @@
         [When(@"I query for the count of all the inserted building entities using (.*) methods")]
         public async Task WhenIQueryForTheCountOfAllTheInsertedBuildingEntitiesUsingMethods(bool useAsyncMethods)
         {
-            FormattableString whereClause = $"charindex(cast({nameof(BuildingDbEntity.BuildingId):of b} as varchar(10)), @BuildingIds) > 4";
-
-            var buildingIds = "ids:" + string.Join(",", _testContext.GetInsertedEntitiesOfType<BuildingDbEntity>()
-                                                           .Select(building => building.BuildingId));
+            var countParams = new
+                {
+                    MinBuildingId = 1
+                };
+            FormattableString whereClause = $"{nameof(BuildingDbEntity.BuildingId):of b} >= {nameof(countParams.MinBuildingId):P}";
 
             _testContext.LastCountQueryResult = useAsyncMethods
                                                     ? await _testContext
@@ -648,13 +649,14 @@
                                                             .CountAsync<BuildingDbEntity>(statement => statement
                                                                                                .WithAlias("b")
                                                                                                .Where(whereClause)
-                                                                                               .WithParameters(new { BuildingIds = buildingIds }))
+                                                                                               .Include<WorkstationDbEntity>(join => join.LeftOuterJoin()) // this shouldn't make a difference as we should be using distinct
+                                                                                               .WithParameters(countParams))
                                                     : _testContext
                                                       .DatabaseConnection
                                                       .Count<BuildingDbEntity>(statement => statement
                                                                                     .WithAlias("b")
                                                                                     .Where(whereClause)
-                                                                                    .WithParameters(new { BuildingIds = buildingIds }));
+                                                                                    .WithParameters(countParams));
         }
 
         [When(@"I query for the count of all the workstation entities combined with the employee entities using (.*) methods")]

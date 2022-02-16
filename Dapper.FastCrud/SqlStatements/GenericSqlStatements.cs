@@ -308,10 +308,12 @@
         {
             var joins = this.AnalyzeStatementJoins(statementOptions);
             var countStatement = (joins == null && statementOptions.WhereClause == null && statementOptions.MainEntityAlias == null)
-                                     ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
+                                     ? _sqlBuilder.ConstructFullCountStatement(null, null, false, null) // gain a small performance boost
                                      : _sqlBuilder.ConstructFullCountStatement(
                                          _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins),
-                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
+                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins),
+                                         joins!=null,
+                                         statementOptions.MainEntityAlias);
             return connection.ExecuteScalar<int>(
                 countStatement,
                 statementOptions.Parameters,
@@ -327,10 +329,12 @@
         {
             var joins = this.AnalyzeStatementJoins(statementOptions);
             var countStatement = (joins == null && statementOptions.WhereClause == null && statementOptions.MainEntityAlias == null)
-                                     ? _sqlBuilder.ConstructFullCountStatement() // gain a small performance boost
+                                     ? _sqlBuilder.ConstructFullCountStatement(null, null, false, null) // gain a small performance boost
                                      : _sqlBuilder.ConstructFullCountStatement(
                                          _sqlBuilder.ConstructFromClause(statementOptions.StatementFormatter, statementOptions.MainEntityAlias, joins),
-                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins));
+                                         _sqlBuilder.ConstructWhereClause(statementOptions.StatementFormatter, statementOptions.WhereClause, joins),
+                                         joins != null,
+                                         statementOptions.MainEntityAlias);
 
             return connection.ExecuteScalarAsync<int>(
                 countStatement,
