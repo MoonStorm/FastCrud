@@ -197,6 +197,11 @@
                     return finalMatchResult;
                 }
 
+                if (finalMatchResult.IsMatch.HasValue)
+                {
+                    return finalMatchResult;
+                }
+
                 // some of the tests that join to entities that don't exist will create null IEnumerables
                 // we'll consider them identical to empty IEnumerables
                 var actualCollectionLength = actualEntityCollection?.Count() ?? 0;
@@ -301,6 +306,11 @@
                     return finalMatchResult;
                 }
 
+                if (finalMatchResult.IsMatch.HasValue)
+                {
+                    return finalMatchResult;
+                }
+
                 if (ReferenceEquals(actualEntity, null) && ReferenceEquals(expectedEntity, null))
                 {
                     return finalMatchResult;
@@ -399,7 +409,7 @@
                         {
                             finalMatchResult.MatchingScore += 1;
                         }
-                        else
+                        else if(decision.IsMatch == false)
                         {
                             finalMatchResult.RegisterMismatch(ObjectMatchMismatchType.PropertyValue, currentLevel, propDescriptor.Name, expectedEntityPropValue, actualEntityPropValue, decision);
                         }

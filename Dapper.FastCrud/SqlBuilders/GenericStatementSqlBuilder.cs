@@ -326,12 +326,8 @@
         /// Constructs the count part of the select statement.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string ConstructCountSelectClause(bool joinsPresent, string? mainEntityAliasWhenInAJoin)
+        internal string ConstructCountSelectClause()
         {
-            if (joinsPresent && this.KeyProperties.Length > 0)
-            {
-                return FormattableString.Invariant($@"COUNT(DISTINCT {string.Join(", ", this.KeyProperties.Select(propInfo => this.GetColumnName(propInfo, mainEntityAliasWhenInAJoin, false)))})");
-            }
             return "COUNT(*)";
         }
 
@@ -958,12 +954,22 @@
         /// </summary>
         protected virtual string ConstructFullCountStatementInternal(string? fromClause, string? whereClause, bool joinsPresent, string? mainEntityAliasWhenInAJoin)
         {
-            FormattableString statement = $"SELECT {this.ConstructCountSelectClause(joinsPresent, mainEntityAliasWhenInAJoin)} FROM {fromClause??this.GetTableName()}";
-            if (whereClause != null)
+            FormattableString statement;
+            if (joinsPresent)
             {
-                statement = $"{statement} WHERE {whereClause}";
+                statement = $@"SELECT 
+                        {this.ConstructCountSelectClause()} 
+                        FROM (SELECT DISTINCT {(this.KeyProperties.Length > 0
+                                                    ? this.ConstructKeyColumnEnumeration(mainEntityAliasWhenInAJoin??this.EntityRegistration.TableName) 
+                                                    : this.ConstructColumnEnumerationForSelect(mainEntityAliasWhenInAJoin??this.EntityRegistration.TableName))} 
+                                FROM {fromClause ?? this.GetTableName()}
+                                {(whereClause!=null? $" WHERE {whereClause}": string.Empty)}
+                             ) AS {this.GetDelimitedIdentifier(Guid.NewGuid().ToString("N"))}";
             }
-
+            else
+            {
+                statement = $@"SELECT {this.ConstructCountSelectClause()} FROM {fromClause ?? this.GetTableName()} {(whereClause != null ? $"WHERE {whereClause}" : string.Empty)}";
+            }
             return FormattableString.Invariant(statement);
         }
 

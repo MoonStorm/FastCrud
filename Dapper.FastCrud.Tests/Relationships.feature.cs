@@ -198,8 +198,8 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Query single relationship one-to-one (build server test)")]
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "2", "synchronous", null)]
-        [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "3", "1", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("LocalDb", "3", "3", "asynchronous", null)]
         public virtual void QuerySingleRelationshipOne_To_OneBuildServerTest(string databaseType, string employeeCount, string badgeCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {

@@ -36,8 +36,8 @@ Scenario Outline: Query single relationship one-to-one (build server test)
 	Then the queried employee entities should be the same as the inserted ones
 	Examples: 
 	| database type | employee count | badge count | method type  |
-	| LocalDb       | 10             | 2            | synchronous  |
-	| LocalDb       | 10             | 3            | asynchronous |
+	| LocalDb       | 3             | 1            | synchronous  |
+	| LocalDb       | 3             | 3            | asynchronous |
 
 @ExternalDatabase
 Scenario Outline: Query single relationship one-to-one (external database)
