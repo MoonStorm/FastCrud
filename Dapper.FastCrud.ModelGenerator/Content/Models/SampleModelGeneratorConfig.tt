@@ -3,28 +3,60 @@
 <#
 /*
 This is a sample configuration file for GenericModelGenerator.tt. 
-When you create your own configuration file, don't forget to set the 'Custom Tool' to TextTemplatingFileGenerator
+When you create your own configuration file, don't forget to set the 'Custom Tool' to TextTemplatingFileGenerator.
+You can right click on your configuration file and click on "Debug T4 Template" to locate a problem.
 */
-	// Settings
-	ConfigPath = @""; //Looks in current project for web.config or app.config by default. You can override it to point to a different config file.
-    ConnectionStringName = ""; // Uses the last connection string in the config if not specified
-    Namespace = "Dapper.FastCrud.Tests.Models";
+
+	// By default, the template looks in the current project for a file named app.config by default.
+	// You can override it to point to a different config file.
+	// Example of app.config for entity generation:
+	// <?xml version="1.0" encoding="utf-8"?>
+	// <configuration>
+	//   <connectionStrings>
+	//     <add name="EntityGeneration" 
+	//	        providerName="System.Data.SqlClient" 
+	//		    connectionString="Data Source=(LocalDb)\MSSQLLocalDb;AttachDbFilename=|DataDirectory|\EntityGenDatabase.mdf;Initial Catalog=EntityGenDatabase;Integrated Security=True"/>
+	//  </connectionStrings>
+	// </configuration>
+	ConfigPath = @""; 
+
+	// By default, the template will use the last connection string in the configuration file. 
+	// You can specify an alternate connection string to be used instead.
+	ConnectionStringName = ""; 
+
+	// The namespace for your generated entities.
+	Namespace = "Dapper.FastCrud.Models";
+
+	// An optional prefix to be used for the class names.
 	ClassPrefix = "";
+
+	// An optional suffix to be used for the class names.
 	ClassSuffix = "Entity";
+
+	// For columns that were found to have an invalid name, they can be prefixed.
 	InvalidPropertyNamePrefix = "Prop";
+
+	// If true, views will also get processed.
     IncludeViews = true;
-	IgnoreColumnDefaultValues = true; // when set to false, the generated properties mapped to columns having default values will be refreshed with the database assigned values on insert.
+
+	// If true, the relationships will be analyzed and navigation properties created.
+    IncludeRelationships = true;
+
+	// When set to false, the generated properties mapped to columns having default values will be refreshed with the database assigned values on insert.
+    // When set to false, a FastCrud attribute will be used since this functionality is not covered by the regular component model data annotations.
+	IgnoreColumnDefaultValues = true; 
+
+	// Table or schema qualified table and view names can be excluded via this property.
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire."};
 #>
 <#@ include file="$(DapperFastCrudModelGeneratorPath)GenericModelGenerator.tt" #>
 <#+
 	void ConfigureTableMappings(Tables tables){
 		/*
-			// Tweak Schema
-			tables["tablename"].Ignore = true;							// To ignore a table
-			tables["tablename"].ClassName = "newname";					// To change the class name of a table
-			tables["tablename"]["columnname"].Ignore = true;			// To ignore a column
-			tables["tablename"]["columnname"].PropertyType="bool";		// To change the property type of a column
+			// You can tweak some of the discovered entities and relationships. Examples:
+			tables["Employee"]["Id"].PropertyName = "EmployeeUserId";
+			tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyName = "Badge";
+			tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyIsCollection = false;
 		*/
 	}
 #>

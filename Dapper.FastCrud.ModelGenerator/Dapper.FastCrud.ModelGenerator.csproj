@@ -22,10 +22,6 @@ More details are available on the project site.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper.FastCrud" Version="2.6.7" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Content\Models\GenericModelGenerator.tt">
       <Pack>true</Pack>
       <PackagePath>contentFiles/any/any/Models/GenericModelGenerator.tt</PackagePath>

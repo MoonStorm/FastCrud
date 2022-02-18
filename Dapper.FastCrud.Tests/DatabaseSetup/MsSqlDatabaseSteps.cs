@@ -176,7 +176,10 @@
 	                        [Id] ASC,
 	                        [EmployeeId] ASC
                         ),
-                        CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY (WorkstationId) REFERENCES [dbo].[Workstations] (WorkstationId))");
+                        CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY ([WorkstationId]) REFERENCES [Workstations] (WorkstationId),
+                        CONSTRAINT [FK_Employee_Employee_ManagerUserId_ManagerEmployeeId] FOREIGN KEY ([ManagerUserId],[ManagerEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId]),
+                        CONSTRAINT [FK_Employee_Employee_SupervisorUserId_SupervisorEmployeeId] FOREIGN KEY ([SupervisorUserId],[SupervisorEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId])
+                        )");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Badges](
 	                    [Id] [int] NOT NULL,

@@ -3,6 +3,8 @@
 <#
 /*
 This is the configuration file for GenericModelGenerator.tt
+TIP #1: When testing this template and you have the db attached, you may find it useful to run 'sqllocaldb stop' in a command prompt to force it to detach.
+TIP #2: You can right click on this file and click on "Debug T4 Template" to locate a problem.
 */
 	// Settings
     ConnectionStringName = ""; // Uses last connection string in config if not specified
@@ -16,15 +18,12 @@ This is the configuration file for GenericModelGenerator.tt
 	IgnoreColumnDefaultValues = false; 
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire.", "Building"};
 #>
-<#@ include file="..\..\..\Dapper.FastCRUD.ModelGenerator\Content\Models\GenericModelGenerator.tt" #>
+<#@ include file="..\..\..\Dapper.FastCRUD.ModelGenerator\Content\Models\GenericModelGenerator.tt" #> 
 <#+
-	void ConfigureTableMappings(Tables tables){
-		/*
-			// Tweak Schema
-			tables["tablename"].Ignore = true;							// To ignore a table
-			tables["tablename"].ClassName = "newname";					// To change the class name of a table
-			tables["tablename"]["columnname"].Ignore = true;			// To ignore a column
-			tables["tablename"]["columnname"].PropertyType="bool";		// To change the property type of a column
-		*/
+	void ConfigureTableMappings(Tables tables)
+	{
+		tables["Employee"]["Id"].PropertyName = "EmployeeUserId";
+		tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyName = "Badge";
+		tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyIsCollection = false;
 	}
 #>

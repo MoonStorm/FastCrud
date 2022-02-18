@@ -107,7 +107,7 @@
                 relationshipsToInvestigate.Add(relationshipToInvestigate);
             }
 
-            if (joinOptions.JoinRelationships.Count == 0)
+            if (joinOptions.JoinRelationships.Count == 0 && joinOptions.JoinOnClause == null)
             {
                 // or look at all of them prior to this one
                 var previousUnusedEntityResolvers = statementOptions.Joins.TakeWhile(join => join != joinOptions)
