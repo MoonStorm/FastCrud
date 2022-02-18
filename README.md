@@ -2,7 +2,7 @@ You hate verbatim SQL queries with zero type safety for your code but you love t
 Visual Studio 2019 and above is recommended. 
 
 #### What to expect when working with Dapper.FastCrud in the DAL? 
-Type safety, clean code, less mistakes, more peace of mind, while still being close to the metal. Here's a sample for 3.0:
+Type safety, clean code, less prone to errors, more peace of mind, while still being close to the metal. Here's a sample for 3.0:
 ```
     var queryParams = new 
     {
@@ -12,7 +12,8 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
 
     var persons = dbConnection.Find<Person>(statement => statement
         .WithAlias("person")
-        .Include<Address>(join => join.InnerJoin().WithAlias("address"))
+        .Include<Address>(join => join.InnerJoin()
+                                      .WithAlias("address"))
         .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
         .OrderBy($"{nameof(Person.LastName):of person} DESC")  
         .Skip(10)  
@@ -35,53 +36,10 @@ Type safety, clean code, less mistakes, more peace of mind, while still being cl
   - Code first, using model data annotations (preferred)
   - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
-- Extensibility points are also provided.
+
 
 #### Active Versions
-- 3.0-preview [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Master%20Branch%20Build%20Pipeline?branchName=master)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=8&branchName=master)
-  - Main library:  
-    - Added support for .NET Standard 2.1
-    - Extended support for the MetadataType attribute in .NET Standard 2.1
-    - Bulk update can now be used with parameters.
-    - Format specifier ":P" added for SQL parameters.
-    - Format specifiers extended to support resolution via aliases in JOINs (e.g. "nameof(prop):of alias").
-    - Methods adjusted for nullable support.
-    - [Breaking change] Clean separation for the formatter and the sql builder. As a result, the access to the formatter got moved out of the ISqlBuilder and into the Sql static class.
-    - Extended the functionality of the Sql "formattables", exposed via the Sql static class, to allow for easy access to both the raw resolved names and their SQL ready counterparts.
-    - Relationships have been reworked:
-      - [Breaking change] The fluent mapping setup has changed for setting up relationships.
-      - The limit of 7 entities in a JOIN was removed.
-      - The main entity and the JOINed entities can now be aliased. It is now recommended to do so when working with multiple entities in a statement for easy targeting in the WHERE clause.
-      - JOIN support has been extended to the GET and COUNT methods.
-      - When joins are used in a COUNT statement, DISTINCT is used.
-      - SQL statements no longer require the presence of a relationship preset in the mappings. You can join with whatever you want, using whatever navigation properties you want (or none) and with any ON clause you desire.
-      - Added support for self referenced entities (via InverseProperty attribute / fluent mappings / directly in the query).
-      - Added support for one-to-one relationships (via InverseProperty attribute / fluent mappings / directly in the query).
-      - Added support for multiple references to the same target (via InverseProperty attribute / fluent mappings / directly in the query).
-    - A preview version has been published on NuGet.
-  - Model generator (database first):
-    - [Breaking change] Added support for self referenced entities.
-    - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.
-    - [Breaking change] Better handling of columns representing reserved keywords in C#.
-    - Support for new csproj style projects.
-    - Fixed a problem preventing it from being used in VS2019 and later.
-    - Pending NuGet publish.
-  - Tests:
-    - All the tests have been reviewed and most got refactored.
-    - Workaround added for the [badly implemented serialization context in Specflow](https://github.com/SpecFlowOSS/SpecFlow/issues/1534).
-    - Better model registration samples in the test project for:
-      - POCO/fluent mapping
-      - code first
-      - metadata classes
-      - database first
-  - Wiki:
-    - To be updated
-- 2.6 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
-  - Upgraded the Dapper dependency.
-  - Added support for .NET Standard 2.0 and .NET Framework 4.6.1
-  - InsertAsync now calling the corresponding async Dapper method.
-  - Added support for TimeSpan.
-  - CI relocated.
+- 3.0 [![Build Status](https://moonstorm.visualstudio.com/Dapper.FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?branchName=release)](https://moonstorm.visualstudio.com/Dapper.FastCrud/_build/latest?definitionId=10&branchName=release)
 
 
 #### WIKI
