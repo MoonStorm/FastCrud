@@ -1,4 +1,4 @@
-name: $(buildBaseVersion).$(Rev:r)
+name: $(buildBaseVersion).$(buildPatchVersion)
 
 pool:
   vmImage: windows-2019
