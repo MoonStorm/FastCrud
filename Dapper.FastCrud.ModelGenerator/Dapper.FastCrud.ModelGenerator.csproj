@@ -10,8 +10,9 @@
 	  <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Dapper.FastCrud.ModelGenerator</PackageId>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
-    <Description>Entity generation for Dapper.FastCrud from a LocalDb or an MsSqlServer database.
+    <Description>Entity generation using classic component model annotations for Dapper.FastCrud from a LocalDb or Sql Server database.
 Entity domain partitioning can be achieved via separate template configurations. The installation package provides a sample config file, SampleModelGeneratorConfig.tt.
 Do not modify GenericModelGenerator.tt, as future upgrades via NuGet will fail to update this file.
 More details are available on the project site.</Description>
@@ -41,6 +42,7 @@ More details are available on the project site.</Description>
       <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#include-msbuild-props-and-targets-in-a-package-->
       <PackagePath>Build/Dapper.FastCrud.ModelGenerator.props</PackagePath>
     </None>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
   <ItemGroup>

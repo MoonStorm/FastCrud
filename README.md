@@ -14,7 +14,9 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
         .WithAlias("person")
         .Include<Address>(join => join.InnerJoin()
                                       .WithAlias("address"))
-        .Where($"{nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
+        .Where($@"
+           {nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} 
+           AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
         .OrderBy($"{nameof(Person.LastName):of person} DESC")  
         .Skip(10)  
         .Top(20)  
