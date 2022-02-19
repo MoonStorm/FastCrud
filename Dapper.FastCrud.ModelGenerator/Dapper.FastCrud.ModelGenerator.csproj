@@ -21,6 +21,10 @@ More details are available on the project site.</Description>
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="Content\Models\GenericModelGenerator.tt">
       <Pack>true</Pack>
