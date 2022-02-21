@@ -21,7 +21,7 @@
     <Version>1.0.0-preview</Version>
     <MinClientVersion>3.3</MinClientVersion>
     <!-- deprecated but still in use -->
-    <PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/Dapper.FastCRUD/master/logo.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/MoonStorm/FastCrud/master/logo.png</PackageIconUrl>
     <PackageIcon>logo.png</PackageIcon>
     <!-- deprecated -->
     <!-- <PackageLicenseUrl>http://www.opensource.org/licenses/MIT</PackageLicenseUrl> -->
@@ -31,7 +31,7 @@
     <Summary>The fastest micro-orm for Dapper</Summary>
     <Company />
     <Copyright />
-    <PackageProjectUrl>https://github.com/MoonStorm/Dapper.FastCRUD</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MoonStorm/FastCrud</PackageProjectUrl>
 
     <!--<RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>-->
     <!--<SkipDefaultEditorConfigAsAdditionalFile>true</SkipDefaultEditorConfigAsAdditionalFile>-->

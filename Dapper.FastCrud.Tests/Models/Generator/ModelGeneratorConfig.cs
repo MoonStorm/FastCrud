@@ -48,6 +48,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         /// </summary>
         public virtual EmployeeEntity Employee { get; set; }
     }
+
     /// <summary>
     /// Represents the 'CrazyTable' table.
     /// </summary>
@@ -78,6 +79,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [Column("switch")]
         public virtual int PropSwitch { get; set; }
     }
+
     /// <summary>
     /// Represents the 'Employee' table.
     /// </summary>
@@ -199,6 +201,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [InverseProperty(nameof(EmployeeEntity.Employee1))]
         public virtual IEnumerable<EmployeeEntity>? Employees1 { get; set; }
     }
+
     /// <summary>
     /// Represents the 'tbl_shoe_size' table.
     /// </summary>
@@ -216,6 +219,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [Column("shoe_size")]
         public virtual byte? ShoeSize { get; set; }
     }
+
     /// <summary>
     /// Represents the 'Workstations' table.
     /// </summary>
@@ -256,6 +260,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [InverseProperty(nameof(EmployeeEntity.Workstation))]
         public virtual IEnumerable<EmployeeEntity>? Employees { get; set; }
     }
+
 }
 
  
