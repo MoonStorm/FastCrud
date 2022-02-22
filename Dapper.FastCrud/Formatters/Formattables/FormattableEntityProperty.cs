@@ -32,7 +32,7 @@
         public string PropertyName { get; }
 
         /// <summary>
-        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.EntityProperty{TEntity}"/>.
+        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/>.
         /// </summary>
         /// <param name="format"> An optional format specifier.</param>
         /// <param name="formatProvider">The provider to use to format the value.</param>
