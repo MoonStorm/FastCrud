@@ -20,7 +20,7 @@
 
         /// <summary>
         /// Returns a formattable SQL parameter.
-        /// When used with the Dapper FastCrud's formatter, it defaults to the "P" specifier (e.g. @Param).
+        /// When used with the FastCrud's formatter, it defaults to the "P" specifier (e.g. @Param).
         /// When used with any other formatter, it defaults to the raw parameter name
         ///   but the "P" specifier is still available in this mode.
         /// </summary>
@@ -38,7 +38,7 @@
 
         /// <summary>
         /// Returns a formattable SQL identifier.
-        /// When used with the Dapper FastCrud's formatter, it defaults to the "I" specifier (e.g. "Identifier").
+        /// When used with the FastCrud's formatter, it defaults to the "I" specifier (e.g. [Identifier]).
         /// When used with any other formatter, it defaults to the raw identifier but the "I" specifier is still available in this mode.
         /// Do not use this method for table or column names.
         /// </summary>
@@ -56,7 +56,7 @@
 
         /// <summary>
         /// Returns a formattable database entity.
-        /// When used with the Dapper FastCrud's formatter, it has no default but responds to the "T" specifier for table or alias.
+        /// When used with the FastCrud's formatter, it has no default but responds to the "T" specifier for table or alias.
         /// When used with any other formatter, it defaults to the raw alias (if provided) or the table name associated with the entity
         ///   but the "T" specifier is still available in this mode as well.
         /// </summary>
@@ -71,7 +71,7 @@
 
         /// <summary>
         /// Returns a formattable property of a database entity.
-        /// When used with the Dapper FastCrud's formatter, it has no default but responds to
+        /// When used with the FastCrud's formatter, it has no default but responds to
         ///   the "T" specifier for table or alias or
         ///   the "C" specifier for the single column name or
         ///   the "TC" specifier for a fully qualified SQL column.
