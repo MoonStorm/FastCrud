@@ -13,7 +13,7 @@
     internal class SAnywhereSqlBuilder : GenericStatementSqlBuilder
     {
         public SAnywhereSqlBuilder(EntityDescriptor entityDescriptor, EntityRegistration entityRegistration, SqlDialect dialect) 
-            : base(entityDescriptor, entityRegistration, dialect)
+            : base(entityDescriptor, entityRegistration, SqlDialect.SAnywhereSql)
         {
         }
 
