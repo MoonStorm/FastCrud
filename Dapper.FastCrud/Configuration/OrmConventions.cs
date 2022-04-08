@@ -23,6 +23,7 @@
         private static readonly SqlDatabaseOptions _defaultMsSqlDatabaseOptions = new MsSqlDatabaseOptions();
         private static readonly SqlDatabaseOptions _defaultMySqlDatabaseOptions = new MySqlDatabaseOptions();
         private static readonly SqlDatabaseOptions _defaultPostgreSqlDatabaseOptions = new PostreSqlDatabaseOptions();
+        private static readonly SqlDatabaseOptions _defaultSAnywhereSqlDatabaseOptions = new SAnywhereSqlDatabaseOptions();
         private static readonly SqlDatabaseOptions _defaultGenericSqlDatabaseOptions = new SqlDatabaseOptions();
 
         private static readonly Type[] _simpleSqlTypes = new[]
@@ -139,6 +140,8 @@
             {
                 case SqlDialect.MsSql:
                     return _defaultMsSqlDatabaseOptions;
+                case SqlDialect.SAnywhereSql:
+                    return _defaultSAnywhereSqlDatabaseOptions;
                 case SqlDialect.PostgreSql:
                     return _defaultPostgreSqlDatabaseOptions;
                 case SqlDialect.MySql:

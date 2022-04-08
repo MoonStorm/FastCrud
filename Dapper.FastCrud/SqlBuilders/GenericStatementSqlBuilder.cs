@@ -41,6 +41,7 @@
             this.IdentifierStartDelimiter = databaseOptions.StartDelimiter;
             this.IdentifierEndDelimiter = databaseOptions.EndDelimiter;
             this.ParameterPrefix = databaseOptions.ParameterPrefix;
+            this.ParameterSuffix = databaseOptions.ParameterSuffix; // Necessary for Sybase Anyhwere SQL
 
             //_entityRelationships = new ConcurrentDictionary<IStatementSqlBuilder, EntityRelationship>();
             //_regularStatementFormatter = new SqlStatementFormatter(entityDescriptor, entityMapping, this, false);
@@ -98,6 +99,7 @@
         protected string IdentifierEndDelimiter { get; }
         protected bool UsesSchemaForTableNames { get; }
         protected string ParameterPrefix { get; }
+        protected string ParameterSuffix { get; }
 
         #region section for all the methods exposed both publicly and internally
 
@@ -110,7 +112,7 @@
         {
             Requires.NotNullOrEmpty(parameterName, nameof(parameterName));
 
-            return FormattableString.Invariant($"{this.ParameterPrefix}{parameterName}");
+            return FormattableString.Invariant($"{this.ParameterPrefix}{parameterName}{this.ParameterSuffix}");
         }
 
         /// <summary>
@@ -690,7 +692,7 @@
         /// </summary>
         protected virtual string ConstructParamEnumerationForInsertInternal()
         {
-            return string.Join(",", this.InsertProperties.Select(propInfo => $"{this.ParameterPrefix + propInfo.PropertyName}"));
+            return string.Join(",", this.InsertProperties.Select(propInfo => $"{this.ParameterPrefix}{propInfo.PropertyName}{this.ParameterSuffix}"));
         }
 
         /// <summary>
@@ -699,7 +701,7 @@
         /// <param name="tableAlias">Optional table alias.</param>
         protected virtual string ConstructUpdateClauseInternal(string tableAlias = null)
         {
-            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix + propInfo.PropertyName}"));
+            return string.Join(",", UpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, tableAlias, false)}={this.ParameterPrefix}{propInfo.PropertyName}{this.ParameterSuffix}"));
         }
 
         /// <summary>
