@@ -85,7 +85,7 @@
             if (limitRowsCount.HasValue) sql = $"{sql} TOP {limitRowsCount.Value}";
             if (skipRowsCount.HasValue)  sql = $"{sql} START AT {skipRowsCount.Value}";
             
-                sql = $"{sql} {selectClause} FROM {fromClause}";
+            sql = $"{sql} {selectClause} FROM {fromClause}";
 
             if (whereClause != null)
             {
