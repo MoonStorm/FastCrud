@@ -24,7 +24,7 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
 ```
 
 #### Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and Sybase Anywhere SQL.
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and SAP/Sybase Anywhere SQL.
 - Entities having composite primary keys are supported, however note that the CRUD operations only support UNIQUE primary keys.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
