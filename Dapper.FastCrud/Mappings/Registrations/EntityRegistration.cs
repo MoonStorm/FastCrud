@@ -452,12 +452,16 @@
                         }
 
                         // now set up the collections
-                        _frozenOrderedPropertyMappings = _propertyMappings
-                                                         .OrderBy(propMapping => propMapping.ColumnOrder, RelationshipOrderComparer.Default)
-                                                         .ToArray();
-                        _frozenOrderedPrimaryKeysPropertyMappings = _frozenOrderedPropertyMappings
+                        _frozenOrderedPrimaryKeysPropertyMappings = _propertyMappings
                                                                     .Where(prop => prop.IsPrimaryKey)
+                                                                    .OrderBy(propMapping => propMapping.ColumnOrder, RelationshipOrderComparer.Default)
                                                                     .ToArray();
+                        // for the ordered properties, we want the first set to always be the primary keys
+                        _frozenOrderedPropertyMappings = _frozenOrderedPrimaryKeysPropertyMappings
+                            .Concat(_propertyMappings
+                                    .Where(prop => !prop.IsPrimaryKey)
+                                    .OrderBy(propMapping => propMapping.ColumnOrder, RelationshipOrderComparer.Default))
+                            .ToArray();
                         _frozenPropertyMappingsMap = _propertyMappings
                             .ToDictionary(propMapping => propMapping.PropertyName, propMapping => propMapping);
 

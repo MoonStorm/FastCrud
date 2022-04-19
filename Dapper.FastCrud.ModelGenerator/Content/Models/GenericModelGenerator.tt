@@ -198,7 +198,6 @@ This code is based on the work of the contributors of Dapper.SimpleCRUD, PetaPoc
 			}
 			WriteLine($@"{currentIndentation}}}");
 			WriteLine("");
-
 		}
 
 		currentIndentation = currentIndentation.Substring(0, currentIndentation.Length - indentationStep.Length);

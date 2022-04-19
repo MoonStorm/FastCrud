@@ -48,7 +48,7 @@
         public string? LegacyDefaultFormatSpecifierOutsideOurFormatter { get; }
 
         /// <summary>
-        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}"/>.
+        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}(string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/>.
         /// </summary>
         /// <param name="format"> An optional format specifier.</param>
         /// <param name="formatProvider">The provider to use to format the value.</param>

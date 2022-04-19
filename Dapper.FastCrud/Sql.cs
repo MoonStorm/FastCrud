@@ -20,7 +20,7 @@
 
         /// <summary>
         /// Returns a formattable SQL parameter.
-        /// When used with the Dapper FastCrud's formatter, it defaults to the "P" specifier (e.g. @Param).
+        /// When used with the FastCrud's formatter, it defaults to the "P" specifier (e.g. @Param).
         /// When used with any other formatter, it defaults to the raw parameter name
         ///   but the "P" specifier is still available in this mode.
         /// </summary>
@@ -38,7 +38,7 @@
 
         /// <summary>
         /// Returns a formattable SQL identifier.
-        /// When used with the Dapper FastCrud's formatter, it defaults to the "I" specifier (e.g. "Identifier").
+        /// When used with the FastCrud's formatter, it defaults to the "I" specifier (e.g. [Identifier]).
         /// When used with any other formatter, it defaults to the raw identifier but the "I" specifier is still available in this mode.
         /// Do not use this method for table or column names.
         /// </summary>
@@ -56,7 +56,7 @@
 
         /// <summary>
         /// Returns a formattable database entity.
-        /// When used with the Dapper FastCrud's formatter, it has no default but responds to the "T" specifier for table or alias.
+        /// When used with the FastCrud's formatter, it has no default but responds to the "T" specifier for table or alias.
         /// When used with any other formatter, it defaults to the raw alias (if provided) or the table name associated with the entity
         ///   but the "T" specifier is still available in this mode as well.
         /// </summary>
@@ -71,7 +71,7 @@
 
         /// <summary>
         /// Returns a formattable property of a database entity.
-        /// When used with the Dapper FastCrud's formatter, it has no default but responds to
+        /// When used with the FastCrud's formatter, it has no default but responds to
         ///   the "T" specifier for table or alias or
         ///   the "C" specifier for the single column name or
         ///   the "TC" specifier for a fully qualified SQL column.
@@ -82,7 +82,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Formattable EntityProperty<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
+        public static Formattable Entity<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             Requires.NotNull(property, nameof(property));
             var propertyDescriptor = property.GetPropertyDescriptor();
@@ -92,7 +92,7 @@
 
         /// <summary>
         /// Returns a formattable database table associated with an entity.
-        /// For consistency, it is recommended to use <see cref="Entity{TEntity}"/> instead.
+        /// For consistency, it is recommended to use <see cref="Entity{TEntity}(string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/> instead.
         /// Irrespective of the formatter used, it defaults to the "T" specifier for table or alias.
         /// </summary>
         /// <param name="alias">An alias to be used instead of the table name.</param>
@@ -110,7 +110,7 @@
 
         /// <summary>
         /// Returns a formattable database column associated with a property.
-        /// For consistency, it is recommended to use <see cref="EntityProperty{TEntity}"/> instead.
+        /// For consistency, it is recommended to use <see cref="Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/> instead.
         /// Irrespective of the formatter used, it defaults to the "C" specifier, however when using with the FastCrud's formatter it also responds to 
         ///   the "T" specifier for table or alias or
         ///   the "TC" specifier for a fully qualified SQL column.
@@ -118,7 +118,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="propertyName">The name of the property. It is recommended to use nameof to provide this value.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
-        [Obsolete("Recommended to use EntityProperty<TEntity> with a proper format specifier.", error: false)]
+        [Obsolete("Recommended to use Entity<TEntity>(entity => entity.prop) with a proper format specifier.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Column<TEntity>(string propertyName, string alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
@@ -128,7 +128,7 @@
 
         /// <summary>
         /// Returns a formattable database column associated with a property.
-        /// For consistency, it is recommended to use <see cref="EntityProperty{TEntity}"/> instead.
+        /// For consistency, it is recommended to use <see cref="Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/> instead.
         /// Irrespective of the formatter used, it defaults to the "C" specifier, however when using with the FastCrud's formatter it also responds to 
         ///   the "T" specifier for table or alias or
         ///   the "TC" specifier for a fully qualified SQL column.
@@ -136,7 +136,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="property">The property of the entity mapped to a column.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
-        [Obsolete("Recommended to use EntityProperty<TEntity> with a proper format specifier.", error: false)]
+        [Obsolete("Recommended to use Entity<TEntity>(entity => entity.prop) with a proper format specifier.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Column<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
@@ -146,7 +146,7 @@
 
         /// <summary>
         /// Returns a fully qualified formattable database column associated with a property.
-        /// For consistency, it is recommended to use <see cref="EntityProperty{TEntity}"/> instead.
+        /// For consistency, it is recommended to use <see cref="Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/> instead.
         /// Irrespective of the formatter used, it defaults to the "TC" specifier, however when using with the FastCrud's formatter it also responds to 
         ///   the "T" specifier for table or alias or
         ///   the "C" specifier for a single column.
@@ -154,7 +154,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="propertyName">The name of the property. It is recommended to use nameof to provide this value.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
-        [Obsolete("Recommended to use EntityProperty<TEntity> with a proper format specifier.", error: false)]
+        [Obsolete("Recommended to use Entity<TEntity>(entity => entity.prop) with a proper format specifier.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable TableAndColumn<TEntity>(string propertyName, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
@@ -166,7 +166,7 @@
 
         /// <summary>
         /// Returns a fully qualified formattable database column associated with a property.
-        /// For consistency, it is recommended to use <see cref="EntityProperty{TEntity}"/> instead.
+        /// For consistency, it is recommended to use <see cref="Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/> instead.
         /// Irrespective of the formatter used, it defaults to the "TC" specifier, however when using with the FastCrud's formatter it also responds to 
         ///   the "T" specifier for table or alias or
         ///   the "C" specifier for a single column.
@@ -174,7 +174,7 @@
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="property">The property of the entity mapped to a column.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
-        [Obsolete("Recommended to use EntityProperty<TEntity> with a proper format specifier.", error: false)]
+        [Obsolete("Recommended to use Entity<TEntity>(entity => entity.prop) with a proper format specifier.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable TableAndColumn<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
