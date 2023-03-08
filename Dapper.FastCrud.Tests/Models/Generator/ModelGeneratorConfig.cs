@@ -10,7 +10,6 @@
 //     Relationships included:                            True
 //     Default database column value generation analysis: True
 // =============================================================================================
-
 namespace Dapper.FastCrud.Tests.Models.Unused
 {
     using System;

@@ -12,7 +12,7 @@
         /// </summary>
         protected string GetConnectionStringFor(IConfiguration configuration, string connectionStringKey)
         {
-            Requires.NotNull(configuration, nameof(configuration));
+            Validate.NotNull(configuration, nameof(configuration));
 
             var connectionString = configuration[$"connectionStrings:add:{connectionStringKey}:connectionString"];
             return connectionString;

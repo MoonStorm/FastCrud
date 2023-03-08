@@ -110,7 +110,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetPrefixedParameter(string parameterName)
         {
-            Requires.NotNullOrEmpty(parameterName, nameof(parameterName));
+            Validate.NotNullOrEmpty(parameterName, nameof(parameterName));
 
             return FormattableString.Invariant($"{this.ParameterPrefix}{parameterName}{this.ParameterSuffix}");
         }
@@ -142,7 +142,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> property, string? tableAlias = null)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
 
             var propName = ((MemberExpression)property.Body).Member.Name;
             return this.GetColumnName(propName, tableAlias);
@@ -156,7 +156,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetColumnNameForSelect(string propertyName, string? tableAlias = null)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             var targetPropertyRegistration = this.EntityRegistration.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
             if (targetPropertyRegistration == null)
@@ -400,7 +400,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string GetDelimitedIdentifier(string sqlIdentifier)
         {
-            Requires.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
+            Validate.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
             var startsWithIdentifier = sqlIdentifier.StartsWith(this.IdentifierStartDelimiter);
             var endsWithIdentifier = sqlIdentifier.EndsWith(this.IdentifierEndDelimiter);
@@ -516,7 +516,7 @@
         /// </summary>
         internal virtual string ConstructFromClause(GenericSqlStatementFormatter formatter, string? tableAlias = null, SqlStatementJoin[]? joins = null)
         {
-            Requires.NotNull(formatter, nameof(formatter));
+            Validate.NotNull(formatter, nameof(formatter));
 
             var mainTableFromClause = this.GetTableNameInternal(tableAlias);
 

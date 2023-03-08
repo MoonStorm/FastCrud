@@ -44,7 +44,7 @@ namespace Dapper.FastCrud
             get => _currentOrmConventions;
             set
             {
-                Requires.NotNull(value, nameof(Conventions));
+                Validate.NotNull(value, nameof(Conventions));
                 _currentOrmConventions = value;
             }
         }
@@ -93,9 +93,9 @@ namespace Dapper.FastCrud
         /// <typeparam name="TEntity">Entity type</typeparam>
         public static EntityMapping<TEntity> SetDefaultEntityMapping<TEntity>(EntityMapping<TEntity> mappings)
         {
-            Requires.NotNull(mappings, nameof(mappings));
+            Validate.NotNull(mappings, nameof(mappings));
             var mappingRegistration = mappings.Registration;
-            Requires.Argument(!mappingRegistration.IsFrozen, nameof(mappings), "The entity mappings were frozen and can't be used as defaults. They must be cloned first.");
+            Validate.Argument(!mappingRegistration.IsFrozen, nameof(mappings), "The entity mappings were frozen and can't be used as defaults. They must be cloned first.");
 
             var entityRegistration = GetEntityDescriptor<TEntity>();
             entityRegistration.CurrentEntityMappingRegistration = mappingRegistration;

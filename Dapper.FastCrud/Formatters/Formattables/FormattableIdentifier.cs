@@ -18,8 +18,8 @@
             EntityRegistration? registrationOverride, 
             string identifier)
         {
-            Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
-            Requires.NotNullOrEmpty(identifier, nameof(identifier));
+            Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
+            Validate.NotNullOrEmpty(identifier, nameof(identifier));
 
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistrationOverride = registrationOverride;

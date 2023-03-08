@@ -26,7 +26,7 @@
         /// </summary>
         public GenericSqlStatements(GenericStatementSqlBuilder sqlBuilder)
         {
-            Requires.NotNull(sqlBuilder, nameof(sqlBuilder));
+            Validate.NotNull(sqlBuilder, nameof(sqlBuilder));
 
             _sqlBuilder = sqlBuilder;
         }

@@ -18,7 +18,7 @@
         
         protected AggregatedSqlStatementOptions(EntityDescriptor entityDescriptor)
         {
-            Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
+            Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
 
             this.EntityDescriptor = entityDescriptor;
             this.CommandTimeout = OrmConfiguration.DefaultSqlStatementOptions.CommandTimeout;

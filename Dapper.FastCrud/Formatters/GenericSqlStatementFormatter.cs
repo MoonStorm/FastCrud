@@ -85,7 +85,7 @@
         /// </summary>
         public IDisposable SetActiveMainResolver(SqlStatementFormatterResolver resolver, bool forceFullyQualifiedColumns)
         {
-            Requires.NotNull(resolver, nameof(resolver));
+            Validate.NotNull(resolver, nameof(resolver));
 
             _activeResolverStack.Push(resolver);
             _activeResolverRequiresFullyQualifiedColumns.Push(forceFullyQualifiedColumns);

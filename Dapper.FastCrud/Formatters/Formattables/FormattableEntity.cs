@@ -19,7 +19,7 @@
             string? alias,
             string? legacyDefaultFormatSpecifierOutsideOurFormatter)
         {
-            Requires.NotNull(entityDescriptor, nameof(entityDescriptor));
+            Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
 
             this.LegacyDefaultFormatSpecifierOutsideOurFormatter = legacyDefaultFormatSpecifierOutsideOurFormatter;
             this.EntityDescriptor = entityDescriptor;

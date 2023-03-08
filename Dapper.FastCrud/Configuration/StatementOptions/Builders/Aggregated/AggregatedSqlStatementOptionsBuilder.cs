@@ -35,7 +35,7 @@
         /// </summary>
         public TStatementOptionsBuilder Top(long? topRecords)
         {
-            Requires.Argument(topRecords == null || topRecords > 0, nameof(topRecords), "The top record count must be a positive value");
+            Validate.Argument(topRecords == null || topRecords > 0, nameof(topRecords), "The top record count must be a positive value");
 
             this.LimitResults = topRecords;
             return this.Builder;
@@ -74,7 +74,7 @@
         /// </summary>
         public TStatementOptionsBuilder Skip(long? skipRecordsCount)
         {
-            Requires.Argument(skipRecordsCount == null || skipRecordsCount >= 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
+            Validate.Argument(skipRecordsCount == null || skipRecordsCount >= 0, nameof(skipRecordsCount), "The number of records to skip must be a positive value");
 
             this.SkipResults = skipRecordsCount;
             return this.Builder;
@@ -112,7 +112,7 @@
         /// </summary>
         public TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null)
         {
-            Requires.NotNull(then, nameof(then));
+            Validate.NotNull(then, nameof(then));
             if (condition)
             {
                 then(this.Builder);

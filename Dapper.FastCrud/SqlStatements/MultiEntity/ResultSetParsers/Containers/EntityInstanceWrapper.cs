@@ -20,7 +20,7 @@
         /// </summary>
         public EntityInstanceWrapper(EntityRegistration entityRegistration, object? entityInstance)
         {
-            Requires.NotNull(entityRegistration, nameof(entityRegistration));
+            Validate.NotNull(entityRegistration, nameof(entityRegistration));
 
             this.EntityRegistration = entityRegistration;
             this.EntityInstance = entityInstance;

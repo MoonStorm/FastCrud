@@ -28,7 +28,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Parameter(string sqlParameterName)
         {
-            Requires.NotNullOrEmpty(sqlParameterName, nameof(sqlParameterName));
+            Validate.NotNullOrEmpty(sqlParameterName, nameof(sqlParameterName));
 
             return new FormattableParameter(
                 _defaultEntityRegistration.Value,
@@ -46,7 +46,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Identifier(string sqlIdentifier)
         {
-            Requires.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
+            Validate.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
             return new FormattableIdentifier(
                 _defaultEntityRegistration.Value, 
@@ -84,7 +84,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Entity<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
             var propertyDescriptor = property.GetPropertyDescriptor();
 
             return EntityProperty<TEntity>(propertyDescriptor.Name, alias, entityMappingOverride, null);
@@ -122,7 +122,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Column<TEntity>(string propertyName, string alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
             return EntityProperty<TEntity>(propertyName, alias, entityMappingOverride, FormatSpecifiers.SingleColumn);
         }
 
@@ -140,7 +140,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Column<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
             return EntityProperty<TEntity>(property.GetPropertyDescriptor().Name, alias, entityMappingOverride, FormatSpecifiers.SingleColumn);
         }
 
@@ -158,7 +158,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable TableAndColumn<TEntity>(string propertyName, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntityProperty(entityDescriptor, entityMappingOverride?.Registration, propertyName, alias, FormatSpecifiers.FullyQualifiedColumn);
@@ -178,7 +178,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable TableAndColumn<TEntity>(Expression<Func<TEntity, object?>> property, string? alias = null, EntityMapping<TEntity> entityMappingOverride = null)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
 
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntityProperty(
@@ -208,7 +208,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Formattable EntityProperty<TEntity>(string propertyName, string? alias, EntityMapping<TEntity>? entityMappingOverride, string? legacyDefaultFormatSpecifierOutsideOurFormatter)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntityProperty(entityDescriptor, entityMappingOverride?.Registration, propertyName, alias, legacyDefaultFormatSpecifierOutsideOurFormatter);
         }

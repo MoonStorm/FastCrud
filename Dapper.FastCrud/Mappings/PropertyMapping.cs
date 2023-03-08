@@ -17,7 +17,7 @@
         /// </summary>
         internal PropertyMapping(PropertyRegistration propertyRegistration)
         {
-            Requires.NotNull(propertyRegistration, nameof(propertyRegistration));
+            Validate.NotNull(propertyRegistration, nameof(propertyRegistration));
             _propertyRegistration = propertyRegistration;
         }
 
@@ -45,7 +45,7 @@
         /// </summary>
         public PropertyMapping<TEntityType> SetDatabaseColumnName(string dbColumnName)
         {
-            Requires.NotNullOrEmpty(dbColumnName, nameof(dbColumnName));
+            Validate.NotNullOrEmpty(dbColumnName, nameof(dbColumnName));
 
             _propertyRegistration.DatabaseColumnName = dbColumnName;
             return this;

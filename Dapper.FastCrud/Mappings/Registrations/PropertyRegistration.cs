@@ -163,7 +163,7 @@
             {
                 this.ValidateState();
 
-                Requires.NotNullOrEmpty(value, nameof(this.DatabaseColumnName));
+                Validate.NotNullOrEmpty(value, nameof(this.DatabaseColumnName));
                 _databaseColumnName = value;
             }
         }

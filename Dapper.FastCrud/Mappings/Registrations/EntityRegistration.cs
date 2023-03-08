@@ -47,7 +47,7 @@
             get => _tableName;
             set
             {
-                Requires.NotNullOrWhiteSpace(value, nameof(this.TableName));
+                Validate.NotNullOrWhiteSpace(value, nameof(this.TableName));
                 this.ValidateState();
                 _tableName = value;
             }
@@ -112,9 +112,9 @@
             string[] referencingColumnProperties,
             PropertyDescriptor? referencingNavigationProperty)
         {
-            Requires.NotNull(referencedEntity, nameof(referencedEntity));
-            Requires.NotNull(referencedColumnProperties, nameof(referencedColumnProperties));
-            Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
+            Validate.NotNull(referencedEntity, nameof(referencedEntity));
+            Validate.NotNull(referencedColumnProperties, nameof(referencedColumnProperties));
+            Validate.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
 
             this.ValidateState();
             
@@ -177,7 +177,7 @@
             string[]? referencingColumnProperties,
             PropertyDescriptor? referencingNavigationProperty)
         {
-            Requires.NotNull(referencedEntity, nameof(referencedEntity));
+            Validate.NotNull(referencedEntity, nameof(referencedEntity));
             this.ValidateState();
 
             // try to locate an existing relationship to update or create a new one in case none was found
@@ -203,7 +203,7 @@
         /// </summary>
         public void RemoveProperties(IEnumerable<string> paramNames, bool exclude)
         {
-            Requires.NotNull(paramNames, nameof(paramNames));
+            Validate.NotNull(paramNames, nameof(paramNames));
             this.ValidateState();
 
             var propNamesToRemove = _propertyMappings
@@ -259,7 +259,7 @@
         /// </summary>
         public PropertyRegistration SetProperty(PropertyRegistration propertyMapping)
         {
-            Requires.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
+            Validate.Argument(propertyMapping.EntityMapping==this, nameof(propertyMapping), "Unable to add a property mapping that is not assigned to the current entity mapping");
             this.ValidateState();
 
             _propertyMappings.Remove(propertyMapping);
@@ -330,7 +330,7 @@
         /// </summary>
         public PropertyRegistration GetOrThrowFrozenPropertyRegistrationByPropertyName(string propertyName)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             var propertyRegistration = this.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
             if (propertyRegistration == null)
@@ -346,7 +346,7 @@
         /// </summary>
         public PropertyRegistration? TryGetFrozenPropertyRegistrationByPropertyName(string propertyName)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             this.EnsureMappingsFrozen();
             if (_frozenPropertyMappingsMap!.TryGetValue(propertyName, out PropertyRegistration propertyRegistration))

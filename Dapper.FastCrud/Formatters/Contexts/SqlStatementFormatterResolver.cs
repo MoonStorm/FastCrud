@@ -23,8 +23,8 @@
             EntityRegistration entityRegistration,
             string? alias)
         {
-            Requires.NotNull(entityDescriptor, nameof(entityRegistration));
-            Requires.NotNull(entityRegistration, nameof(entityRegistration));
+            Validate.NotNull(entityDescriptor, nameof(entityRegistration));
+            Validate.NotNull(entityRegistration, nameof(entityRegistration));
 
             this.EntityDescriptor = entityDescriptor;
             this.EntityRegistration = entityRegistration;

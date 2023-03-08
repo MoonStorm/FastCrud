@@ -11,7 +11,7 @@
     /// <summary>
     /// Common runtime checks that throw ArgumentExceptions upon failure.
     /// </summary>
-    internal static class Requires
+    internal static class Validate
     {
         /// <summary>
         /// Throws an exception if the specified parameter's value is the default.

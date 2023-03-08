@@ -35,7 +35,7 @@
         /// </summary>
         public SqlStatementFormatterResolver LocateResolver(Type entityType, string? alias)
         {
-            Requires.NotNull(entityType, nameof(entityType));
+            Validate.NotNull(entityType, nameof(entityType));
 
             SqlStatementFormatterResolver? locatedResolver;
             // if you change these line, change the other methods as well
@@ -67,7 +67,7 @@
         /// </summary>
         public bool RemoveResolver(EntityRegistration registration, string? alias)
         {
-            Requires.NotNull(registration, nameof(registration));
+            Validate.NotNull(registration, nameof(registration));
 
             var removed = false;
 
@@ -95,7 +95,7 @@
         /// <exception cref="InvalidOperationException">A resolver with the same alias/table/entity already exists. A unique alias must be provided.</exception>
         public void AddResolver(SqlStatementFormatterResolver resolver)
         {
-            Requires.NotNull(resolver, nameof(resolver));
+            Validate.NotNull(resolver, nameof(resolver));
 
             // if you change these line, change the other methods as well
             if (resolver.Alias != null)
@@ -136,7 +136,7 @@
         {
             get
             {
-                Requires.NotNullOrEmpty(aliasOrTableOrTypeName, nameof(aliasOrTableOrTypeName));
+                Validate.NotNullOrEmpty(aliasOrTableOrTypeName, nameof(aliasOrTableOrTypeName));
 
                 if (!_resolverMap.TryGetValue(aliasOrTableOrTypeName, out SqlStatementFormatterResolver resolver))
                 {

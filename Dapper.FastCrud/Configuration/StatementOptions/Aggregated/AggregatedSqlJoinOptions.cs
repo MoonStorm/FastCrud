@@ -20,7 +20,7 @@
         /// </summary>
         protected AggregatedSqlJoinOptions(EntityDescriptor referencedEntityDescriptor)
         {
-            Requires.NotNull(referencedEntityDescriptor, nameof(referencedEntityDescriptor));
+            Validate.NotNull(referencedEntityDescriptor, nameof(referencedEntityDescriptor));
 
             this.ReferencedEntityDescriptor = referencedEntityDescriptor;
         }

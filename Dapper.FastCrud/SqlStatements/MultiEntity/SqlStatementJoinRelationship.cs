@@ -29,8 +29,8 @@
             bool mapResults
         )
         {
-            Requires.NotNull(referencingEntityResolver, nameof(referencingEntityResolver));
-            Requires.NotNull(referencedEntityResolver, nameof(referencedEntityResolver));
+            Validate.NotNull(referencingEntityResolver, nameof(referencingEntityResolver));
+            Validate.NotNull(referencedEntityResolver, nameof(referencedEntityResolver));
 
             this.ReferencingEntityFormatterResolver = referencingEntityResolver;
             this.ReferencingNavigationProperty = referencingEntityNavigationProperty;

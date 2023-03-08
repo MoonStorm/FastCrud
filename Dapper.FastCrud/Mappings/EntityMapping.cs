@@ -23,7 +23,7 @@
         /// </summary>
         internal EntityMapping(EntityRegistration entityRegistration)
         {
-            Requires.NotNull(entityRegistration, nameof(entityRegistration));
+            Validate.NotNull(entityRegistration, nameof(entityRegistration));
             _entityRegistration = entityRegistration;
         }
 
@@ -38,7 +38,7 @@
         /// <param name="tableName">Table name</param>
         public EntityMapping<TEntity> SetTableName(string tableName)
         {
-            Requires.NotNullOrWhiteSpace(tableName, nameof(tableName));
+            Validate.NotNullOrWhiteSpace(tableName, nameof(tableName));
             _entityRegistration.TableName = tableName;
             return this;
         }
@@ -92,7 +92,7 @@
             Expression<Func<TEntity, TProperty>> property,
             Action<PropertyMapping<TEntity>>? propertySetupFct)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
 
             var propName = ((MemberExpression)property.Body).Member.Name;
             var propMapping = _entityRegistration.SetProperty(propName);
@@ -194,9 +194,9 @@
         /// <param name="propertyName">Name of the property (e.g. nameof(User.Name) ) </param>
         public PropertyMapping<TEntity> GetProperty(string propertyName)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
             var propMapping = _entityRegistration.TryGetFrozenPropertyRegistrationByPropertyName(propertyName);
-            Requires.Argument(propMapping != null, nameof(propertyName), $"Unable to find the property '{propertyName}' on the entity '{typeof(TEntity).FullName}'");
+            Validate.Argument(propMapping != null, nameof(propertyName), $"Unable to find the property '{propertyName}' on the entity '{typeof(TEntity).FullName}'");
             return new PropertyMapping<TEntity>(propMapping!);
         }
 
@@ -290,8 +290,8 @@
             Expression<Func<TEntity, IEnumerable<TChildEntity>?>> referencingChildrenNavigationProperty,
             params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
-            Requires.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
-            Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
+            Validate.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
+            Validate.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
 
             this.SetParentChildOrChildrenRelationshipInternal(
                 typeof(TChildEntity),
@@ -350,8 +350,8 @@
             Expression<Func<TEntity, TChildEntity?>> referencingChildrenNavigationProperty,
             params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
-            Requires.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
-            Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
+            Validate.NotNull(referencingChildrenNavigationProperty, nameof(referencingChildrenNavigationProperty));
+            Validate.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
 
             this.SetParentChildOrChildrenRelationshipInternal(
                 typeof(TChildEntity),
@@ -388,7 +388,7 @@
         public EntityMapping<TEntity> SetParentChildrenRelationship<TChildEntity>(
                 params Expression<Func<TChildEntity, object?>>[] referencedChildrenColumnProperties)
         {
-            Requires.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
+            Validate.NotNull(referencedChildrenColumnProperties, nameof(referencedChildrenColumnProperties));
             this.SetParentChildOrChildrenRelationshipInternal(
                 typeof(TChildEntity),
                 null,
@@ -442,8 +442,8 @@
             Expression<Func<TEntity, TParentEntity?>> referencingParentNavigationProperty,
             params Expression<Func<TEntity, object?>>[] referencingColumnProperties)
         {
-            Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
-            Requires.NotNull(referencingParentNavigationProperty, nameof(referencingParentNavigationProperty));
+            Validate.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
+            Validate.NotNull(referencingParentNavigationProperty, nameof(referencingParentNavigationProperty));
 
             this.SetChildParentRelationshipInternal<TParentEntity>(referencingParentNavigationProperty, referencingColumnProperties);
             return this;
@@ -472,7 +472,7 @@
         public EntityMapping<TEntity> SetChildParentRelationship<TParentEntity>(
                 params Expression<Func<TEntity, object?>>[] referencingColumnProperties)
         {
-            Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
+            Validate.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
             this.SetChildParentRelationshipInternal<TParentEntity>(null, referencingColumnProperties);
 
             return this;

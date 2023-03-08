@@ -21,7 +21,7 @@
             string? legacyDefaultFormatSpecifierOutsideOurFormatter)
             : base(entityDescriptor, registrationOverride, alias, legacyDefaultFormatSpecifierOutsideOurFormatter)
         {
-            Requires.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
             this.PropertyName = propertyName;
         }

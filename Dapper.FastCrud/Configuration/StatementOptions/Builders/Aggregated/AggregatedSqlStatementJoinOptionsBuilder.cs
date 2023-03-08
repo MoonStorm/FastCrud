@@ -31,7 +31,7 @@
         /// </summary>
         public TStatementOptionsBuilder When(bool condition, Func<TStatementOptionsBuilder, TStatementOptionsBuilder> then, Func<TStatementOptionsBuilder, TStatementOptionsBuilder>? otherwise = null)
         {
-            Requires.NotNull(then, nameof(then));
+            Validate.NotNull(then, nameof(then));
             if (condition)
             {
                 then(this.Builder);

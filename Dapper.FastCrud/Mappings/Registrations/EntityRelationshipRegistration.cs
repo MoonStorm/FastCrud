@@ -19,9 +19,9 @@
             string[] referencingColumnProperties, 
             PropertyDescriptor? referencingNavigationProperty)
         {
-            Requires.NotNull(referencedEntity, nameof(referencedEntity));
-            Requires.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
-            Requires.NotNull(referencedColumnProperties, nameof(referencedColumnProperties));
+            Validate.NotNull(referencedEntity, nameof(referencedEntity));
+            Validate.NotNull(referencingColumnProperties, nameof(referencingColumnProperties));
+            Validate.NotNull(referencedColumnProperties, nameof(referencedColumnProperties));
 
             this.RelationshipType = relationshipType;
             this.ReferencedEntity = referencedEntity;

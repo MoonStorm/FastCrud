@@ -19,7 +19,7 @@
         /// </summary>
         public static PropertyDescriptor GetPropertyDescriptor<TType, TPropType>(this Expression<Func<TType, TPropType>> expr)
         {
-            Requires.NotNull(expr, nameof(expr));
+            Validate.NotNull(expr, nameof(expr));
 
             var type = typeof(TType);
             var propertyName = expr.Body switch
@@ -60,7 +60,7 @@
         /// </summary>
         public static Type GetEntityType(this PropertyDescriptor property)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
 
             if (IsEntityCollectionProperty(property))
             {
@@ -75,7 +75,7 @@
         /// </summary>
         public static bool IsEntityCollectionProperty(this PropertyDescriptor property)
         {
-            Requires.NotNull(property, nameof(property));
+            Validate.NotNull(property, nameof(property));
 
             var propertyType = property.PropertyType;
             return typeof(IEnumerable).IsAssignableFrom(propertyType)

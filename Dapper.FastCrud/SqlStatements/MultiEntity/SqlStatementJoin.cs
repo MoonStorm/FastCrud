@@ -25,7 +25,7 @@
             AggregatedSqlStatementOptions mainStatementOptions, 
             AggregatedSqlJoinOptions joinStatementOptions)
         {
-            Requires.NotNull(mainStatementOptions, nameof(mainStatementOptions));
+            Validate.NotNull(mainStatementOptions, nameof(mainStatementOptions));
 
             this.JoinType = joinStatementOptions.JoinType;
             this.JoinOnClause = joinStatementOptions.JoinOnClause;

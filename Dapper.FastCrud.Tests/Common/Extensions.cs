@@ -14,7 +14,7 @@
         /// <returns></returns>
         public static string GetDirectory(this Assembly assembly)
         {
-            Requires.NotNull(assembly, nameof(assembly));
+            Validate.NotNull(assembly, nameof(assembly));
 
             //The CodeBase is a URL to the place where the file was found, while the Location is the path from where it was actually loaded.
             //For example, if the assembly was downloaded from the internet, its CodeBase may start with “http://”, but its Location may start with “C:\”. 

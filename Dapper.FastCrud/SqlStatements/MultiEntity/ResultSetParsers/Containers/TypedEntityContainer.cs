@@ -22,7 +22,7 @@
         /// </summary>
         public TypedEntityContainer(Type entityType)
         {
-            Requires.NotNull(entityType, nameof(entityType));
+            Validate.NotNull(entityType, nameof(entityType));
 
             this.EntityType = entityType;
             _globalEntityInstances = new List<object>();
