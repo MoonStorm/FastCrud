@@ -1,9 +1,9 @@
 ﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
-    using System.Data.SqlClient;
     using System.IO;
     using System.Text.RegularExpressions;
     using Dapper.FastCrud.Tests.Contexts;
+    using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
     using Microsoft.SqlServer.Management.Common;
     using Microsoft.SqlServer.Management.Smo;

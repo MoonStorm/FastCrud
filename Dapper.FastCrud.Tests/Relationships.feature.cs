@@ -26,7 +26,7 @@ namespace Dapper.FastCrud.Tests
         
         private TechTalk.SpecFlow.ITestRunner testRunner;
         
-        private string[] _featureTags = ((string[])(null));
+        private static string[] featureTags = ((string[])(null));
         
 #line 1 "Relationships.feature"
 #line hidden
@@ -35,7 +35,7 @@ namespace Dapper.FastCrud.Tests
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "", "Relationships", "\tTests for the relationship between various entities", ProgrammingLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "", "Relationships", "\tTests for the relationship between various entities", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -47,28 +47,28 @@ namespace Dapper.FastCrud.Tests
         }
         
         [NUnit.Framework.SetUpAttribute()]
-        public virtual void TestInitialize()
+        public void TestInitialize()
         {
         }
         
         [NUnit.Framework.TearDownAttribute()]
-        public virtual void TestTearDown()
+        public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
         }
         
-        public virtual void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
+        public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
             testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
         }
         
-        public virtual void ScenarioStart()
+        public void ScenarioStart()
         {
             testRunner.OnScenarioStart();
         }
         
-        public virtual void ScenarioCleanup()
+        public void ScenarioCleanup()
         {
             testRunner.CollectScenarioErrors();
         }
@@ -78,7 +78,7 @@ namespace Dapper.FastCrud.Tests
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentWithChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentWithChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -91,21 +91,11 @@ namespace Dapper.FastCrud.Tests
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parent with children (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parent with children (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 5
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -140,7 +130,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentWithChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentWithChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -153,21 +143,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parent with children (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parent with children (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 17
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -200,7 +180,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "3", "1", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "3", "3", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipOne_To_OneBuildServerTest(string databaseType, string employeeCount, string badgeCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipOne_To_OneBuildServerTest(string databaseType, string employeeCount, string badgeCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -214,21 +194,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("employee count", employeeCount);
             argumentsOfScenario.Add("badge count", badgeCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship one-to-one (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship one-to-one (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 31
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -263,7 +233,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "4", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "6", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipOne_To_OneExternalDatabase(string databaseType, string employeeCount, string badgeCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipOne_To_OneExternalDatabase(string databaseType, string employeeCount, string badgeCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -277,21 +247,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("employee count", employeeCount);
             argumentsOfScenario.Add("badge count", badgeCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship one-to-one (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship one-to-one (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 43
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -324,7 +284,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "20", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "20", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithChildrenBuildServerTest(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentsWithChildrenBuildServerTest(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -338,21 +298,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("parent entity count", parentEntityCount);
             argumentsOfScenario.Add("child entity count", childEntityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with children (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with children (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 57
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -387,7 +337,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "20", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "20", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "20", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string parentEntityCount, string childEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -401,21 +351,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("parent entity count", parentEntityCount);
             argumentsOfScenario.Add("child entity count", childEntityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with children (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with children (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 69
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -448,7 +388,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void CountSingleRelationshipParentsWithChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void CountSingleRelationshipParentsWithChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -461,21 +401,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count single relationship parents with children (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count single relationship parents with children (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 83
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -513,7 +443,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void CountSingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void CountSingleRelationshipParentsWithChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -526,21 +456,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count single relationship parents with children (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count single relationship parents with children (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 96
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -577,7 +497,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void TheManualONClauseCanBeUsedWhenRelationshipsAndNavigationPropertiesAreNotSetUpInTheMappingBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void TheManualONClauseCanBeUsedWhenRelationshipsAndNavigationPropertiesAreNotSetUpInTheMappingBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -591,21 +511,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("The manual ON clause can be used when relationships and navigation properties are" +
-                    " not set up in the mapping (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    " not set up in the mapping (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 111
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -645,7 +555,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void TheManualONClauseCanBeUsedWhenRelationshipsAndNavigationPropertiesAreNotSetUpInTheMappingExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void TheManualONClauseCanBeUsedWhenRelationshipsAndNavigationPropertiesAreNotSetUpInTheMappingExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -659,21 +569,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("The manual ON clause can be used when relationships and navigation properties are" +
-                    " not set up in the mapping (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    " not set up in the mapping (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 124
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -710,7 +610,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void ACustomJoinCanBeUsedEvenForNavigationPropertiesBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void ACustomJoinCanBeUsedEvenForNavigationPropertiesBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -723,21 +623,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("A custom join can be used even for navigation properties (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("A custom join can be used even for navigation properties (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 139
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -772,7 +662,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void ACustomJoinCanBeUsedEvenForNavigationPropertiesExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void ACustomJoinCanBeUsedEvenForNavigationPropertiesExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -785,21 +675,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("A custom join can be used even for navigation properties (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("A custom join can be used even for navigation properties (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 151
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -832,7 +712,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipChildrenWithParentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipChildrenWithParentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -845,21 +725,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with parents (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with parents (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 165
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -894,7 +764,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipChildrenWithParentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipChildrenWithParentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -907,21 +777,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with parents (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with parents (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 177
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -954,7 +814,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipChildrenWithNoParentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipChildrenWithNoParentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -967,21 +827,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with no parents (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with no parents (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 191
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1012,7 +862,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipChildrenWithNoParentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipChildrenWithNoParentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1025,21 +875,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with no parents (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship children with no parents (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 202
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1068,7 +908,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithNoChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentsWithNoChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1081,21 +921,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with no children (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with no children (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 215
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1126,7 +956,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QuerySingleRelationshipParentsWithNoChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QuerySingleRelationshipParentsWithNoChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1139,21 +969,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with no children (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query single relationship parents with no children (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 226
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1183,7 +1003,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipGrandparentsWithParentsAndChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipGrandparentsWithParentsAndChildrenBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1197,21 +1017,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship grandparents with parents and children (build server" +
-                    " test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    " test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 239
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1251,7 +1061,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipGrandparentsWithParentsAndChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipGrandparentsWithParentsAndChildrenExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1265,21 +1075,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship grandparents with parents and children (external dat" +
-                    "abase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "abase)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 252
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1317,7 +1117,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipChildrenWithParentsAndGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipChildrenWithParentsAndGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1331,21 +1131,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with parents and grandparents (build server" +
-                    " test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    " test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 267
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1385,7 +1175,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipChildrenWithParentsAndGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipChildrenWithParentsAndGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1399,21 +1189,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with parents and grandparents (external dat" +
-                    "abase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "abase)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 280
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1450,7 +1230,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "3", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "5", "asynchronous", null)]
-        public virtual void QueryTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
+        public void QueryTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1464,21 +1244,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
             argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 295
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1513,7 +1283,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "5", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "5", "3", "asynchronous", null)]
-        public virtual void QueryTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
+        public void QueryTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1527,21 +1297,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("referenced entity count", referencedEntityCount);
             argumentsOfScenario.Add("referencing entity count", referencingEntityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two relationships back to the same entity (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 307
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1575,7 +1335,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "5", "11", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "7", "13", "asynchronous", null)]
-        public virtual void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
+        public void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityBuildServerTest(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1591,21 +1351,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("query count", queryCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query a subset of entities having two relationships back to the same entity (buil" +
-                    "d server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "d server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 321
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1644,7 +1394,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "3", "2", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "20", "10", "12", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "20", "10", "14", "asynchronous", null)]
-        public virtual void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
+        public void QueryASubsetOfEntitiesHavingTwoRelationshipsBackToTheSameEntityExternalDatabase(string databaseType, string referencedEntityCount, string referencingEntityCount, string queryCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1660,21 +1410,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("query count", queryCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query a subset of entities having two relationships back to the same entity (exte" +
-                    "rnal database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "rnal database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 334
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1711,7 +1451,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1725,21 +1465,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with no parents or grandparents (build serv" +
-                    "er test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "er test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 349
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1771,7 +1501,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void QueryTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1785,21 +1515,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Query two level relationship children with no parents or grandparents (external d" +
-                    "atabase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "atabase)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 360
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1829,7 +1549,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "10", "asynchronous", null)]
-        public virtual void CountTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void CountTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1843,21 +1563,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count two level relationship children with no parents or grandparents (build serv" +
-                    "er test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "er test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 373
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -1889,7 +1599,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "10", "asynchronous", null)]
-        public virtual void CountTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void CountTwoLevelRelationshipChildrenWithNoParentsOrGrandparentsExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1903,21 +1613,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count two level relationship children with no parents or grandparents (external d" +
-                    "atabase)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+                    "atabase)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 384
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
