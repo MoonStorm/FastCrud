@@ -3,24 +3,29 @@ Visual Studio 2019 and above is recommended.
 
 #### What to expect when working with Dapper.FastCrud in the DAL? 
 Type safety, clean code, less prone to errors, more peace of mind, while still being close to the metal. Here's a sample for 3.0:
-```
-    var queryParams = new 
-    {
-        FirstName = "John",
-        Street = "Creek Street"
-    };
+```csharp
+// Create paramters for the query
+var queryParams = new 
+{
+    FirstName = "John",
+    Street = "Creek Street"
+};
 
-    var persons = dbConnection.Find<Person>(statement => statement
-        .WithAlias("person")
-        .Include<Address>(join => join.InnerJoin()
-                                      .WithAlias("address"))
-        .Where($@"
-           {nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} 
-           AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}")  
-        .OrderBy($"{nameof(Person.LastName):of person} DESC")  
-        .Skip(10)  
-        .Top(20)  
-        .WithParameters(queryParams);
+// Get persons using the above created query parameters
+var persons = dbConnection.Find<Person>(statement => statement
+    .WithAlias("person")
+    .Include<Address>(join =>
+		join.InnerJoin()
+		.WithAlias("address")
+	)
+	.Where($@"
+       {nameof(Person.FirstName):of person} = {nameof(queryParams.FirstName):P} 
+       AND {nameof(Address.Street):of address} = {nameof(queryParams.Street):P}
+	")
+	.OrderBy($"{nameof(Person.LastName):of person} DESC")  
+    .Skip(10)
+    .Top(20)
+    .WithParameters(queryParams);
 ```
 
 #### Features:
