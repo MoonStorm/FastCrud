@@ -11,7 +11,7 @@
     /// <summary>
     /// Common runtime checks that throw ArgumentExceptions upon failure.
     /// </summary>
-    public static class Requires
+    internal static class Requires
     {
         /// <summary>
         /// Throws an exception if the specified parameter's value is the default.
