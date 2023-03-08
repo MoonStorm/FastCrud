@@ -140,7 +140,7 @@
             {
                 case SqlDialect.MsSql:
                     return _defaultMsSqlDatabaseOptions;
-                case SqlDialect.SAnywhereSql:
+                case SqlDialect.SqlAnywhere:
                     return _defaultSAnywhereSqlDatabaseOptions;
                 case SqlDialect.PostgreSql:
                     return _defaultPostgreSqlDatabaseOptions;

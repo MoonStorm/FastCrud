@@ -26,7 +26,7 @@ namespace Dapper.FastCrud.Tests
         
         private TechTalk.SpecFlow.ITestRunner testRunner;
         
-        private string[] _featureTags = ((string[])(null));
+        private static string[] featureTags = ((string[])(null));
         
 #line 1 "Crud.feature"
 #line hidden
@@ -35,7 +35,7 @@ namespace Dapper.FastCrud.Tests
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "", "CRUD tests", null, ProgrammingLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "", "CRUD tests", null, ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -47,28 +47,28 @@ namespace Dapper.FastCrud.Tests
         }
         
         [NUnit.Framework.SetUpAttribute()]
-        public virtual void TestInitialize()
+        public void TestInitialize()
         {
         }
         
         [NUnit.Framework.TearDownAttribute()]
-        public virtual void TestTearDown()
+        public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
         }
         
-        public virtual void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
+        public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
             testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
         }
         
-        public virtual void ScenarioStart()
+        public void ScenarioStart()
         {
             testRunner.OnScenarioStart();
         }
         
-        public virtual void ScenarioCleanup()
+        public void ScenarioCleanup()
         {
             testRunner.CollectScenarioErrors();
         }
@@ -87,7 +87,7 @@ namespace Dapper.FastCrud.Tests
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "4", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "building", "2", "synchronous", null)]
-        public virtual void InsertAndSelectAllBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void InsertAndSelectAllBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest",
@@ -102,21 +102,11 @@ namespace Dapper.FastCrud.Tests
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 6
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -148,6 +138,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Insert and select all (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
+        [NUnit.Framework.TestCaseAttribute("SQLAnywhere", "employee", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "asynchronous", null)]
@@ -156,7 +147,8 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "3", "synchronous", null)]
-        public virtual void InsertAndSelectAllExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "building", "3", "synchronous", null)]
+        public void InsertAndSelectAllExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -170,21 +162,11 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select all (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 27
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
@@ -218,7 +200,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "6", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "6", "synchronous", null)]
-        public virtual void CountWithAWhereClauseBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        public void CountWithAWhereClauseBuildServerTest(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -231,37 +213,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count with a where clause (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 46
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count with a where clause (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 48
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 47
+#line 49
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 48
+#line 50
  testRunner.When(string.Format("I insert {0} building entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 49
+#line 51
  testRunner.And(string.Format("I query for the count of all the inserted building entities using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 50
+#line 52
  testRunner.Then(string.Format("the result of the last query count should be {0}", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -271,11 +243,13 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Count with a where clause (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "4", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "3", "synchronous", null)]
-        public virtual void CountWithAWhereClauseExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "3", "synchronous", null)]
+        public void CountWithAWhereClauseExternalDatabase(string databaseType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -288,37 +262,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("database type", databaseType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count with a where clause (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 57
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Count with a where clause (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 59
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 58
+#line 60
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 59
+#line 61
  testRunner.When(string.Format("I insert {0} building entities using {1} methods", entityCount, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 60
+#line 62
  testRunner.And(string.Format("I query for the count of all the inserted building entities using {0} methods", methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 61
+#line 63
  testRunner.Then(string.Format("the result of the last query count should be {0}", entityCount), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -340,7 +304,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "", "", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "10", "1", "0", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "1", "0", "synchronous", null)]
-        public virtual void FindEntitiesBuildServerTest(string databaseType, string entityType, string entityCount, string max, string skip, string methodType, string[] exampleTags)
+        public void FindEntitiesBuildServerTest(string databaseType, string entityType, string entityCount, string max, string skip, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -356,37 +320,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("skip", skip);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find entities (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 70
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find entities (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 74
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 71
+#line 75
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 72
+#line 76
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 73
+#line 77
  testRunner.And(string.Format("I query for a maximum of {0} {1} entities reverse ordered skipping {2} records", max, entityType, skip), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 74
+#line 78
  testRunner.Then(string.Format("the queried {0} entities should be the same as the ones I inserted, in reverse or" +
                             "der, starting from {1} counting {2}", entityType, skip, max), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
@@ -397,9 +351,11 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Find entities (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "workstation", "10", "1", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "1", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "1", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "1", "2", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "workstation", "10", "1", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "1", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "1", "", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "1", "", "synchronous", null)]
@@ -409,7 +365,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "", "", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "1", "0", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "1", "0", "synchronous", null)]
-        public virtual void FindEntitiesExternalDatabase(string databaseType, string entityType, string entityCount, string max, string skip, string methodType, string[] exampleTags)
+        public void FindEntitiesExternalDatabase(string databaseType, string entityType, string entityCount, string max, string skip, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -425,37 +381,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("skip", skip);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find entities (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 91
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Find entities (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 95
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 92
+#line 96
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 93
+#line 97
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 94
+#line 98
  testRunner.And(string.Format("I query for a maximum of {0} {1} entities reverse ordered skipping {2} records", max, entityType, skip), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 95
+#line 99
  testRunner.Then(string.Format("the queried {0} entities should be the same as the ones I inserted, in reverse or" +
                             "der, starting from {1} counting {2}", entityType, skip, max), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
@@ -474,7 +420,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "building", "2", "synchronous", null)]
-        public virtual void InsertAndSelectByPrimaryKeyBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void InsertAndSelectByPrimaryKeyBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -488,37 +434,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 112
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 118
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 113
+#line 119
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 114
+#line 120
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 115
+#line 121
  testRunner.And(string.Format("I query for the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 116
+#line 122
  testRunner.Then(string.Format("the queried {0} entities should be the same as the inserted ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -530,6 +466,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "2", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "asynchronous", null)]
@@ -540,7 +477,8 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "2", "synchronous", null)]
-        public virtual void InsertAndSelectByPrimaryKeyExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "building", "2", "synchronous", null)]
+        public void InsertAndSelectByPrimaryKeyExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -554,37 +492,27 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 129
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Insert and select by primary key (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 135
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 130
+#line 136
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 131
+#line 137
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 132
+#line 138
  testRunner.And(string.Format("I query for the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 133
+#line 139
  testRunner.Then(string.Format("the queried {0} entities should be the same as the inserted ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -602,7 +530,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("SqLite", "building", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "building", "2", "synchronous", null)]
-        public virtual void UpdateByPrimaryKeysBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void UpdateByPrimaryKeysBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -616,40 +544,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 150
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 158
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 151
+#line 159
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 152
+#line 160
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 153
+#line 161
  testRunner.And(string.Format("I update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 154
+#line 162
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 155
+#line 163
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -660,6 +578,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.DescriptionAttribute("Update by primary keys (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "2", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "2", "asynchronous", null)]
@@ -671,7 +590,8 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "2", "synchronous", null)]
-        public virtual void UpdateByPrimaryKeysExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "building", "2", "synchronous", null)]
+        public void UpdateByPrimaryKeysExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -685,40 +605,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 168
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Update by primary keys (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 176
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 169
+#line 177
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 170
+#line 178
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 171
+#line 179
  testRunner.And(string.Format("I update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 172
+#line 180
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 173
+#line 181
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -730,7 +640,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("AutomaticBuildServerTest")]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "synchronous", null)]
-        public virtual void PartialUpdateBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void PartialUpdateBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -744,40 +654,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 190
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 200
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 191
+#line 201
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 192
+#line 202
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 193
+#line 203
  testRunner.And(string.Format("I partially update all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 194
+#line 204
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 195
+#line 205
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -791,7 +691,8 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "synchronous", null)]
-        public virtual void PartialUpdateExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "3", "synchronous", null)]
+        public void PartialUpdateExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -805,40 +706,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 202
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Partial update (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 212
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 203
+#line 213
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 204
+#line 214
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 205
+#line 215
  testRunner.And(string.Format("I partially update all the inserted {0} entities", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 206
+#line 216
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 207
+#line 217
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -856,7 +747,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("LocalDb", "building", "3", "synchronous", null)]
-        public virtual void DeleteByPrimaryKeysBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void DeleteByPrimaryKeysBuildServerTest(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -870,40 +761,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 216
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 227
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 217
+#line 228
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 218
+#line 229
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 219
+#line 230
  testRunner.And(string.Format("I delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 220
+#line 231
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 221
+#line 232
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -915,6 +796,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "3", "asynchronous", null)]
@@ -925,7 +807,10 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "3", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "building", "3", "synchronous", null)]
-        public virtual void DeleteByPrimaryKeysExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "workstation", "3", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "building", "3", "synchronous", null)]
+        public void DeleteByPrimaryKeysExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -939,40 +824,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 234
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Delete by primary keys (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 245
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 235
+#line 246
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 236
+#line 247
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 237
+#line 248
  testRunner.And(string.Format("I delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 238
+#line 249
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 239
+#line 250
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -986,7 +861,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("LocalDb", "employee", "10", "3", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "asynchronous", null)]
-        public virtual void BatchUpdateBuildServerTest(string databaseType, string entityType, string entityCount, string skip, string max, string methodType, string[] exampleTags)
+        public void BatchUpdateBuildServerTest(string databaseType, string entityType, string entityCount, string skip, string max, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1002,40 +877,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("skip", skip);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 256
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 271
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 257
+#line 272
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 258
+#line 273
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 259
+#line 274
  testRunner.And(string.Format("I batch update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 260
+#line 275
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 261
+#line 276
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1047,9 +912,11 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "10", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "10", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "10", "asynchronous", null)]
-        public virtual void BatchUpdateExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void BatchUpdateExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1063,40 +930,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 270
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch update (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 285
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 271
+#line 286
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 272
+#line 287
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 273
+#line 288
  testRunner.And(string.Format("I batch update all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 274
+#line 289
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 275
+#line 290
  testRunner.Then(string.Format("the queried {0} entities should be the same as the updated ones", entityType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1110,7 +967,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestCaseAttribute("LocalDb", "workstation", "10", "3", "2", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("SqLite", "workstation", "10", "3", "2", "asynchronous", null)]
-        public virtual void BatchDeleteBuildServerTest(string databaseType, string entityType, string entityCount, string skip, string max, string methodType, string[] exampleTags)
+        public void BatchDeleteBuildServerTest(string databaseType, string entityType, string entityCount, string skip, string max, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "AutomaticBuildServerTest"};
@@ -1126,40 +983,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("skip", skip);
             argumentsOfScenario.Add("max", max);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (build server test)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 284
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (build server test)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 301
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 285
+#line 302
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 286
+#line 303
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 287
+#line 304
  testRunner.And(string.Format("I batch delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 288
+#line 305
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 289
+#line 306
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
@@ -1171,9 +1018,11 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "workstation", "10", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "workstation", "10", "synchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "workstation", "10", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "synchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "workstation", "10", "asynchronous", null)]
-        public virtual void BatchDeleteExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
+        public void BatchDeleteExternalDatabase(string databaseType, string entityType, string entityCount, string methodType, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "ExternalDatabase"};
@@ -1187,40 +1036,30 @@ this.ScenarioInitialize(scenarioInfo);
             argumentsOfScenario.Add("entity type", entityType);
             argumentsOfScenario.Add("entity count", entityCount);
             argumentsOfScenario.Add("method type", methodType);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (external database)", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 298
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Batch delete (external database)", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 315
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            bool isScenarioIgnored = default(bool);
-            bool isFeatureIgnored = default(bool);
-            if ((tagsOfScenario != null))
-            {
-                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((this._featureTags != null))
-            {
-                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
-            }
-            if ((isScenarioIgnored || isFeatureIgnored))
+            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
                 testRunner.SkipScenario();
             }
             else
             {
                 this.ScenarioStart();
-#line 299
+#line 316
  testRunner.Given(string.Format("I have initialized a {0} database", databaseType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 300
+#line 317
  testRunner.When(string.Format("I insert {0} {1} entities using {2} methods", entityCount, entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 301
+#line 318
  testRunner.And(string.Format("I batch delete all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 302
+#line 319
  testRunner.And(string.Format("I query for all the inserted {0} entities using {1} methods", entityType, methodType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
-#line 303
+#line 320
  testRunner.Then("the result of the last query count should be 0", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }

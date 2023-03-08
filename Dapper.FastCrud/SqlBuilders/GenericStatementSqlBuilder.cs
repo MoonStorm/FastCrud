@@ -806,6 +806,9 @@
             return FormattableString.Invariant($"SELECT {this.ConstructColumnEnumerationForSelect()} FROM {this.GetTableName()} WHERE {this.ConstructKeysWhereClause()}");
         }
 
+        /// <summary>
+        /// Constructs a full select statement.
+        /// </summary>
         protected abstract string ConstructFullSelectStatementInternal(
             string selectClause,
             string fromClause,

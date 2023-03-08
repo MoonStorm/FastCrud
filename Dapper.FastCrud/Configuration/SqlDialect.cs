@@ -29,6 +29,6 @@ namespace Dapper.FastCrud
         /// <summary>
         /// SAP/Sybase Anywhere SQL
         /// </summary>
-        SAnywhereSql,
+        SqlAnywhere,
     }
 }
