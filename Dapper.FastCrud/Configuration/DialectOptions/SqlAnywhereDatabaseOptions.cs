@@ -1,8 +1,8 @@
 ﻿namespace Dapper.FastCrud.Configuration.DialectOptions
 {
-    internal class SAnywhereSqlDatabaseOptions : SqlDatabaseOptions
+    internal class SqlAnywhereDatabaseOptions : SqlDatabaseOptions
     {
-        public SAnywhereSqlDatabaseOptions()
+        public SqlAnywhereDatabaseOptions()
         {
             this.StartDelimiter = this.EndDelimiter = "\"";
             this.ParameterPrefix = this.ParameterSuffix = "?";

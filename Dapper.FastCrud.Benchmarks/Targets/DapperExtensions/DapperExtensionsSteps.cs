@@ -73,7 +73,7 @@
             var dbConnection = _testContext.DatabaseConnection;
             foreach (var entity in _testContext.GetInsertedEntitiesOfType<SimpleBenchmarkEntity>())
             {
-                _testContext.RecordQueriedEntity(DapperExtensions.Get<SimpleBenchmarkEntity>(dbConnection, entity.Id));
+                _testContext.RecordQueriedEntity(DapperExtensions.Get<SimpleBenchmarkEntity>(dbConnection, new {entity.Id}));
             }
         }
 

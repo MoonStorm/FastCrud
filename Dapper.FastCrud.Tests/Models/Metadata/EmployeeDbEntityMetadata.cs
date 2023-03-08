@@ -33,6 +33,9 @@
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string FullName { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public long RecordVersion { get; set; }
+
         [ForeignKey(nameof(EmployeeDbEntity.Manager))]
         public int? ManagerUserId { get; }
         [ForeignKey(nameof(EmployeeDbEntity.Manager))]

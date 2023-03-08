@@ -138,7 +138,7 @@ this.ScenarioInitialize(scenarioInfo);
         [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("Insert and select all (external database)")]
         [NUnit.Framework.CategoryAttribute("ExternalDatabase")]
-        [NUnit.Framework.TestCaseAttribute("SQLAnywhere", "employee", "4", "asynchronous", null)]
+        [NUnit.Framework.TestCaseAttribute("SqlAnywhere", "employee", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("PostgreSql", "employee", "4", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "employee", "3", "asynchronous", null)]
         [NUnit.Framework.TestCaseAttribute("MySql", "building", "2", "asynchronous", null)]

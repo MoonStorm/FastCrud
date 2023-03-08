@@ -22,7 +22,8 @@
         public DateTime BirthDate { get; set; }
         public string FullName { get; set; }
         public int RecordIndex { get; set; }
-        
+        public long RecordVersion { get; set; }
+
         public long? WorkstationId { get; set; }
         public WorkstationDbEntity? Workstation { get; set; }
 

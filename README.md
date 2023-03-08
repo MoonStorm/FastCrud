@@ -57,49 +57,47 @@ Check the [release notes](https://github.com/MoonStorm/FastCrud/wiki/Release-not
 Let's have a look at some popular ORMs out there and benchmark their speed:  
 
 - ``Dapper.SimpleCRUD v2.3.0``
-- ``DapperExtensions v1.6.3 ``
-- ``Entity Framework Core v6.0.2`` 
+- ``DapperExtensions v1.7.0 ``
+- ``Entity Framework Core v7.0.3`` 
 
-##### Automatic Benchmark Report (Last Run: Wednesday, February 16, 2022)
+##### Automatic Benchmark Report (Last Run: Wednesday, March 8, 2023)
 
 |  Library   |  Operation | Op Count |Time (ms) | Time/op (μs) |
 |------------|------------|----------|----------|--------------|
 | <a name="new_entry_marker"/> |
 ||||||
-| Dapper | insert | 10000 | 2,974.40 | 297.44 |
-| Fast Crud | insert | 10000 | 3,172.67 | 317.27 |
-| Dapper Extensions | insert | 10000 | 3,529.16 | 352.92 |
-| Simple Crud | insert | 10000 | 3,110.40 | 311.04 |
-| Entity Framework - single op/call | insert | 10000 | 119,784.63 | 11,978.46 |
+| Dapper | insert | 10000 | 1,929.23 | 192.92 |
+| Fast Crud | insert | 10000 | 2,055.25 | 205.53 |
+| Dapper Extensions | insert | 10000 | 2,268.53 | 226.85 |
+| Simple Crud | insert | 10000 | 2,261.87 | 226.19 |
+| Entity Framework - single op/call | insert | 10000 | 56,141.54 | 5,614.15 |
 ||||||
-| Dapper | update | 10000 | 3,319.82 | 331.98 |
-| Fast Crud | update | 10000 | 3,276.99 | 327.70 |
-| Dapper Extensions | update | 10000 | 3,657.30 | 365.73 |
-| Simple Crud | update | 10000 | 3,150.76 | 315.08 |
-| Entity Framework - single op/call | update | 10000 | 235,678.77 | 23,567.88 |
+| Dapper | update | 10000 | 1,866.15 | 186.62 |
+| Fast Crud | update | 10000 | 1,882.50 | 188.25 |
+| Dapper Extensions | update | 10000 | 2,140.93 | 214.09 |
+| Simple Crud | update | 10000 | 1,902.17 | 190.22 |
+| Entity Framework - single op/call | update | 10000 | 109,686.07 | 10,968.61 |
 ||||||
-| Dapper | delete | 10000 | 2,869.64 | 286.96 |
-| Fast Crud | delete | 10000 | 2,916.99 | 291.70 |
-| Dapper Extensions | delete | 10000 | 3,106.24 | 310.62 |
-| Simple Crud | delete | 10000 | 3,120.13 | 312.01 |
-| Entity Framework - single op/call | delete | 10000 | 7,326.03 | 732.60 |
+| Dapper | delete | 10000 | 1,748.89 | 174.89 |
+| Fast Crud | delete | 10000 | 1,874.53 | 187.45 |
+| Dapper Extensions | delete | 10000 | 1,887.07 | 188.71 |
+| Simple Crud | delete | 10000 | 1,811.88 | 181.19 |
+| Entity Framework - single op/call | delete | 10000 | 2,683.03 | 268.30 |
 ||||||
-| Dapper | select by id | 10000 | 1,499.67 | 149.97 |
-| Fast Crud | select by id | 10000 | 1,861.50 | 186.15 |
-| Dapper Extensions | select by id | 10000 | 2,026.22 | 202.62 |
-| Simple Crud | select by id | 10000 | 2,113.70 | 211.37 |
-| Entity Framework | select by id | 10000 | 3,665.71 | 366.57 |
+| Dapper | select by id | 10000 | 846.25 | 84.62 |
+| Fast Crud | select by id | 10000 | 892.80 | 89.28 |
+| Dapper Extensions | select by id | 10000 | 4,273.33 | 427.33 |
+| Simple Crud | select by id | 10000 | 1,212.33 | 121.23 |
+| Entity Framework | select by id | 10000 | 1,912.39 | 191.24 |
 ||||||
-| Dapper | select all | 10000 | 1,449.41 | 144.94 |
-| Fast Crud | select all | 10000 | 1,748.86 | 174.89 |
-| Dapper Extensions | select all | 10000 | 1,762.69 | 176.27 |
-| Simple Crud | select all | 10000 | 2,281.44 | 228.14 |
-| Entity Framework | select all | 10000 | 6,233.53 | 623.35 |
+| Dapper | select all | 10000 | 854.54 | 85.45 |
+| Fast Crud | select all | 10000 | 944.38 | 94.44 |
+| Dapper Extensions | select all | 10000 | 5,922.75 | 592.28 |
+| Simple Crud | select all | 10000 | 1,310.30 | 131.03 |
+| Entity Framework | select all | 10000 | 3,272.34 | 327.23 |
 
 Dapper is included for reference. All the libs involved get their own internal cache cleared before each run, the benchmark database is re-created, data file gets pre-allocated, and the statistics are turned off.
 The tests are following the same steps and are running in the same environment on the same number and size of records.
-We're happy to see that most light ORMs have matured enough over the years and caught up with ``FastCrud`` and even exceeded its speed in some cases. 
-The really heavy ones are still trailing far behind.
 
 You can find more details about how to run the benchmarks yourself in the wiki.
 

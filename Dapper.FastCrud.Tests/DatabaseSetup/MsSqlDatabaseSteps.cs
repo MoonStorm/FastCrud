@@ -137,7 +137,7 @@
                 database.ExecuteNonQuery($@"ALTER DATABASE {_testContext.DatabaseName} MODIFY FILE(NAME=[{_testContext.DatabaseName}], SIZE=100MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
-	                    [Id] [int] IDENTITY(2,1) NOT NULL,
+	                    [Id] [bigint] IDENTITY(2,1) NOT NULL,
 	                    [FirstName] [nvarchar](50) NULL,
 	                    [LastName] [nvarchar](50) NOT NULL,
 	                    [DateOfBirth] [datetime] NULL,
@@ -157,6 +157,8 @@
 	                        [WorkstationId] ASC
                         ))");
 
+                // we know this works but we want to test triggers
+                // [FullName] AS ([FirstName] + [LastName]),
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
@@ -165,12 +167,13 @@
 	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [RecordIndex] [int] NOT NULL,
+                        [RecordVersion] [timestamp] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
 	                    [SupervisorUserId] [int] NULL,
                         [SupervisorEmployeeId] [uniqueidentifier] NULL,
 	                    [ManagerUserId] [int] NULL,
 	                    [ManagerEmployeeId] [uniqueidentifier] NULL,
-                        [FullName] AS ([FirstName] + [LastName]),
+                        [FullName] [nvarchar](200),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC,

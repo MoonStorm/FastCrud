@@ -5,9 +5,9 @@
     using NUnit.Framework;
     using System;
     using Dapper;
+    using Microsoft.Data.SqlClient;
     using System.Collections;
     using System.Data;
-    using System.Data.SqlClient;
     using System.Linq;
     using System.Reflection;
     using TechTalk.SpecFlow;

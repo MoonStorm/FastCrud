@@ -33,7 +33,7 @@ Scenario Outline: Insert and select all (external database)
 	And the result of the last query count should be <entity count>
 	Examples: 
 	| database type | entity type | entity count | method type  |
-	| SQLAnywhere   | employee    | 4            | asynchronous |
+	| SqlAnywhere   | employee    | 4            | asynchronous |
 	| PostgreSql    | employee    | 4            | asynchronous |
 	| MySql         | employee    | 3            | asynchronous |
 	| MySql         | building    | 2            | asynchronous |
