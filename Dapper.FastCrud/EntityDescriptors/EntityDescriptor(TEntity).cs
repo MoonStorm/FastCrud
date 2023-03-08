@@ -47,6 +47,9 @@
             {
                 case SqlDialect.MsSql:
                     statementSqlBuilder = new MsSqlBuilder(this, entityRegistration);
+                    break;                    
+                case SqlDialect.SAnywhereSql:
+                    statementSqlBuilder = new SAnywhereSqlBuilder(this, entityRegistration);
                     break;
                 case SqlDialect.MySql:
                     statementSqlBuilder = new MySqlBuilder(this, entityRegistration);

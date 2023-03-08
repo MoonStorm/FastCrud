@@ -29,7 +29,7 @@ var persons = dbConnection.Find<Person>(statement => statement
 ```
 
 #### Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and SAP/Sybase Anywhere SQL.
 - Entities having composite primary keys are supported, however note that the CRUD operations only support UNIQUE primary keys.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.

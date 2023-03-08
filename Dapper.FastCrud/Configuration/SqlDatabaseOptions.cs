@@ -34,5 +34,10 @@
         /// Gets the prefix used for named parameters
         /// </summary>
         public string ParameterPrefix { get; protected set; }
+
+        /// <summary>
+        /// Gets the suffix used for named parameters
+        /// </summary>
+        public string ParameterSuffix { get; protected set; }
     }
 }
