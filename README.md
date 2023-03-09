@@ -29,7 +29,7 @@ var persons = dbConnection.Find<Person>(statement => statement
 ```
 
 #### Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and SAP/Sybase Anywhere SQL.
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and SAP/Sybase SQL Anywhere.
 - Entities having composite primary keys are supported, however note that the CRUD operations only support UNIQUE primary keys.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
@@ -46,7 +46,7 @@ var persons = dbConnection.Find<Person>(statement => statement
 
 
 #### Active Versions
-- 3.0 [![Build Status](https://moonstorm.visualstudio.com/FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?repoName=MoonStorm%2FFastCrud&branchName=release)](https://moonstorm.visualstudio.com/FastCrud/_build/latest?definitionId=10&repoName=MoonStorm%2FFastCrud&branchName=release)
+- 3.1 [![Build Status](https://moonstorm.visualstudio.com/FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?repoName=MoonStorm%2FFastCrud&branchName=release)](https://moonstorm.visualstudio.com/FastCrud/_build/latest?definitionId=10&repoName=MoonStorm%2FFastCrud&branchName=release)
 Check the [release notes](https://github.com/MoonStorm/FastCrud/wiki/Release-notes) for information about the recent changes or the readme info published on NuGet. 
 
 #### WIKI

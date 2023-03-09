@@ -2,7 +2,7 @@ You hate verbatim SQL queries with zero type safety for your code but you love t
 Visual Studio 2019 and above is recommended. 
 
 ## What to expect when working with Dapper.FastCrud in the DAL? 
-Type safety, clean code, less prone to errors, more peace of mind, while still being close to the metal. Here's a sample for 3.0:
+Type safety, clean code, less prone to errors, more peace of mind, while still being close to the metal. Here's a sample for 3.x:
 ```
     var queryParams = new 
     {
@@ -25,7 +25,7 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
 ```
 
 ## Features:
-- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql.
+- Support for LocalDb, Ms Sql Server, MySql, SqLite, PostgreSql and SAP/Sybase SQL Anywhere.
 - Entities having composite primary keys are supported, however note that the CRUD operations only support UNIQUE primary keys.
 - Multiple entity mappings are supported, useful for partial queries in large denormalized tables and data migrations between different database types.
 - All the CRUD methods accept a transaction, a command timeout, and a custom entity mapping.
@@ -39,6 +39,11 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
   - Code first, using model data annotations (preferred)
   - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
+
+## Release Notes for 3.1
+- Added support for SQL Anywhere
+- Added support for 'rowversion' type columns for the SQL Server dialect.
+- Dependencies, tests and benchmarks updated.
 
 ## Release Notes for 3.0
 - Added support for .NET Standard 2.1
