@@ -65,6 +65,7 @@
                             FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
     	                    RecordIndex int NOT NULL,
+                            RecordVersion binary(11) NOT NULL,
                             WorkstationId bigint NULL,
 	                        SupervisorUserId int NULL,
                             SupervisorEmployeeId char(36) NULL,
@@ -80,6 +81,16 @@
                             FOR EACH ROW
                             SET NEW.EmployeeId = UUID(),
                             New.KeyPass = UUID();
+
+                        CREATE TRIGGER `Employee_Assign_RecordVersion`
+                            BEFORE INSERT ON Employee
+                            FOR EACH ROW
+                            SET NEW.RecordVersion = CONVERT(UNIX_TIMESTAMP() USING BINARY);
+
+                        CREATE TRIGGER `Employee_Update_RecordVersion`
+                            BEFORE UPDATE ON Employee
+                            FOR EACH ROW
+                            SET NEW.RecordVersion = CONVERT(UNIX_TIMESTAMP() USING BINARY);
 
                         CREATE TABLE `Badges` (
 	                        Id int NOT NULL,

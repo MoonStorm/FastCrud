@@ -81,6 +81,7 @@
                             ""FullName"" varchar(200) NOT NULL,
 	                        ""BirthDate"" timestamp NOT NULL,
 	                        ""RecordIndex"" int NOT NULL,
+                            ""RecordVersion"" BYTEA NULL,
                             ""WorkstationId"" int NULL,
 	                        ""SupervisorUserId"" int NULL,
                             ""SupervisorEmployeeId"" uuid NULL,

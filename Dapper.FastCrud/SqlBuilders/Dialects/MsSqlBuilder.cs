@@ -25,7 +25,7 @@
                 return FormattableString.Invariant($"INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) VALUES ({this.ConstructParamEnumerationForInsert()})");
             }
 
-            // one database generated field to be inserted, and that alone is the primary key
+            // one database generated field to be returned, and that alone is the primary key
             if (this.InsertKeyDatabaseGeneratedProperties.Length == 1 && this.RefreshOnInsertProperties.Length == 1)
             {
                 var keyProperty = this.InsertKeyDatabaseGeneratedProperties[0];
@@ -40,23 +40,33 @@
                 }
             }
 
-            var dbInsertedOutputColumns = string.Join(",", this.RefreshOnInsertProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = this.ConstructRefreshOnInsertColumnSelection();
+            // more than one field to be returned or not the primary key
 
             // the union will make the constraints be ignored
+            // we only record the primary keys and not all the properties that need to be refreshed on insert because of timestamp/rowversion columns
+            // we can't use simple OUTPUT vars (other than the keys) because of triggers
+            var keyColumnRegularEnumeration = string.Join(",", this.KeyProperties.Select(prop => this.GetColumnName(prop)));
+            var keyColumnInsertEnumeration = string.Join(",", this.KeyProperties.Select(prop => FormattableString.Invariant($"inserted.{this.GetColumnName(prop)}")));
             return FormattableString.Invariant($@"
-                SELECT *
+               SELECT * 
                     INTO #temp 
-                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
-                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
-            
-                INSERT INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
-                    OUTPUT {dbInsertedOutputColumns} INTO #temp 
-                    VALUES ({this.ConstructParamEnumerationForInsert()});
+                    FROM (
+                        SELECT {keyColumnRegularEnumeration} FROM {this.GetTableName()} WHERE 1=0 
+                        UNION 
+                        SELECT {keyColumnRegularEnumeration} FROM {this.GetTableName()} WHERE 1=0
+                    ) as [combined];
 
-                SELECT * FROM #temp");
+                INSERT  INTO {this.GetTableName()} ({this.ConstructColumnEnumerationForInsert()}) 
+                        OUTPUT {keyColumnInsertEnumeration} INTO #temp 
+                        VALUES ({this.ConstructParamEnumerationForInsert()});
+
+                SELECT {string.Join(",", this.RefreshOnInsertProperties.Select(prop => this.GetColumnName(prop, "main", true)))}
+                    FROM {this.GetTableName()} AS {this.GetDelimitedIdentifier("main")}
+                    INNER JOIN #temp
+                        ON {string.Join(" AND ", this.KeyProperties.Select(prop => FormattableString.Invariant($"{this.GetColumnName(prop, "main")} = {this.GetColumnName(prop, "#temp")}")))}
+            ");
         }
-
+        
         /// <summary>
         /// Constructs an update statement for a single entity.
         /// </summary>
@@ -67,22 +77,35 @@
                 return base.ConstructFullSingleUpdateStatementInternal();
             }
 
-            var dbUpdatedOutputColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
-            var dbGeneratedColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
+            //var dbUpdatedOutputColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"inserted.{this.GetColumnName(propInfo, null, true)}"));
+            //var dbGeneratedColumns = string.Join(",", this.RefreshOnUpdateProperties.Select(propInfo => $"{this.GetColumnName(propInfo, null, true)}"));
+            //// the union will make the constraints be ignored
+            //return FormattableString.Invariant($@"
+            //    SELECT *
+            //        INTO #temp 
+            //        FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
+            //            UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
 
-            // the union will make the constraints be ignored
+            //    UPDATE {this.GetTableName()} 
+            //        SET {this.ConstructUpdateClause()}
+            //        OUTPUT {dbUpdatedOutputColumns} INTO #temp
+            //        WHERE {this.ConstructKeysWhereClause()}
+
+            //    SELECT * FROM #temp");
+
+            // more than one field to be returned or not the primary key
+
+            // we can't use simple OUTPUT vars (other than the keys) because of triggers
+            var keyColumnRegularEnumeration = string.Join(",", this.KeyProperties.Select(prop => this.GetColumnName(prop)));
             return FormattableString.Invariant($@"
-                SELECT *
-                    INTO #temp 
-                    FROM (SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0 
-                        UNION SELECT {dbGeneratedColumns} FROM {this.GetTableName()} WHERE 1=0) as u;
-
                 UPDATE {this.GetTableName()} 
                     SET {this.ConstructUpdateClause()}
-                    OUTPUT {dbUpdatedOutputColumns} INTO #temp
                     WHERE {this.ConstructKeysWhereClause()}
 
-                SELECT * FROM #temp");
+                SELECT {string.Join(",", this.RefreshOnUpdateProperties.Select(prop => this.GetColumnName(prop, null, true)))}
+                    FROM {this.GetTableName()}
+                    WHERE {this.ConstructKeysWhereClause()}
+            ");
         }
 
         protected override string ConstructFullSelectStatementInternal(

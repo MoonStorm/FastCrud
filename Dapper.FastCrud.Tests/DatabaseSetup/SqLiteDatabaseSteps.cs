@@ -41,19 +41,6 @@
                 command.ExecuteNonQuery();
             }
 
-            ////using (var command = _testContext.DatabaseConnection.CreateCommand())
-            ////{
-            ////    command.CommandText =
-            ////        $@"CREATE TABLE SimpleBenchmarkEntities(
-            ////         Id integer primary key AUTOINCREMENT,
-            ////            FirstName nvarchar(50) NULL,
-            ////         LastName  nvarchar(50) NOT NULL,
-            ////            DateOfBirth datetime NULL
-            ////        ";
-
-            ////    command.ExecuteNonQuery();
-            ////}
-
             using (var command = _testContext.DatabaseConnection.CreateCommand())
             {
                 command.CommandText = $@"CREATE TABLE Buildings (

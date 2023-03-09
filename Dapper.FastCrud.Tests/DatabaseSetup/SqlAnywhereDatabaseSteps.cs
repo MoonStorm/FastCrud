@@ -43,6 +43,7 @@
                             ""FullName"" varchar(200) NOT NULL COMPUTE( ""FirstName"" + ""LastName"" ),
 	                        ""BirthDate"" timestamp NOT NULL,
 	                        ""RecordIndex"" int NOT NULL,
+                            ""RecordVersion"" binary(8) NULL,
                             ""WorkstationId"" int NULL,
 	                        ""SupervisorUserId"" int NULL,
                             ""SupervisorEmployeeId"" uniqueidentifier NULL,

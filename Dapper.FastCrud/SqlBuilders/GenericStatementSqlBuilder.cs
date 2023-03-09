@@ -86,19 +86,74 @@
             _fullSingleSelectStatement = new Lazy<string>(()=>this.ConstructFullSingleSelectStatementInternal(),LazyThreadSafetyMode.PublicationOnly);
         }
         
+        /// <summary>
+        /// The entity descriptor the current instance of sql builder was created for.
+        /// </summary>
         public EntityDescriptor EntityDescriptor { get; }
+
+        /// <summary>
+        /// The entity registration the current instance of sql builder was created for.
+        /// </summary>
         public EntityRegistration EntityRegistration { get; }
+
+        /// <summary>
+        /// All the properties that participate in selects.
+        /// </summary>
         public PropertyRegistration[] SelectProperties { get; }
+
+        /// <summary>
+        /// All the primary key properties.
+        /// </summary>
         public PropertyRegistration[] KeyProperties { get; }
+
+        /// <summary>
+        /// All the properties that participate in inserts.
+        /// </summary>
         public PropertyRegistration[] InsertProperties { get; }
+
+        /// <summary>
+        /// All the properties that participate in updates.
+        /// </summary>
         public PropertyRegistration[] UpdateProperties { get; }
+
+        /// <summary>
+        /// Primary key properties that are generated on inserts.
+        /// </summary>
         public PropertyRegistration[] InsertKeyDatabaseGeneratedProperties { get; }
+        
+        /// <summary>
+        /// Properties that require to be updated on inserts.
+        /// </summary>
         public PropertyRegistration[] RefreshOnInsertProperties { get; }
+        
+        /// <summary>
+        /// Properties that require to be updated on updates.
+        /// </summary>
         public PropertyRegistration[] RefreshOnUpdateProperties { get; }
+
+        /// <summary>
+        /// Delimiter to be used at the start of identifiers (e.g. [UserTable])
+        /// </summary>
         protected string IdentifierStartDelimiter { get; }
+
+        /// <summary>
+        /// Delimiter to be used at the end of identifiers (e.g. [UserTable])
+        /// </summary>
         protected string IdentifierEndDelimiter { get; }
+
+        /// <summary>
+        /// If true, schema qualified table names should be used.
+        /// </summary>
         protected bool UsesSchemaForTableNames { get; }
+
+        /// <summary>
+        /// The prefix that needs to be used for sql parameters (e.g. @UserId)
+        /// </summary>
         protected string ParameterPrefix { get; }
+
+        /// <summary>
+        /// The suffix that needs to be used for sql parameters (e.g. ?UserId?)
+        /// </summary>
         protected string ParameterSuffix { get; }
 
         #region section for all the methods exposed both publicly and internally
@@ -402,8 +457,8 @@
         {
             Validate.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
-            var startsWithIdentifier = sqlIdentifier.StartsWith(this.IdentifierStartDelimiter);
-            var endsWithIdentifier = sqlIdentifier.EndsWith(this.IdentifierEndDelimiter);
+            var startsWithIdentifier = !string.IsNullOrEmpty(this.IdentifierStartDelimiter) && sqlIdentifier.StartsWith(this.IdentifierStartDelimiter);
+            var endsWithIdentifier = !string.IsNullOrEmpty(this.IdentifierEndDelimiter) &&  sqlIdentifier.EndsWith(this.IdentifierEndDelimiter);
 
             return string.Format(
                 CultureInfo.InvariantCulture,

@@ -157,8 +157,6 @@
 	                        [WorkstationId] ASC
                         ))");
 
-                // we know this works but we want to test triggers
-                // [FullName] AS ([FirstName] + [LastName]),
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
@@ -167,13 +165,13 @@
 	                    [FirstName] [nvarchar](100) NULL,
 	                    [BirthDate] [datetime] NOT NULL,
 	                    [RecordIndex] [int] NOT NULL,
-                        [RecordVersion] [timestamp] NOT NULL,
+                        [RecordVersion] [rowversion] NOT NULL,
 	                    [WorkstationId] [bigint] NULL,
 	                    [SupervisorUserId] [int] NULL,
                         [SupervisorEmployeeId] [uniqueidentifier] NULL,
 	                    [ManagerUserId] [int] NULL,
 	                    [ManagerEmployeeId] [uniqueidentifier] NULL,
-                        [FullName] [nvarchar](200),
+                        [FullName] AS ([FirstName] + [LastName]),
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC,
@@ -183,6 +181,15 @@
                         CONSTRAINT [FK_Employee_Employee_ManagerUserId_ManagerEmployeeId] FOREIGN KEY ([ManagerUserId],[ManagerEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId]),
                         CONSTRAINT [FK_Employee_Employee_SupervisorUserId_SupervisorEmployeeId] FOREIGN KEY ([SupervisorUserId],[SupervisorEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId])
                         )");
+
+                database.ExecuteNonQuery(@"
+                            CREATE TRIGGER [dbo].[EmployeeTrigger] 
+                            ON [dbo].[Employee] 
+                            AFTER INSERT, UPDATE AS 
+	                            IF (@@ROWCOUNT = 0)
+		                            RETURN;
+	                            PRINT 'I''m just a trigger'
+                        ");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Badges](
 	                    [Id] [int] NOT NULL,
