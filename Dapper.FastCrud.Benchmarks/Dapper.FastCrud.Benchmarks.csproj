@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -27,7 +27,7 @@
       <GeneratePathProperty>true</GeneratePathProperty>
     </PackageReference>-->
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.13.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.3" />
     <PackageReference Include="MySql.Data" Version="8.0.32.1" />
     <PackageReference Include="Npgsql" Version="7.0.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
