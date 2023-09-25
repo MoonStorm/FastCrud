@@ -1030,60 +1030,49 @@ static Regex InvalidNamePortionRegex = new Regex(@"([\s_]+)|(tbl)", RegexOptions
 
 		static string GetPropertyType(string sqlType)
 		{
-			string sysType = "string";
 			switch (sqlType)
 			{
 				case "bigint":
-					sysType = "long";
-					break;
+					return "long";
 				case "smallint":
-					sysType = "short";
-					break;
+					return "short";
 				case "int":
-					sysType = "int";
-					break;
+					return "int";
 				case "uniqueidentifier":
-					sysType = "Guid";
-					break;
+					return "Guid";
 				case "smalldatetime":
 				case "datetime":
 				case "datetime2":
 				case "date":
 				case "time":
-					sysType = "DateTime";
-					break;
+					return "DateTime";
 				case "float":
-					sysType = "double";
-					break;
+					return "double";
 				case "real":
-					sysType = "float";
-					break;
+					return "float";
 				case "numeric":
 				case "smallmoney":
 				case "decimal":
 				case "money":
-					sysType = "decimal";
-					break;
+					return "decimal";
 				case "tinyint":
-					sysType = "byte";
-					break;
+					return "byte";
 				case "bit":
-					sysType = "bool";
-					break;
+					return "bool";
 				case "image":
 				case "binary":
 				case "varbinary":
 				case "timestamp":
-					sysType = "byte[]";
-					break;
+					return "byte[]";
 				case "geography":
-					sysType = "Microsoft.SqlServer.Types.SqlGeography";
-					break;
+					return "Microsoft.SqlServer.Types.SqlGeography";
 				case "geometry":
-					sysType = "Microsoft.SqlServer.Types.SqlGeometry";
-					break;
+					return "Microsoft.SqlServer.Types.SqlGeometry";
+				case "datetimeoffset":
+					return "DateTimeOffset";
+				default:
+					return "string";
 			}
-			return sysType;
 		}
 
 		const string TABLE_SQL = @"SELECT TABLES.*,
