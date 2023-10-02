@@ -65,7 +65,7 @@ This code is based on the work of the contributors of Dapper.SimpleCRUD, PetaPoc
 			WriteLine($@"{currentIndentation}/// <summary>");
 			foreach (var tableDescriptionLine in table.Description)
 			{
-				WriteLine($@"{currentIndentation}/// {tableDescriptionLine}");
+				WriteLine($@"{currentIndentation}/// {tableDescriptionLine} <br/>");
 			}
 			WriteLine($@"{currentIndentation}/// Represents the '{table.Name}' {(table.IsView?"view":"table")}.");
 			WriteLine($@"{currentIndentation}/// </summary>");
@@ -94,7 +94,7 @@ This code is based on the work of the contributors of Dapper.SimpleCRUD, PetaPoc
 					WriteLine($@"{currentIndentation}/// <summary>");
 					foreach (var columnDescriptionLine in column.Description)
 					{
-						WriteLine($@"{currentIndentation}/// {columnDescriptionLine}");
+						WriteLine($@"{currentIndentation}/// {columnDescriptionLine} <br/>");
 					}
 					WriteLine($@"{currentIndentation}/// Represents the column '{column.Name}'.");
 					WriteLine($@"{currentIndentation}/// </summary>");
