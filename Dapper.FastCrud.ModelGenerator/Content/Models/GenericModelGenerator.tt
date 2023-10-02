@@ -895,6 +895,11 @@ static Regex InvalidNamePortionRegex = new Regex(@"([\s_]+)|(tbl)", RegexOptions
 				p.Value = tbl.Schema;
 				cmd.Parameters.Add(p);
 
+				p = cmd.CreateParameter();
+				p.ParameterName = "@tableType";
+				p.Value = tbl.IsView ? "VIEW" : "TABLE";
+				cmd.Parameters.Add(p);
+
 				using (IDataReader rdr = cmd.ExecuteReader())
 				{
 					while (rdr.Read())
@@ -1097,7 +1102,7 @@ static Regex InvalidNamePortionRegex = new Regex(@"([\s_]+)|(tbl)", RegexOptions
 			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed,
 			DescriptionExProps.value as Description
 		FROM  INFORMATION_SCHEMA.COLUMNS
-		OUTER APPLY fn_listextendedproperty('MS_Description', 'schema', @schemaName, 'table', @tableName, 'column', COLUMN_NAME) As DescriptionExProps
+		OUTER APPLY fn_listextendedproperty('MS_Description', 'schema', @schemaName, @tableType, @tableName, 'column', COLUMN_NAME) As DescriptionExProps
 		WHERE TABLE_NAME=@tableName AND TABLE_SCHEMA=@schemaName
 		ORDER BY OrdinalPosition ASC";
 
