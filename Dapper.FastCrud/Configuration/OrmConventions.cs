@@ -46,7 +46,11 @@
             typeof (DateTime),
             typeof (TimeSpan),
             typeof (DateTimeOffset),
-            typeof (byte[])
+            typeof (byte[]),
+#if NET6_0_OR_GREATER
+            typeof (DateOnly),
+            typeof (TimeOnly)
+#endif
         };
 
 

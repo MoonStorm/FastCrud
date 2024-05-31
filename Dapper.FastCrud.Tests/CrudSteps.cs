@@ -88,6 +88,8 @@
                         LastName = $"Last Name {Guid.NewGuid().ToString("N")}",
                         RecordIndex = ++_recordIndex,
                         BirthDate = new DateTime(_rnd.Next(2000, 2010), _rnd.Next(1, 12), _rnd.Next(1, 28), _rnd.Next(0, 23), _rnd.Next(0, 59), _rnd.Next(0, 59)),
+                        HiringDate = new DateOnly(_rnd.Next(2020, 2024), _rnd.Next(1, 12), _rnd.Next(1, 28)),
+                        ShiftStartingTime = new TimeOnly(_rnd.Next(0, 23), _rnd.Next(0, 60), _rnd.Next(0,60))
                     };
             }
         }
@@ -968,7 +970,9 @@
                         FirstName = "Updated " + originalEmployeeEntity.FirstName,
                         LastName = "Updated " + originalEmployeeEntity.LastName,
                         KeyPass = originalEmployeeEntity.KeyPass,
-                    };
+                        HiringDate = new DateOnly(2024, 05, 30),
+                        ShiftStartingTime = new TimeOnly(23, 59, 59)
+                };
             }
         }
 

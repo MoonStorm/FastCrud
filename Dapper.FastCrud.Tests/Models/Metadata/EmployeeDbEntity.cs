@@ -24,6 +24,9 @@
         public int RecordIndex { get; set; }
         public byte[] RecordVersion { get; set; }
 
+        public DateOnly? HiringDate { get; set; }
+        public TimeOnly? ShiftStartingTime { get; set; }
+
         public long? WorkstationId { get; set; }
         public WorkstationDbEntity? Workstation { get; set; }
 

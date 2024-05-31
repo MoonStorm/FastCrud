@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
     using Dapper.FastCrud.Tests.Contexts;
     using Microsoft.Extensions.Configuration;
@@ -87,6 +87,8 @@
                             ""SupervisorEmployeeId"" uuid NULL,
 	                        ""ManagerUserId"" int NULL,
 	                        ""ManagerEmployeeId"" uuid NULL,
+                            ""HiringDate"" date NULL,
+                            ""ShiftStartingTime"" time NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
 

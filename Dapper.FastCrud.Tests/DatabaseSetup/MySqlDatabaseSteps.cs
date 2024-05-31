@@ -1,6 +1,8 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
-    using Dapper.FastCrud.Tests.Contexts;
+  using System;
+  using System.Data;
+  using Dapper.FastCrud.Tests.Contexts;
     using Microsoft.Extensions.Configuration;
     using MySql.Data.MySqlClient;
     using TechTalk.SpecFlow;
@@ -58,19 +60,21 @@
 
                         CREATE TABLE `Employee` (
 	                        Id int NOT NULL AUTO_INCREMENT,
-                            EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+                          EmployeeId CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        KeyPass CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
 	                        LastName nvarchar(100) NOT NULL,
 	                        FirstName nvarchar(100) NOT NULL,
-                            FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
+                          FullName nvarchar(200) AS (CONCAT(FirstName,LastName)),
 	                        BirthDate datetime NOT NULL,
     	                    RecordIndex int NOT NULL,
-                            RecordVersion binary(11) NOT NULL,
-                            WorkstationId bigint NULL,
+                          RecordVersion binary(11) NOT NULL,
+                          WorkstationId bigint NULL,
 	                        SupervisorUserId int NULL,
-                            SupervisorEmployeeId char(36) NULL,
+                          SupervisorEmployeeId char(36) NULL,
 	                        ManagerUserId int NULL,
 	                        ManagerEmployeeId char(36) NULL,
+                          HiringDate date NULL,
+                          ShiftStartingTime time NULL,
 	                        PRIMARY KEY (Id, EmployeeId)
                         );
 

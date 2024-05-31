@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
     using System.IO;
     using System.Text.RegularExpressions;
@@ -10,7 +10,7 @@
     using TechTalk.SpecFlow;
 
     [Binding]
-    public sealed class MsSqlDatabaseSteps:CommonDatabaseSetup
+    public sealed class MsSqlDatabaseSteps : CommonDatabaseSetup
     {
         private readonly DatabaseTestContext _testContext;
         private readonly IConfiguration _configuration;
@@ -172,6 +172,8 @@
 	                    [ManagerUserId] [int] NULL,
 	                    [ManagerEmployeeId] [uniqueidentifier] NULL,
                         [FullName] AS ([FirstName] + [LastName]),
+                        [HiringDate] [date] NULL,
+                        [ShiftStartingTime] [time] NULL,
                         CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED
                         (
 	                        [Id] ASC,
@@ -180,7 +182,7 @@
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY ([WorkstationId]) REFERENCES [Workstations] (WorkstationId),
                         CONSTRAINT [FK_Employee_Employee_ManagerUserId_ManagerEmployeeId] FOREIGN KEY ([ManagerUserId],[ManagerEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId]),
                         CONSTRAINT [FK_Employee_Employee_SupervisorUserId_SupervisorEmployeeId] FOREIGN KEY ([SupervisorUserId],[SupervisorEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId])
-                        )");
+                      )");
 
                 database.ExecuteNonQuery(@"
                             CREATE TRIGGER [dbo].[EmployeeTrigger] 

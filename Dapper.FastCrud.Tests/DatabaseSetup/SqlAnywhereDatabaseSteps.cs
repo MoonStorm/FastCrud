@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
     using System.Data.Odbc;
     using Dapper.FastCrud.Tests.Contexts;
@@ -49,6 +49,8 @@
                             ""SupervisorEmployeeId"" uniqueidentifier NULL,
 	                        ""ManagerUserId"" int NULL,
 	                        ""ManagerEmployeeId"" uniqueidentifier NULL,
+                            ""HiringDate"" date NULL,
+                            ""ShiftStartingTime"" time NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
 

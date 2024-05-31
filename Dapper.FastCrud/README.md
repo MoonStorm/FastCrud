@@ -1,5 +1,4 @@
 You hate verbatim SQL queries with zero type safety for your code but you love the speed? ``Dapper.FastCrud`` is a fast orm built around essential features of the C# 6 / VB 14 that have finally raised the simplicity of raw SQL constructs to acceptable maintenance levels. These features leave no chance to mistypings or problems arising from db entity refactorings.
-Visual Studio 2019 and above is recommended. 
 
 ## What to expect when working with Dapper.FastCrud in the DAL? 
 Type safety, clean code, less prone to errors, more peace of mind, while still being close to the metal. Here's a sample for 3.x:
@@ -35,17 +34,24 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
 - A set of "formattables" are also included, which can be used even if you don't need the CRUD features of this library but you want to take advantage of the DB mappings.
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 - The following mapping styles are supported:
-  - Database first (limited to SQL Server)
   - Code first, using model data annotations (preferred)
+  - Database first (limited to SQL Server, soon to be dropped)
   - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
 
-## Release Notes for 3.1
+## Release Notes 
+### 3.2
+- Added support for ``DateOnly`` and ``TimeOnly`` data types, introduced in .NET6, 
+however provider support isn't all that great across database flavors. 
+Please check this [discussion thread](https://github.com/MoonStorm/FastCrud/discussions/196) for more info.
+- Dependencies, tests and benchmarks updated.
+
+### 3.1
 - Added support for SQL Anywhere
 - Added support for 'rowversion' type columns for the SQL Server dialect.
 - Dependencies, tests and benchmarks updated.
 
-## Release Notes for 3.0
+### 3.0
 - Added support for .NET Standard 2.1
 - Extended support for the MetadataType attribute in .NET Standard 2.1
 - Bulk update can now be used with parameters.

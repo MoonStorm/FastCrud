@@ -26,9 +26,9 @@
     <!-- deprecated -->
     <!-- <PackageLicenseUrl>http://www.opensource.org/licenses/MIT</PackageLicenseUrl> -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>dapper crud orm sql sqlite mysql mssql localdb postgresql poco</PackageTags>
+    <PackageTags>dapper fast crud orm sql sqlite mysql mssql localdb postgresql poco</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Summary>The fastest micro-orm for Dapper</Summary>
+    <Summary>The fastest micro-orm for .NET</Summary>
     <Company />
     <Copyright />
     <PackageProjectUrl>https://github.com/MoonStorm/FastCrud</PackageProjectUrl>

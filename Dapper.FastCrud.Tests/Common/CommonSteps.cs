@@ -10,7 +10,6 @@
     using Dapper.FastCrud.Tests.Contexts;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
     using NUnit.Framework;
     using TechTalk.SpecFlow;
 

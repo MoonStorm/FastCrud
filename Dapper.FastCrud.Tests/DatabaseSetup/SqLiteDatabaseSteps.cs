@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
     using System.Data.SQLite;
     using Dapper.FastCrud.Tests.Contexts;
@@ -6,7 +6,7 @@
     using TechTalk.SpecFlow;
 
     [Binding]
-    public sealed class SqLiteDatabaseSteps:CommonDatabaseSetup
+    public sealed class SqLiteDatabaseSteps : CommonDatabaseSetup
     {
         private readonly DatabaseTestContext _testContext;
         private readonly IConfiguration _configuration;
@@ -51,8 +51,6 @@
 
                 command.ExecuteNonQuery();
             }
-
         }
-
     }
 }

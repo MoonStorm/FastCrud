@@ -1,29 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyTitle>Dapper.FastCrud.Tests</AssemblyTitle>
     <AssemblyName>Dapper.FastCrud.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="MartinCostello.SqlLocalDb" Version="3.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <!--<PackageReference Include="Microsoft.SqlServer.Compact">
       <Version>4.0.8876.1</Version>
       <GeneratePathProperty>true</GeneratePathProperty>
     </PackageReference>-->
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.13.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
-    <PackageReference Include="MySql.Data" Version="8.0.32.1" />
-    <PackageReference Include="Npgsql" Version="7.0.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="171.30.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.6" />
+    <PackageReference Include="MySql.Data" Version="8.4.0" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="SpecFlow.NUnit.Runners" Version="3.9.74" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
+    <!--<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />-->
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,6 +59,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <SpecFlowObsoleteCodeBehindFiles Remove="Crud - In Memory DBs - Copy.feature.cs" />
+    <SpecFlowObsoleteCodeBehindFiles Remove="Relationships - Copy.feature.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="D:\Code\Dapper.FastCRUD\Dapper.FastCrud.Tests\.editorconfig" />
   </ItemGroup>
 
@@ -67,6 +72,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Crud - External DBs.feature.cs">
+      <DependentUpon>Crud - External DBs.feature</DependentUpon>
+    </Compile>
     <Compile Update="DatabaseSetup\MySqlDatabaseSteps.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -81,5 +89,19 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ModelGeneratorConfig.tt</DependentUpon>
     </Compile>
+    <Compile Update="Relationships - External DBs.feature.cs">
+      <DependentUpon>Relationships - External DBs.feature</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <SpecFlowFeatureFiles Update="Crud - External DBs.feature">
+      <Visible>$(UsingMicrosoftNETSdk)</Visible>
+      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
+    </SpecFlowFeatureFiles>
+    <SpecFlowFeatureFiles Update="Relationships - External DBs.feature">
+      <Visible>$(UsingMicrosoftNETSdk)</Visible>
+      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
+    </SpecFlowFeatureFiles>
   </ItemGroup>
 </Project>

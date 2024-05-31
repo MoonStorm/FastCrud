@@ -1,6 +1,8 @@
-﻿namespace Dapper.FastCrud.Tests.DatabaseSetup
+namespace Dapper.FastCrud.Tests.DatabaseSetup
 {
+    using System;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Dapper.FastCrud.Tests.Common;
     using Dapper.FastCrud.Tests.Models.Poco;
     using Dapper.FastCrud.Validations;
     using Microsoft.Extensions.Configuration;
@@ -31,6 +33,19 @@
                             .SetParentChildrenRelationship(
                                 building => building.Workstations,
                                 workstation => workstation.BuildingId);
+
+            // tweak some dapper mappings that still don't work properly for all the database flavors
+            SqlMapper.RemoveTypeMap(typeof(DateOnly));
+            SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+            SqlMapper.RemoveTypeMap(typeof(DateOnly?));
+            SqlMapper.AddTypeHandler(new NullableDateOnlyTypeHandler());
+
+            SqlMapper.RemoveTypeMap(typeof(TimeOnly));
+            SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
+
+            SqlMapper.RemoveTypeMap(typeof(TimeOnly?));
+            SqlMapper.AddTypeHandler(new NullableTimeOnlyTypeHandler());
         }
 
     }
