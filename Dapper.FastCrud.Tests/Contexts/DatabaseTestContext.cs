@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.Contexts
+namespace Dapper.FastCrud.Tests.Contexts
 {
     using System;
     using System.Collections.Generic;

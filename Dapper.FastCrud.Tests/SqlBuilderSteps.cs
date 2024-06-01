@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests
+namespace Dapper.FastCrud.Tests
 {
     using System;
     using System.Linq;

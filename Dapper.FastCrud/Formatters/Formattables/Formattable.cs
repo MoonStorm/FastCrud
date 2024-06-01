@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Formatters.Formattables
+namespace Dapper.FastCrud.Formatters.Formattables
 {
     using System;
 

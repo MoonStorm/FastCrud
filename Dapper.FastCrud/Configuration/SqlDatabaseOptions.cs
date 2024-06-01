@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration
+namespace Dapper.FastCrud.Configuration
 {
     /// <summary>
     /// Stores database options linked to a particular dialect.

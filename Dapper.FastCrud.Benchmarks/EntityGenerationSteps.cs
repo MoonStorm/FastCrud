@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+namespace Dapper.FastCrud.Benchmarks
 {
     using Dapper.FastCrud.Benchmarks.Models;
     using System;

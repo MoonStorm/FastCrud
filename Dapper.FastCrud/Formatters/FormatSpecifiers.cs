@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Formatters
+namespace Dapper.FastCrud.Formatters
 {
     /// <summary>
     /// Holds all the format specifiers supported by the library.

@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.EntityDescriptors
+namespace Dapper.FastCrud.EntityDescriptors
 {
     using System;
     using System.Threading;

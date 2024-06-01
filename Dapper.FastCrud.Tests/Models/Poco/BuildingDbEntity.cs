@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.Models.Poco
+namespace Dapper.FastCrud.Tests.Models.Poco
 {
     using System.Collections.Generic;
     using Dapper.FastCrud.Tests.DatabaseSetup;

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyTitle>Dapper.FastCrud.Benchmarks</AssemblyTitle>
     <AssemblyName>Dapper.FastCrud.Benchmarks</AssemblyName>
   </PropertyGroup>

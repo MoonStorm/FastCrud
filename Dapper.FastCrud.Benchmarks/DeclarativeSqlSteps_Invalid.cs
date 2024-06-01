@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.Features
+namespace Dapper.FastCrud.Tests.Features
 {
     using System;
     using Dapper.FastCrud.Tests.Models;

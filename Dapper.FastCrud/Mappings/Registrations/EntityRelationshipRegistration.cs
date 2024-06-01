@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Mappings.Registrations
+namespace Dapper.FastCrud.Mappings.Registrations
 {
     using Dapper.FastCrud.Validations;
     using System;

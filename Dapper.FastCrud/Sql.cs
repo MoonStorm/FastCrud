@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud
+namespace Dapper.FastCrud
 {
     using Dapper.FastCrud.Configuration;
     using Dapper.FastCrud.EntityDescriptors;

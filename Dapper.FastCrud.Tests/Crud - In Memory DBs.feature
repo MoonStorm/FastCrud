@@ -1,4 +1,4 @@
-﻿Feature: CRUD Tests - In-Memory Databases
+Feature: CRUD Tests - In-Memory Databases
 
 @AutomaticBuildServerTest
 Scenario Outline: Insert and select all (build server test)

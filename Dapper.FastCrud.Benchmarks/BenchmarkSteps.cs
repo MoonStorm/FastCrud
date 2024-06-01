@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Benchmarks
+namespace Dapper.FastCrud.Benchmarks
 {
     using Dapper.FastCrud.Tests.Common;
     using Dapper.FastCrud.Tests.Contexts;

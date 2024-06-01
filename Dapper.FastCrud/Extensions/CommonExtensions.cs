@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Extensions
+namespace Dapper.FastCrud.Extensions
 {
     using Dapper.FastCrud.Validations;
     using System;

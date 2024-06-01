@@ -1,4 +1,4 @@
-﻿Feature: CRUD Tests - Externally Installed DBs
+Feature: CRUD Tests - Externally Installed DBs
 
 @ExternalDatabase
 Scenario Outline: Insert and select all (external database)

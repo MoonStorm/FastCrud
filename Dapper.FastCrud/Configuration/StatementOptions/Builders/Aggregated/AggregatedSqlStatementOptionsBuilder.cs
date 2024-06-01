@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated
+namespace Dapper.FastCrud.Configuration.StatementOptions.Builders.Aggregated
 {
     using System;
     using System.Data;

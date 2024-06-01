@@ -1,4 +1,4 @@
-﻿Feature: Benchmarks
+Feature: Benchmarks
 
 Scenario Outline: Insert benchmark
 	Given I have initialized a <database type> database

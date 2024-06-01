@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Formatters.Contexts
+namespace Dapper.FastCrud.Formatters.Contexts
 {
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;

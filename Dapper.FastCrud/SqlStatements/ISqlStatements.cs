@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.SqlStatements
+namespace Dapper.FastCrud.SqlStatements
 {
     using System.Collections.Generic;
     using System.Data;

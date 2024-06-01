@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Formatters
+namespace Dapper.FastCrud.Formatters
 {
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Formatters.Contexts;

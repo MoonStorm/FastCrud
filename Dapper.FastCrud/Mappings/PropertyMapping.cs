@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Mappings
+namespace Dapper.FastCrud.Mappings
 {
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;

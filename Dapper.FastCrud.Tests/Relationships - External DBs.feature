@@ -1,4 +1,4 @@
-﻿Feature: Relationships - Externally Installed DBs
+Feature: Relationships - Externally Installed DBs
 	Tests for the relationship between various entities
 
 @ExternalDatabase

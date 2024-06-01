@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions
+namespace Dapper.FastCrud.Configuration.StatementOptions
 {
     /// <summary>
     /// Parameterized SQL statement options setter.

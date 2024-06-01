@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions
+namespace Dapper.FastCrud.Configuration.StatementOptions
 {
     using Dapper.FastCrud.Configuration.StatementOptions.Builders;
     using System;

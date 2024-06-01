@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Benchmarks.SimpleCrud
+namespace Dapper.FastCrud.Benchmarks.SimpleCrud
 {
     using Dapper.FastCrud.Benchmarks.Models;
     using Dapper.FastCrud.Tests.Contexts;

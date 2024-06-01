@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
+namespace Dapper.FastCrud.Configuration.StatementOptions.Aggregated
 {
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Validations;

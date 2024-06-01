@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.Models.Metadata
+namespace Dapper.FastCrud.Tests.Models.Metadata
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿Feature: SQL Builder
+Feature: SQL Builder
 
 @AutomaticBuildServerTest
 Scenario Outline: Select all columns

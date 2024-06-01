@@ -1,4 +1,4 @@
-﻿Feature: Relationships - In-Memory Databases
+Feature: Relationships - In-Memory Databases
 	Tests for the relationship between various entities
 
 @AutomaticBuildServerTest

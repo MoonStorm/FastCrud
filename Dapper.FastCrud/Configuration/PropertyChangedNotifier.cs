@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration
+namespace Dapper.FastCrud.Configuration
 {
     using System.ComponentModel;
     using System.Runtime.CompilerServices;

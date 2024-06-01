@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Benchmarks.Targets.Dapper
+namespace Dapper.FastCrud.Benchmarks.Targets.Dapper
 {
     using global::Dapper.FastCrud.Benchmarks.Models;
     using global::Dapper.FastCrud.Tests.Contexts;

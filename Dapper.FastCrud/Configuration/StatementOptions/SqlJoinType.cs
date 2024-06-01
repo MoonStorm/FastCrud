@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Configuration.StatementOptions
+namespace Dapper.FastCrud.Configuration.StatementOptions
 {
     /// <summary>
     /// Specifies the type of join

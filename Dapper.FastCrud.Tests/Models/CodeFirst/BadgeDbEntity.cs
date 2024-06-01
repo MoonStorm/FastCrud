@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.Tests.Models.CodeFirst
+namespace Dapper.FastCrud.Tests.Models.CodeFirst
 {
     using System;
     using System.ComponentModel.DataAnnotations;

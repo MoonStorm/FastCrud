@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.SqlBuilders
+namespace Dapper.FastCrud.SqlBuilders
 {
     using System;
     using System.Collections.Generic;

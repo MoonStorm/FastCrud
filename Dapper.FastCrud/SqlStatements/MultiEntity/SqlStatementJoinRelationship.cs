@@ -1,4 +1,4 @@
-﻿namespace Dapper.FastCrud.SqlStatements.MultiEntity
+namespace Dapper.FastCrud.SqlStatements.MultiEntity
 {
     using Dapper.FastCrud.EntityDescriptors;
     using Dapper.FastCrud.Extensions;
