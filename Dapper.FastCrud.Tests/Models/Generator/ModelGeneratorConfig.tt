@@ -7,14 +7,14 @@ TIP #1: When testing this template and you have the db attached, you may find it
 TIP #2: You can right click on this file and click on "Debug T4 Template" to locate a problem.
 */
 	// Settings
-    ConnectionStringName = ""; // Uses last connection string in config if not specified
+  ConnectionStringName = ""; // Uses last connection string in config if not specified
 	ConfigPath = @""; //Looks in current project for web.config or app.config by default. You can override it to point to a different config file.
-    Namespace = "Dapper.FastCrud.Tests.Models.Unused";
+  Namespace = "Dapper.FastCrud.Tests.Models.Unused";
 	ClassPrefix = ""; 
 	ClassSuffix = "Entity";
 	InvalidPropertyNamePrefix = "Prop";
 	IncludeViews = true;
-    IncludeRelationships = true;
+  IncludeRelationships = true;
 	IgnoreColumnDefaultValues = false; 
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire.", "Building"};
 #>

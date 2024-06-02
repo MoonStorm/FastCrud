@@ -39,6 +39,7 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         public virtual Guid EmployeeId { get; set; }
 
         /// <summary>
+        /// The barcode of the badge used by the employee <br/>
         /// Represents the column 'Barcode'.
         /// </summary>
         public virtual string Barcode { get; set; }
@@ -56,24 +57,24 @@ namespace Dapper.FastCrud.Tests.Models.Unused
     public partial class CrazyTableEntity
     {
         /// <summary>
-        /// Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since
-        /// the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,
-        /// but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
-        /// sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum
+        /// Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since <br/>
+        /// the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, <br/>
+        /// but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset <br/>
+        /// sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum <br/>
         /// Represents the column 'Id'.
         /// </summary>
         [Key]
         public virtual int Id { get; set; }
 
         /// <summary>
-        /// Test starting with a digit
+        /// Test starting with a digit <br/>
         /// Represents the column '123mb'.
         /// </summary>
         [Column("123mb")]
         public virtual int Prop123Mb { get; set; }
 
         /// <summary>
-        /// Test starting with a C# keyword
+        /// Test starting with a C# keyword <br/>
         /// Represents the column 'switch'.
         /// </summary>
         [Column("switch")]
@@ -200,6 +201,33 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         /// </summary>
         [InverseProperty(nameof(EmployeeEntity.Employee1))]
         public virtual IEnumerable<EmployeeEntity>? Employees1 { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the 'EmployeeBadges' view.
+    /// </summary>
+    [Table("EmployeeBadges")]
+    public partial class EmployeeBadgeEntity
+    {
+        /// <summary>
+        /// Represents the column 'EmployeeId'.
+        /// </summary>
+        public virtual Guid EmployeeId { get; set; }
+
+        /// <summary>
+        /// Represents the column 'FirstName'.
+        /// </summary>
+        public virtual string? FirstName { get; set; }
+
+        /// <summary>
+        /// Represents the column 'LastName'.
+        /// </summary>
+        public virtual string LastName { get; set; }
+
+        /// <summary>
+        /// Represents the column 'Barcode'.
+        /// </summary>
+        public virtual string Barcode { get; set; }
     }
 
     /// <summary>
