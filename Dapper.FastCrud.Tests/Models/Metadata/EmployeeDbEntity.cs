@@ -3,6 +3,7 @@ namespace Dapper.FastCrud.Tests.Models.Metadata
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Dapper.FastCrud.Tests.Models.CodeFirst;
     using Dapper.FastCrud.Tests.Models.Poco;
     
@@ -24,7 +25,8 @@ namespace Dapper.FastCrud.Tests.Models.Metadata
         public int RecordIndex { get; set; }
         public byte[] RecordVersion { get; set; }
 
-        public DateOnly? HiringDate { get; set; }
+        [Column("HiringDate")]
+        public DateOnly? HireDate { get; set; }
         public TimeOnly? ShiftStartingTime { get; set; }
 
         public long? WorkstationId { get; set; }

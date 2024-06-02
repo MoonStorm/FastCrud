@@ -16,8 +16,6 @@ namespace Dapper.FastCrud
     /// </summary>
     public static class Sql
     {
-        private static readonly Lazy<EntityDescriptor> _defaultEntityRegistration = new Lazy<EntityDescriptor>(OrmConfiguration.GetEntityDescriptor<FakeEntity>);
-
         /// <summary>
         /// Returns a formattable SQL parameter.
         /// When used with the FastCrud's formatter, it defaults to the "P" specifier (e.g. @Param).
@@ -31,7 +29,7 @@ namespace Dapper.FastCrud
             Validate.NotNullOrEmpty(sqlParameterName, nameof(sqlParameterName));
 
             return new FormattableParameter(
-                _defaultEntityRegistration.Value,
+                OrmConfiguration.GetEntityDescriptor<FakeEntity>(),
                 null, 
                 sqlParameterName);
         }
@@ -49,7 +47,7 @@ namespace Dapper.FastCrud
             Validate.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
             return new FormattableIdentifier(
-                _defaultEntityRegistration.Value, 
+                OrmConfiguration.GetEntityDescriptor<FakeEntity>(), 
                 null, 
                 sqlIdentifier);
         }

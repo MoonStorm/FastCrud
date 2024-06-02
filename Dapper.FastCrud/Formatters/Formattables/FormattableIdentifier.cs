@@ -4,6 +4,7 @@ namespace Dapper.FastCrud.Formatters.Formattables
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
+    using Dapper.FastCrud.SqlBuilders;
 
     /// <summary>
     /// Formattable identifier.
@@ -14,27 +15,14 @@ namespace Dapper.FastCrud.Formatters.Formattables
         /// Default constructor
         /// </summary>
         public FormattableIdentifier(
-            EntityDescriptor entityDescriptor, 
-            EntityRegistration? registrationOverride, 
+            EntityDescriptor entityDescriptor,
+            EntityRegistration? registrationOverride,
             string identifier)
+            : base(entityDescriptor, registrationOverride)
         {
-            Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
-            Validate.NotNullOrEmpty(identifier, nameof(identifier));
-
-            this.EntityDescriptor = entityDescriptor;
-            this.EntityRegistrationOverride = registrationOverride;
+            Validate.NotNull(identifier, nameof(identifier));
             this.Identifier = identifier;
         }
-
-        /// <summary>
-        /// Entity descriptor.
-        /// </summary>
-        public EntityDescriptor EntityDescriptor { get; }
-
-        /// <summary>
-        /// An optional entity registration override.
-        /// </summary>
-        public EntityRegistration? EntityRegistrationOverride { get; }
 
         /// <summary>
         /// The provided identifier.
@@ -42,29 +30,46 @@ namespace Dapper.FastCrud.Formatters.Formattables
         public string Identifier { get; }
 
         /// <summary>
-        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Identifier"/>.
+        /// Performs formatting under FastCrud.
         /// </summary>
-        /// <param name="format"> An optional format specifier.</param>
-        /// <param name="formatProvider">The provider to use to format the value.</param>
-        /// <returns>The value of the current instance in the specified format.</returns>
-        public override string ToString(string? format, IFormatProvider? formatProvider = null)
+        internal override string PerformFastCrudFormatting(GenericStatementSqlBuilder sqlBuilder, string? format, GenericSqlStatementFormatter fastCrudFormatter)
         {
-            var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
-
-            if (string.IsNullOrEmpty(format) && formatProvider is GenericSqlStatementFormatter)
-            {
-                // if OUR formatter is being used, use the SQL ready version
-                format = FormatSpecifiers.Identifier;
-            }
-
+            string formattedOutput;
             switch (format)
             {
                 case FormatSpecifiers.Identifier:
-                    return sqlBuilder.GetDelimitedIdentifier(this.Identifier);
+                case null:
+                    formattedOutput = sqlBuilder.GetDelimitedIdentifier(this.Identifier);
+                    break;
                 default:
-                    // for generic usage we'll return what we have, without delimiters
-                    return this.Identifier;
+                    // running under our own provider, need to obey the rules
+                    throw new InvalidOperationException($"Invalid format specifier '{format}' provided for identifier '{this.Identifier}' encountered under the FastCrud formatter.");
             }
+
+            return formattedOutput;
+        }
+
+        /// <summary>
+        /// Performs formatting outside FastCrud.
+        /// </summary>
+        internal override string PerformGenericFormatting(GenericStatementSqlBuilder sqlBuilder, string? format)
+        {
+            string formattedOutput;
+            switch (format)
+            {
+                case FormatSpecifiers.Identifier:
+                    formattedOutput = sqlBuilder.GetDelimitedIdentifier(this.Identifier);
+                    break;
+                case null:
+                    // provide the clean identifier
+                    formattedOutput = this.Identifier;
+                    break;
+                default:
+                    // running under our own provider, need to obey the rules
+                    throw new InvalidOperationException($"Invalid format specifier '{format}' provided for identifier '{this.Identifier}' encountered under a non-FastCrud formatter.");
+            }
+
+            return formattedOutput;
         }
     }
 }

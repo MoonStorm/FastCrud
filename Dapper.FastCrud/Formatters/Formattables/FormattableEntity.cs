@@ -4,6 +4,7 @@ namespace Dapper.FastCrud.Formatters.Formattables
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
+    using Dapper.FastCrud.SqlBuilders;
 
     /// <summary>
     /// A formattable representing a database entity.
@@ -17,20 +18,14 @@ namespace Dapper.FastCrud.Formatters.Formattables
             EntityDescriptor entityDescriptor, 
             EntityRegistration? registrationOverride, 
             string? alias,
-            string? legacyDefaultFormatSpecifierOutsideOurFormatter)
+            string? forcedDefaultFormat)
+        :base(entityDescriptor, registrationOverride)
         {
             Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
 
-            this.LegacyDefaultFormatSpecifierOutsideOurFormatter = legacyDefaultFormatSpecifierOutsideOurFormatter;
-            this.EntityDescriptor = entityDescriptor;
-            this.EntityRegistrationOverride = registrationOverride;
+            this.ForcedDefaultFormat = forcedDefaultFormat;
             this.Alias = alias;
         }
-
-        /// <summary>
-        /// An optional entity registration override.
-        /// </summary>
-        public EntityRegistration? EntityRegistrationOverride { get; }
 
         /// <summary>
         /// An optional alias.
@@ -38,59 +33,72 @@ namespace Dapper.FastCrud.Formatters.Formattables
         public string? Alias { get; }
 
         /// <summary>
-        /// The entity type
+        /// When set, a default is going to be enforced.
         /// </summary>
-        public EntityDescriptor EntityDescriptor { get; }
+        public string? ForcedDefaultFormat { get; }
+
+        ///// <summary>
+        ///// The default format specifier to use when running outside our own formatter.
+        ///// </summary>
+        //public string? LegacyDefaultFormatSpecifierOutsideOurFormatter { get; }
 
         /// <summary>
-        /// The default format specifier to use when running outside of our own formatter.
+        /// Performs formatting under FastCrud.
         /// </summary>
-        public string? LegacyDefaultFormatSpecifierOutsideOurFormatter { get; }
-
-        /// <summary>
-        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}(string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/>.
-        /// </summary>
-        /// <param name="format"> An optional format specifier.</param>
-        /// <param name="formatProvider">The provider to use to format the value.</param>
-        /// <returns>The value of the current instance in the specified format.</returns>
-        public override string ToString(string? format, IFormatProvider? formatProvider = null)
+        internal override string PerformFastCrudFormatting(GenericStatementSqlBuilder sqlBuilder, string? format, GenericSqlStatementFormatter fastCrudFormatter)
         {
-            var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
-
             GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
 
+            // fix the parsedAlias if not set
+            parsedAlias = parsedAlias ?? this.Alias;
+
+            // fix the format if we can
             if (parsedFormat == null)
             {
-                if (parsedAlias != null)
-                {
-                    // only happening in the new world
-                    parsedFormat = FormatSpecifiers.TableOrAlias;
-                }
-                else if (formatProvider is GenericSqlStatementFormatter)
-                {
-                    // running under our own formatter could be legacy, otherwise we'll fail
-                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
-                }
-                else if (this.LegacyDefaultFormatSpecifierOutsideOurFormatter != null)
-                {
-                    // running outside our formatter, default to a legacy behavior
-                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
-                }
+                parsedFormat = this.ForcedDefaultFormat;
             }
 
+            string formattedOutput;
             switch (parsedFormat)
             {
                 case FormatSpecifiers.TableOrAlias:
-                    return sqlBuilder.GetTableName(parsedAlias ?? this.Alias);
+                case null:
+                    formattedOutput = sqlBuilder.GetTableName(parsedAlias);
+                    break;
                 default:
-                    if (formatProvider is GenericSqlStatementFormatter)
-                    {
-                        throw new InvalidOperationException($"Unknown format specifier '{format}' specified for an entity in Dapper.FastCrud");
-                    }
-
-                    // for generic usage, we'll return the table name or alias if provided, without delimiters
-                    return this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName;
+                    // running under our own provider, need to obey the rules
+                    throw new InvalidOperationException(
+                        $"Invalid format specifier '{format}' provided for entity '{sqlBuilder.EntityDescriptor.EntityType.Name} (alias: {parsedAlias ?? "None"})' encountered under the FastCrud formatter.");
             }
+
+            return formattedOutput;
+        }
+
+        /// <summary>
+        /// Performs formatting outside FastCrud.
+        /// </summary>
+        internal override string PerformGenericFormatting(GenericStatementSqlBuilder sqlBuilder, string? format)
+        {
+            GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
+
+            // fix the parsedAlias if not set
+            parsedAlias = parsedAlias ?? this.Alias;
+
+            string formattedOutput;
+            switch (parsedFormat)
+            {
+                case FormatSpecifiers.TableOrAlias:
+                    formattedOutput = sqlBuilder.GetTableName(parsedAlias);
+                    break;
+                case null:
+                    // we are able to provide the table name, non-delimited, when we're not asked to format with our own specifiers
+                    formattedOutput = parsedAlias ?? sqlBuilder.EntityDescriptor.CurrentEntityMappingRegistration.TableName;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Invalid format specifier '{format}' provided for entity '{sqlBuilder.EntityDescriptor.EntityType.Name} (alias: {parsedAlias ?? "None"})' encountered under a non-FastCrud formatter.");
+            }
+
+            return formattedOutput;
         }
     }
 }

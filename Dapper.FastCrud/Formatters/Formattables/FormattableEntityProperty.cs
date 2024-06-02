@@ -4,6 +4,7 @@ namespace Dapper.FastCrud.Formatters.Formattables
     using Dapper.FastCrud.Mappings.Registrations;
     using Dapper.FastCrud.Validations;
     using System;
+    using Dapper.FastCrud.SqlBuilders;
 
     /// <summary>
     /// A formattable representing a property on a database entity.
@@ -18,8 +19,8 @@ namespace Dapper.FastCrud.Formatters.Formattables
             EntityRegistration? registrationOverride, 
             string propertyName, 
             string? alias,
-            string? legacyDefaultFormatSpecifierOutsideOurFormatter)
-            : base(entityDescriptor, registrationOverride, alias, legacyDefaultFormatSpecifierOutsideOurFormatter)
+            string? forcedDefaultFormat)
+            : base(entityDescriptor, registrationOverride, alias, forcedDefaultFormat)
         {
             Validate.NotNullOrEmpty(propertyName, nameof(propertyName));
 
@@ -32,59 +33,90 @@ namespace Dapper.FastCrud.Formatters.Formattables
         public string PropertyName { get; }
 
         /// <summary>
-        /// Applies formatting to the current instance. For more information, see <seealso cref="Sql.Entity{TEntity}(System.Linq.Expressions.Expression{System.Func{TEntity,object?}},string?,Dapper.FastCrud.Mappings.EntityMapping{TEntity}?)"/>.
+        /// Performs formatting under FastCrud.
         /// </summary>
-        /// <param name="format"> An optional format specifier.</param>
-        /// <param name="formatProvider">The provider to use to format the value.</param>
-        /// <returns>The value of the current instance in the specified format.</returns>
-        public override string ToString(string? format, IFormatProvider? formatProvider = null)
+        internal override string PerformFastCrudFormatting(
+            GenericStatementSqlBuilder sqlBuilder,
+            string? format,
+            GenericSqlStatementFormatter fastCrudFormatter)
         {
-            var sqlBuilder = this.EntityDescriptor.GetSqlBuilder(this.EntityRegistrationOverride);
             GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
 
+            // fix the parsedAlias if not set
+            parsedAlias = parsedAlias ?? this.Alias;
+
+            // fix the format if we can
             if (parsedFormat == null)
             {
-                if (parsedAlias != null)
-                {
-                    // only happening in the new world
-                    parsedFormat = FormatSpecifiers.FullyQualifiedColumn;
-                }
-                else if (formatProvider is GenericSqlStatementFormatter)
-                {
-                    // running under our own formatter, might be legacy, otherwise we'll fail later
-                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
-                }
-                else if (this.LegacyDefaultFormatSpecifierOutsideOurFormatter != null)
-                {
-                    // running outside our formatter, default to a legacy behavior
-                    parsedFormat = this.LegacyDefaultFormatSpecifierOutsideOurFormatter;
-                }
+                parsedFormat = this.ForcedDefaultFormat;
             }
 
+            string formattedOutput;
             switch (parsedFormat)
             {
                 case FormatSpecifiers.SingleColumn:
-                    if (formatProvider is GenericSqlStatementFormatter fastCrudFormatter && fastCrudFormatter.ForceFullyQualifiedColumns)
-                    {
-                        return this.ToString(FormatSpecifiers.FullyQualifiedColumn, formatProvider);
-                    }
-                    return sqlBuilder.GetColumnName(this.PropertyName);
+                    // return the delimited column
+                    formattedOutput = sqlBuilder.GetColumnName(this.PropertyName);
+                    break;
                 case FormatSpecifiers.FullyQualifiedColumn:
-                    return sqlBuilder.GetColumnName(this.PropertyName, parsedAlias ?? this.Alias ?? (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TableName);
+                case null:
+                    // return the delimited column qualified with the alias or the table name
+                    formattedOutput = sqlBuilder.GetColumnName(this.PropertyName, parsedAlias ?? sqlBuilder.EntityDescriptor.CurrentEntityMappingRegistration.TableName);
+                    break;
                 default:
-                    if (formatProvider is GenericSqlStatementFormatter)
-                    {
-                        throw new InvalidOperationException($"Unknown format specifier '{format}' specified for an entity property in Dapper.FastCrud");
-                    }
-                    // by default we'll return the column name in clear
-                    var propertyRegistration = (this.EntityRegistrationOverride ?? this.EntityDescriptor.CurrentEntityMappingRegistration).TryGetFrozenPropertyRegistrationByPropertyName(this.PropertyName);
+                    // running under our own formatter, needs to play by our own rules
+                    throw new InvalidOperationException($"Invalid format specifier '{format}' provided for the entity property'{sqlBuilder.EntityDescriptor.EntityType.Name} (alias: {this.Alias ?? "None"}).{this.PropertyName}' encountered under the FastCrud formatter.");
+            }
+
+            return formattedOutput;
+        }
+
+        /// <summary>
+        /// Performs formatting outside FastCrud.
+        /// </summary>
+        internal override string PerformGenericFormatting(GenericStatementSqlBuilder sqlBuilder, string? format)
+        {
+            GenericSqlStatementFormatter.ParseFormat(format, out string? parsedFormat, out string? parsedAlias);
+
+            // fix the parsedAlias if not set
+            parsedAlias = parsedAlias ?? this.Alias;
+
+            string formattedOutput;
+            switch (parsedFormat)
+            {
+                case FormatSpecifiers.SingleColumn:
+                    formattedOutput = sqlBuilder.GetTableName(parsedAlias);
+                    break;
+                case FormatSpecifiers.FullyQualifiedColumn:
+                    // return the delimited column qualified with the alias or the table name
+                    formattedOutput = sqlBuilder.GetColumnName(this.PropertyName, parsedAlias ?? sqlBuilder.EntityDescriptor.CurrentEntityMappingRegistration.TableName);
+                    break;
+                case null:
+                    // NOT under our own formatter, return the column name in clear
+                    var propertyRegistration = sqlBuilder.EntityRegistration.TryGetFrozenPropertyRegistrationByPropertyName(this.PropertyName);
                     if (propertyRegistration == null)
                     {
-                        throw new ArgumentException($"Property '{this.PropertyName}' was not found on '{(this.EntityRegistrationOverride??this.EntityDescriptor.CurrentEntityMappingRegistration).EntityType}'");
+                        throw new ArgumentException($"The entity property found that the property '{this.PropertyName}' was not found on '{sqlBuilder.EntityDescriptor.EntityType.Name}' under a non-FastCrud formatter.");
                     }
 
-                    return propertyRegistration.DatabaseColumnName;
+                    if (parsedAlias != null)
+                    {
+                        // it's debatable whether we should do this,
+                        // but at the same time the caller should not provide the alias if it didn't want the alias to be part of the output.
+                        formattedOutput = FormattableString.Invariant($"{parsedAlias}.{propertyRegistration.DatabaseColumnName}");
+                    }
+                    else
+                    {
+                        formattedOutput = propertyRegistration.DatabaseColumnName;
+                    }
+
+                    break;
+                default:
+                    throw new InvalidOperationException($"Invalid format specifier '{format}' provided for the entity property'{sqlBuilder.EntityDescriptor.EntityType.Name} (alias: {this.Alias ?? "None"}).{this.PropertyName}' encountered under a non-FastCrud formatter.");
             }
+
+            return formattedOutput;
         }
+
     }
 }

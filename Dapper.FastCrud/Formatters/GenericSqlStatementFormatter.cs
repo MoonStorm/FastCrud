@@ -164,7 +164,7 @@ namespace Dapper.FastCrud.Formatters
                         case null:
                             return stringArg;
                         default:
-                            throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a string argument to Dapper.FastCrud");
+                            throw new InvalidOperationException($"Unknown format specifier '{format}' provided for a string argument to FastCrud.");
                     }
                     break;
                 case Type typeArg:
@@ -181,7 +181,7 @@ namespace Dapper.FastCrud.Formatters
                             // output: "[alias_or_table]"
                             return this.FormatTypeOrAliasOrNothing(typeArg.Name);
                         default:
-                            throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a type argument to Dapper.FastCrud");
+                            throw new InvalidOperationException($"Unknown format specifier '{format}' specified for a type argument to FastCrud");
                     }
                 default:
                     // try again, but this time with the object converted to a string
@@ -283,7 +283,9 @@ namespace Dapper.FastCrud.Formatters
                 resolverToUse = _resolverMap[typeOrAliasOrNothing];
             }
 
-            return this.FormatIdentifier(resolverToUse.Alias??resolverToUse.EntityRegistration.TableName);
+            // UPDATE: fix for the schemas not being used
+            // return this.FormatIdentifier(resolverToUse.Alias??resolverToUse.EntityRegistration.TableName);
+            return resolverToUse.SqlBuilder.GetTableName(resolverToUse.Alias);
         }
 
         /// <summary>
