@@ -43,8 +43,10 @@ var persons = dbConnection.Find<Person>(statement => statement
 
 
 #### Active Versions
-- 3.2 [![Build Status](https://moonstorm.visualstudio.com/FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?repoName=MoonStorm%2FFastCrud&branchName=release)](https://moonstorm.visualstudio.com/FastCrud/_build/latest?definitionId=10&repoName=MoonStorm%2FFastCrud&branchName=release)
-Check the [release notes](https://github.com/MoonStorm/FastCrud/wiki/10.-Release-notes) for information about the recent changes or the readme info published on NuGet. 
+- 3.3 [![Build Status](https://moonstorm.visualstudio.com/FastCrud/_apis/build/status/Release%20Branch%20Build%20Pipeline?repoName=MoonStorm%2FFastCrud&branchName=release)](https://moonstorm.visualstudio.com/FastCrud/_build/latest?definitionId=10&repoName=MoonStorm%2FFastCrud&branchName=release)
+
+Check the release notes for [the main library](https://github.com/MoonStorm/FastCrud/wiki/Release-notes-for-Dapper.FastCrud) as well as [the model generator](https://github.com/MoonStorm/FastCrud/wiki/Release-notes-for-Dapper.FastCrud.ModelGenerator)
+for information about the recent changes. 
 
 #### WIKI
 [The wiki](https://github.com/MoonStorm/FastCrud/wiki) is a great place for learning more about this library.
