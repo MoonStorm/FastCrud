@@ -9,7 +9,7 @@ namespace Dapper.FastCrud.Tests.Models.CodeFirst
     /// A code first approach to mapping.
     /// For a clean separation between the database entities and the mappings, see the <see cref="Employee"/> entity.
     /// </summary>
-    [Table("Badges")]
+    [Table("Badges", Schema="access")]
     public class BadgeDbEntity
     {
         /// <summary>

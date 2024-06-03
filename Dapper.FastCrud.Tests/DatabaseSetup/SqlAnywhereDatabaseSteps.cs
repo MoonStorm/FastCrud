@@ -32,8 +32,32 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
             {
                 command.CommandText =
                     $@"
-                        DROP TABLE IF EXISTS ""Employee""
+                        DROP TABLE IF EXISTS ""Buildings"";
 
+                        CREATE TABLE ""Buildings"" (
+	                        ""Id"" int NOT NULL DEFAULT AUTOINCREMENT,
+	                        ""BuildingName"" nvarchar(100) NULL,
+                            ""Description"" nvarchar(100) NULL,
+                            PRIMARY KEY(""Id"")
+                        );
+
+                        DROP TABLE IF EXISTS ""Workstations"";
+
+                        CREATE TABLE ""Workstations"" (
+	                        ""WorkstationId"" bigint NOT NULL DEFAULT AUTOINCREMENT,
+	                        ""Name"" nvarchar(100) NOT NULL,
+                            ""InventoryIndex"" int NOT NULL,
+                            ""AccessLevel"" int NOT NULL DEFAULT 1,
+                            ""BuildingId"" int NULL,
+	                        PRIMARY KEY (""WorkstationId"")
+                        );
+
+                        DROP TABLE IF EXISTS ""access"".""Employee"";
+
+                        -- SQL Anywhere is special when it comes to schemas
+                        -- you're only allowed to create a schema named after the currently logged in user
+                        -- under which you create tables and views IN ONE GO until ';' gets hit
+                        CREATE SCHEMA AUTHORIZATION ""access""
                         CREATE TABLE ""Employee"" (
 	                        ""Id"" int NOT NULL DEFAULT AUTOINCREMENT,
                             ""EmployeeId"" uniqueidentifier NOT NULL DEFAULT NEWID(),
@@ -53,27 +77,6 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
                             ""ShiftStartingTime"" time NULL,
 	                        PRIMARY KEY (""Id"", ""EmployeeId"")
                         );
-
-                        DROP TABLE IF EXISTS ""Buildings""
-
-                        CREATE TABLE ""Buildings"" (
-	                        ""Id"" int NOT NULL DEFAULT AUTOINCREMENT,
-	                        ""BuildingName"" nvarchar(100) NULL,
-                            ""Description"" nvarchar(100) NULL,
-                            PRIMARY KEY(""Id"")
-                        );
-
-                        DROP TABLE IF EXISTS ""Workstations""
-
-                        CREATE TABLE ""Workstations"" (
-	                        ""WorkstationId"" bigint NOT NULL DEFAULT AUTOINCREMENT,
-	                        ""Name"" nvarchar(100) NOT NULL,
-                            ""InventoryIndex"" int NOT NULL,
-                            ""AccessLevel"" int NOT NULL DEFAULT 1,
-                            ""BuildingId"" int NULL,
-	                        PRIMARY KEY (""WorkstationId"")
-                        );
-
                     ";
 
                 command.ExecuteNonQuery();

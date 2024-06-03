@@ -33,7 +33,7 @@ namespace Dapper.FastCrud.Tests
                     [BirthDate],
                     [HiringDate]
                 FROM
-                    [Employee]
+                    [access].[Employee]
                 WHERE
                     [FullName] = @FullName
             ";
@@ -63,7 +63,7 @@ namespace Dapper.FastCrud.Tests
                     ""BirthDate"",
                     ""HiringDate""
                 FROM
-                    ""Employee""
+                    ""access"".""Employee""
                 WHERE
                     ""FullName"" = @FullName
             ";
@@ -98,7 +98,7 @@ namespace Dapper.FastCrud.Tests
                     [em].[ShiftStartingTime],
                     [ws].[WorkstationId]
                 FROM
-                    [Employee] AS [em]
+                    [access].[Employee] AS [em]
                     INNER JOIN [Workstations] AS [ws]
                         ON [ws].[WorkstationId] = [em].[WorkstationId]
                 WHERE
@@ -135,7 +135,7 @@ namespace Dapper.FastCrud.Tests
                     ""em"".""ShiftStartingTime"",
                     ""ws"".""WorkstationId""
                 FROM
-                    ""Employee"" AS ""em""
+                    ""access"".""Employee"" AS ""em""
                     INNER JOIN ""Workstations"" AS ""ws""
                         ON ""ws"".""WorkstationId"" = ""em"".""WorkstationId""
                 WHERE
@@ -170,7 +170,7 @@ namespace Dapper.FastCrud.Tests
                     em.ShiftStartingTime,
                     ws.WorkstationId
                 FROM
-                    [Employee] AS em
+                    [access].[Employee] AS em
                     INNER JOIN Workstations AS ws
                         ON ws.WorkstationId = em.WorkstationId
                 WHERE

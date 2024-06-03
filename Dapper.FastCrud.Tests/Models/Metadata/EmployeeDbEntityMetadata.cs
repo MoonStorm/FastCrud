@@ -11,7 +11,7 @@ namespace Dapper.FastCrud.Tests.Models.Metadata
     /// <summary>
     /// The metadata class contains all OR extra db mapping info for existing properties on the main entity.
     /// </summary>
-    [Table("Employee")]
+    [Table("Employee", Schema = "access")]
     internal class EmployeeDbEntityMetadata
     {
         [Key]

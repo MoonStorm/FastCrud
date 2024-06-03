@@ -72,7 +72,9 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
                 using (var command = dataConnection.CreateCommand())
                 {
                     command.CommandText = $@"
-                        CREATE TABLE ""Employee"" (
+                        CREATE SCHEMA ""access""
+
+                        CREATE TABLE ""access"".""Employee"" (
 	                        ""Id"" SERIAL,
                             ""EmployeeId"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
 	                        ""KeyPass"" uuid NOT NULL DEFAULT (md5(random()::text || clock_timestamp()::text)::uuid),
@@ -108,11 +110,11 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
 
                         CREATE TRIGGER ""computed_full_name_trigger""
                         BEFORE INSERT OR UPDATE
-                        ON ""Employee""
+                        ON ""access"".""Employee""
                         FOR EACH ROW
                         EXECUTE PROCEDURE computed_full_name();
 
-                        CREATE TABLE ""Badges"" (
+                        CREATE TABLE ""access"".""Badges"" (
 	                        ""Id"" int NOT NULL,
                             ""EmployeeId"" uuid NOT NULL,
 	                        ""Barcode"" varchar(100) NOT NULL,

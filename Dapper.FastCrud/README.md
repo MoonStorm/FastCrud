@@ -42,7 +42,9 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
 ## Release Notes 
 ### 3.3
 - Fixed an issue where the SQL formatter was not generating proper SQL when schemas were used.
-- More tests added to cover schemas.
+- Fixed an issue where calling ``OrmConfiguration.ClearEntityRegistrations`` was not enough to clear the state between switching dialects via ``OrmConfiguration.DefaultDialect``.
+- Schema tests added for the SQL formatter.
+- Tests added to cover schemas for the MsSql, PostgreSql and SQLAnywhere dialects.
 
 ### 3.2
 - Added support for ``DateOnly`` and ``TimeOnly`` data types, introduced in .NET6, 

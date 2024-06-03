@@ -136,6 +136,8 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
                 database.ExecuteNonQuery($@"ALTER DATABASE {_testContext.DatabaseName} SET AUTO_UPDATE_STATISTICS OFF"); // for benchmarking purposes
                 database.ExecuteNonQuery($@"ALTER DATABASE {_testContext.DatabaseName} MODIFY FILE(NAME=[{_testContext.DatabaseName}], SIZE=100MB, FILEGROWTH=10%)"); // for benchmarking purposes 5MB approx 20k records
 
+                database.ExecuteNonQuery($@"CREATE SCHEMA [access]");
+
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[SimpleBenchmarkEntities](
 	                    [Id] [bigint] IDENTITY(2,1) NOT NULL,
 	                    [FirstName] [nvarchar](50) NULL,
@@ -157,7 +159,7 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
 	                        [WorkstationId] ASC
                         ))");
 
-                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Employee](
+                database.ExecuteNonQuery(@"CREATE TABLE [access].[Employee](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL DEFAULT(newid()),
 	                    [KeyPass] [uniqueidentifier] NOT NULL DEFAULT(newid()),
@@ -180,20 +182,20 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
 	                        [EmployeeId] ASC
                         ),
                         CONSTRAINT [FK_Workstations_Employee] FOREIGN KEY ([WorkstationId]) REFERENCES [Workstations] (WorkstationId),
-                        CONSTRAINT [FK_Employee_Employee_ManagerUserId_ManagerEmployeeId] FOREIGN KEY ([ManagerUserId],[ManagerEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId]),
-                        CONSTRAINT [FK_Employee_Employee_SupervisorUserId_SupervisorEmployeeId] FOREIGN KEY ([SupervisorUserId],[SupervisorEmployeeId]) REFERENCES [Employee] ([Id],[EmployeeId])
+                        CONSTRAINT [FK_Employee_Employee_ManagerUserId_ManagerEmployeeId] FOREIGN KEY ([ManagerUserId],[ManagerEmployeeId]) REFERENCES [access].[Employee] ([Id],[EmployeeId]),
+                        CONSTRAINT [FK_Employee_Employee_SupervisorUserId_SupervisorEmployeeId] FOREIGN KEY ([SupervisorUserId],[SupervisorEmployeeId]) REFERENCES [access].[Employee] ([Id],[EmployeeId])
                       )");
 
                 database.ExecuteNonQuery(@"
-                            CREATE TRIGGER [dbo].[EmployeeTrigger] 
-                            ON [dbo].[Employee] 
+                            CREATE TRIGGER [access].[EmployeeTrigger] 
+                            ON [access].[Employee] 
                             AFTER INSERT, UPDATE AS 
 	                            IF (@@ROWCOUNT = 0)
 		                            RETURN;
 	                            PRINT 'I''m just a trigger'
                         ");
 
-                database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Badges](
+                database.ExecuteNonQuery(@"CREATE TABLE [access].[Badges](
 	                    [Id] [int] NOT NULL,
 	                    [EmployeeId] [uniqueidentifier] NOT NULL,
 	                    [Barcode] [nvarchar](100) NOT NULL,
@@ -202,7 +204,7 @@ namespace Dapper.FastCrud.Tests.DatabaseSetup
 	                        [Id] ASC,
 	                        [EmployeeId] ASC
                         ),
-                        CONSTRAINT [FK_Badge_Employee] FOREIGN KEY (Id, EmployeeId) REFERENCES [dbo].[Employee] (Id, EmployeeId))");
+                        CONSTRAINT [FK_Badge_Employee] FOREIGN KEY (Id, EmployeeId) REFERENCES [access].[Employee] (Id, EmployeeId))");
 
                 database.ExecuteNonQuery(@"CREATE TABLE [dbo].[Buildings](
 	                    [Id] [int] IDENTITY(2,1) NOT NULL,
