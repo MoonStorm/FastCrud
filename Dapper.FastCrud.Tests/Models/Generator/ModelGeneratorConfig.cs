@@ -7,9 +7,11 @@
 // 
 //     Provider:                                          System.Data.SqlClient
 //     Views included:                                    True
+//     Schemas included:                                  True
 //     Relationships included:                            True
 //     Default database column value generation analysis: True
 // =============================================================================================
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 namespace Dapper.FastCrud.Tests.Models.Unused
 {
     using System;
@@ -19,16 +21,16 @@ namespace Dapper.FastCrud.Tests.Models.Unused
     /// <summary>
     /// Represents the 'Badges' table.
     /// </summary>
-    [Table("Badges")]
-    public partial class BadgeEntity
+    [Table("Badges", Schema = "access")]
+    internal class BadgeEntity
     {
         /// <summary>
-        /// Represents the column 'Id'.
+        /// Represents the column 'AssetId'.
         /// </summary>
         [Key]
         [Column(Order = 1)]
         [ForeignKey(nameof(Employee))]
-        public virtual int Id { get; set; }
+        public int AssetId { get; set; }
 
         /// <summary>
         /// Represents the column 'EmployeeId'.
@@ -36,64 +38,33 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [Key]
         [Column(Order = 2)]
         [ForeignKey(nameof(Employee))]
-        public virtual Guid EmployeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
         /// <summary>
-        /// The barcode of the badge used by the employee <br/>
+        /// The barcode of the badge used by the employee. <br/>
         /// Represents the column 'Barcode'.
         /// </summary>
-        public virtual string Barcode { get; set; }
+        public string Barcode { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the child-parent relationship involving <seealso cref="EmployeeEntity"/>
         /// </summary>
-        public virtual EmployeeEntity Employee { get; set; }
-    }
-
-    /// <summary>
-    /// Represents the 'CrazyTable' table.
-    /// </summary>
-    [Table("CrazyTable")]
-    public partial class CrazyTableEntity
-    {
-        /// <summary>
-        /// Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since <br/>
-        /// the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, <br/>
-        /// but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset <br/>
-        /// sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum <br/>
-        /// Represents the column 'Id'.
-        /// </summary>
-        [Key]
-        public virtual int Id { get; set; }
-
-        /// <summary>
-        /// Test starting with a digit <br/>
-        /// Represents the column '123mb'.
-        /// </summary>
-        [Column("123mb")]
-        public virtual int Prop123Mb { get; set; }
-
-        /// <summary>
-        /// Test starting with a C# keyword <br/>
-        /// Represents the column 'switch'.
-        /// </summary>
-        [Column("switch")]
-        public virtual int PropSwitch { get; set; }
+        public virtual EmployeeEntity? Employee { get; set; }
     }
 
     /// <summary>
     /// Represents the 'Employee' table.
     /// </summary>
-    [Table("Employee")]
-    public partial class EmployeeEntity
+    [Table("Employee", Schema = "access")]
+    internal class EmployeeEntity
     {
         /// <summary>
-        /// Represents the column 'Id'.
+        /// Represents the column 'AssetId'.
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("Id", Order = 1)]
-        public virtual int EmployeeUserId { get; set; }
+        [Column("AssetId", Order = 1)]
+        public int UserId { get; set; }
 
         /// <summary>
         /// Represents the column 'EmployeeId'.
@@ -101,94 +72,104 @@ namespace Dapper.FastCrud.Tests.Models.Unused
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column(Order = 2)]
-        public virtual Guid EmployeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
         /// <summary>
         /// Represents the column 'KeyPass'.
         /// </summary>
         [Dapper.FastCrud.DatabaseGeneratedDefaultValue]
-        public virtual Guid KeyPass { get; set; }
+        public Guid KeyPass { get; set; }
 
         /// <summary>
         /// Represents the column 'LastName'.
         /// </summary>
-        public virtual string LastName { get; set; }
+        public string LastName { get; set; }
 
         /// <summary>
         /// Represents the column 'FirstName'.
         /// </summary>
-        public virtual string? FirstName { get; set; }
+        public string? FirstName { get; set; }
 
         /// <summary>
         /// Represents the column 'BirthDate'.
         /// </summary>
-        public virtual DateTime BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         /// <summary>
         /// Represents the column 'RecordIndex'.
         /// </summary>
-        public virtual int RecordIndex { get; set; }
+        public int RecordIndex { get; set; }
 
         /// <summary>
         /// Represents the column 'WorkstationId'.
         /// </summary>
         [ForeignKey(nameof(Workstation))]
-        public virtual long? WorkstationId { get; set; }
+        public long? WorkstationId { get; set; }
 
         /// <summary>
-        /// Represents the column 'SupervisorUserId'.
+        /// Represents the column 'SupervisorAssetId'.
         /// </summary>
         [Column(Order = 1)]
         [ForeignKey(nameof(Employee))]
-        public virtual int? SupervisorUserId { get; set; }
+        public int? SupervisorAssetId { get; set; }
 
         /// <summary>
         /// Represents the column 'SupervisorEmployeeId'.
         /// </summary>
         [Column(Order = 2)]
         [ForeignKey(nameof(Employee))]
-        public virtual Guid? SupervisorEmployeeId { get; set; }
+        public Guid? SupervisorEmployeeId { get; set; }
 
         /// <summary>
-        /// Represents the column 'ManagerUserId'.
+        /// Represents the column 'ManagerAssetId'.
         /// </summary>
         [Column(Order = 1)]
         [ForeignKey(nameof(Employee1))]
-        public virtual int? ManagerUserId { get; set; }
+        public int? ManagerAssetId { get; set; }
 
         /// <summary>
         /// Represents the column 'ManagerEmployeeId'.
         /// </summary>
         [Column(Order = 2)]
         [ForeignKey(nameof(Employee1))]
-        public virtual Guid? ManagerEmployeeId { get; set; }
+        public Guid? ManagerEmployeeId { get; set; }
 
         /// <summary>
         /// Represents the column 'FullName'.
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public virtual string? FullName { get; set; }
+        public string? FullName { get; set; }
+
+        /// <summary>
+        /// Represents the column 'HiringDate'.
+        /// </summary>
+        public DateOnly? HiringDate { get; set; }
+
+        /// <summary>
+        /// Represents the column 'ShiftStart'.
+        /// </summary>
+        public TimeOnly? ShiftStart { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the child-parent relationship involving <seealso cref="WorkstationEntity"/>
         /// </summary>
-        public virtual WorkstationEntity Workstation { get; set; }
+        public virtual WorkstationEntity? Workstation { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the child-parent relationship involving <seealso cref="EmployeeEntity"/>
         /// </summary>
-        public virtual EmployeeEntity Employee { get; set; }
+        public virtual EmployeeEntity? Employee { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the child-parent relationship involving <seealso cref="EmployeeEntity"/>
         /// </summary>
-        public virtual EmployeeEntity Employee1 { get; set; }
+        public virtual EmployeeEntity? Employee1 { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the parent-children relationship involving <seealso cref="BadgeEntity"/>
         /// </summary>
         [InverseProperty(nameof(BadgeEntity.Employee))]
-        public virtual BadgeEntity? Badge { get; set; }
+        public virtual IEnumerable<BadgeEntity>? BadgeEntities { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the parent-children relationship involving <seealso cref="EmployeeEntity"/>
@@ -206,81 +187,136 @@ namespace Dapper.FastCrud.Tests.Models.Unused
     /// <summary>
     /// Represents the 'EmployeeBadges' view.
     /// </summary>
-    [Table("EmployeeBadges")]
-    public partial class EmployeeBadgeEntity
+    [Table("EmployeeBadges", Schema = "access")]
+    internal class EmployeeBadgeEntity
     {
+        /// <summary>
+        /// Represents the column 'AssetId'.
+        /// </summary>
+        public int AssetId { get; set; }
+
         /// <summary>
         /// Represents the column 'EmployeeId'.
         /// </summary>
-        public virtual Guid EmployeeId { get; set; }
+        public Guid EmployeeId { get; set; }
 
         /// <summary>
         /// Represents the column 'FirstName'.
         /// </summary>
-        public virtual string? FirstName { get; set; }
+        public string? FirstName { get; set; }
 
         /// <summary>
         /// Represents the column 'LastName'.
         /// </summary>
-        public virtual string LastName { get; set; }
+        public string LastName { get; set; }
 
         /// <summary>
         /// Represents the column 'Barcode'.
         /// </summary>
-        public virtual string Barcode { get; set; }
+        public string Barcode { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the 'CrazyTable' table.
+    /// </summary>
+    [Table("CrazyTable", Schema = "dbo")]
+    internal class CrazyTableEntity
+    {
+        /// <summary>
+        /// Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since <br/>
+        /// the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, <br/>
+        /// but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset <br/>
+        /// sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum <br/>
+        /// Represents the column 'Id'.
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Test starting with a digit <br/>
+        /// Represents the column '123mb'.
+        /// </summary>
+        [Column("123mb")]
+        public int Prop123Mb { get; set; }
+
+        /// <summary>
+        /// Test starting with a C# keyword <br/>
+        /// Represents the column 'switch'.
+        /// </summary>
+        [Column("switch")]
+        public int PropSwitch { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the 'Employee' table.
+    /// </summary>
+    [Table("Employee", Schema = "dbo")]
+    internal class DboEmployeeEntity
+    {
+        /// <summary>
+        /// Represents the column 'EmployeeId'.
+        /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int EmployeeId { get; set; }
+
+        /// <summary>
+        /// Represents the column 'AccessLevel'.
+        /// </summary>
+        public int AccessLevel { get; set; }
     }
 
     /// <summary>
     /// Represents the 'tbl_shoe_size' table.
     /// </summary>
-    [Table("tbl_shoe_size")]
-    public partial class ShoeSizeEntity
+    [Table("tbl_shoe_size", Schema = "dbo")]
+    internal class ShoeSizeEntity
     {
         /// <summary>
         /// Represents the column 'PersonId'.
         /// </summary>
-        public virtual int PersonId { get; set; }
+        public int PersonId { get; set; }
 
         /// <summary>
         /// Represents the column 'shoe_size'.
         /// </summary>
         [Column("shoe_size")]
-        public virtual byte? ShoeSize { get; set; }
+        public byte? ShoeSize { get; set; }
     }
 
     /// <summary>
     /// Represents the 'Workstations' table.
     /// </summary>
-    [Table("Workstations")]
-    public partial class WorkstationEntity
+    [Table("Workstations", Schema = "dbo")]
+    internal class WorkstationEntity
     {
         /// <summary>
         /// Represents the column 'WorkstationId'.
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public virtual long WorkstationId { get; set; }
+        public long WorkstationId { get; set; }
 
         /// <summary>
         /// Represents the column 'Name'.
         /// </summary>
-        public virtual string? Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Represents the column 'InventoryIndex'.
         /// </summary>
-        public virtual int InventoryIndex { get; set; }
+        public int InventoryIndex { get; set; }
 
         /// <summary>
         /// Represents the column 'AccessLevel'.
         /// </summary>
         [Dapper.FastCrud.DatabaseGeneratedDefaultValue]
-        public virtual int AccessLevel { get; set; }
+        public int AccessLevel { get; set; }
 
         /// <summary>
         /// Represents the column 'BuildingId'.
         /// </summary>
-        public virtual int? BuildingId { get; set; }
+        public int? BuildingId { get; set; }
 
         /// <summary>
         /// Represents the navigation property for the parent-children relationship involving <seealso cref="EmployeeEntity"/>

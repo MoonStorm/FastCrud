@@ -20,7 +20,7 @@ Head over to the wiki section on the project website for more details.
         [Key]
         [Column(Order = 1)]
         [ForeignKey(nameof(Employee))]
-        public virtual int Id { get; set; }
+        public virtual int AssetId { get; set; }
 
         /// <summary>
         /// Represents the column 'EmployeeId'.
@@ -38,12 +38,24 @@ Head over to the wiki section on the project website for more details.
         /// <summary>
         /// Represents the navigation property for the child-parent relationship involving <seealso cref="EmployeeEntity"/>
         /// </summary>
-        public virtual EmployeeEntity Employee { get; set; }
+        public virtual EmployeeEntity? Employee { get; set; }
     }
 
 ```
 
-## Release Notes for 3.0
+## Release Notes
+
+### 3.3
+- An opt-in flag was added for generating schema decorated entities.
+- Several problems involving schemas were fixed 
+(e.g. identical table names in separate schemas, relationships, general metadata extraction).
+- Parent entity properties are now generated as nullable.
+- Added support for ``TimeOnly`` and ``DateOnly``.
+- Added warning suppressions for non-nullable properties.
+- Customizable entity class modifiers.
+- Customizable entity property modifiers.
+
+### 3.0
 - [Breaking change] Support for composite primary keys.
 - [Breaking change] Added support for self referenced entities.
 - [Breaking change] Added support for multiple references to the same target using the InverseProperty attribute.

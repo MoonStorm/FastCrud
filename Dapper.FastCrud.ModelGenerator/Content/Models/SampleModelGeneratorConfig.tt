@@ -33,21 +33,31 @@ You can right click on your configuration file and click on "Debug T4 Template" 
 	// An optional suffix to be used for the class names.
 	ClassSuffix = "Entity";
 
+  // The class modifiers to be used for the generated entities.
+  ClassModifiers = "public partial";
+
+  // The property modifiers to be used for the generated entities.
+  PropertyModifiers = "public virtual";
+
 	// For columns that were found to have an invalid name, they can be prefixed.
 	InvalidPropertyNamePrefix = "Prop";
 
 	// If true, views will also get processed.
-    IncludeViews = true;
+  IncludeViews = true;
+
+  // If true, schemas will be generated as part of the metadata for the entities.
+  IncludeSchemas = true;
 
 	// If true, the relationships will be analyzed and navigation properties created.
-    IncludeRelationships = true;
+  IncludeRelationships = true;
 
 	// When set to false, the generated properties mapped to columns having default values will be refreshed with the database assigned values on insert.
-    // When set to false, a FastCrud attribute will be used since this functionality is not covered by the regular component model data annotations.
+  // When set to false, a FastCrud attribute will be used since this functionality is not covered by the regular component model data annotations.
 	IgnoreColumnDefaultValues = true; 
 
 	// Table or schema qualified table and view names can be excluded via this property.
-	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire."};
+	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "HangFire.", "access."};
+
 #>
 <#@ include file="$(DapperFastCrudModelGeneratorPath)GenericModelGenerator.tt" #>
 <#+

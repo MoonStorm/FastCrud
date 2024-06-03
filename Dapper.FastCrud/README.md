@@ -35,11 +35,15 @@ Type safety, clean code, less prone to errors, more peace of mind, while still b
 - A generic T4 template for C# is also provided for convenience in the NuGet package Dapper.FastCrud.ModelGenerator.
 - The following mapping styles are supported:
   - Code first, using model data annotations (preferred)
-  - Database first (limited to SQL Server, soon to be dropped)
+  - Database first (limited to SQL Server/LocalDb)
   - Fluent registration for POCO objects
   - Semi-POCO using metadata objects
 
 ## Release Notes 
+### 3.3
+- Fixed an issue where the SQL formatter was not generating proper SQL when schemas were used.
+- More tests added to cover schemas.
+
 ### 3.2
 - Added support for ``DateOnly`` and ``TimeOnly`` data types, introduced in .NET6, 
 however provider support isn't all that great across database flavors. 

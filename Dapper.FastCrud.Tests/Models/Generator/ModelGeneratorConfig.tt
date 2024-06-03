@@ -1,6 +1,6 @@
-<#@ template hostspecific="True" #>
+<#@ template debug="true" hostspecific="True" #>
 
-<# 
+<#  
 /*
 This is the configuration file for GenericModelGenerator.tt
 TIP #1: When testing this template and you have the db attached, you may find it useful to run 'sqllocaldb stop' in a command prompt to force it to detach.
@@ -10,20 +10,28 @@ TIP #2: You can right click on this file and click on "Debug T4 Template" to loc
   ConnectionStringName = ""; // Uses last connection string in config if not specified
 	ConfigPath = @""; //Looks in current project for web.config or app.config by default. You can override it to point to a different config file.
   Namespace = "Dapper.FastCrud.Tests.Models.Unused";
-	ClassPrefix = ""; 
+	ClassPrefix = "";
 	ClassSuffix = "Entity";
+  ClassModifiers = "internal";
+  PropertyModifiers = "public";
 	InvalidPropertyNamePrefix = "Prop";
 	IncludeViews = true;
+  IncludeSchemas = true;
   IncludeRelationships = true;
-	IgnoreColumnDefaultValues = false; 
+	IgnoreColumnDefaultValues = false;
 	ExcludeTablePrefixes = new string[]{"ELMAH", "AspNet_", "dtproperties", "NormalizedUsageLog", "HangFire.", "Building"};
 #>
 <#@ include file="..\..\..\Dapper.FastCRUD.ModelGenerator\Content\Models\GenericModelGenerator.tt" #> 
 <#+
 	void ConfigureTableMappings(Tables tables)
 	{
-		tables["Employee"]["Id"].PropertyName = "EmployeeUserId";
-		tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyName = "Badge";
-		tables["Employee"].ParentChildRelationships.Single(rel => rel.ReferencedTableName == "Badges").ReferencingNavigationPropertyIsCollection = false;
+		tables["Employee","access"]["AssetId"].PropertyName = "UserId";
+
+    // if you want to be more specific, you can by passing in the schema as well
+    var badgeRelationship = tables["Employee","access"].ParentChildRelationships.SingleOrDefault(rel => rel.ReferencedTableName.Contains("Badges"));
+    if(badgeRelationship == null){
+      throw new InvalidOperationException("Unable to locate the Employee - Badge relationship for configuring the table mapping.");
+    }
+    badgeRelationship.ReferencingNavigationPropertyName = "BadgeEntities";
 	}
 #>
